@@ -1,0 +1,19 @@
+{
+  "name": "serialserver",
+  "version": "1.0.0",
+  "description": " Webserver that hosts all incoming serial data",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jwbuiter/serialserver.git"
+  },
+  "author": "jwbuiter",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jwbuiter/serialserver/issues"
+  },
+  "homepage": "https://github.com/jwbuiter/serialserver#readme"
+}
