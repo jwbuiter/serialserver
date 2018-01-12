@@ -8,7 +8,20 @@ var serialLogPos = 0;
 var latestLogEntry = 'No entries received yet';
 var fullLog = 'No serial data received yet';
 
-exec(`minicom -D ${config.serialPort} -b ${config.serialBaudrate} -o -C seriallog.txt`, (err, stdout, stderr) => {
+var stream = fs.createWriteStream("minicom.dfl");
+stream.once('open', function(fd) {
+  stream.write("# Machine-generated file - do not edit.\n");
+  stream.write(`pr port             ${config.serialPort}\n`);
+  stream.write(`pu baudrate         ${config.serialBaudrate}\n`);
+  stream.write(`pu bits             ${config.serialBits}\n`);
+  stream.write(`pu parity           ${config.serialParity}\n`);
+  stream.write(`pu stopbits         ${config.serialStopBits}\n`);
+  stream.write(`pu rtscts           ${config.serialRTSCTS}\n`);
+  stream.write(`pu xonxoff          ${config.serialXONXOFF}\n`);
+  stream.end();
+});
+
+exec(`minicom -D ${config.serialPort} -o -C seriallog.txt minicom.dfl`, (err, stdout, stderr) => {
   if (err) {
       console.error('Could not open serial port or create serial file.')
     return;
@@ -24,7 +37,7 @@ fs.watchFile('seriallog.txt', (curr, prev) => {
     console.log(contents.slice(pos));
     pos = contents.length;
 
-});
+  });
 });
 
 app.get('/', (request, response) => {
