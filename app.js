@@ -42,11 +42,15 @@ fs.watchFile('seriallog.txt', (curr, prev) => {
 
 app.get('/', (request, response) => {
   response.send(latestLogEntry)
-})
+});
 
 app.get('/full', (request, response) => {
   response.send(fullLog)
-})
+});
+
+app.get('/debug', function(req, res){
+    res.sendFile('debug.html', { root: __dirname});
+});
 
 app.listen(config.port, (err) => {
   if (err) {
@@ -54,4 +58,4 @@ app.listen(config.port, (err) => {
   }
 
   console.log(`server is listening on ${config.port}`)
-})
+});
