@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/jwbuiter/serialserver/issues"
   },
-  "homepage": "https://github.com/jwbuiter/serialserver#readme"
+  "homepage": "https://github.com/jwbuiter/serialserver#readme",
+  "dependencies": {
+    "express": "^4.16.2"
+  }
 }
