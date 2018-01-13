@@ -1,5 +1,8 @@
+var config = require('./config');
 var express = require('express');
 var app = express();
+var server = app.listen(config.port);
+var io = require('socket.io').listen(server);
 var fs = require('fs');
 var { exec } = require('child_process');
 var config = require('./config');
@@ -36,7 +39,7 @@ fs.watchFile('seriallog.txt', (curr, prev) => {
     fullLog = contents;
     console.log(contents.slice(pos));
     pos = contents.length;
-
+    io.emit('serial entry', latestLogEntry);
   });
 });
 
@@ -52,10 +55,6 @@ app.get('/debug', function(req, res){
     res.sendFile('debug.html', { root: __dirname});
 });
 
-app.listen(config.port, (err) => {
-  if (err) {
-    return console.log('something bad happened', err)
-  }
-
-  console.log(`server is listening on ${config.port}`)
+io.on('connection', function(socket){
+  console.log('a user connected');
 });
