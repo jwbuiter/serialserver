@@ -13,8 +13,9 @@ var fullLog = [];
 
 for(i = 0; i < config.serial.length; i++){
   serialLogPos[i] = 0;
-  latestLogEntry[i] = 'No entries received yet';
-  fullLog[i] = 'No serial data received yet';
+  latestLogEntry[i] = `No entries received yet for ${config.serial[i].name}`;
+  fullLog[i] = `No serial data received yet for ${config.serial[i].name}`;
+
   var stream = fs.createWriteStream(`minicom${config.serial[i].name}.dfl`);
   stream.write("# Machine-generated file - do not edit.\n");
   stream.write(`pr port             ${config.serial[i].port}\n`);
@@ -34,24 +35,25 @@ for(i = 0; i < config.serial.length; i++){
     }
   });
 
-  fs.watchFile(`seriallog${config.serial[i].name}.txt`, (curr, prev) => {
-    console.log(`the current mtime is: ${curr.mtime}`);
-    console.log(`the previous mtime was: ${prev.mtime}`);
-    fs.readFile(`seriallog${config.serial[i].name}.txt`, 'utf8', function(err, contents) {
-      latestLogEntry[i] = contents.slice(serialLogPos[i]);
-      fullLog[i] = contents;
-      console.log(contents.slice(serialLogPos[i]));
-      serialLogPos[i] = contents.length;
-      io.emit('serial entry', latestLogEntry);
+  (function(index){
+    fs.watchFile(`seriallog${config.serial[i].name}.txt`, (curr, prev) => {
+      console.log(`the current mtime is: ${curr.mtime}`);
+      console.log(`the previous mtime was: ${prev.mtime}`);
+      fs.readFile(`seriallog${config.serial[index].name}.txt`, 'utf8', function(err, contents) {
+        latestLogEntry[index] = contents.slice(serialLogPos[index]);
+        fullLog[index] = contents;
+        console.log(contents.slice(serialLogPos[index]));
+        serialLogPos[index] = contents.length;
+        io.emit('serial entry', latestLogEntry);
+      });
     });
-  });
 
-  app.get(`/${config.serial[i].name.toLowerCase()}`, (request, response) => {
-    response.send(fullLog[i])
-  });
+    app.get(`/${config.serial[index].name.toLowerCase()}`, (request, response) => {
+      response.send(fullLog[index]);
+    })
+
+  }(i));
 }
-
-
 app.get('/', (request, response) => {
   response.send(latestLogEntry)
 });
