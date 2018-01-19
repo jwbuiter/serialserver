@@ -7,41 +7,50 @@ var fs = require('fs');
 var { exec } = require('child_process');
 var config = require('./config');
 
-var serialLogPos = 0;
-var latestLogEntry = 'No entries received yet';
-var fullLog = 'No serial data received yet';
+var serialLogPos = [];
+var latestLogEntry= [];
+var fullLog = [];
 
-var stream = fs.createWriteStream("minicom.dfl");
-stream.once('open', function(fd) {
+for(i = 0; i < config.serial.length; i++){
+  serialLogPos[i] = 0;
+  latestLogEntry[i] = 'No entries received yet';
+  fullLog[i] = 'No serial data received yet';
+  var stream = fs.createWriteStream(`minicom${config.serial[i].name}.dfl`);
   stream.write("# Machine-generated file - do not edit.\n");
-  stream.write(`pr port             ${config.serialPort}\n`);
-  stream.write(`pu baudrate         ${config.serialBaudrate}\n`);
-  stream.write(`pu bits             ${config.serialBits}\n`);
-  stream.write(`pu parity           ${config.serialParity}\n`);
-  stream.write(`pu stopbits         ${config.serialStopBits}\n`);
-  stream.write(`pu rtscts           ${config.serialRTSCTS}\n`);
-  stream.write(`pu xonxoff          ${config.serialXONXOFF}\n`);
+  stream.write(`pr port             ${config.serial[i].port}\n`);
+  stream.write(`pu baudrate         ${config.serial[i].baudRate}\n`);
+  stream.write(`pu bits             ${config.serial[i].bits}\n`);
+  stream.write(`pu parity           ${config.serial[i].parity[0]}\n`);
+  stream.write(`pu stopbits         ${config.serial[i].stopBits}\n`);
+  stream.write(`pu rtscts           ${config.serial[i].RTSCTS}\n`);
+  stream.write(`pu xonxoff          ${config.serial[i].XONXOFF}\n`);
   stream.end();
-});
 
-exec(`minicom -D ${config.serialPort} -o -C seriallog.txt minicom.dfl`, (err, stdout, stderr) => {
-  if (err) {
-      console.error('Could not open serial port or create serial file.')
-    return;
-  }
-});
-
-fs.watchFile('seriallog.txt', (curr, prev) => {
-  console.log(`the current mtime is: ${curr.mtime}`);
-  console.log(`the previous mtime was: ${prev.mtime}`);
-  fs.readFile('seriallog.txt', 'utf8', function(err, contents) {
-    latestLogEntry = contents.slice(pos);
-    fullLog = contents;
-    console.log(contents.slice(pos));
-    pos = contents.length;
-    io.emit('serial entry', latestLogEntry);
+  exec(`minicom -D ${config.serial[i].port} -o -C seriallog${config.serial[i].name}.txt minicom${config.serial[i].name}.dfl`, (err, stdout, stderr) => {
+    if (err) {
+        console.error('Could not open serial port or create serial file.');
+        console.error(err);
+      return;
+    }
   });
-});
+
+  fs.watchFile(`seriallog${config.serial[i].name}.txt`, (curr, prev) => {
+    console.log(`the current mtime is: ${curr.mtime}`);
+    console.log(`the previous mtime was: ${prev.mtime}`);
+    fs.readFile(`seriallog${config.serial[i].name}.txt`, 'utf8', function(err, contents) {
+      latestLogEntry[i] = contents.slice(serialLogPos[i]);
+      fullLog[i] = contents;
+      console.log(contents.slice(serialLogPos[i]));
+      serialLogPos[i] = contents.length;
+      io.emit('serial entry', latestLogEntry);
+    });
+  });
+
+  app.get(`/${config.serial[i].name.toLowerCase()}`, (request, response) => {
+    response.send(fullLog[i])
+  });
+}
+
 
 app.get('/', (request, response) => {
   response.send(latestLogEntry)
