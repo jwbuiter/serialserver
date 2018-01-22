@@ -8,13 +8,20 @@ var { exec } = require('child_process');
 var config = require('./config');
 
 var serialLogPos = [];
-var latestLogEntry= [];
+var latestLogEntry = [];
+var averageEntry = [];
 var fullLog = [];
+
+function decode(entry){
+  return entry;
+}
 
 for(i = 0; i < config.serial.length; i++){
   serialLogPos[i] = 0;
   latestLogEntry[i] = `No entries received yet for ${config.serial[i].name}`;
   fullLog[i] = `No serial data received yet for ${config.serial[i].name}`;
+  if (config.serial[i].numerical)
+    averageEntry[i] = new Array(config.serial[i].averages);
 
   var stream = fs.createWriteStream(`minicom${config.serial[i].name}.dfl`);
   stream.write("# Machine-generated file - do not edit.\n");
@@ -36,7 +43,7 @@ for(i = 0; i < config.serial.length; i++){
   });
 
   (function(index){
-    fs.watchFile(`seriallog${config.serial[i].name}.txt`, (curr, prev) => {
+    fs.watchFile(`seriallog${config.serial[index].name}.txt`, (curr, prev) => {
       console.log(`the current mtime is: ${curr.mtime}`);
       console.log(`the previous mtime was: ${prev.mtime}`);
       fs.readFile(`seriallog${config.serial[index].name}.txt`, 'utf8', function(err, contents) {
@@ -44,7 +51,10 @@ for(i = 0; i < config.serial.length; i++){
         fullLog[index] = contents;
         console.log(contents.slice(serialLogPos[index]));
         serialLogPos[index] = contents.length;
-        io.emit('serial entry', latestLogEntry);
+
+        io.emit('entry', {name : config.serial[index].name, entry : latestLogEntry});
+        if (config.serial[index].numerical)
+          io.emit('average', {name : config.serial[index].name, entry : latestLogEntry});
       });
     });
 
@@ -52,7 +62,7 @@ for(i = 0; i < config.serial.length; i++){
       response.send(fullLog[index]);
     })
 
-  }(i));
+  }(i)); //these statements have to be wrapped in an anonymous function so that the value of i is remembered when the inner functions are called in the future
 }
 app.get('/', (request, response) => {
   response.send(latestLogEntry)
@@ -64,6 +74,9 @@ app.get('/full', (request, response) => {
 
 app.get('/debug', function(req, res){
     res.sendFile('debug.html', { root: __dirname});
+});
+app.get('/config.js', function(req, res){
+    res.sendFile('config.js', { root: __dirname});
 });
 
 io.on('connection', function(socket){

@@ -1,12 +1,94 @@
 <html>
 <head>
+  <title>serial debugger</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box;}
+      body { font-style: : Helvetica, Arial; font-size: 0px;}
+      table { width: 100%; text-align: center; border: none; border-collapse: collapse;}
+      tr { height: 30px; }
+      td { text-align: center; font-size: 20px; border-style: bold; }
+      .header { background-color: yellow;}
+      .result { background-color: #98FB98;}
+    </style>
 </head>
 <body>
+  <table id="table">
+    <tr>
+      <td class="header" id="headername"></td>
+      <td class="header" id="headerip"></td>
+      <td class="header" id="headerdate"></td>
+      <td class="header" id="headertime"></td>
+      <td class="header" id="headerqs"></td>
+    </tr>
+    <tr></tr>
+    <tr></tr>
+
+  </table>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="/config.js"></script>
   <script>
+    function printDate(){
+      var date = new Date();
+      return date.getDate() + '-' + (date.getMonth()+1) + '-' + (date.getYear()+1900);
+    }
+    function printTime(){
+      var date = new Date();
+      return date.getHours() + ':' + ("0" + date.getMinutes()).slice(-2) + ':' + date.getSeconds();
+    }
+
+    $('#headername').html('Name: '+ config.name);
+    $('#headerip').html('IP: '+ location.host);
+    $('#headerdate').html('Date: '+ printDate());
+    $('#headertime').html('Time: '+ printTime());
+    $('#headerqs').html('QS: '+ config.QS);
+
+    setInterval(function(){ 
+      $('#headerdate').html('Date: '+ printDate());
+      $('#headertime').html('Time: '+ printTime());
+    }, 1000);
+
+    for (var i = 0; i<config.serial.length; i++){
+      $('#table').append($('<tr>'));
+      $('#table').append($('<tr>'));
+
+      for (var j = 0; j<config.serial[i].averages; j++){
+        var row = $('<tr>');
+        if((j===config.serial[i].averages-1))
+          row.addClass('result');
+        $('#table').append(row);
+
+        if (j===config.serial[i].averages-1)
+          row.append($('<td>'+config.serial[i].name+ '</td>'));
+        else
+          row.append($('<td>'));
+        row.append($('<td>'+(j+1)+'</td>'))
+        row.append($('<td id=\"'+(config.serial[i].name+'time'+j)+'\">'));
+        row.append($('<td id=\"'+(config.serial[i].name+'entry'+j)+'\">'));
+        if (j===config.serial[i].averages-2 && config.serial[i].numerical)
+          row.append($('<td>Average last ' + config.serial[i].averages + '</td>'));
+        if (j===config.serial[i].averages-1 && config.serial[i].numerical)
+          row.append($('<td id=\"'+ config.serial[i].name+'avg\">'));
+      }
+    }
+    console.log($);
     var socket = io();
-    socket.on('chat message', function(msg){
-      $('#messages').append($('<li>').text(msg));
+    socket.on('entry', function(msg){
+      for(var i = 0; i<config.serial.length; i++)
+        if (msg.name===config.serial[i].name)
+          break;  //store value of i for correct serial entry
+
+      for(var j = 0; j<config.serial[i].averages; j++){
+        if (j<config.serial[i].averages-1)
+          $(config.serial[i].name+'entry'+j).html($(config.serial[i].name+'entry'+(j + 1).html()));
+        else
+          $(config.serial[i].name+'entry'+j).html(msg.entry);
+      }
+    });
+    socket.on('average', function(msg){
+      for(var i = 0; i<config.serial.length; i++)
+        if (msg.name===config.serial[i].name)
+          $(config.serial[i].name+'avg').html(msg.entry);
     });
   </script>
 </body>

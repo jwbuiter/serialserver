@@ -12,7 +12,7 @@ config.serial= [
 
     name : 'Weight',
     numerical : true,           // whether the input is numerical, o
-    averages : 5,               // in case of a numerical input, the number of averages to take.
+    averages : 5,               // in case of a numerical input, the number of averages to take. Also the number of entries shown in debug
 
     prefix : 'W=',              // string preceding serial data
     postfix : 'kg'             // string following serial data
@@ -28,7 +28,7 @@ config.serial= [
 
     name : 'RFID',
     numerical : false,
-    averages : 0,
+    averages : 5,
 
     prefix : '',
     postfix : ''
