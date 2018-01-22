@@ -20,8 +20,16 @@ for(i = 0; i < config.serial.length; i++){
   serialLogPos[i] = 0;
   latestLogEntry[i] = `No entries received yet for ${config.serial[i].name}`;
   fullLog[i] = `No serial data received yet for ${config.serial[i].name}`;
+
   if (config.serial[i].numerical)
     entryList[i] = [];
+
+  try {
+    fs.accessSync(`seriallog${config.serial[i].name}.txt`);
+    fs.unlinkSync(`seriallog${config.serial[i].name}.txt`);
+  } 
+  catch (err) {
+  }
 
   var stream = fs.createWriteStream(`minicom${config.serial[i].name}.dfl`);
   stream.write("# Machine-generated file - do not edit.\n");
@@ -44,30 +52,66 @@ for(i = 0; i < config.serial.length; i++){
 
   (function(index){
     fs.watchFile(`seriallog${config.serial[index].name}.txt`, (curr, prev) => {
+
       console.log(`the current mtime is: ${curr.mtime}`);
       console.log(`the previous mtime was: ${prev.mtime}`);
-      fs.readFile(`seriallog${config.serial[index].name}.txt`, 'utf8', function(err, contents) {
-        latestLogEntry[index] = contents.slice(serialLogPos[index]);
-        fullLog[index] = contents;
-        console.log(contents.slice(serialLogPos[index]));
-        serialLogPos[index] = contents.length;
 
-        io.emit('entry', {name : config.serial[index].name, entry : latestLogEntry});
-        if (config.serial[index].numerical){
-          for (var j = 0; j < entryList[index].length; j++)
-          {
-            if (j < entryList[index].length-1)
-              entryList[index][j] = entryList[index][j + 1];
-            else
-              entryList[index][j] = parseFloat(latestLogEntry[index]);
+      fs.readFile(`seriallog${config.serial[index].name}.txt`, 'utf8', function(err, contents) {
+        fullLog[index] = contents;
+        var nextEntry, nextEntryEnd;
+        var remainingEntries = contents.slice(serialLogPos[index]);
+
+        if (remainingEntries.length===0)
+          return;
+
+        while((nextEntry = remainingEntries.indexOf(config.serial[index].prefix))>=0){
+          if (!((nextEntryEnd = remainingEntries.indexOf(config.serial[index].postfix))>=0)){
+            break;
           }
-          io.emit('average', {name : config.serial[index].name, entry : (entryList[index].reduce( ( p, c ) => p + c, 0 ) / entryList[index].length)});
-        }
+
+          latestLogEntry[index] =  remainingEntries.slice(nextEntry + config.serial[index].prefix.length, nextEntryEnd);
+
+          
+          if (config.serial[index].numerical){
+            io.emit('entry', {name : config.serial[index].name, entry : parseFloat(latestLogEntry[index])});
+
+            for (var j = config.serial[index].averages-1; j > 0; j--)
+            {
+              if (entryList[index][j-1]){
+                entryList[index][j] = entryList[index][j - 1];
+              }
+            }
+            entryList[index][0] = parseFloat(latestLogEntry[index]);
+            var sum = 0;
+            for (var j = 0; j <entryList[index].length; j++)
+              sum+=entryList[index][j];
+
+            io.emit('average', {name : config.serial[index].name, entry : (sum / entryList[index].length)});
+          }
+          else{
+            io.emit('entry', {name : config.serial[index].name, entry : latestLogEntry[index]});
+          }
+
+          serialLogPos[index] += nextEntryEnd + config.serial[index].postfix.length;
+          remainingEntries=contents.slice(serialLogPos[index]);
+        }  
       });
     });
 
-    app.get(`/${config.serial[index].name.toLowerCase()}`, (request, response) => {
+    app.get(`/${config.serial[index].name.toLowerCase()}full`, (request, response) => {
       response.send(fullLog[index]);
+    })
+
+    app.get(`/${config.serial[index].name.toLowerCase()}`, (request, response) => {
+      response.send(latestLogEntry[index]);
+    })
+
+    app.get(`/${config.serial[index].name.toLowerCase()}avg`, (request, response) => {
+      var sum = 0;
+      for (var j = 0; j <entryList[index].length; j++)
+        sum+=entryList[index][j];
+
+      response.send((sum / entryList[index].length).toString());
     })
 
   }(i)); //these statements have to be wrapped in an anonymous function so that the value of i is remembered when the inner functions are called in the future
