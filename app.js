@@ -9,7 +9,7 @@ var config = require('./config');
 
 var serialLogPos = [];
 var latestLogEntry = [];
-var averageEntry = [];
+var entryList = [];
 var fullLog = [];
 
 function decode(entry){
@@ -21,7 +21,7 @@ for(i = 0; i < config.serial.length; i++){
   latestLogEntry[i] = `No entries received yet for ${config.serial[i].name}`;
   fullLog[i] = `No serial data received yet for ${config.serial[i].name}`;
   if (config.serial[i].numerical)
-    averageEntry[i] = new Array(config.serial[i].averages);
+    entryList[i] = [];
 
   var stream = fs.createWriteStream(`minicom${config.serial[i].name}.dfl`);
   stream.write("# Machine-generated file - do not edit.\n");
@@ -53,8 +53,16 @@ for(i = 0; i < config.serial.length; i++){
         serialLogPos[index] = contents.length;
 
         io.emit('entry', {name : config.serial[index].name, entry : latestLogEntry});
-        if (config.serial[index].numerical)
-          io.emit('average', {name : config.serial[index].name, entry : latestLogEntry});
+        if (config.serial[index].numerical){
+          for (int j = 0; j < entryList[index].length; j++)
+          {
+            if (j < entryList[index].length-1)
+              entryList[index][j] = entryList[index][j + 1];
+            else
+              entryList[index][j] = parseFloat(latestLogEntry[index]);
+          }
+          io.emit('average', {name : config.serial[index].name, entry : (entryList[index].reduce( ( p, c ) => p + c, 0 ) / entryList[index].length)});
+        }
       });
     });
 
