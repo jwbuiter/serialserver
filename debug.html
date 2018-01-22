@@ -80,9 +80,9 @@
 
       for(var j = 0; j<config.serial[i].averages; j++){
         if (j<config.serial[i].averages-1)
-          $(config.serial[i].name+'entry'+j).html($(config.serial[i].name+'entry'+(j + 1).html()));
+          $('#' + config.serial[i].name+'entry'+j).html($('#' + config.serial[i].name+'entry'+(j + 1)).html());
         else
-          $(config.serial[i].name+'entry'+j).html(msg.entry);
+          $('#' + config.serial[i].name+'entry'+j).html(msg.entry);
       }
     });
     socket.on('average', function(msg){
