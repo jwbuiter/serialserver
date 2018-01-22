@@ -54,7 +54,7 @@ for(i = 0; i < config.serial.length; i++){
 
         io.emit('entry', {name : config.serial[index].name, entry : latestLogEntry});
         if (config.serial[index].numerical){
-          for (int j = 0; j < entryList[index].length; j++)
+          for (var j = 0; j < entryList[index].length; j++)
           {
             if (j < entryList[index].length-1)
               entryList[index][j] = entryList[index][j + 1];
