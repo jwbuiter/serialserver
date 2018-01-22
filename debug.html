@@ -62,13 +62,13 @@
           row.append($('<td>'+config.serial[i].name+ '</td>'));
         else
           row.append($('<td>'));
-        row.append($('<td>'+(j+1)+'</td>'))
-        row.append($('<td id=\"'+(config.serial[i].name+'time'+j)+'\">'));
-        row.append($('<td id=\"'+(config.serial[i].name+'entry'+j)+'\">'));
+        row.append($('<td>').html(j+1));
+        row.append($('<td>').attr('id', config.serial[i].name+'time'+j));
+        row.append($('<td>').attr('id', config.serial[i].name+'entry'+j));
         if (j===config.serial[i].averages-2 && config.serial[i].numerical)
-          row.append($('<td>Average last ' + config.serial[i].averages + '</td>'));
+          row.append($('<td>').html( 'Average last ' + config.serial[i].averages));
         if (j===config.serial[i].averages-1 && config.serial[i].numerical)
-          row.append($('<td id=\"'+ config.serial[i].name+'avg\">'));
+          row.append($('<td>').attr('id', config.serial[i].name));
       }
     }
     console.log($);
