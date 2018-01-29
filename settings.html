@@ -103,7 +103,12 @@
       <td>Postfix</td>
     </tr>
     <tr>
-      <td><input type="button" value="Save and restart" onclick="javascript:setSettings()"></td>
+      <td><input type="date" id="date"></td>
+      <td><input type="time" id="time"></td>
+      <td><input type="button" value="Change date and time" onclick="javascript:setDate()"></td>
+    </tr>
+    <tr>
+      <td><input type="button" value="Save settings and restart" onclick="javascript:setSettings()"></td>
       <td><input type="button" value="Cancel" onclick="javascript:goDebug()"></td>
     </tr>
   </table>
@@ -131,6 +136,11 @@
 
     var socket = io();
 
+    function setDate(){
+      let dateTimeString = $('#date').val() + ' ' + $('#time').val()
+      let dateTime = Date.parse(dateTimeString);
+      socket.emit('setDateTime', dateTime/1000);
+    }
 
     function goDebug(){
       window.location.href = '/';

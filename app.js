@@ -267,6 +267,15 @@ io.on('connection', function(socket){
     });
     process.exit();
   });
+
+  socket.on('setDateTime', (dateTime) =>{
+    exec(`timedatectl set-time @${dateTime}`, (err, stdout, stderr) => {
+      if (err) {
+        console.error(`exec error: ${err}`);
+        return;
+      }
+    });
+  });
 });
 
 setInterval(() =>{
