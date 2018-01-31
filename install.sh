@@ -9,6 +9,10 @@ rm -rf tmp
 npm install
 adduser --disabled-password --gecos "" serialserver
 chown -R serialserver:serialserver /srv/serialserver
+chmod 777 /srv/serialserver
 [ -e /etc/systemd/system/serialserver.service ] && rm /etc/systemd/system/serialserver.service
 cp serialserver.service /etc/systemd/system/
 systemctl enable flood
+systemctl enable ssh
+systemctl start ssh
+raspi-config --expand-rootfs
