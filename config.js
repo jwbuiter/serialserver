@@ -30,8 +30,8 @@ config.serial= [
     numerical : false,
     averages : 5,
 
-    prefix : '',
-    postfix : ''
+    prefix : 'ð#',
+    postfix : '05'
   }
 ];
 config.name = 'MBDCcom01';
