@@ -1,3 +1,4 @@
 seriallog*.txt
 minicom*.dfl
 node_modules
+config.js
