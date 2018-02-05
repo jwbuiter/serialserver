@@ -18,6 +18,7 @@
   "homepage": "https://github.com/jwbuiter/serialserver#readme",
   "dependencies": {
     "express": "^4.16.2",
+    "ip": "^1.1.5",
     "socket.io": "^2.0.4"
   }
 }

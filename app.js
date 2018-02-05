@@ -4,6 +4,7 @@ var app = express();
 var server = app.listen(config.port);
 var io = require('socket.io').listen(server);
 var fs = require('fs');
+var ip = require("ip");
 var { exec } = require('child_process');
 var config = require('./config');
 
@@ -31,7 +32,7 @@ for(i = 0; i < config.serial.length; i++){
   catch (err) {
   }
 
-  var stream = fs.createWriteStream(`minicom${config.serial[i].name}.dfl`);
+  var stream = fs.createWriteStream(`/etc/minicom/minirc.${config.serial[i].name}`);
   stream.write("# Machine-generated file - do not edit.\n");
   stream.write(`pr port             ${config.serial[i].port}\n`);
   stream.write(`pu baudrate         ${config.serial[i].baudRate}\n`);
@@ -42,7 +43,7 @@ for(i = 0; i < config.serial.length; i++){
   stream.write(`pu xonxoff          ${config.serial[i].XONXOFF}\n`);
   stream.end();
 
-  exec(`minicom -D ${config.serial[i].port} -o -C seriallog${config.serial[i].name}.txt minicom${config.serial[i].name}.dfl`, (err, stdout, stderr) => {
+  exec(`minicom -o -C seriallog${config.serial[i].name}.txt ${config.serial[i].name}`, (err, stdout, stderr) => {
     if (err) {
         console.error('Could not open serial port or create serial file.');
         console.error(err);
@@ -100,37 +101,51 @@ for(i = 0; i < config.serial.length; i++){
 
     app.get(`/${config.serial[index].name.toLowerCase()}full`, (request, response) => {
       response.send(fullLog[index]);
-    })
+    });
 
     app.get(`/${config.serial[index].name.toLowerCase()}`, (request, response) => {
       response.send(latestLogEntry[index]);
-    })
+    });
 
-    app.get(`/${config.serial[index].name.toLowerCase()}avg`, (request, response) => {
-      var sum = 0;
-      for (var j = 0; j <entryList[index].length; j++)
-        sum+=entryList[index][j];
+    if (config.serial[index].numerical){
+      app.get(`/${config.serial[index].name.toLowerCase()}avg`, (request, response) => {
+        var sum = 0;
+        for (var j = 0; j <entryList[index].length; j++)
+          sum+=entryList[index][j];
 
-      response.send((sum / entryList[index].length).toString());
-    })
+        response.send((sum / entryList[index].length).toString());
+      });
+    }
 
+    app.get(`/com${index}`, (request, response) => {
+      if (config.serial[index].numerical){
+        var sum = 0;
+        for (var j = 0; j <entryList[index].length; j++)
+          sum+=entryList[index][j];
+
+        response.send((sum / entryList[index].length).toString());
+      }
+      else{
+        response.send(latestLogEntry[index]);
+      }
+    });
+    
   }(i)); //these statements have to be wrapped in an anonymous function so that the value of i is remembered when the inner functions are called in the future
 }
 app.get('/', (request, response) => {
-  response.send(latestLogEntry)
+   response.sendFile('debug.html', { root: __dirname});
 });
 
 app.get('/full', (request, response) => {
   response.send(fullLog)
 });
 
-app.get('/debug', function(req, res){
-    res.sendFile('debug.html', { root: __dirname});
-});
-app.get('/config.js', function(req, res){
-    res.sendFile('config.js', { root: __dirname});
+app.get('/config.js', function(request, response){
+    response.sendFile('config.js', { root: __dirname});
 });
 
 io.on('connection', function(socket){
   console.log('a user connected');
+  socket.emit('ip', ip.address());
 });
+

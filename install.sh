@@ -15,4 +15,3 @@ cp serialserver.service /etc/systemd/system/
 systemctl enable serialserver
 systemctl enable ssh
 systemctl start ssh
-raspi-config --expand-rootfs

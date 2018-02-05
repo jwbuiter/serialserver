@@ -20,8 +20,6 @@
       <td class="header" id="headertime"></td>
       <td class="header" id="headerqs"></td>
     </tr>
-    <tr></tr>
-    <tr></tr>
 
   </table>
   <script src="/socket.io/socket.io.js"></script>
@@ -37,19 +35,17 @@
       return date.getHours() + ':' + ("0" + date.getMinutes()).slice(-2) + ':' + ("0" + date.getSeconds()).slice(-2);
     }
 
-    $('#headername').html('Name: '+ config.name);
-    $('#headerip').html('IP: '+ location.host);
-    $('#headerdate').html('Date: '+ printDate());
-    $('#headertime').html('Time: '+ printTime());
-    $('#headerqs').html('QS: '+ config.QS);
+    $('#headername').html(config.name); 
+    $('#headerdate').html(printDate());
+    $('#headertime').html(printTime());
+    $('#headerqs').html(config.QS);
 
     setInterval(function(){ 
-      $('#headerdate').html('Date: '+ printDate());
-      $('#headertime').html('Time: '+ printTime());
+      $('#headerdate').html(printDate());
+      $('#headertime').html(printTime());
     }, 1000);
 
     for (var i = 0; i<config.serial.length; i++){
-      $('#table').append($('<tr>'));
       $('#table').append($('<tr>'));
 
       for (var j = 0; j<config.serial[i].averages; j++){
@@ -89,6 +85,7 @@
         }
       }
     });
+
     socket.on('average', function(msg){
       for(var i = 0; i<config.serial.length; i++)
         if (msg.name===config.serial[i].name){
@@ -96,6 +93,11 @@
           $('#' + config.serial[i].name+'avg').html(Math.round(msg.entry*1000)/1000);
         }
     });
+
+    socket.on('ip', function(msg){
+      $('#headerip').html(msg);
+    });
+
   </script>
 </body>
 </html>
