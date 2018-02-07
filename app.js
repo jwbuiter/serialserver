@@ -5,7 +5,7 @@ var server = app.listen(config.port);
 var io = require('socket.io').listen(server);
 var fs = require('fs');
 var ip = require("ip");
-var { exec } = require('child_process');
+var serialPort = require('serialport');
 var config = require('./config');
 
 var serialLogPos = [];
@@ -23,8 +23,8 @@ function average(list){
     return 0;
 
   var sum = 0;
-  for (var j = 0; j <entryList[index].length; j++)
-    sum+=entryList[index][j];
+  for (var j = 0; j <list.length; j++)
+    sum+=list[j];
 
   return (sum / list.length);
 }
@@ -32,7 +32,7 @@ function average(list){
 for(i = 0; i < config.serial.length; i++){
   serialLogPos[i] = 0;
   latestLogEntry[i] = '0';
-  fullLog[i] = '0';
+  fullLog[i] = Buffer.alloc(0);
 
   if (config.serial[i].numerical)
     entryList[i] = [];
@@ -44,71 +44,65 @@ for(i = 0; i < config.serial.length; i++){
   catch (err) {
   }
 
-  var stream = fs.createWriteStream(`/etc/minicom/minirc.${config.serial[i].name}`);
-  stream.write("# Machine-generated file - do not edit.\n");
-  stream.write(`pr port             ${config.serial[i].port}\n`);
-  stream.write(`pu baudrate         ${config.serial[i].baudRate}\n`);
-  stream.write(`pu bits             ${config.serial[i].bits}\n`);
-  stream.write(`pu parity           ${config.serial[i].parity[0]}\n`);
-  stream.write(`pu stopbits         ${config.serial[i].stopBits}\n`);
-  stream.write(`pu rtscts           ${config.serial[i].RTSCTS}\n`);
-  stream.write(`pu xonxoff          ${config.serial[i].XONXOFF}\n`);
-  stream.end();
-
-  exec(`minicom -o -C seriallog${config.serial[i].name}.txt ${config.serial[i].name}`, (err, stdout, stderr) => {
-    if (err) {
-        console.error('Could not open serial port or create serial file.');
-        console.error(err);
-      return;
-    }
-  });
 
   (function(index){
-    fs.watchFile(`seriallog${config.serial[index].name}.txt`, (curr, prev) => {
 
-      console.log(`the current mtime is: ${curr.mtime}`);
-      console.log(`the previous mtime was: ${prev.mtime}`);
+    var port = new serialPort(config.serial[index].port, {
+      baudRate: config.serial[index].baudRate,
+      dataBits: config.serial[index].bits,
+      stopBits: config.serial[index].stopBits,
+      parity: config.serial[index].parity,
+      rtscts: config.serial[index].RTSCTS,
+      xon: config.serial[index].XON,
+      xoff: config.serial[index].XOFF
+    });
 
-      fs.readFile(`seriallog${config.serial[index].name}.txt`, 'utf8', function(err, contents) {
-        fullLog[index] = contents;
-        var nextEntry, nextEntryEnd;
-        var remainingEntries = contents.slice(serialLogPos[index]);
+    console.log(config.serial[index].prefix.length);
+    console.log(config.serial[index].prefix);
 
-        if (remainingEntries.length===0)
-          return;
+    port.on('readable', function() {
+      var contents = port.read();
+      fullLog[index] = Buffer.concat([fullLog[index], contents]);
+      
+      var nextEntry, nextEntryEnd;
+      var remainingEntries = fullLog[index].slice(serialLogPos[index]);
 
-        while((nextEntry = remainingEntries.indexOf(config.serial[index].prefix))>=0){
-          if (!((nextEntryEnd = remainingEntries.indexOf(config.serial[index].postfix))>=0)){
-            break;
-          }
+      if (remainingEntries.length===0)
+        return;
 
-          latestLogEntry[index] =  remainingEntries.slice(nextEntry + config.serial[index].prefix.length, nextEntryEnd);
+      console.log(remainingEntries);
 
-          
-          if (config.serial[index].numerical){
-            io.emit('entry', {name : config.serial[index].name, entry : parseFloat(latestLogEntry[index])});
+      while((nextEntry = remainingEntries.indexOf(config.serial[index].prefix))>=0){
+        nextEntryEnd = remainingEntries.indexOf(config.serial[index].postfix)
+        if (nextEntryEnd===-1){
+          break;
+        }
+        latestLogEntry[index] =  (remainingEntries.slice(nextEntry + Buffer(config.serial[index].prefix).length, (nextEntryEnd===0)?remainingEntries.length:nextEntryEnd)).toString();
+        console.log(latestLogEntry[index]);
+        
+        if (config.serial[index].numerical){
+          io.emit('entry', {name : config.serial[index].name, entry : parseFloat(latestLogEntry[index])});
 
-            for (var j = config.serial[index].averages-1; j > 0; j--)
-            {
-              if (entryList[index][j-1]){
-                entryList[index][j] = entryList[index][j - 1];
-              }
+          for (var j = config.serial[index].averages-1; j > 0; j--)
+          {
+            if (entryList[index][j-1]){
+              entryList[index][j] = entryList[index][j - 1];
             }
-            entryList[index][0] = parseFloat(latestLogEntry[index]);
-            var sum = 0;
-            for (var j = 0; j <entryList[index].length; j++)
-              sum+=entryList[index][j];
-
-            io.emit('average', {name : config.serial[index].name, entry : (sum / entryList[index].length)});
           }
-          else{
-            io.emit('entry', {name : config.serial[index].name, entry : latestLogEntry[index]});
-          }
+          entryList[index][0] = parseFloat(latestLogEntry[index]);
+          var sum = 0;
+          for (var j = 0; j <entryList[index].length; j++)
+            sum+=entryList[index][j];
 
-          serialLogPos[index] += nextEntryEnd + config.serial[index].postfix.length;
-          remainingEntries=contents.slice(serialLogPos[index]);
-        }  
-      });
+          io.emit('average', {name : config.serial[index].name, entry : (sum / entryList[index].length)});
+        }
+        else{
+          io.emit('entry', {name : config.serial[index].name, entry : latestLogEntry[index]});
+        }
+
+        serialLogPos[index] += nextEntryEnd + config.serial[index].postfix.length;
+        remainingEntries=contents.slice(serialLogPos[index]);
+      }  
     });
 
     app.get(`/${config.serial[index].name.toLowerCase()}full`, (request, response) => {
