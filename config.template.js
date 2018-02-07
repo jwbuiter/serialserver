@@ -3,11 +3,11 @@ var config = {};
 config.serial= [
   {
     port : '/dev/ttyUSB0',       
-    baudRate : 115200,          // most common options are 110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 56000, 57600, 115200
+    baudRate : 9600 ,          // most common options are 110, 300, 600, 1200, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 56000, 57600, 115200
     stopBits : 1,               // options are 1 and 2.
     bits : 8,                   // options are 8, 7, 6 and 5.
     parity : 'None',            // options are 'None', 'Even', 'Odd', 'Mark' and 'Space'. Must be capitalized.
-    RTSCTS : 'No',              // options are 'Yes' and 'No'. Must be capitalized.
+    RTSCTS : 'Yes',              // options are 'Yes' and 'No'. Must be capitalized.
     XONXOFF : 'No',             // options are 'Yes' and 'No'. Must be capitalized.
 
     name : 'Weight',
@@ -19,11 +19,11 @@ config.serial= [
   },
   {
     port : '/dev/ttyUSB1',
-    baudRate : 115200,
+    baudRate : 9600,
     stopBits : 1,
     bits : 8,
     parity : 'None',
-    RTSCTS : 'No',
+    RTSCTS : 'Yes',
     XONXOFF : 'No',
 
     name : 'RFID',
@@ -36,6 +36,6 @@ config.serial= [
 ];
 config.name = 'MBDCcom01';
 config.QS = '222 333 444';
-config.port = 8080;
+config.port = 80;
 
 module.exports = config;
