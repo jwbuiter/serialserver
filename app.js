@@ -17,10 +17,22 @@ function decode(entry){
   return entry;
 }
 
+function average(list){
+
+  if (list.length===0)
+    return 0;
+
+  var sum = 0;
+  for (var j = 0; j <entryList[index].length; j++)
+    sum+=entryList[index][j];
+
+  return (sum / list.length);
+}
+
 for(i = 0; i < config.serial.length; i++){
   serialLogPos[i] = 0;
-  latestLogEntry[i] = `No entries received yet for ${config.serial[i].name}`;
-  fullLog[i] = `No serial data received yet for ${config.serial[i].name}`;
+  latestLogEntry[i] = '0';
+  fullLog[i] = '0';
 
   if (config.serial[i].numerical)
     entryList[i] = [];
@@ -109,21 +121,14 @@ for(i = 0; i < config.serial.length; i++){
 
     if (config.serial[index].numerical){
       app.get(`/${config.serial[index].name.toLowerCase()}avg`, (request, response) => {
-        var sum = 0;
-        for (var j = 0; j <entryList[index].length; j++)
-          sum+=entryList[index][j];
-
-        response.send((sum / entryList[index].length).toString());
+        
+        response.send(average(entryList[index]).toString());
       });
     }
 
     app.get(`/com${index}`, (request, response) => {
       if (config.serial[index].numerical){
-        var sum = 0;
-        for (var j = 0; j <entryList[index].length; j++)
-          sum+=entryList[index][j];
-
-        response.send((sum / entryList[index].length).toString());
+        response.send(average(entryList[index]).toString());
       }
       else{
         response.send(latestLogEntry[index]);
