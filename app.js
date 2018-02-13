@@ -185,9 +185,21 @@ app.get('/restart', (request, response) => {
 });
 
 app.get('/terminal', (request, response) => {
-
   response.send('<meta http-equiv="refresh" content="0; url=/" /><title>MBDCcomUnit</title>Opening terminal.')
-  process.exit();
+  console.log('test');
+  exec('DISPLAY=:1 xhost +localhost', (err, stdout, stderr) => {
+    if (err) {
+      console.error(`exec error: ${err}`);
+      return;
+    }
+  });
+  exec('DISPLAY=:1 lxterminal', (err, stdout, stderr) => {
+    if (err) {
+      console.error(`exec error: ${err}`);
+      return;
+    }
+  });
+  exec('bash DISPLAY=:1 lxterminal');
 });
 
 app.use(express.static('res'))
