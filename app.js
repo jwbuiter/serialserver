@@ -70,7 +70,7 @@ for(i = 0; i < config.serial.length; i++){
       console.log(remainingEntries);
 
       if ((conf.prefix==='')&&(conf.postfix==='')){
-        io.emit('entry', {name : conf.name, entry : fullLog[index].toString()});
+        io.emit('entry', {name : conf.name, entry : fullLog[index].toString().slice(-conf.digits)});
         return
       }
 
@@ -87,7 +87,7 @@ for(i = 0; i < config.serial.length; i++){
 
         if (conf.factor===0)  // if input is numerical
         {
-          io.emit('entry', {name : conf.name, entry : parseFloat(latestLogEntry[index]).toFixed(conf.digits)});
+          io.emit('entry', {name : conf.name, entry : (parseFloat(latestLogEntry[index])*conf.factor).toFixed(conf.digits)});
         }
         else
         {
@@ -131,7 +131,7 @@ for(i = 0; i < config.serial.length; i++){
     app.get(`/com${index}`, (request, response) => {
       let sendString='<title>MBDCcomUnit</title>';
       if ((conf.prefix==='')&&(conf.postfix==='')){
-        sendString += fullLog[index].toString();
+        sendString += fullLog[index].toString().slice(-conf.digits);
       }
       else if (conf.average){
         sendString += (average(entryList[index])*conf.factor).toFixed(conf.digits).toString();
