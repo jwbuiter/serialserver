@@ -70,7 +70,7 @@
         row.append($('<td>').attr('id', config.serial[i].name+'time'+j));
         row.append($('<td>').attr('id', config.serial[i].name+'entry'+j));
         if (j===config.serial[i].entries-2 && config.serial[i].average)
-          row.append($('<td>').html( 'Average last ' + config.serial[i].entries));
+          row.append($('<td>').html( 'Average' ));
         if (j===config.serial[i].entries-1 && config.serial[i].average)
           row.append($('<td>').attr('id', config.serial[i].name + 'avg'));
       }
