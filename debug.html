@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>serial debugger</title>
+  <title>MBDCcomUnit</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box;}
       body { font-style: : Helvetica, Arial; font-size: 0px;}
@@ -48,22 +48,22 @@
     for (var i = 0; i<config.serial.length; i++){
       $('#table').append($('<tr>'));
 
-      for (var j = 0; j<config.serial[i].averages; j++){
+      for (var j = 0; j<config.serial[i].entries; j++){
         var row = $('<tr>');
-        if((j===config.serial[i].averages-1))
+        if((j===config.serial[i].entries-1))
           row.addClass('result');
         $('#table').append(row);
 
-        if (j===config.serial[i].averages-1)
+        if (j===config.serial[i].entries-1)
           row.append($('<td>'+config.serial[i].name+ '</td>'));
         else
           row.append($('<td>'));
         row.append($('<td>').html(j+1));
         row.append($('<td>').attr('id', config.serial[i].name+'time'+j));
         row.append($('<td>').attr('id', config.serial[i].name+'entry'+j));
-        if (j===config.serial[i].averages-2 && config.serial[i].numerical)
-          row.append($('<td>').html( 'Average last ' + config.serial[i].averages));
-        if (j===config.serial[i].averages-1 && config.serial[i].numerical)
+        if (j===config.serial[i].entries-2 && config.serial[i].average)
+          row.append($('<td>').html( 'Average last ' + config.serial[i].entries));
+        if (j===config.serial[i].entries-1 && config.serial[i].average)
           row.append($('<td>').attr('id', config.serial[i].name + 'avg'));
       }
     }
@@ -74,8 +74,8 @@
         if (msg.name===config.serial[i].name)
           break;  //store value of i for correct serial entry
 
-      for(var j = 0; j<config.serial[i].averages; j++){
-        if (j<config.serial[i].averages-1){
+      for(var j = 0; j<config.serial[i].entries; j++){
+        if (j<config.serial[i].entries-1){
           $('#' + config.serial[i].name+'time'+j).html($('#' + config.serial[i].name+'time'+(j + 1)).html());
           $('#' + config.serial[i].name+'entry'+j).html($('#' + config.serial[i].name+'entry'+(j + 1)).html());
         }

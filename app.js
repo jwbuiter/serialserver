@@ -18,7 +18,6 @@ function decode(entry){
 }
 
 function average(list){
-
   if (list.length===0)
     return 0;
 
@@ -32,9 +31,9 @@ function average(list){
 for(i = 0; i < config.serial.length; i++){
   serialLogPos[i] = 0;
   latestLogEntry[i] = '0';
-  fullLog[i] = Buffer.alloc(0);
+  fullLog[i] = Buffer('0');
 
-  if (config.serial[i].numerical)
+  if (config.serial[i].average)
     entryList[i] = [];
 
   try {
@@ -85,10 +84,10 @@ for(i = 0; i < config.serial.length; i++){
         latestLogEntry[index] =  (remainingEntries.slice(nextEntry + Buffer(config.serial[index].prefix).length, (nextEntryEnd===0)?remainingEntries.length:nextEntryEnd)).toString();
         console.log(latestLogEntry[index]);
         
-        if (config.serial[index].numerical){
+        if (config.serial[index].average){
           io.emit('entry', {name : config.serial[index].name, entry : parseFloat(latestLogEntry[index])});
 
-          for (var j = config.serial[index].averages-1; j > 0; j--)
+          for (var j = config.serial[index].entries-1; j > 0; j--)
           {
             if (entryList[index][j-1]){
               entryList[index][j] = entryList[index][j - 1];
@@ -118,23 +117,25 @@ for(i = 0; i < config.serial.length; i++){
       response.send(latestLogEntry[index]);
     });
 
-    if (config.serial[index].numerical){
+    if (config.serial[index].average){
       app.get(`/${config.serial[index].name.toLowerCase()}avg`, (request, response) => {
         
-        response.send(average(entryList[index]).toString());
+        response.send(average(entryList[index]).toFixed(config.serial[index].digits).toString());
       });
     }
 
     app.get(`/com${index}`, (request, response) => {
+      let sendString='<title>MBDCcomUnit</title>';
       if ((config.serial[index].prefix==='')&&(config.serial[index].postfix==='')){
-        response.send(fullLog[index].toString());
+        sendString += fullLog[index].toString();
       }
-      else if (config.serial[index].numerical){
-        response.send(average(entryList[index]).toString());
+      else if (config.serial[index].average){
+        sendString += average(entryList[index]).toFixed(config.serial[index].digits).toString();
       }
       else{
-        response.send(latestLogEntry[index]);
+        sendString += latestLogEntry[index].slice(-config.serial[index].digits);
       }
+      response.send(sendString);
     });
     
   }(i)); //these statements have to be wrapped in an anonymous function so that the value of i is remembered when the inner functions are called in the future
