@@ -25,6 +25,7 @@
   <div class = "buttons">
     <img src = "/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
     <img src = "/settings.svg" height="30" width="30" onclick="javascript:goSettings()">
+    <img src = "/restart.ico"  height="30" width="30" onclick="javascript:goRestart()">
     </a>
   </div>
   <script src="/socket.io/socket.io.js"></script>
@@ -43,6 +44,11 @@
       }
     }
 
+    function goRestart(){
+      if (confirm("Do you really want to restart?")){
+        window.location.href = '/restart'; //relative to domain
+      }
+    }
     function printDate(){
       var date = new Date();
       return date.getDate() + '-' + (date.getMonth()+1) + '-' + (date.getYear()+1900);

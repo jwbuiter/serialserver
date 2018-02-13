@@ -170,14 +170,18 @@ app.get('/config.js', function(request, response){
 
 app.get('/shutdown', (request, response) => {
   response.send('<title>MBDCcomUnit</title>Shutting down now.')
-  exec('systemctl stop serialserver', (err, stdout, stderr) => {
-  if (err) {
-    console.error(`exec error: ${err}`);
-    return;
-  }
-  console.log(`Number of files ${stdout}`);
+  exec('shutdown now', (err, stdout, stderr) => {
+    if (err) {
+      console.error(`exec error: ${err}`);
+      return;
+    }
+  });
 });
-  process.exit()
+
+app.get('/restart', (request, response) => {
+
+  response.send('<meta http-equiv="refresh" content="1; url=/" /><title>MBDCcomUnit</title>Restarting now.')
+  process.exit();
 });
 
 app.use(express.static('res'))
