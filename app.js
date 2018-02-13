@@ -184,6 +184,12 @@ app.get('/restart', (request, response) => {
   process.exit();
 });
 
+app.get('/terminal', (request, response) => {
+
+  response.send('<meta http-equiv="refresh" content="0; url=/" /><title>MBDCcomUnit</title>Opening terminal.')
+  process.exit();
+});
+
 app.use(express.static('res'))
 
 io.on('connection', function(socket){

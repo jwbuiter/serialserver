@@ -9,7 +9,7 @@
       td { text-align: center; font-size: 20px; border-style: bold; }
       .header { background-color: yellow;}
       .result { background-color: #98FB98;}
-      .buttons {position: fixed; right: 0; top: 0;}
+      .buttons {position: fixed; right: 0; top: 30px;}
     </style>
 </head>
 <body>
@@ -26,6 +26,7 @@
     <img src = "/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
     <img src = "/settings.svg" height="30" width="30" onclick="javascript:goSettings()">
     <img src = "/restart.ico"  height="30" width="30" onclick="javascript:goRestart()">
+    <img src = "/terminal.png" height="30" width="30" onclick="javascript:goTerminal()">
     </a>
   </div>
   <script src="/socket.io/socket.io.js"></script>
@@ -49,6 +50,13 @@
         window.location.href = '/restart'; //relative to domain
       }
     }
+
+    function goTerminal(){
+      if (confirm("Do you really want to open a terminal?")){
+        window.location.href = '/terminal'; //relative to domain
+      }
+    }
+
     function printDate(){
       var date = new Date();
       return date.getDate() + '-' + (date.getMonth()+1) + '-' + (date.getYear()+1900);
