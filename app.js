@@ -120,7 +120,7 @@ for(i = 0; i < config.serial.length; i++){
     if (config.serial[index].average){
       app.get(`/${config.serial[index].name.toLowerCase()}avg`, (request, response) => {
         
-        response.send(average(entryList[index]).toFixed(config.serial[index].digits).toString());
+        response.send((average(entryList[index])*config.serial[index].factor).toFixed(config.serial[index].digits).toString());
       });
     }
 
@@ -130,7 +130,7 @@ for(i = 0; i < config.serial.length; i++){
         sendString += fullLog[index].toString();
       }
       else if (config.serial[index].average){
-        sendString += average(entryList[index]).toFixed(config.serial[index].digits).toString();
+        sendString += (average(entryList[index])*config.serial[index].factor).toFixed(config.serial[index].digits).toString();
       }
       else{
         sendString += latestLogEntry[index].slice(-config.serial[index].digits);
