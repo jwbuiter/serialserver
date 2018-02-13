@@ -57,9 +57,6 @@ for(i = 0; i < config.serial.length; i++){
       xoff: config.serial[index].XOFF
     });
 
-    console.log(config.serial[index].prefix.length);
-    console.log(config.serial[index].prefix);
-
     port.on('readable', function() {
       var contents = port.read();
       fullLog[index] = Buffer.concat([fullLog[index], contents]);
@@ -72,11 +69,19 @@ for(i = 0; i < config.serial.length; i++){
 
       console.log(remainingEntries);
 
+      if ((config.serial[index].prefix==='')&&(config.serial[index].postfix==='')){
+        io.emit('entry', {name : config.serial[index].name, entry : fullLog[index].toString()});
+        return
+      }
+
       while((nextEntry = remainingEntries.indexOf(config.serial[index].prefix))>=0){
-        nextEntryEnd = remainingEntries.indexOf(config.serial[index].postfix)
+
+        nextEntryEnd = remainingEntries.indexOf(config.serial[index].postfix);
+
         if (nextEntryEnd===-1){
           break;
         }
+
         latestLogEntry[index] =  (remainingEntries.slice(nextEntry + Buffer(config.serial[index].prefix).length, (nextEntryEnd===0)?remainingEntries.length:nextEntryEnd)).toString();
         console.log(latestLogEntry[index]);
         
@@ -121,7 +126,10 @@ for(i = 0; i < config.serial.length; i++){
     }
 
     app.get(`/com${index}`, (request, response) => {
-      if (config.serial[index].numerical){
+      if ((config.serial[index].prefix==='')&&(config.serial[index].postfix==='')){
+        response.send(fullLog[index].toString());
+      }
+      else if (config.serial[index].numerical){
         response.send(average(entryList[index]).toString());
       }
       else{
