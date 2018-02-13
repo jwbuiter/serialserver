@@ -5,6 +5,7 @@ var server = app.listen(config.port);
 var io = require('socket.io').listen(server);
 var fs = require('fs');
 var ip = require("ip");
+const { exec } = require('child_process');
 var serialPort = require('serialport');
 var config = require('./config');
 
@@ -169,6 +170,13 @@ app.get('/config.js', function(request, response){
 
 app.get('/shutdown', (request, response) => {
   response.send('<title>MBDCcomUnit</title>Shutting down now.')
+  exec('systemctl stop serialserver', (err, stdout, stderr) => {
+  if (err) {
+    console.error(`exec error: ${err}`);
+    return;
+  }
+  console.log(`Number of files ${stdout}`);
+});
   process.exit()
 });
 

@@ -23,17 +23,26 @@
     </tr>
   </table>
   <div class = "buttons">
-    <a href = "/shutdown">
-      <img src = "/shutdown.ico" height="25" width="25">
-    </a>
-    <a href = "/settings">
-      <img src = "/settings.svg" height="25" width="25">
+    <img src = "/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
+    <img src = "/settings.svg" height="30" width="30" onclick="javascript:goSettings()">
     </a>
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
   <script src="/config.js"></script>
   <script>
+    function goSettings(){
+      if (confirm("Do you want to go to the settings?")){
+        window.location.href = '/settings'; //relative to domain
+      }
+    }
+
+    function goShutdown(){
+      if (confirm("Do you really want to shut down?")){
+        window.location.href = '/shutdown'; //relative to domain
+      }
+    }
+
     function printDate(){
       var date = new Date();
       return date.getDate() + '-' + (date.getMonth()+1) + '-' + (date.getYear()+1900);
