@@ -9,6 +9,7 @@
       td { text-align: center; font-size: 20px; border-style: bold; }
       .header { background-color: yellow;}
       .result { background-color: #98FB98;}
+      .buttons {position: fixed; right: 0; top: 0;}
     </style>
 </head>
 <body>
@@ -20,8 +21,15 @@
       <td class="header" id="headerdate"></td>
       <td class="header" id="headerqs"></td>
     </tr>
-
   </table>
+  <div class = "buttons">
+    <a href = "/shutdown">
+      <img src = "/shutdown.ico" height="25" width="25">
+    </a>
+    <a href = "/settings">
+      <img src = "/settings.svg" height="25" width="25">
+    </a>
+  </div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
   <script src="/config.js"></script>

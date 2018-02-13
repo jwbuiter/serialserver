@@ -144,6 +144,10 @@ app.get('/', (request, response) => {
    response.sendFile('debug.html', { root: __dirname});
 });
 
+app.get('/settings', function(request, response){
+    response.sendFile('settings.html', { root: __dirname});
+});
+
 app.get('/full', (request, response) => {
   response.send(fullLog)
 });
@@ -151,6 +155,14 @@ app.get('/full', (request, response) => {
 app.get('/config.js', function(request, response){
     response.sendFile('config.js', { root: __dirname});
 });
+
+
+app.get('/shutdown', (request, response) => {
+  response.send('<title>MBDCcomUnit</title>Shutting down now.')
+  process.exit()
+});
+
+app.use(express.static('res'))
 
 io.on('connection', function(socket){
   console.log('a user connected');
