@@ -1,7 +1,123 @@
 <html>
 <head>
   <title>MBDCcomUnit</title>
+   <style>
+      * { margin: 0; padding: 0; box-sizing: border-box;}
+      table {text-align: center; border: none; border-collapse: collapse;}
+      tr { height: 20px; width: 100px;}
+      td { text-align: center; font-size: 18px; border-style: bold; }
+    </style>
 </head>
 <body>
+<h1>Settings for com 0</h1><br>
+<table id="com0">
+  <tr>
+    <td><input type="number" id="baudrate" min="0" step="1"></td>
+    <td>Baudrate</td>
+  <tr>
+  <tr>
+    <td><input type="number" id="stopbits" min="0" step="1"></td>
+    <td>Number of stop bits</td>
+  <tr>
+  <tr>
+    <td><input type="number" id="bits" min="0" step="1"></td>
+    <td>Number of Data bits</td>
+  <tr>
+  <tr>
+    <td>
+      <select id ="parit">
+        <option value="none">None</option>
+        <option value="even">Even</option>
+        <option value="odd">Odd</option>
+        <option value="mark">Mark</option>
+        <option value="space">Space</option>
+      </select>
+    </td>
+    <td>Parity</td>
+  <tr>
+  <tr>
+    <td><input type="checkbox" id="rtscts"></td>
+    <td>RTSCTS</td>
+  <tr>
+  <tr>
+    <td><input type="checkbox" id="xonxoff"></td>
+    <td>XONXOFF</td>
+  <tr>
+  <tr>
+    <td><input type="checkbox" id="average"></td>
+    <td>Take average</td>
+  <tr>
+  <tr>
+    <td><input type="number" id="digits" min="0" step="1"></td>
+    <td>Digits/rounding</td>
+  <tr>
+  <tr>
+    <td><input type="number" id="factor"></td>
+    <td>Factor</td>
+  <tr>
+  <tr>
+    <td><input type="text" id="prefix"></td>
+    <td>Prefix</td>
+  <tr>
+  <tr>
+    <td><input type="text" id="postfix"></td>
+    <td>Postfix</td>
+  <tr>
+</table>
+<h1>Settings for com 1</h1><br>
+<table id="com1">
+  <tr>
+    <td><input type="number" id="baudrate" min="0" step="1"></td>
+    <td>Baudrate</td>
+  <tr>
+  <tr>
+    <td><input type="number" id="stopbits" min="0" step="1"></td>
+    <td>Number of stop bits</td>
+  <tr>
+  <tr>
+    <td><input type="number" id="bits" min="0" step="1"></td>
+    <td>Number of Data bits</td>
+  <tr>
+  <tr>
+    <td>
+      <select id ="parit">
+        <option value="none">None</option>
+        <option value="even">Even</option>
+        <option value="odd">Odd</option>
+        <option value="mark">Mark</option>
+        <option value="space">Space</option>
+      </select>
+    </td>
+    <td>Parity</td>
+  <tr>
+  <tr>
+    <td><input type="checkbox" id="rtscts"></td>
+    <td>RTSCTS</td>
+  <tr>
+  <tr>
+    <td><input type="checkbox" id="xonxoff"></td>
+    <td>XONXOFF</td>
+  <tr>
+  <tr>
+    <td><input type="checkbox" id="average"></td>
+    <td>Take average</td>
+  <tr>
+  <tr>
+    <td><input type="number" id="digits" min="0" step="1"></td>
+    <td>Digits/rounding</td>
+  <tr>
+  <tr>
+    <td><input type="number" id="factor"></td>
+    <td>Factor</td>
+  <tr>
+  <tr>
+    <td><input type="text" id="prefix"></td>
+    <td>Prefix</td>
+  <tr>
+  <tr>
+    <td><input type="text" id="postfix"></td>
+    <td>Postfix</td>
+  <tr>
+</table>
 </body>
 </html>
