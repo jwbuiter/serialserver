@@ -13,9 +13,9 @@ config.serial= [
 
     name : 'Weight',
     average : true,             // Whether the input should be averaged, either true or false
-    digits : 5,                 // When averaging, the number of decimals to show, otherwise the cuttof for the last shown characters
-    entries : 5,                // The number of entries shown in debug. In case of a numerical input also the number of averages to take. Also the number of entries shown in debug
-    factor: 1,                  // Multiplication factor in the case of numerical input.
+    digits : 5,                 // When input is numeric, the number of decimals to show, otherwise the cuttof for the last shown characters
+    entries : 5,                // The number of entries shown in debug. In case where averaging is on also the number of averages to take. Also the number of entries shown in debug
+    factor: 1,                  // Multiplication factor in the case of numerical input, 0 if input is not numerical
 
 
     prefix : 'W=+',             // String preceding serial data
@@ -32,7 +32,7 @@ config.serial= [
     XOFF : false,
 
     name : 'RFID',
-    average : true,
+    average : false,
     digits : 5,
     entries : 5, 
     factor : 0, 
