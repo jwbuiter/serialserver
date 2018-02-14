@@ -187,7 +187,7 @@ app.get('/restart', (request, response) => {
 app.get('/terminal', (request, response) => {
   response.send('<meta http-equiv="refresh" content="0; url=/" /><title>MBDCcomUnit</title>Opening terminal.')
   console.log('test');
-  exec('DISPLAY=:1 xhost +localhost', (err, stdout, stderr) => {
+  exec('export DISPLAY=:1 && xhost +localhost', (err, stdout, stderr) => {
     if (err) {
       console.error(`exec error: ${err}`);
       return;
@@ -207,5 +207,11 @@ app.use(express.static('res'))
 io.on('connection', function(socket){
   console.log('a user connected');
   socket.emit('ip', ip.address());
+
+  socket.on('settings', function(config){
+    console.log(JSON.stringify(config, null, 2));
+  });
 });
+
+
 

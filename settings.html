@@ -6,6 +6,7 @@
       table {text-align: center; border: none; border-collapse: collapse;}
       tr { height: 40px; }
       td { text-align: center; font-size: 18px; border-style: bold; width: 160px; }
+      input {text-align: center;}
     </style>
 </head>
 <body>
@@ -13,20 +14,20 @@
   <h1>Settings for com 0</h1>
   <table id="com0">
     <tr>
-      <td><input type="number" id="baudrate" min="0" step="1"></td>
+      <td><input type="number" class="baudRate" min="0" step="1"></td>
       <td>Baudrate</td>
     </tr>
     <tr>
-      <td><input type="number" id="stopbits" min="0" step="1"></td>
+      <td><input type="number" class="stopBits" min="0" step="1"></td>
       <td>Number of stop bits</td>
     </tr>
     <tr>
-      <td><input type="number" id="bits" min="0" step="1"></td>
+      <td><input type="number" class="bits" min="0" step="1"></td>
       <td>Number of Data bits</td>
     </tr>
     <tr>
       <td>
-        <select id ="parit">
+        <select class ="parity">
           <option value="none">None</option>
           <option value="even">Even</option>
           <option value="odd">Odd</option>
@@ -37,36 +38,40 @@
       <td>Parity</td>
     </tr>
     <tr>
-      <td><input type="checkbox" id="rtscts"></td>
+      <td><input type="checkbox" class="RTSCTS"></td>
       <td>RTSCTS</td>
     </tr>
     <tr>
-      <td><input type="checkbox" id="xonxoff"></td>
+      <td><input type="checkbox" class="XONXOFF"></td>
       <td>XONXOFF</td>
     </tr>
     <tr>
-      <td><input type="checkbox" id="average"></td>
+      <td><input type="checkbox" class="average"></td>
       <td>Take average</td>
     </tr>
     <tr>
-      <td><input type="number" id="digits" min="0" step="1"></td>
+      <td><input type="number" class="entries" min="0" step="1"></td>
+      <td>Number of entries</td>
+    </tr>
+    <tr>
+      <td><input type="number" class="digits" min="0" step="1"></td>
       <td>Digits/rounding</td>
     </tr>
     <tr>
-      <td><input type="number" id="factor"></td>
+      <td><input type="number" class="factor"></td>
       <td>Factor</td>
     </tr>
     <tr>
-      <td><input type="text" id="prefix"></td>
+      <td><input type="text" class="prefix"></td>
       <td>Prefix</td>
     </tr>
     <tr>
-      <td><input type="text" id="postfix"></td>
+      <td><input type="text" class="postfix"></td>
       <td>Postfix</td>
     </tr>
     <tr>
-      <td><input type="button" value="Save and restart"></td>
-      <td><input type="button" value="Cancel"></td>
+      <td><input type="button" value="Save and restart" onclick="javascript:setSettings()"></td>
+      <td><input type="button" value="Cancel" onclick="javascript:goDebug()"></td>
     </tr>
   </table>
 </div>
@@ -75,20 +80,20 @@
   <h1>Settings for com 1</h1>
   <table id="com1">
     <tr>
-      <td><input type="number" id="baudrate" min="0" step="1"></td>
+      <td><input type="number" class="baudRate" min="0" step="1"></td>
       <td>Baudrate</td>
     </tr>
     <tr>
-      <td><input type="number" id="stopbits" min="0" step="1"></td>
+      <td><input type="number" class="stopBits" min="0" step="1"></td>
       <td>Number of stop bits</td>
     </tr>
     <tr>
-      <td><input type="number" id="bits" min="0" step="1"></td>
+      <td><input type="number" class="bits" min="0" step="1"></td>
       <td>Number of Data bits</td>
     </tr>
     <tr>
       <td>
-        <select id ="parit">
+        <select class ="parity">
           <option value="none">None</option>
           <option value="even">Even</option>
           <option value="odd">Odd</option>
@@ -99,34 +104,97 @@
       <td>Parity</td>
     </tr>
     <tr>
-      <td><input type="checkbox" id="rtscts"></td>
+      <td><input type="checkbox" class="RTSCTS"></td>
       <td>RTSCTS</td>
     </tr>
     <tr>
-      <td><input type="checkbox" id="xonxoff"></td>
+      <td><input type="checkbox" class="XONXOFF"></td>
       <td>XONXOFF</td>
     </tr>
     <tr>
-      <td><input type="checkbox" id="average"></td>
+      <td><input type="checkbox" class="average"></td>
       <td>Take average</td>
     </tr>
     <tr>
-      <td><input type="number" id="digits" min="0" step="1"></td>
+      <td><input type="number" class="entries" min="0" step="1"></td>
+      <td>Number of entries</td>
+    </tr>
+    <tr>
+      <td><input type="number" class="digits" min="0" step="1"></td>
       <td>Digits/rounding</td>
     </tr>
     <tr>
-      <td><input type="number" id="factor"></td>
+      <td><input type="number" class="factor"></td>
       <td>Factor</td>
     </tr>
     <tr>
-      <td><input type="text" id="prefix"></td>
+      <td><input type="text" class="prefix"></td>
       <td>Prefix</td>
     </tr>
     <tr>
-      <td><input type="text" id="postfix"></td>
+      <td><input type="text" class="postfix"></td>
       <td>Postfix</td>
     </tr>
   </table>
 </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="/config.js"></script>
+  <script type="text/javascript">
+    for (var i = 0; i < 2; i++)
+    {
+      var table = $(`#com${i}`);
+      var conf = config.serial[i];
+      Object.keys(conf).forEach(function(key) 
+      {
+        if (typeof(conf[key]) === "boolean")
+        {
+          table.find(`.${key}`).prop('checked', conf[key]);
+        }
+        else
+        {
+          table.find(`.${key}`).val(conf[key]);
+        }
+      });
+    }
+
+    var socket = io();
+
+
+    function goDebug(){
+      if (confirm("Do you want to go back?")){
+        window.location.href = '/'; //relative to domain
+      }
+    }
+
+    function setSettings(){
+      if (confirm("Do you really want to save these settings??"))
+      {
+        for (var i = 0; i < 2; i++)
+        {
+          var table = $(`#com${i}`);
+          var conf = config.serial[i];
+          Object.keys(conf).forEach(function(key) 
+          {
+            if (typeof(conf[key]) === "boolean")
+            {
+              conf[key] = table.find(`.${key}`).prop('checked');
+            }
+            else if (!isNaN(conf[key]))
+            {
+              conf[key] = Number(table.find(`.${key}`).val());
+            }
+            else
+            {
+              conf[key] = table.find(`.${key}`).val();
+            }
+          });
+        }
+        socket.emit('settings',config);
+        console.log('test');
+      }
+    }
+
+  </script>
 </body>
 </html>

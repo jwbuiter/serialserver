@@ -23,10 +23,9 @@
     </tr>
   </table>
   <div class = "buttons">
-    <img src = "/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
     <img src = "/settings.svg" height="30" width="30" onclick="javascript:goSettings()">
     <img src = "/restart.ico"  height="30" width="30" onclick="javascript:goRestart()">
-    <img src = "/terminal.png" height="30" width="30" onclick="javascript:goTerminal()">
+    <img src = "/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
     </a>
   </div>
   <script src="/socket.io/socket.io.js"></script>
@@ -48,12 +47,6 @@
     function goRestart(){
       if (confirm("Do you really want to restart?")){
         window.location.href = '/restart'; //relative to domain
-      }
-    }
-
-    function goTerminal(){
-      if (confirm("Do you really want to open a terminal?")){
-        window.location.href = '/terminal'; //relative to domain
       }
     }
 
