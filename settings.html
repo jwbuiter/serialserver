@@ -2,32 +2,46 @@
 <head>
   <title>MBDCcomUnit</title>
    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box;}
       table {text-align: center; border: none; border-collapse: collapse;}
       tr { height: 40px; }
-      td { text-align: center; font-size: 18px; border-style: bold; width: 160px; }
+      td { text-align: center; font-size: 18px; border-style: bold; width: 200px; }
       input {text-align: center;}
     </style>
 </head>
 <body>
-<div style="float: left">
-  <h1>Settings for com 0</h1>
-  <table id="com0">
+<div style="display: block; width: 600px; margin:0 auto;">
+  <table>
     <tr>
-      <td><input type="number" class="baudRate" min="0" step="1"></td>
+      <td><h2>Settings com 0</h2></td>
+      <td><h2>Settings com 1</h2></td>
+    </tr>
+    <tr>
+      <td><input type="number" id="baudRate0" min="0" step="1"></td>
+      <td><input type="number" id="baudRate1" min="0" step="1"></td>
       <td>Baudrate</td>
     </tr>
     <tr>
-      <td><input type="number" class="stopBits" min="0" step="1"></td>
+      <td><input type="number" id="stopBits0" min="0" step="1"></td>
+      <td><input type="number" id="stopBits1" min="0" step="1"></td>
       <td>Number of stop bits</td>
     </tr>
     <tr>
-      <td><input type="number" class="bits" min="0" step="1"></td>
+      <td><input type="number" id="bits0" min="0" step="1"></td>
+      <td><input type="number" id="bits1" min="0" step="1"></td>
       <td>Number of Data bits</td>
     </tr>
     <tr>
       <td>
-        <select class ="parity">
+        <select id ="parity0">
+          <option value="none">None</option>
+          <option value="even">Even</option>
+          <option value="odd">Odd</option>
+          <option value="mark">Mark</option>
+          <option value="space">Space</option>
+        </select>
+      </td>
+      <td>
+        <select id ="parity1">
           <option value="none">None</option>
           <option value="even">Even</option>
           <option value="odd">Odd</option>
@@ -38,35 +52,43 @@
       <td>Parity</td>
     </tr>
     <tr>
-      <td><input type="checkbox" class="RTSCTS"></td>
+      <td><input type="checkbox" id="RTSCTS0"></td>
+      <td><input type="checkbox" id="RTSCTS1"></td>
       <td>RTSCTS</td>
     </tr>
     <tr>
-      <td><input type="checkbox" class="XONXOFF"></td>
+      <td><input type="checkbox" id="XONXOFF0"></td>
+      <td><input type="checkbox" id="XONXOFF1"></td>
       <td>XONXOFF</td>
     </tr>
     <tr>
-      <td><input type="checkbox" class="average"></td>
+      <td><input type="checkbox" id="average0"></td>
+      <td><input type="checkbox" id="average1"></td>
       <td>Take average</td>
     </tr>
     <tr>
-      <td><input type="number" class="entries" min="0" step="1"></td>
+      <td><input type="number" id="entries0" min="0" step="1"></td>
+      <td><input type="number" id="entries1" min="0" step="1"></td>
       <td>Number of entries</td>
     </tr>
     <tr>
-      <td><input type="number" class="digits" min="0" step="1"></td>
+      <td><input type="number" id="digits0" min="0" step="1"></td>
+      <td><input type="number" id="digits1" min="0" step="1"></td>
       <td>Digits/rounding</td>
     </tr>
     <tr>
-      <td><input type="number" class="factor"></td>
+      <td><input type="number" id="factor0"></td>
+      <td><input type="number" id="factor1"></td>
       <td>Factor</td>
     </tr>
     <tr>
-      <td><input type="text" class="prefix"></td>
+      <td><input type="text" id="prefix0"></td>
+      <td><input type="text" id="prefix1"></td>
       <td>Prefix</td>
     </tr>
     <tr>
-      <td><input type="text" class="postfix"></td>
+      <td><input type="text" id="postfix0"></td>
+      <td><input type="text" id="postfix1"></td>
       <td>Postfix</td>
     </tr>
     <tr>
@@ -76,84 +98,22 @@
   </table>
 </div>
 
-<div style="float: left">
-  <h1>Settings for com 1</h1>
-  <table id="com1">
-    <tr>
-      <td><input type="number" class="baudRate" min="0" step="1"></td>
-      <td>Baudrate</td>
-    </tr>
-    <tr>
-      <td><input type="number" class="stopBits" min="0" step="1"></td>
-      <td>Number of stop bits</td>
-    </tr>
-    <tr>
-      <td><input type="number" class="bits" min="0" step="1"></td>
-      <td>Number of Data bits</td>
-    </tr>
-    <tr>
-      <td>
-        <select class ="parity">
-          <option value="none">None</option>
-          <option value="even">Even</option>
-          <option value="odd">Odd</option>
-          <option value="mark">Mark</option>
-          <option value="space">Space</option>
-        </select>
-      </td>
-      <td>Parity</td>
-    </tr>
-    <tr>
-      <td><input type="checkbox" class="RTSCTS"></td>
-      <td>RTSCTS</td>
-    </tr>
-    <tr>
-      <td><input type="checkbox" class="XONXOFF"></td>
-      <td>XONXOFF</td>
-    </tr>
-    <tr>
-      <td><input type="checkbox" class="average"></td>
-      <td>Take average</td>
-    </tr>
-    <tr>
-      <td><input type="number" class="entries" min="0" step="1"></td>
-      <td>Number of entries</td>
-    </tr>
-    <tr>
-      <td><input type="number" class="digits" min="0" step="1"></td>
-      <td>Digits/rounding</td>
-    </tr>
-    <tr>
-      <td><input type="number" class="factor"></td>
-      <td>Factor</td>
-    </tr>
-    <tr>
-      <td><input type="text" class="prefix"></td>
-      <td>Prefix</td>
-    </tr>
-    <tr>
-      <td><input type="text" class="postfix"></td>
-      <td>Postfix</td>
-    </tr>
-  </table>
-</div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
   <script src="/config.js"></script>
   <script type="text/javascript">
     for (var i = 0; i < 2; i++)
     {
-      var table = $(`#com${i}`);
       var conf = config.serial[i];
       Object.keys(conf).forEach(function(key) 
       {
         if (typeof(conf[key]) === "boolean")
         {
-          table.find(`.${key}`).prop('checked', conf[key]);
+          $(`#${key}${i}`).prop('checked', conf[key]);
         }
         else
         {
-          table.find(`.${key}`).val(conf[key]);
+          $(`#${key}${i}`).val(conf[key]);
         }
       });
     }
@@ -172,26 +132,27 @@
       {
         for (var i = 0; i < 2; i++)
         {
-          var table = $(`#com${i}`);
           var conf = config.serial[i];
           Object.keys(conf).forEach(function(key) 
           {
             if (typeof(conf[key]) === "boolean")
             {
-              conf[key] = table.find(`.${key}`).prop('checked');
+              conf[key] = $(`#${key}${i}`).prop('checked')  || conf[key];
             }
             else if (!isNaN(conf[key]))
             {
-              conf[key] = Number(table.find(`.${key}`).val());
+              conf[key] = Number($(`#${key}${i}`).val())  || conf[key];
             }
             else
             {
-              conf[key] = table.find(`.${key}`).val();
+              conf[key] = $(`#${key}${i}`).val() || conf[key];
             }
           });
         }
         socket.emit('settings',config);
-        console.log('test');
+        setTimeout(function(){ 
+          window.location.href = '/';
+        }, 1000);
       }
     }
 

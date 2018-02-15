@@ -54,8 +54,8 @@ for(i = 0; i < config.serial.length; i++){
       stopBits: conf.stopBits,
       parity: conf.parity,
       rtscts: conf.RTSCTS,
-      xon: conf.XON,
-      xoff: conf.XOFF
+      xon: conf.XONXOFF,
+      xoff: conf.XONXOFF
     });
 
     port.on('readable', function() {
@@ -209,7 +209,26 @@ io.on('connection', function(socket){
   socket.emit('ip', ip.address());
 
   socket.on('settings', function(config){
-    console.log(JSON.stringify(config, null, 2));
+
+    let conf = JSON.stringify(config, null, 2).replace(/"/g, "'")
+      .replace(/\\u00[0-9]{2}/g, match => String.fromCharCode(parseInt(match.slice(-2), 16)))
+      .replace(/'[\w]+':/g, match => match.slice(1,-2)+' :');
+
+    const name = 'config.js';
+    try {
+      fs.accessSync(name);
+      fs.unlinkSync(name);
+    } 
+    catch (err) {
+    }
+
+    conf = 'var config =' + conf + ';\n\nmodule.exports = config;';
+    fs.writeFileSync(name, conf, (err) => {  
+      if (err) throw err;
+
+      console.log('Config saved!');
+    });
+    process.exit();
   });
 });
 
