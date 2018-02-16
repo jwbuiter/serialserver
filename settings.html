@@ -133,17 +133,21 @@
           var conf = config.serial[i];
           Object.keys(conf).forEach(function(key) 
           {
-            if (typeof(conf[key]) === "boolean")
+            let element = $(`#${key}${i}`);
+            if (element.length!=0)
             {
-              conf[key] = $(`#${key}${i}`).prop('checked')  || conf[key];
-            }
-            else if (!isNaN(conf[key]))
-            {
-              conf[key] = Number($(`#${key}${i}`).val())  || conf[key];
-            }
-            else
-            {
-              conf[key] = $(`#${key}${i}`).val() || conf[key];
+              if (typeof(conf[key]) === "boolean")
+              {
+                conf[key] = element.prop('checked');
+              }
+              else if (!isNaN(conf[key]))
+              {
+                conf[key] = Number(element.val());
+              }
+              else
+              {
+                conf[key] = element.val();
+              }
             }
           });
         }
