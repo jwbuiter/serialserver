@@ -10,13 +10,13 @@ var config ={
       XONXOFF : false,                 // Options are true or false
 
       name : 'Weight',
-      average : true,                  // Whether the input should be averaged, either true or false
-      digits : 5,                      // When input is numeric, the number of decimals to show, otherwise the cuttof for the last shown characters
+      average : false,                  // Whether the input should be averaged, either true or false
+      digits : 3,                      // When input is numeric, the number of decimals to show, otherwise the cuttof for the last shown characters
       entries : 5,                     // The number of entries shown in debug. In case where averaging is on also the number of averages to take. Also the number of entries shown in debug
       factor : 1,                      // Multiplication factor in the case of numerical input, 0 if input is not numerical
 
-      prefix : 'W=+',                  // String preceding serial data
-      postfix : 'kg'                   // String following serial data
+      prefix : 'ST,GS,',                  // String preceding serial data
+      postfix : 'KG'                   // String following serial data
     },
     {
       port : '/dev/ttyUSB1',
@@ -29,12 +29,12 @@ var config ={
 
       name : 'RFID',
       average : false,
-      digits : 5,
+      digits : 15,
       entries : 5,
       factor : 0,
 
-      prefix : 'ð#',
-      postfix : '05'
+      prefix : '#',
+      postfix : '05'
     }
   ],
   name : 'MBDCcom01',

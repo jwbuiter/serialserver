@@ -1,3 +1,4 @@
+<!doctype html>
 <html>
 <head>
   <title>MBDCcomUnit</title>
@@ -26,7 +27,6 @@
     <img src = "/settings.svg" height="30" width="30" onclick="javascript:goSettings()">
     <img src = "/restart.ico"  height="30" width="30" onclick="javascript:goRestart()">
     <img src = "/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
-    </a>
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
@@ -70,25 +70,29 @@
     }, 1000);
 
     for (var i = 0; i<config.serial.length; i++){
+      let conf = config.serial[i];
+      if (conf.name==='')
+        continue;
+
       $('#table').append($('<tr>'));
 
-      for (var j = 0; j<config.serial[i].entries; j++){
+      for (var j = 0; j<conf.entries; j++){
         var row = $('<tr>');
-        if((j===config.serial[i].entries-1))
+        if((j===conf.entries-1))
           row.addClass('result');
         $('#table').append(row);
 
-        if (j===config.serial[i].entries-1)
-          row.append($('<td>'+config.serial[i].name+ '</td>'));
+        if (j===conf.entries-1)
+          row.append($('<td>'+conf.name+ '</td>'));
         else
           row.append($('<td>'));
         row.append($('<td>').html(j+1));
-        row.append($('<td>').attr('id', config.serial[i].name+'time'+j));
-        row.append($('<td>').attr('id', config.serial[i].name+'entry'+j));
-        if (j===config.serial[i].entries-2 && config.serial[i].average)
+        row.append($('<td>').attr('id', conf.name+'time'+j));
+        row.append($('<td>').attr('id', conf.name+'entry'+j));
+        if (j===conf.entries-2 && conf.average)
           row.append($('<td>').html( 'Average' ));
-        if (j===config.serial[i].entries-1 && config.serial[i].average)
-          row.append($('<td>').attr('id', config.serial[i].name + 'avg'));
+        if (j===conf.entries-1 && conf.average)
+          row.append($('<td>').attr('id', conf.name + 'avg'));
       }
     }
 

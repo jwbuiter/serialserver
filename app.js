@@ -114,19 +114,22 @@ for(i = 0; i < config.serial.length; i++){
       }  
     });
 
-    app.get(`/${conf.name.toLowerCase()}full`, (request, response) => {
-      response.send(fullLog[index]);
-    });
-
-    app.get(`/${conf.name.toLowerCase()}`, (request, response) => {
-      response.send(latestLogEntry[index]);
-    });
-
-    if (conf.average){
-      app.get(`/${conf.name.toLowerCase()}avg`, (request, response) => {
-        
-        response.send((average(entryList[index])*conf.factor).toFixed(conf.digits).toString());
+    if (conf.name != '')
+    {
+      app.get(`/${conf.name.toLowerCase()}full`, (request, response) => {
+        response.send(fullLog[index]);
       });
+
+      app.get(`/${conf.name.toLowerCase()}`, (request, response) => {
+        response.send(latestLogEntry[index]);
+      });
+
+      if (conf.average){
+        app.get(`/${conf.name.toLowerCase()}avg`, (request, response) => {
+          
+          response.send((average(entryList[index])*conf.factor).toFixed(conf.digits).toString());
+        });
+      }
     }
 
     app.get(`/com${index}`, (request, response) => {

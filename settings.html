@@ -1,3 +1,4 @@
+<!doctype html>
 <html>
 <head>
   <title>MBDCcomUnit</title>
@@ -60,6 +61,11 @@
       <td><input type="checkbox" id="XONXOFF0"></td>
       <td><input type="checkbox" id="XONXOFF1"></td>
       <td>XONXOFF</td>
+    </tr>
+    <tr>
+      <td><input type="text" id="name0"></td>
+      <td><input type="text" id="name1"></td>
+      <td>Name</td>
     </tr>
     <tr>
       <td><input type="checkbox" id="average0"></td>
@@ -140,7 +146,7 @@
               {
                 conf[key] = element.prop('checked');
               }
-              else if (!isNaN(conf[key]))
+              else if (!isNaN(parseInt(conf[key])))
               {
                 conf[key] = Number(element.val());
               }
