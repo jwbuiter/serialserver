@@ -38,7 +38,7 @@ var config ={
     }
   ],
   name : 'MBDCcom01',
-  QS : '222 333 444',
+  QS : '000 000 000',
   port : 80
 };
 
