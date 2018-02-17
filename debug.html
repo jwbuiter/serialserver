@@ -11,6 +11,7 @@
       .header { background-color: yellow;}
       .result { background-color: #98FB98;}
       .buttons {position: fixed; right: 0; top: 30px; font-size:20px;}
+      .logo {position: fixed; left: 0; top: 30px;}
     </style>
 </head>
 <body>
@@ -29,6 +30,9 @@
     <img src = "/restart.ico"  height="30" width="30" onclick="javascript:goRestart()">
     
     <img src = "/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
+  </div>
+  <div class = "logo">
+    <img id = "logo" src = "/mbdc.jpg">
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
@@ -71,10 +75,17 @@
       $('#headertime').html(printTime());
     }, 1000);
 
+    let logoSizeSet = false;
     for (var i = 0; i<config.serial.length; i++){
       let conf = config.serial[i];
       if (conf.name==='')
         continue;
+
+      if (!logoSizeSet)
+      {
+        logoSizeSet = true;
+        $('#logo').height(Math.min(140, conf.entries*30)*0.95);
+      }
 
       $('#table').append($('<tr>'));
 
