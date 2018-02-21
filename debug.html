@@ -12,10 +12,11 @@
       .result { background-color: #98FB98;}
       .buttons {position: fixed; right: 0; top: 30px; font-size:20px;}
       .logo {position: fixed; left: 0; top: 30px;}
+      #fileLoader {font-size: 30px; }
     </style>
 </head>
 <body>
-  <table id="table">
+  <table id="content">
     <tr>
       <td class="header" id="headername"></td>
       <td class="header" id="headerip"></td>
@@ -24,15 +25,19 @@
       <td class="header" id="headerqs"></td>
     </tr>
   </table>
+  <div id = "fileLoader">
+    <form action="upload" method="post" enctype="multipart/form-data">
+    Pick file:<input id="fileLocation" type="file" name="importFile"><input type="submit" value="Import .xls" name="submit">
+  </div>
   <div class = "buttons">
-    <img src = "/settings.svg" height="30" width="30" onclick="javascript:goSettings()">
+    <img src = "/res/settings.svg" height="30" width="30" onclick="javascript:goSettings()">
 
-    <img src = "/restart.ico"  height="30" width="30" onclick="javascript:goRestart()">
+    <img src = "/res/restart.ico"  height="30" width="30" onclick="javascript:goRestart()">
     
-    <img src = "/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
+    <img src = "/res/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
   </div>
   <div class = "logo">
-    <img id = "logo" src = "/mbdc.jpg">
+    <img id = "logo" src = "/res/mbdc.jpg">
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
@@ -87,13 +92,13 @@
         $('#logo').height(Math.min(140, conf.entries*30)*0.95);
       }
 
-      $('#table').append($('<tr>'));
+      $('#content').append($('<tr>'));
 
       for (var j = 0; j<conf.entries; j++){
         var row = $('<tr>');
         if((j===conf.entries-1))
           row.addClass('result');
-        $('#table').append(row);
+        $('#content').append(row);
 
         if (j===conf.entries-1)
           row.append($('<td>'+conf.name+ '</td>'));

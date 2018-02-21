@@ -1,5 +1,6 @@
 var config = require('./config');
 var express = require('express');
+var fileUpload = require('express-fileupload');
 var app = express();
 var server = app.listen(config.port);
 var io = require('socket.io').listen(server);
@@ -205,7 +206,25 @@ app.get('/terminal', (request, response) => {
   exec('bash DISPLAY=:1 lxterminal');
 });
 
-app.use(express.static('res'))
+app.use('/res', express.static('res'))
+
+app.use('/upload', fileUpload());
+
+app.post('/upload', (req, res) => {
+  if (!req.files)
+    return res.status(400).send('No files were uploaded.');
+ 
+  // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+  let sampleFile = req.files.importFile;
+ 
+  // Use the mv() method to place the file somewhere on your server
+  sampleFile.mv(__dirname + '/data/data.xls', function(err) {
+    if (err)
+      return res.status(500).send(err);
+    console.log(__dirname + '/data.xls');
+    res.send('File uploaded!');
+  });
+});
 
 io.on('connection', function(socket){
   console.log('a user connected');
