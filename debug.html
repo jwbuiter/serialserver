@@ -136,7 +136,7 @@
       for(var i = 0; i<config.serial.length; i++)
         if (msg.name===config.serial[i].name){
           console.log(config.serial[i].name+'avg');
-          $('#' + config.serial[i].name+'avg').html(Math.round(msg.entry*1000)/1000);
+          $('#' + config.serial[i].name+'avg').html(msg.entry);
         }
     });
 

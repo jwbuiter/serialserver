@@ -69,7 +69,7 @@ for(i = 0; i < config.serial.length; i++){
       if (remainingEntries.length===0)
         return;
 
-      console.log(remainingEntries);
+
 
       if ((conf.prefix==='')&&(conf.postfix==='')){
         io.emit('entry', {name : conf.name, entry : fullLog[index].toString().slice(-conf.digits)});
@@ -78,17 +78,17 @@ for(i = 0; i < config.serial.length; i++){
 
       while((nextEntry = remainingEntries.indexOf(conf.prefix))>=0){
 
-        nextEntryEnd = remainingEntries.indexOf(conf.postfix);
+        nextEntryEnd = remainingEntries.slice(nextEntry).indexOf(conf.postfix);
 
         if (nextEntryEnd===-1){
           break;
         }
 
-        latestLogEntry[index] =  (remainingEntries.slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries.length:nextEntryEnd)).toString();
-        console.log(latestLogEntry[index]);
+        latestLogEntry[index] =  (remainingEntries.slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries.length:(nextEntryEnd+nextEntry))).toString();
 
         if (conf.factor!=0)  // if input is numerical
         {
+          latestLogEntry[index]=latestLogEntry[index].replace(/ /g,'');
           io.emit('entry', {name : conf.name, entry : (parseFloat(latestLogEntry[index])*conf.factor).toFixed(conf.digits)});
         }
         else
@@ -100,13 +100,15 @@ for(i = 0; i < config.serial.length; i++){
         {
           for (var j = conf.entries-1; j > 0; j--)
           {
-            if (entryList[index][j-1]){
+            if (entryList[index].length>(j-1)){
               entryList[index][j] = entryList[index][j - 1];
             }
           }
+
           entryList[index][0] = parseFloat(latestLogEntry[index]);
 
           io.emit('average', {name : conf.name, entry : (average(entryList[index])*conf.factor).toFixed(conf.digits).toString()});
+          
         }
           
 
