@@ -1,64 +1,0 @@
-[1mdiff --git a/app.js b/app.js[m
-[1mindex ac09c27..7729edb 100644[m
-[1m--- a/app.js[m
-[1m+++ b/app.js[m
-[36m@@ -69,7 +69,7 @@[m [mfor(i = 0; i < config.serial.length; i++){[m
-       if (remainingEntries.length===0)[m
-         return;[m
- [m
-[31m-      console.log(remainingEntries);[m
-[32m+[m[41m[m
- [m
-       if ((conf.prefix==='')&&(conf.postfix==='')){[m
-         io.emit('entry', {name : conf.name, entry : fullLog[index].toString().slice(-conf.digits)});[m
-[36m@@ -78,17 +78,17 @@[m [mfor(i = 0; i < config.serial.length; i++){[m
- [m
-       while((nextEntry = remainingEntries.indexOf(conf.prefix))>=0){[m
- [m
-[31m-        nextEntryEnd = remainingEntries.indexOf(conf.postfix);[m
-[32m+[m[32m        nextEntryEnd = remainingEntries.slice(nextEntry).indexOf(conf.postfix);[m[41m[m
- [m
-         if (nextEntryEnd===-1){[m
-           break;[m
-         }[m
- [m
-[31m-        latestLogEntry[index] =  (remainingEntries.slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries.length:nextEntryEnd)).toString();[m
-[31m-        console.log(latestLogEntry[index]);[m
-[32m+[m[32m        latestLogEntry[index] =  (remainingEntries.slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries.length:(nextEntryEnd+nextEntry))).toString();[m[41m[m
- [m
-         if (conf.factor!=0)  // if input is numerical[m
-         {[m
-[32m+[m[32m          latestLogEntry[index]=latestLogEntry[index].replace(/ /g,'');[m[41m[m
-           io.emit('entry', {name : conf.name, entry : (parseFloat(latestLogEntry[index])*conf.factor).toFixed(conf.digits)});[m
-         }[m
-         else[m
-[36m@@ -100,13 +100,15 @@[m [mfor(i = 0; i < config.serial.length; i++){[m
-         {[m
-           for (var j = conf.entries-1; j > 0; j--)[m
-           {[m
-[31m-            if (entryList[index][j-1]){[m
-[32m+[m[32m            if (entryList[index].length>(j-1)){[m[41m[m
-               entryList[index][j] = entryList[index][j - 1];[m
-             }[m
-           }[m
-[32m+[m[41m[m
-           entryList[index][0] = parseFloat(latestLogEntry[index]);[m
- [m
-           io.emit('average', {name : conf.name, entry : (average(entryList[index])*conf.factor).toFixed(conf.digits).toString()});[m
-[32m+[m[41m          [m
-         }[m
-           [m
- [m
-[1mdiff --git a/debug.html b/debug.html[m
-[1mindex 71732b2..0b942f4 100644[m
-[1m--- a/debug.html[m
-[1m+++ b/debug.html[m
-[36m@@ -136,7 +136,7 @@[m
-       for(var i = 0; i<config.serial.length; i++)[m
-         if (msg.name===config.serial[i].name){[m
-           console.log(config.serial[i].name+'avg');[m
-[31m-          $('#' + config.serial[i].name+'avg').html(Math.round(msg.entry*1000)/1000);[m
-[32m+[m[32m          $('#' + config.serial[i].name+'avg').html(msg.entry);[m[41m[m
-         }[m
-     });[m
- [m
