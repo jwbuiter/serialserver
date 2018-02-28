@@ -93,7 +93,7 @@ for(i = 0; i < config.serial.length; i++){
           newEntry=newEntry.replace(/ /g,'');
         }
 
-        if (latestLogEntry[index]===newEntry && time.getTime()<(latestLogEntryTime[index] + conf.timeout)){
+        if (!conf.average && latestLogEntry[index]===newEntry && time.getTime()<(latestLogEntryTime[index] + conf.timeout)){
           break;
         }
 
