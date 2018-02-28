@@ -61,24 +61,19 @@
       }
     }
 
-    function printDate(){
-      var date = new Date();
+    function printDate(time){
+      console.log(time);
+      var date = new Date(time);
+      console.log(date);
       return date.getDate() + '-' + (date.getMonth()+1) + '-' + (date.getYear()+1900);
     }
-    function printTime(){
-      var date = new Date();
+    function printTime(time){
+      var date = new Date(time);
       return date.getHours() + ':' + ("0" + date.getMinutes()).slice(-2) + ':' + ("0" + date.getSeconds()).slice(-2);
     }
 
     $('#headername').html(config.name); 
-    $('#headerdate').html(printDate());
-    $('#headertime').html(printTime());
     $('#headerqs').html(config.QS);
-
-    setInterval(function(){ 
-      $('#headerdate').html(printDate());
-      $('#headertime').html(printTime());
-    }, 1000);
 
     let logoSizeSet = false;
     for (var i = 0; i<config.serial.length; i++){
@@ -126,7 +121,7 @@
           $('#' + config.serial[i].name+'entry'+j).html($('#' + config.serial[i].name+'entry'+(j + 1)).html());
         }
         else{
-          $('#' + config.serial[i].name+'time'+j).html(printTime());
+          $('#' + config.serial[i].name+'time'+j).html(printTime(msg.entryTime));
           $('#' + config.serial[i].name+'entry'+j).html(msg.entry);
         }
       }
@@ -144,6 +139,11 @@
       $('#headerip').html(msg);
     });
 
+    socket.on('time', function(msg){
+
+      $('#headertime').html(printTime(msg));
+      $('#headerdate').html(printDate(msg));
+    })
   </script>
 </body>
 </html>

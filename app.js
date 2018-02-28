@@ -10,8 +10,6 @@ const { exec } = require('child_process');
 var serialPort = require('serialport');
 var config = require('./config');
 
-var time = new Date();
-
 var serialLogPos = [];
 var latestLogEntry = [];
 var latestLogEntryTime = [];
@@ -93,6 +91,8 @@ for(i = 0; i < config.serial.length; i++){
           newEntry=newEntry.replace(/ /g,'');
         }
 
+        let time = new Date();
+
         if (!conf.average && latestLogEntry[index]===newEntry && time.getTime()<(latestLogEntryTime[index] + conf.timeout)){
           break;
         }
@@ -102,11 +102,11 @@ for(i = 0; i < config.serial.length; i++){
 
         if (conf.factor!=0)  // if input is numerical
         {
-          io.emit('entry', {name : conf.name, entry : (parseFloat(latestLogEntry[index])*conf.factor).toFixed(conf.digits)});
+          io.emit('entry', {name : conf.name, entryTime: time.getTime(), entry : (parseFloat(latestLogEntry[index])*conf.factor).toFixed(conf.digits)});
         }
         else
         {
-          io.emit('entry', {name : conf.name, entry : latestLogEntry[index].slice(-conf.digits)});
+          io.emit('entry', {name : conf.name, entryTime: time.getTime(), entry : latestLogEntry[index].slice(-conf.digits)});
         }
         
         if (conf.average)
@@ -269,5 +269,8 @@ io.on('connection', function(socket){
   });
 });
 
-
+setInterval(() =>{
+  let time = new Date();
+  io.emit('time', time.getTime());
+}, 1000);
 
