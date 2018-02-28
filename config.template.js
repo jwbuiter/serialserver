@@ -11,6 +11,7 @@ var config ={
 
       name : 'Weight',
       average : false,                  // Whether the input should be averaged, either true or false
+      timeout: 10000,                  // When not averaging: the number of milliseconds to way to show the same response in a row.
       digits : 3,                      // When input is numeric, the number of decimals to show, otherwise the cuttof for the last shown characters
       entries : 5,                     // The number of entries shown in debug. In case where averaging is on also the number of averages to take. Also the number of entries shown in debug
       factor : 1,                      // Multiplication factor in the case of numerical input, 0 if input is not numerical
@@ -29,6 +30,7 @@ var config ={
 
       name : 'RFID',
       average : false,
+      timeout: 10000,
       digits : 15,
       entries : 5,
       factor : 0,

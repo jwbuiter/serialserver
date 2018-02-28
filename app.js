@@ -10,8 +10,11 @@ const { exec } = require('child_process');
 var serialPort = require('serialport');
 var config = require('./config');
 
+var time = new Date();
+
 var serialLogPos = [];
 var latestLogEntry = [];
+var latestLogEntryTime = [];
 var entryList = [];
 var fullLog = [];
 
@@ -33,6 +36,7 @@ function average(list){
 for(i = 0; i < config.serial.length; i++){
   serialLogPos[i] = 0;
   latestLogEntry[i] = '0';
+  latestLogEntryTime[i] = '0';
   fullLog[i] = Buffer('0');
 
   if (config.serial[i].average)
@@ -84,11 +88,20 @@ for(i = 0; i < config.serial.length; i++){
           break;
         }
 
-        latestLogEntry[index] =  (remainingEntries.slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries.length:(nextEntryEnd+nextEntry))).toString();
+        let newEntry = (remainingEntries.slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries.length:(nextEntryEnd+nextEntry))).toString();
+        if (conf.factor!=0){
+          newEntry=newEntry.replace(/ /g,'');
+        }
+
+        if (latestLogEntry[index]===newEntry && time.getTime()<(latestLogEntryTime[index] + conf.timeout)){
+          break;
+        }
+
+        latestLogEntry[index] = newEntry;  
+        latestLogEntryTime[index] = time.getTime();
 
         if (conf.factor!=0)  // if input is numerical
         {
-          latestLogEntry[index]=latestLogEntry[index].replace(/ /g,'');
           io.emit('entry', {name : conf.name, entry : (parseFloat(latestLogEntry[index])*conf.factor).toFixed(conf.digits)});
         }
         else
