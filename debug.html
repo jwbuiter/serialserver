@@ -62,9 +62,7 @@
     }
 
     function printDate(time){
-      console.log(time);
       var date = new Date(time);
-      console.log(date);
       return date.getDate() + '-' + (date.getMonth()+1) + '-' + (date.getYear()+1900);
     }
     function printTime(time){
@@ -130,7 +128,6 @@
     socket.on('average', function(msg){
       for(var i = 0; i<config.serial.length; i++)
         if (msg.name===config.serial[i].name){
-          console.log(config.serial[i].name+'avg');
           $('#' + config.serial[i].name+'avg').html(msg.entry);
         }
     });
