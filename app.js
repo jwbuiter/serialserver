@@ -92,8 +92,9 @@ for(i = 0; i < config.serial.length; i++){
         }
 
         let time = new Date();
-
         if (!conf.average && latestLogEntry[index]===newEntry && time.getTime()<(latestLogEntryTime[index] + conf.timeout)){
+          serialLogPos[index] += nextEntryEnd + conf.postfix.length;
+          remainingEntries=contents.slice(serialLogPos[index]);
           break;
         }
 
