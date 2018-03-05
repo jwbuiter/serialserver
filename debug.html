@@ -104,10 +104,25 @@
     }
 
     var socket = io();
+    var previousEntry = [];
+    var previousTime = [];
+    for(var i = 0; i<config.serial.length; i++){
+      previousEntry[i] = '';
+      previousTime[i] = 0;
+    }
+
     socket.on('entry', function(msg){
       for(var i = 0; i<config.serial.length; i++)
         if (msg.name===config.serial[i].name)
           break;  //store value of i for correct serial entry
+        
+      var date = new Date()
+      if (msg.entry==previousEntry[i] && date.getTime()<previousTime[i] + config.serial[i].timeout)
+        return;
+
+      previousTime[i]=date.getTime();
+      previousEntry[i]=msg.entry;
+
 
       for(var j = 0; j<config.serial[i].entries; j++){
         if (j<config.serial[i].entries-1){

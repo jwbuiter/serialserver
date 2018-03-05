@@ -10,11 +10,9 @@ const { exec } = require('child_process');
 var serialPort = require('serialport');
 var config = require('./config');
 
-var serialLogPos = [];
 var latestLogEntry = [];
-var latestLogEntryTime = [];
 var entryList = [];
-var fullLog = [];
+var remainingEntries = [];
 
 function decode(entry){
   return entry;
@@ -32,10 +30,8 @@ function average(list){
 }
 
 for(i = 0; i < config.serial.length; i++){
-  serialLogPos[i] = 0;
   latestLogEntry[i] = '0';
-  latestLogEntryTime[i] = '0';
-  fullLog[i] = Buffer('0');
+  remainingEntries[i] = Buffer('0');
 
   if (config.serial[i].average)
     entryList[i] = [];
@@ -63,44 +59,36 @@ for(i = 0; i < config.serial.length; i++){
 
     port.on('readable', function() {
       var contents = port.read();
-      fullLog[index] = Buffer.concat([fullLog[index], contents]);
+      remainingEntries[index] = Buffer.concat([remainingEntries[index], contents]);
 
       var nextEntry, nextEntryEnd;
-      var remainingEntries = fullLog[index].slice(serialLogPos[index]);
-
-      if (remainingEntries.length===0)
+      
+      if (remainingEntries[index].length===0)
         return;
 
 
 
       if ((conf.prefix==='')&&(conf.postfix==='')){
-        io.emit('entry', {name : conf.name, entry : fullLog[index].toString().slice(-conf.digits)});
+        io.emit('entry', {name : conf.name, entry : remainingEntries[index].toString().slice(-conf.digits)});
         return
       }
 
-      while((nextEntry = remainingEntries.indexOf(conf.prefix))>=0){
+      while((nextEntry = remainingEntries[index].indexOf(conf.prefix))>=0){
 
-        nextEntryEnd = remainingEntries.slice(nextEntry).indexOf(conf.postfix);
+        nextEntryEnd = remainingEntries[index].slice(nextEntry).indexOf(conf.postfix);
 
         if (nextEntryEnd===-1){
           break;
         }
 
-        let newEntry = (remainingEntries.slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries.length:(nextEntryEnd+nextEntry))).toString();
+        let newEntry = (remainingEntries[index].slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries[index].length:(nextEntryEnd+nextEntry))).toString();
         if (conf.factor!=0){
           newEntry=newEntry.replace(/ /g,'');
         }
 
+        latestLogEntry[index] = newEntry; 
+         
         let time = new Date();
-        if (!conf.average && latestLogEntry[index]===newEntry && time.getTime()<(latestLogEntryTime[index] + conf.timeout)){
-          serialLogPos[index] += nextEntryEnd + conf.postfix.length;
-          remainingEntries=contents.slice(serialLogPos[index]);
-          break;
-        }
-
-        latestLogEntry[index] = newEntry;  
-        latestLogEntryTime[index] = time.getTime();
-
         if (conf.factor!=0)  // if input is numerical
         {
           io.emit('entry', {name : conf.name, entryTime: time.getTime(), entry : (parseFloat(latestLogEntry[index])*conf.factor).toFixed(conf.digits)});
@@ -125,9 +113,8 @@ for(i = 0; i < config.serial.length; i++){
           
         }
           
-
-        serialLogPos[index] += nextEntryEnd + conf.postfix.length;
-        remainingEntries=contents.slice(serialLogPos[index]);
+        remainingEntries[index]=remainingEntries[index].slice(nextEntry + nextEntryEnd);
+        console.log(remainingEntries);
       }  
     });
 
