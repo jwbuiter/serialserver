@@ -6,6 +6,7 @@ var server = app.listen(config.port);
 var io = require('socket.io').listen(server);
 var fs = require('fs');
 var ip = require("ip");
+var xlsx = require('node-xlsx');
 const { exec } = require('child_process');
 var serialPort = require('serialport');
 var config = require('./config');
@@ -13,6 +14,14 @@ var config = require('./config');
 var latestLogEntry = [];
 var entryList = [];
 var remainingEntries = [];
+
+// For reading the excel file
+var excelFile;
+var justReadRFID;
+if (fs.existsSync(__dirname + '/data/data.xls')){
+  excelFile = xlsx.parse(__dirname + '/data/data.xls');
+}
+ 
 
 function decode(entry){
   return entry;
@@ -67,7 +76,6 @@ for(i = 0; i < config.serial.length; i++){
         return;
 
 
-
       if ((conf.prefix==='')&&(conf.postfix==='')){
         io.emit('entry', {name : conf.name, entry : remainingEntries[index].toString().slice(-conf.digits)});
         return
@@ -87,6 +95,29 @@ for(i = 0; i < config.serial.length; i++){
         }
 
         latestLogEntry[index] = newEntry; 
+
+        if (excelFile){
+          if (conf.name.toLowerCase() === 'rfid'){
+            justReadRFID = newEntry;
+          }
+          if (conf.name.toLowerCase() === 'weight' && justReadRFID !== undefined){
+            let foundRow = excelFile[0].data.find((row) =>{
+              return (row[0] === justReadRFID);
+            })
+            if (foundRow){
+              let birthDate = foundRow[1] - 25568;
+              let todayDate = new Date().getTime()/1000/86400;
+              let aantalSpenen = foundRow[2] || 0;
+              let index = foundRow[3] || 0;
+              let currentWeigth = parseFloat(latestLogEntry[index])*conf.factor;
+              let growthRate = 1000*(currentWeigth - 1.5)/(todayDate - birthDate);
+              growthRate = growthRate.toFixed(conf.digits);
+              io.emit('excelEntry', {RFID: justReadRFID, aantalSpenen, birthDate, index, growthRate});
+
+            }
+            justReadRFID = undefined;
+          }
+        }
          
         let time = new Date();
         if (conf.factor!=0)  // if input is numerical
@@ -224,7 +255,7 @@ app.post('/upload', (req, res) => {
   sampleFile.mv(__dirname + '/data/data.xls', function(err) {
     if (err)
       return res.status(500).send(err);
-    console.log(__dirname + '/data.xls');
+    console.log(__dirname + '/data/data.xls');
     res.send('File uploaded!');
   });
 });

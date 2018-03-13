@@ -12,6 +12,7 @@
       .result { background-color: #98FB98;}
       .buttons {position: fixed; right: 0; top: 30px; font-size:20px;}
       .logo {position: fixed; left: 0; top: 30px;}
+      .excelEntries{ font-size: 30px; color: black; }
       #fileLoader {font-size: 30px; }
     </style>
 </head>
@@ -25,6 +26,8 @@
       <td class="header" id="headerqs"></td>
     </tr>
   </table>
+  <div id = "excelEntries" class="excelEntries">
+  </div>
   <div class = "buttons">
     <img src = "/res/settings.svg" height="30" width="30" onclick="javascript:goSettings()">
 
@@ -134,6 +137,11 @@
           $('#' + config.serial[i].name+'entry'+j).html(msg.entry);
         }
       }
+    });
+
+    socket.on('excelEntry', function(msg){
+      let birthDate = printDate(msg.birthDate*86400*1000);
+      $('#excelEntries').html(`RFID: ${msg.RFID}, Geboorte datum: ${birthDate}, Aantal spenen: ${msg.aantalSpenen}, Index: ${msg.index}, Levensgroei: ${msg.growthRate}`);
     });
 
     socket.on('average', function(msg){
