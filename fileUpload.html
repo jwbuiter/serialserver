@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+<head>
+  <title>MBDCcomUnit</title>
+   <style>
+      h2 { text-align: center; font-size: 30px; border-style: bold; background: cyan; }
+      input {text-align: center; font-size: 30px; margin-right: 100px;}
+    </style>
+</head>
+<body>
+<div style="display: block; width: 600px; margin:0 auto;">
+	<br><br><br><br>
+	<h2>File upload</h2>
+	<br><br>
+      <form action="upload" method="post" enctype="multipart/form-data">
+        <input id="fileLocation" type="file" name="importFile" accept=".xls">
+		<br><br><br><br>
+        <input type="submit" value="Import .xls" name="submit">
+		<input type="button" value="Cancel" onclick="javascript:goDebug()">
+      </form>
+</div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/res/jquery-1.11.1.js"></script>
+  <script src="/config.js"></script>
+  <script type="text/javascript">
+    for (var i = 0; i < 2; i++)
+    {
+      var conf = config.serial[i];
+      Object.keys(conf).forEach(function(key) 
+      {
+        if (typeof(conf[key]) === "boolean")
+        {
+          $(`#${key}${i}`).prop('checked', conf[key]);
+        }
+        else
+        {
+          $(`#${key}${i}`).val(conf[key]);
+        }
+      });
+    }
+
+    var socket = io();
+
+    function setDate(){
+      let dateTimeString = $('#date').val() + ' ' + $('#time').val()
+      let dateTime = Date.parse(dateTimeString);
+      socket.emit('setDateTime', dateTime/1000);
+    }
+
+    function goDebug(){
+      window.location.href = '/';
+    }
+
+    function setSettings(){
+      if (confirm("Do you really want to save these settings??"))
+      {
+        for (var i = 0; i < 2; i++)
+        {
+          var conf = config.serial[i];
+          Object.keys(conf).forEach(function(key) 
+          {
+            let element = $(`#${key}${i}`);
+            if (element.length!=0)
+            {
+              if (typeof(conf[key]) === "boolean")
+              {
+                conf[key] = element.prop('checked');
+              }
+              else if (!isNaN(parseInt(conf[key])))
+              {
+                conf[key] = Number(element.val());
+              }
+              else
+              {
+                conf[key] = element.val();
+              }
+            }
+          });
+        }
+        socket.emit('settings',config);
+        setTimeout(function(){ 
+          window.location.href = '/';
+        }, 1000);
+      }
+    }
+
+  </script>
+</body>
+</html>

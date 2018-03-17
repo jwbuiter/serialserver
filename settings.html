@@ -75,7 +75,7 @@
     <tr>
       <td><input type="number" id="timeout0" min="0" step="1"></td>
       <td><input type="number" id="timeout1" min="0" step="1"></td>
-      <td>Timeout in milliseconds</td>
+      <td>Timeout in seconds</td>
     </tr>
     <tr>
       <td><input type="number" id="entries0" min="0" step="1"></td>
@@ -107,12 +107,6 @@
       <td><input type="time" id="time"></td>
       <td><input type="button" value="Change date and time" onclick="javascript:setDate()"></td>
     </tr>
-    <tr>
-      <form action="upload" method="post" enctype="multipart/form-data">
-        <td><input id="fileLocation" type="file" name="importFile"></td>
-        <td><input type="submit" value="Import .xls" name="submit"></td>
-        <td>Upload data file</td>
-      </form>
     <tr>
       <td><input type="button" value="Save settings and restart" onclick="javascript:setSettings()"></td>
       <td><input type="button" value="Cancel" onclick="javascript:goDebug()"></td>
@@ -181,7 +175,7 @@
         socket.emit('settings',config);
         setTimeout(function(){ 
           window.location.href = '/';
-        }, 1000);
+        }, 5000);
       }
     }
 

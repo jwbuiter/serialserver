@@ -93,28 +93,46 @@ for(i = 0; i < config.serial.length; i++){
         if (conf.factor!=0){
           newEntry=newEntry.replace(/ /g,'');
         }
-
-        latestLogEntry[index] = newEntry; 
-
+		
+		if (conf.factor!=0)
+		{
+			latestLogEntry[index] = (parseFloat(newEntry)*conf.factor).toFixed(conf.digits);
+		}
+		else
+		{
+			latestLogEntry[index] = newEntry.slice(-conf.digits);
+		}
+		
+		
+		
         if (excelFile){
           if (conf.name.toLowerCase() === 'rfid'){
-            justReadRFID = newEntry;
+            justReadRFID = latestLogEntry[index];
           }
           if (conf.name.toLowerCase() === 'weight' && justReadRFID !== undefined){
+			
             let foundRow = excelFile[0].data.find((row) =>{
               return (row[0] === justReadRFID);
             })
+			let currentWeigth = latestLogEntry[index];
             if (foundRow){
-              let birthDate = foundRow[1] - 25568;
+			  console.log('found row');
+              let birthDate = foundRow[1] - 25569;
               let todayDate = new Date().getTime()/1000/86400;
               let aantalSpenen = foundRow[2] || 0;
               let index = foundRow[3] || 0;
-              let currentWeigth = parseFloat(latestLogEntry[index])*conf.factor;
-              let growthRate = 1000*(currentWeigth - 1.5)/(todayDate - birthDate);
-              growthRate = growthRate.toFixed(conf.digits);
-              io.emit('excelEntry', {RFID: justReadRFID, aantalSpenen, birthDate, index, growthRate});
-
+			  let age = todayDate - birthDate;
+              let growthRate = 1000*(currentWeigth - 1.5)/(age);
+              growthRate = Math.round(growthRate);
+			  let sendData = {RFID: justReadRFID, aantalSpenen, age, index, growthRate, currentWeigth};
+			  console.log(sendData);
+              io.emit('excelEntry', sendData);
             }
+			else
+			{	
+				let sendData = {RFID: 'Not found'};
+				io.emit('excelEntry', sendData);
+			}
             justReadRFID = undefined;
           }
         }
@@ -122,11 +140,11 @@ for(i = 0; i < config.serial.length; i++){
         let time = new Date();
         if (conf.factor!=0)  // if input is numerical
         {
-          io.emit('entry', {name : conf.name, entryTime: time.getTime(), entry : (parseFloat(latestLogEntry[index])*conf.factor).toFixed(conf.digits)});
+          io.emit('entry', {name : conf.name, entryTime: time.getTime(), entry : latestLogEntry[index]});
         }
         else
         {
-          io.emit('entry', {name : conf.name, entryTime: time.getTime(), entry : latestLogEntry[index].slice(-conf.digits)});
+          io.emit('entry', {name : conf.name, entryTime: time.getTime(), entry : latestLogEntry[index]});
         }
         
         if (conf.average)
@@ -138,14 +156,14 @@ for(i = 0; i < config.serial.length; i++){
             }
           }
 
-          entryList[index][0] = parseFloat(latestLogEntry[index]);
+          entryList[index][0] = latestLogEntry[index];
 
           io.emit('average', {name : conf.name, entry : (average(entryList[index])*conf.factor).toFixed(conf.digits).toString()});
           
         }
           
         remainingEntries[index]=remainingEntries[index].slice(nextEntry + nextEntryEnd);
-        console.log(remainingEntries);
+        //console.log(remainingEntries);
       }  
     });
 
@@ -178,11 +196,11 @@ for(i = 0; i < config.serial.length; i++){
         }
         else
         {
-          sendString += (parseFloat(latestLogEntry[index])*conf.factor).toFixed(conf.digits);
+          sendString += latestLogEntry[index];
         }
       }
       else{
-        sendString += latestLogEntry[index].slice(-conf.digits);
+        sendString += latestLogEntry[index];
       }
       response.send(sendString);
     });
@@ -195,6 +213,10 @@ app.get('/', (request, response) => {
 
 app.get('/settings', function(request, response){
     response.sendFile('settings.html', { root: __dirname});
+});
+
+app.get('/fileupload', function(request, response){
+    response.sendFile('fileUpload.html', { root: __dirname});
 });
 
 app.get('/full', (request, response) => {
@@ -218,7 +240,7 @@ app.get('/shutdown', (request, response) => {
 
 app.get('/restart', (request, response) => {
 
-  response.send('<meta http-equiv="refresh" content="1; url=/" /><title>MBDCcomUnit</title>Restarting now.')
+  response.send('<meta http-equiv="refresh" content="5; url=/" /><title>MBDCcomUnit</title>Restarting now.')
   process.exit();
 });
 
@@ -245,19 +267,24 @@ app.use('/res', express.static('res'))
 app.use('/upload', fileUpload());
 
 app.post('/upload', (req, res) => {
-  if (!req.files)
-    return res.status(400).send('No files were uploaded.');
+  if (!req.files.importFile){
+	     return res.send('<meta http-equiv="refresh" content="1; url=/" /><title>MBDCcomUnit</title> No files were uploaded.')
+  }
  
   // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
   let sampleFile = req.files.importFile;
  
   // Use the mv() method to place the file somewhere on your server
   sampleFile.mv(__dirname + '/data/data.xls', function(err) {
-    if (err)
-      return res.status(500).send(err);
+    if (err){
+        return res.status(500).send(err);
+	}
     console.log(__dirname + '/data/data.xls');
-    res.send('File uploaded!');
+    res.send('<meta http-equiv="refresh" content="5; url=/" /><title>MBDCcomUnit</title> File uploaded.')
+	process.exit();
   });
+  
+
 });
 
 io.on('connection', function(socket){

@@ -41,7 +41,9 @@ var config ={
   ],
   name : 'MBDCcom01',
   QS : '000 000 000',
-  port : 80
+  port : 80,
+  
+  exposeUpload: false
 };
 
 module.exports = config;
