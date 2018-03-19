@@ -42,6 +42,9 @@ var config ={
   name : 'MBDCcom01',
   QS : '000 000 000',
   port : 80,
+  onlineGPIO : 10,
+  com0GPIO : 11,
+  com1GPIO : 12,
   
   exposeUpload: false
 };

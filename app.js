@@ -9,11 +9,19 @@ var ip = require("ip");
 var xlsx = require('node-xlsx');
 const { exec } = require('child_process');
 var serialPort = require('serialport');
+var Gpio = require('onoff').Gpio;
 var config = require('./config');
 
 var latestLogEntry = [];
 var entryList = [];
 var remainingEntries = [];
+var onlineGPIO = new Gpio(config.onlineGPIO, 'out');
+
+var comGPIO = [];
+comGPIO[0] = new Gpio(config.com0GPIO, 'out');
+comGPIO[1] = new Gpio(config.com1GPIO, 'out');
+
+onlineGPIO.writeSync(1);
 
 // For reading the excel file
 var excelFile;
@@ -93,6 +101,9 @@ for(i = 0; i < config.serial.length; i++){
         if (conf.factor!=0){
           newEntry=newEntry.replace(/ /g,'');
         }
+
+        comGPIO[index].writeSync(1);
+        setInterval(() => comGPIO[index].writeSync(0),250);
         
         if (conf.factor!=0)
         {
@@ -239,6 +250,7 @@ app.get('/shutdown', (request, response) => {
 app.get('/restart', (request, response) => {
 
   response.send('<meta http-equiv="refresh" content="5; url=/" /><title>MBDCcomUnit</title>Restarting now.')
+  onlineGPIO.writeSync(0);
   process.exit();
 });
 
@@ -279,6 +291,7 @@ app.post('/upload', (req, res) => {
   }
     console.log(__dirname + '/data/data.xls');
     res.send('<meta http-equiv="refresh" content="5; url=/" /><title>MBDCcomUnit</title> File uploaded.')
+    onlineGPIO.writeSync(0);
     process.exit();
   });
   
@@ -309,6 +322,7 @@ io.on('connection', function(socket){
 
       console.log('Config saved!');
     });
+    onlineGPIO.writeSync(0);
     process.exit();
   });
 
@@ -327,3 +341,9 @@ setInterval(() =>{
   io.emit('time', time.getTime());
 }, 1000);
 
+// Catch CTRL+C
+process.on ('SIGINT', () => {
+  onlineGPIO.writeSync(0);
+  console.log ('\nCTRL+C...');
+  process.exit (0);
+});
