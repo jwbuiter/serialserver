@@ -93,46 +93,44 @@ for(i = 0; i < config.serial.length; i++){
         if (conf.factor!=0){
           newEntry=newEntry.replace(/ /g,'');
         }
-		
-		if (conf.factor!=0)
-		{
-			latestLogEntry[index] = (parseFloat(newEntry)*conf.factor).toFixed(conf.digits);
-		}
-		else
-		{
-			latestLogEntry[index] = newEntry.slice(-conf.digits);
-		}
-		
-		
-		
+        
+        if (conf.factor!=0)
+        {
+          latestLogEntry[index] = (parseFloat(newEntry)*conf.factor).toFixed(conf.digits);
+        }
+        else
+        {
+          latestLogEntry[index] = newEntry.slice(-conf.digits);
+        }
+
         if (excelFile){
-          if (conf.name.toLowerCase() === 'rfid'){
+          if (index === 1){
             justReadRFID = latestLogEntry[index];
           }
-          if (conf.name.toLowerCase() === 'weight' && justReadRFID !== undefined){
-			
+          if (index === 0 && justReadRFID !== undefined){
+
             let foundRow = excelFile[0].data.find((row) =>{
               return (row[0] === justReadRFID);
             })
-			let currentWeigth = latestLogEntry[index];
+            let currentWeigth = latestLogEntry[index];
             if (foundRow){
-			  console.log('found row');
+              console.log('found row');
               let birthDate = foundRow[1] - 25569;
               let todayDate = new Date().getTime()/1000/86400;
               let aantalSpenen = foundRow[2] || 0;
               let index = foundRow[3] || 0;
-			  let age = todayDate - birthDate;
+              let age = todayDate - birthDate;
               let growthRate = 1000*(currentWeigth - 1.5)/(age);
               growthRate = Math.round(growthRate);
-			  let sendData = {RFID: justReadRFID, aantalSpenen, age, index, growthRate, currentWeigth};
-			  console.log(sendData);
+              let sendData = {RFID: justReadRFID, aantalSpenen, age, index, growthRate, currentWeigth};
+              console.log(sendData);
               io.emit('excelEntry', sendData);
             }
-			else
-			{	
-				let sendData = {RFID: 'Not found'};
-				io.emit('excelEntry', sendData);
-			}
+            else
+            {	
+              let sendData = {RFID: 'Not found'};
+              io.emit('excelEntry', sendData);
+            }
             justReadRFID = undefined;
           }
         }
@@ -268,7 +266,7 @@ app.use('/upload', fileUpload());
 
 app.post('/upload', (req, res) => {
   if (!req.files.importFile){
-	     return res.send('<meta http-equiv="refresh" content="1; url=/" /><title>MBDCcomUnit</title> No files were uploaded.')
+    return res.send('<meta http-equiv="refresh" content="1; url=/" /><title>MBDCcomUnit</title> No files were uploaded.')
   }
  
   // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
@@ -278,10 +276,10 @@ app.post('/upload', (req, res) => {
   sampleFile.mv(__dirname + '/data/data.xls', function(err) {
     if (err){
         return res.status(500).send(err);
-	}
+  }
     console.log(__dirname + '/data/data.xls');
     res.send('<meta http-equiv="refresh" content="5; url=/" /><title>MBDCcomUnit</title> File uploaded.')
-	process.exit();
+    process.exit();
   });
   
 
