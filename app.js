@@ -75,6 +75,10 @@ for(i = 0; i < config.serial.length; i++){
     });
 
     port.on('readable', function() {
+      comGPIO[index].writeSync(1);
+      setTimeout(() => comGPIO[index].writeSync(0), 250);
+
+
       var contents = port.read();
       remainingEntries[index] = Buffer.concat([remainingEntries[index], contents]);
 
@@ -101,9 +105,6 @@ for(i = 0; i < config.serial.length; i++){
         if (conf.factor!=0){
           newEntry=newEntry.replace(/ /g,'');
         }
-
-        comGPIO[index].writeSync(1);
-        setTimeout(() => comGPIO[index].writeSync(0),250);
         
         if (conf.factor!=0)
         {
