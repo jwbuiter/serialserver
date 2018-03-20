@@ -103,7 +103,7 @@ for(i = 0; i < config.serial.length; i++){
         }
 
         comGPIO[index].writeSync(1);
-        setInterval(() => comGPIO[index].writeSync(0),250);
+        setTimeout(() => comGPIO[index].writeSync(0),250);
         
         if (conf.factor!=0)
         {
