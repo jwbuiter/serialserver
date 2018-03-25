@@ -188,7 +188,7 @@ for(i = 0; i < config.serial.length; i++){
       }
       else if (conf.factor!=0){
         if (conf.average){
-          sendString += (average(entryList[index])*conf.factor).toFixed(conf.digits).toString();
+          sendString += (average(entryList[conf.name])).toFixed(conf.digits);
         }
         else
         {
