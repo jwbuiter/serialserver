@@ -35,7 +35,7 @@
 
     <img src = "/res/restart.ico"  height="30" width="30" onclick="javascript:goRestart()">
     
-    <img src = "/res/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
+    <img id = "shutDownButton" src = "/res/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
   </div>
   <div class = "logo">
     <img id = "logo" src = "/res/mbdc.jpg">
@@ -113,30 +113,31 @@
           row.append($('<td>').attr('id', conf.name + 'avg'));
       }
     }
-	
-	if (!config.exposeUpload){
-		$('#uploadButton').remove();
-	}
-	else 
-	{
-		$('#content').append($('<tr>'));
-	var excelTopRow = $('<tr>').addClass('excelTopRow excel');
-	var excelBottomRow = $('<tr>').addClass('excel');
-	$('#content').append(excelTopRow);
-	$('#content').append(excelBottomRow);
-	excelTopRow.append($('<td>').html('ID'));
-	excelTopRow.append($('<td>').html('Age'));
-	excelTopRow.append($('<td>').html('Teats'));
-	excelTopRow.append($('<td>').html('Index'));
-	excelTopRow.append($('<td>').html('Life Gain'));
-	excelBottomRow.append($('<td>').attr('id', 'excelRFID'));
-	excelBottomRow.append($('<td>').attr('id', 'excelBirthDate'));
-	excelBottomRow.append($('<td>').attr('id', 'excelNumTeats'));
-	excelBottomRow.append($('<td>').attr('id', 'excelIndex'));
-	excelBottomRow.append($('<td>').attr('id', 'excelGrowthRate'));
-	}
-	
+  
+    if (!config.exposeUpload){
+      $('#uploadButton').remove();
+    }
+    else {
+      $('#content').append($('<tr>'));
+      var excelTopRow = $('<tr>').addClass('excelTopRow excel');
+      var excelBottomRow = $('<tr>').addClass('excel');
+      $('#content').append(excelTopRow);
+      $('#content').append(excelBottomRow);
+      excelTopRow.append($('<td>').html('ID'));
+      excelTopRow.append($('<td>').html('Age'));
+      excelTopRow.append($('<td>').html('Teats'));
+      excelTopRow.append($('<td>').html('Index'));
+      excelTopRow.append($('<td>').html('Life Gain'));
+      excelBottomRow.append($('<td>').attr('id', 'excelRFID'));
+      excelBottomRow.append($('<td>').attr('id', 'excelBirthDate'));
+      excelBottomRow.append($('<td>').attr('id', 'excelNumTeats'));
+      excelBottomRow.append($('<td>').attr('id', 'excelIndex'));
+      excelBottomRow.append($('<td>').attr('id', 'excelGrowthRate'));
+    }
 
+    if (config.testMode){
+      $('#shutDownButton').remove();
+    }
 
 
     var socket = io();

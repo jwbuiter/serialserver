@@ -13,7 +13,7 @@ var Gpio = require('onoff').Gpio;
 var config = require('./config');
 
 var latestLogEntry = [];
-var entryList = [];
+var entryList = {};
 var remainingEntries = [];
 var onlineGPIO = new Gpio(config.onlineGPIO, 'out');
 
@@ -31,8 +31,68 @@ if (fs.existsSync(__dirname + '/data/data.xls')){
 }
  
 
-function decode(entry){
-  return entry;
+function decode(entry, config){
+  let decodedEntry;
+  let time = new Date();
+
+  if (config.factor!=0){
+    entry = entry.replace(/ /g,'');
+    decodedEntry = (parseFloat(entry)*config.factor).toFixed(config.digits);
+    if (config.alwaysPositive && decodedEntry<0){
+      decodedEntry = -decodedEntry;
+    }
+  }
+  else
+  {
+    decodedEntry = entry.slice(-config.digits);
+  }
+
+  io.emit('entry', {name : config.name, entryTime: time.getTime(), entry : decodedEntry});
+
+  if (excelFile){
+    if (index === 1){
+      justReadRFID = decodedEntry;
+    }
+    if (index === 0 && justReadRFID !== undefined){
+      let foundRow = excelFile[0].data.find((row) =>{
+        return (row[0] === justReadRFID);
+      });
+      let currentWeigth = decodedEntry;
+      if (foundRow){
+        console.log('found row');
+        let birthDate = foundRow[1] - 25569;
+        let todayDate = new Date().getTime()/1000/86400;
+        let aantalSpenen = foundRow[2] || 0;
+        let index = foundRow[3] || 0;
+        let age = todayDate - birthDate;
+        let growthRate = 1000*(currentWeigth - 1.5)/(age);
+        growthRate = Math.round(growthRate);
+        let sendData = {RFID: justReadRFID, aantalSpenen, age, index, growthRate, currentWeigth};
+        console.log(sendData);
+        io.emit('excelEntry', sendData);
+      }
+      else
+      { 
+        let sendData = {RFID: 'Not found'};
+        io.emit('excelEntry', sendData);
+      }
+      justReadRFID = undefined;
+    }
+  }
+   
+  if (config.average)
+  {
+    let averageList = entryList[config.name];
+    for (var j = config.entries-1; j > 0; j--)
+    {
+      if (averageList.length>(j-1)){
+        averageList[j] = averageList[j - 1];
+      }
+    }
+    averageList[0] = parseFloat(decodedEntry);
+    io.emit('average', {name : config.name, entry : (average(averageList)).toString()});
+  }
+  return decodedEntry;
 }
 
 function average(list){
@@ -51,138 +111,64 @@ for(i = 0; i < config.serial.length; i++){
   remainingEntries[i] = Buffer('0');
 
   if (config.serial[i].average)
-    entryList[i] = [];
-
-  try {
-    fs.accessSync(`seriallog${config.serial[i].name}.txt`);
-    fs.unlinkSync(`seriallog${config.serial[i].name}.txt`);
-  } 
-  catch (err) {
-  }
-
+    entryList[config.serial[i].name] = [];
 
   (function(index){
     var conf = config.serial[index];
 
-    var port = new serialPort(conf.port, {
-      baudRate: conf.baudRate,
-      dataBits: conf.bits,
-      stopBits: conf.stopBits,
-      parity: conf.parity,
-      rtscts: conf.RTSCTS,
-      xon: conf.XONXOFF,
-      xoff: conf.XONXOFF
-    });
+    if (config.testMode){
+      setInterval(()=> decode(conf.testMessage, conf), conf.timeout * 1000);
+    } else {
 
-    port.on('readable', function() {
-      comGPIO[index].writeSync(1);
-      setTimeout(() => comGPIO[index].writeSync(0), 250);
+      var port = new serialPort(conf.port, {
+        baudRate: conf.baudRate,
+        dataBits: conf.bits,
+        stopBits: conf.stopBits,
+        parity: conf.parity,
+        rtscts: conf.RTSCTS,
+        xon: conf.XONXOFF,
+        xoff: conf.XONXOFF
+      });
 
-
-      var contents = port.read();
-      remainingEntries[index] = Buffer.concat([remainingEntries[index], contents]);
-
-      var nextEntry, nextEntryEnd;
-      
-      if (remainingEntries[index].length===0)
-        return;
+      port.on('readable', function() {
+        comGPIO[index].writeSync(1);
+        setTimeout(() => comGPIO[index].writeSync(0), 250);
 
 
-      if ((conf.prefix==='')&&(conf.postfix==='')){
-        io.emit('entry', {name : conf.name, entry : remainingEntries[index].toString().slice(-conf.digits)});
-        return
-      }
+        var contents = port.read();
+        remainingEntries[index] = Buffer.concat([remainingEntries[index], contents]);
 
-      while((nextEntry = remainingEntries[index].indexOf(conf.prefix))>=0){
-
-        nextEntryEnd = remainingEntries[index].slice(nextEntry).indexOf(conf.postfix);
-
-        if (nextEntryEnd===-1){
-          break;
-        }
-
-        let newEntry = (remainingEntries[index].slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries[index].length:(nextEntryEnd+nextEntry))).toString();
-        if (conf.factor!=0){
-          newEntry=newEntry.replace(/ /g,'');
-        }
+        var nextEntry, nextEntryEnd;
         
-        if (conf.factor!=0)
-        {
-          latestLogEntry[index] = (parseFloat(newEntry)*conf.factor).toFixed(conf.digits);
-        }
-        else
-        {
-          latestLogEntry[index] = newEntry.slice(-conf.digits);
+        if (remainingEntries[index].length===0)
+          return;
+
+
+        if ((conf.prefix==='')&&(conf.postfix==='')){
+          io.emit('entry', {name : conf.name, entry : remainingEntries[index].toString().slice(-conf.digits)});
+          return
         }
 
-        if (excelFile){
-          if (index === 1){
-            justReadRFID = latestLogEntry[index];
-          }
-          if (index === 0 && justReadRFID !== undefined){
+        while((nextEntry = remainingEntries[index].indexOf(conf.prefix))>=0){
 
-            let foundRow = excelFile[0].data.find((row) =>{
-              return (row[0] === justReadRFID);
-            })
-            let currentWeigth = latestLogEntry[index];
-            if (foundRow){
-              console.log('found row');
-              let birthDate = foundRow[1] - 25569;
-              let todayDate = new Date().getTime()/1000/86400;
-              let aantalSpenen = foundRow[2] || 0;
-              let index = foundRow[3] || 0;
-              let age = todayDate - birthDate;
-              let growthRate = 1000*(currentWeigth - 1.5)/(age);
-              growthRate = Math.round(growthRate);
-              let sendData = {RFID: justReadRFID, aantalSpenen, age, index, growthRate, currentWeigth};
-              console.log(sendData);
-              io.emit('excelEntry', sendData);
-            }
-            else
-            {	
-              let sendData = {RFID: 'Not found'};
-              io.emit('excelEntry', sendData);
-            }
-            justReadRFID = undefined;
-          }
-        }
-         
-        let time = new Date();
-        if (conf.factor!=0)  // if input is numerical
-        {
-          io.emit('entry', {name : conf.name, entryTime: time.getTime(), entry : latestLogEntry[index]});
-        }
-        else
-        {
-          io.emit('entry', {name : conf.name, entryTime: time.getTime(), entry : latestLogEntry[index]});
-        }
-        
-        if (conf.average)
-        {
-          for (var j = conf.entries-1; j > 0; j--)
-          {
-            if (entryList[index].length>(j-1)){
-              entryList[index][j] = entryList[index][j - 1];
-            }
+          nextEntryEnd = remainingEntries[index].slice(nextEntry).indexOf(conf.postfix);
+
+          if (nextEntryEnd===-1){
+            break;
           }
 
-          entryList[index][0] = latestLogEntry[index];
-
-          io.emit('average', {name : conf.name, entry : (average(entryList[index])*conf.factor).toFixed(conf.digits).toString()});
+          let newEntry = (remainingEntries[index].slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries[index].length:(nextEntryEnd+nextEntry))).toString();
           
-        }
-          
-        remainingEntries[index]=remainingEntries[index].slice(nextEntry + nextEntryEnd);
-        //console.log(remainingEntries);
-      }  
-    });
+          latestLogEntry[index] = decode(newEntry, conf);
+            
+          remainingEntries[index]=remainingEntries[index].slice(nextEntry + nextEntryEnd);
+          //console.log(remainingEntries);
+        }  
+      });
+    }
 
     if (conf.name != '')
     {
-      app.get(`/${conf.name.toLowerCase()}full`, (request, response) => {
-        response.send(fullLog[index]);
-      });
-
       app.get(`/${conf.name.toLowerCase()}`, (request, response) => {
         response.send(latestLogEntry[index]);
       });
@@ -217,6 +203,7 @@ for(i = 0; i < config.serial.length; i++){
     
   }(i)); //these statements have to be wrapped in an anonymous function so that the value of i is remembered when the inner functions are called in the future
 }
+
 app.get('/', (request, response) => {
    response.sendFile('debug.html', { root: __dirname});
 });
@@ -229,14 +216,9 @@ app.get('/fileupload', function(request, response){
     response.sendFile('fileUpload.html', { root: __dirname});
 });
 
-app.get('/full', (request, response) => {
-  response.send(fullLog)
-});
-
 app.get('/config.js', function(request, response){
     response.sendFile('config.js', { root: __dirname});
 });
-
 
 app.get('/shutdown', (request, response) => {
   response.send('<title>MBDCcomUnit</title>Shutting down now.')
@@ -249,7 +231,6 @@ app.get('/shutdown', (request, response) => {
 });
 
 app.get('/restart', (request, response) => {
-
   response.send('<meta http-equiv="refresh" content="5; url=/" /><title>MBDCcomUnit</title>Restarting now.')
   onlineGPIO.writeSync(0);
   process.exit();

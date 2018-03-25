@@ -15,9 +15,12 @@ var config ={
       digits : 3,                      // When input is numeric, the number of decimals to show, otherwise the cuttof for the last shown characters
       entries : 5,                     // The number of entries shown in debug. In case where averaging is on also the number of averages to take. Also the number of entries shown in debug
       factor : 1,                      // Multiplication factor in the case of numerical input, 0 if input is not numerical
+      alwaysPositive: true,            // If this is set to true, numerical input will automatically be made positive if it is negative
 
       prefix : 'ST,GS,',                  // String preceding serial data
-      postfix : 'KG'                   // String following serial data
+      postfix : 'KG',                   // String following serial data
+
+      testMessage : '10'              // In test mode: the entry that will be emitted
     },
     {
       port : '/dev/ttyUSB1',
@@ -34,9 +37,12 @@ var config ={
       digits : 15,
       entries : 5,
       factor : 0,
+      alwaysPositive: false, 
 
       prefix : '#',
-      postfix : '05'
+      postfix : '05',
+
+      testMessage : '999000000157495'
     }
   ],
   name : 'MBDCcom01',
@@ -46,7 +52,8 @@ var config ={
   com0GPIO : 11,
   com1GPIO : 12,
   
-  exposeUpload: false
+  exposeUpload: false,
+  testMode: true
 };
 
 module.exports = config;
