@@ -90,7 +90,7 @@ function decode(entry, config){
       }
     }
     averageList[0] = parseFloat(decodedEntry);
-    io.emit('average', {name : config.name, entry : (average(averageList)).toString()});
+    io.emit('average', {name : config.name, entry : (average(averageList)).toFixed(config.digits)});
   }
   return decodedEntry;
 }
