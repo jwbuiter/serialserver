@@ -31,7 +31,7 @@ if (fs.existsSync(__dirname + '/data/data.xls')){
 }
  
 
-function decode(entry, config){
+function decode(entry, config, index){
   let decodedEntry;
   let time = new Date();
 
@@ -48,8 +48,9 @@ function decode(entry, config){
   }
 
   io.emit('entry', {name : config.name, entryTime: time.getTime(), entry : decodedEntry});
-
+  
   if (excelFile){
+    console.log(index);
     if (index === 1){
       justReadRFID = decodedEntry;
     }
@@ -117,8 +118,8 @@ for(i = 0; i < config.serial.length; i++){
     var conf = config.serial[index];
 
     if (config.testMode){
-      setInterval(()=> decode(conf.testMessage, conf), conf.timeout * 1000);
-      latestLogEntry[index] = decode(conf.testMessage, conf);
+      setInterval(()=> decode(conf.testMessage, conf, index), conf.timeout * 1000);
+      latestLogEntry[index] = decode(conf.testMessage, conf, index);
     } else {
 
       var port = new serialPort(conf.port, {
@@ -160,7 +161,7 @@ for(i = 0; i < config.serial.length; i++){
 
           let newEntry = (remainingEntries[index].slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries[index].length:(nextEntryEnd+nextEntry))).toString();
           
-          latestLogEntry[index] = decode(newEntry, conf);
+          latestLogEntry[index] = decode(newEntry, conf, index);
             
           remainingEntries[index]=remainingEntries[index].slice(nextEntry + nextEntryEnd);
           //console.log(remainingEntries);
