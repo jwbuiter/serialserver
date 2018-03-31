@@ -20,7 +20,7 @@ var config ={
       prefix : 'ST,GS,',                  // String preceding serial data
       postfix : 'KG',                   // String following serial data
 
-      testMessage : '10'              // In test mode: the entry that will be emitted
+      testMessage : '12.345'              // In test mode: the entry that will be emitted
     },
     {
       port : '/dev/ttyUSB1',
@@ -42,7 +42,7 @@ var config ={
       prefix : '#',
       postfix : '05',
 
-      testMessage : '999000000157495'
+      testMessage : '0123456789012345'
     }
   ],
   name : 'MBDCcom01',
@@ -53,7 +53,7 @@ var config ={
   com1GPIO : 12,
   
   exposeUpload: false,
-  testMode: true
+  testMode: false
 };
 
 module.exports = config;

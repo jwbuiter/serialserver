@@ -117,7 +117,8 @@ for(i = 0; i < config.serial.length; i++){
     var conf = config.serial[index];
 
     if (config.testMode){
-      setInterval(()=> latestLogEntry[index] = decode(conf.testMessage, conf), conf.timeout * 1000);
+      setInterval(()=> decode(conf.testMessage, conf), conf.timeout * 1000);
+      latestLogEntry[index] = decode(conf.testMessage, conf);
     } else {
 
       var port = new serialPort(conf.port, {
