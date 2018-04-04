@@ -3,27 +3,176 @@
 <head>
   <title>MBDCcomUnit</title>
    <style>
-      h2 { text-align: center; font-size: 30px; border-style: bold; background: cyan; }
-      input {text-align: center; font-size: 30px; margin-right: 100px;}
+      *{font-size: 25px; padding:0;}
+      table { text-align: center; border: none; border-collapse: collapse;}
+      tr { height: 29px; }
+      td { text-align: center;  border-style: bold; width: 12vw; height: 29px;}
+      input {text-align: center; width: 12vw;}
+      input.wide {width: 28vw;}
+      input[type="submit"]{width: auto;}
+      select { width: 12vw; }
     </style>
 </head>
 <body>
-<div style="display: block; width: 600px; margin:0 auto;">
-	<br><br><br><br>
-	<h2>File upload</h2>
-	<br><br>
-      <form action="upload" method="post" enctype="multipart/form-data">
-        <input id="fileLocation" type="file" name="importFile" accept=".xls">
-		<br><br><br><br>
-        <input type="submit" value="Import .xls" name="submit">
-		<input type="button" value="Cancel" onclick="javascript:goDebug()">
-      </form>
-</div>
+  <div style="display: block; margin:0 auto;">
+    <table id="content">
+    </table>
+  </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/res/jquery-1.11.1.js"></script>
   <script src="/config.js"></script>
   <script type="text/javascript">
+
+  //     <h2>File upload</h2>
+  // <br><br>
+  //     <form action="upload" method="post" enctype="multipart/form-data">
+  //       <input id="fileLocation" type="file" name="importFile" accept=".xls">
+  //   <br><br><br><br>
+  //       <input type="submit" value="Import .xls" name="submit">
+  //   <input type="button" value="Cancel" onclick="javascript:goDebug()">
+  //     </form>
+
+    const numColumns = 7;
+    const numRows = 33;
+
+    const tableNumbers = 5;
+    const tableLetters = 2;
+
+    const numOutputs = 10;
+    const numInputs = 5;
+
+
+    function address(rowNum, columnNum){
+      return '#c' + columnNum + 'r' + rowNum;
+    }
+
+    for (let i = 0; i < numRows; i++){
+      var currentRow = $('<tr>');
+      $('#content').append(currentRow);
+      for (let j = 0; j < numColumns; j++){
+        currentRow.append($('<td>').attr('id', address(j, i).slice(1)));
+      }
+    }
+
+    $(address(0, 0)).append($('<b>').html('File upload'));
+    $(address(2, 0)).append($('<form id="uploadForm" action="upload" method="post" enctype="multipart/form-data">').html('<input class="wide" id="fileLocation" type="file" name="importFile" accept=".xls">'));
+    $(address(2, 1)).append($('<input type="button" value="Import .xls" onclick="javascript:goSubmit()">'));
+
+    $(address(3, 0)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
+    $(address(4, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
+
+    $(address(5, 0)).append($('<b>').html('Trigger'));
+    $(address(5, 1)).append($('<b>').html('Search'));
+    $(address(5, 2)).append($('<b>').html('Save to file'));
+
+    $(address(6, 0)).append($('<select id ="parity0">').html('<option value="com0">Com 0</option><option value="com1">Com 1</option>'));
+    $(address(6, 1)).append($('<input type="text" id="trigger">'));
+    $(address(6, 2)).append($('<input type="checkbox" id="saveToFile">'));
+
+    $(address(0, 4)).append($('<b>').html('Table'));
+    $(address(1, 4)).append($('<b>').html('Name'));
+    $(address(2, 4)).append($('<b>').html('Formula'));
+    $(address(3, 4)).append($('<b>').html('Factor'));
+    $(address(4, 4)).append($('<b>').html('Digits/round.'));
+    $(address(5, 4)).append($('<b>').html('Command'));
+    $(address(6, 4)).append($('<b>').html('Value'));
+
+    var commands = [
+      'com1',
+      'com1',
+      '#date',
+      '$A',
+      '#A1',
+      '#O1',
+      '#I1',
+      'and',
+      'or',
+      '( )',
+      '>',
+      '>=',
+      '<',
+      '<=',
+      '+',
+      '-',
+      '*',
+      '/',
+      '#exe',
+      '#exedo',
+      '#exeup',
+      '#exebl',
+    ];
+
+    var meanings = [
+      'value com0',
+      'value com1',
+      'date today',
+      'value input-file column A',
+      'value table #A1',
+      'value output 1 (0 or 1)',
+      'value input 1 (0 or 1)',
+      'meets both commands',
+      'meets 1 of the commands',
+      'priority',
+      'greater than',
+      'greater or equal than',
+      'less than',
+      'less or equal than',
+      'add',
+      'substract',
+      'multiply',
+      'divide',
+      'execute button',
+      'execute down',
+      'execute up',
+      'execute block',
+    ];
+
+    for (let i = 0; i < commands.length; i++){
+      $(address(5, i + 5)).html(commands[i]);
+      $(address(6, i + 5)).html(meanings[i]);
+    }
+
+    var cursor = 5;
+    for (let i = 0; i < tableLetters; i++){
+      for (let j = 0; j < tableNumbers; j++){
+        $(address(0, cursor)).append($('<b>').html('#' + String.fromCharCode(65 + i) + (j + 1)));
+        $(address(1, cursor)).append($('<input type="text" id="tableName' + (i*tableNumbers + j) + '">'));
+        $(address(2, cursor)).append($('<input class="wide" type="text" id="tableFormula' + (i*tableNumbers + j) + '">'));
+        $(address(3, cursor)).append($('<input type="number" id="tableFactor' + (i*tableNumbers + j) +'">'));
+        $(address(4, cursor)).append($('<input type="number" id="tableDigits' + (i*tableNumbers + j) + '" min="0" step="1">'));
+        cursor++;
+      }
+    }
+      
+    cursor ++;
+    $(address(1, cursor)).append($('<b>').html('Name'));
+    $(address(2, cursor)).append($('<b>').html('Formula'));
+    $(address(3, cursor)).append($('<b>').html('Execute'));
+    $(address(4, cursor)).append($('<b>').html('Seconds'));
+
+    cursor++;
+
+    for (let i = 0; i < numOutputs; i++){
+      $(address(0, cursor)).append($('<b>').html('Output ' + (i + 1)));
+      $(address(1, cursor)).append($('<input type="text" id="outputName' + i + '">'));
+      $(address(2, cursor)).append($('<input class="wide" type="text" id="outputFormula' + i + '">'));
+      $(address(3, cursor)).append($('<input type="checkbox" id="outputExecute' + i + '">'));
+      $(address(4, cursor)).append($('<input type="number" id="outputSeconds' + i + '" min="0" step="1">'));
+      cursor++;
+    }
+
+    cursor++;
+
+    for (let i = 0; i < numInputs; i++){
+      $(address(0, cursor)).append($('<b>').html('Input ' + (i + 1)));
+      $(address(1, cursor)).append($('<input type="text" id="inputName' + i + '">'));
+      $(address(2, cursor)).append($('<input class="wide" type="text" id="inputFormula' + i + '">'));
+
+      $(address(4, cursor)).append($('<input type="number" id="inputSeconds' + i + '" min="0" step="1">'));
+      cursor++;
+    }
+
     for (var i = 0; i < 2; i++)
     {
       var conf = config.serial[i];
@@ -46,6 +195,11 @@
       let dateTimeString = $('#date').val() + ' ' + $('#time').val()
       let dateTime = Date.parse(dateTimeString);
       socket.emit('setDateTime', dateTime/1000);
+    }
+
+    function goSubmit(){
+      console.log('test');
+      $('#uploadForm').submit();
     }
 
     function goDebug(){
