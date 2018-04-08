@@ -7,6 +7,7 @@
       table { text-align: center; border: none; border-collapse: collapse;}
       tr { height: 29px; }
       td { text-align: center;  border-style: bold; width: 12vw; height: 29px;}
+      td.small { font-size: 15px; }
       input {text-align: center; width: 12vw;}
       input.wide {width: 28vw;}
       input[type="submit"]{width: auto;}
@@ -23,16 +24,6 @@
   <script src="/res/jquery-1.11.1.js"></script>
   <script src="/config.js"></script>
   <script type="text/javascript">
-
-  //     <h2>File upload</h2>
-  // <br><br>
-  //     <form action="upload" method="post" enctype="multipart/form-data">
-  //       <input id="fileLocation" type="file" name="importFile" accept=".xls">
-  //   <br><br><br><br>
-  //       <input type="submit" value="Import .xls" name="submit">
-  //   <input type="button" value="Cancel" onclick="javascript:goDebug()">
-  //     </form>
-
     const numColumns = 7;
     const numRows = 33;
 
@@ -66,8 +57,8 @@
     $(address(5, 1)).append($('<b>').html('Search'));
     $(address(5, 2)).append($('<b>').html('Save to file'));
 
-    $(address(6, 0)).append($('<select id ="parity0">').html('<option value="com0">Com 0</option><option value="com1">Com 1</option>'));
-    $(address(6, 1)).append($('<input type="text" id="trigger">'));
+    $(address(6, 0)).append($('<select id ="triggerCom">').html('<option value="0">Com 0</option><option value="1">Com 1</option>'));
+    $(address(6, 1)).append($('<input type="text" id="searchColumn">'));
     $(address(6, 2)).append($('<input type="checkbox" id="saveToFile">'));
 
     $(address(0, 4)).append($('<b>').html('Table'));
@@ -79,9 +70,9 @@
     $(address(6, 4)).append($('<b>').html('Value'));
 
     var commands = [
+      'com0',
       'com1',
-      'com1',
-      '#date',
+      'date',
       '$A',
       '#A1',
       '#O1',
@@ -89,6 +80,8 @@
       'and',
       'or',
       '( )',
+      '==',
+      '!=',
       '>',
       '>=',
       '<',
@@ -97,10 +90,10 @@
       '-',
       '*',
       '/',
-      '#exe',
-      '#exedo',
-      '#exeup',
-      '#exebl',
+      'exe',
+      'exedo',
+      'exeup',
+      'exebl',
     ];
 
     var meanings = [
@@ -114,6 +107,8 @@
       'meets both commands',
       'meets 1 of the commands',
       'priority',
+      'equal to',
+      'not equal to',
       'greater than',
       'greater or equal than',
       'less than',
@@ -130,17 +125,19 @@
 
     for (let i = 0; i < commands.length; i++){
       $(address(5, i + 5)).html(commands[i]);
+      $(address(5, i + 5)).addClass('small');
       $(address(6, i + 5)).html(meanings[i]);
+      $(address(6, i + 5)).addClass('small');
     }
 
     var cursor = 5;
     for (let i = 0; i < tableLetters; i++){
       for (let j = 0; j < tableNumbers; j++){
         $(address(0, cursor)).append($('<b>').html('#' + String.fromCharCode(65 + i) + (j + 1)));
-        $(address(1, cursor)).append($('<input type="text" id="tableName' + (i*tableNumbers + j) + '">'));
-        $(address(2, cursor)).append($('<input class="wide" type="text" id="tableFormula' + (i*tableNumbers + j) + '">'));
-        $(address(3, cursor)).append($('<input type="number" id="tableFactor' + (i*tableNumbers + j) +'">'));
-        $(address(4, cursor)).append($('<input type="number" id="tableDigits' + (i*tableNumbers + j) + '" min="0" step="1">'));
+        $(address(1, cursor)).append($('<input type="text" id="nameTable' + (i*tableNumbers + j) + '">'));
+        $(address(2, cursor)).append($('<input class="wide" type="text" id="formulaTable' + (i*tableNumbers + j) + '">'));
+        $(address(3, cursor)).append($('<input type="number" id="factorTable' + (i*tableNumbers + j) +'">'));
+        $(address(4, cursor)).append($('<input type="number" id="digitsTable' + (i*tableNumbers + j) + '" min="0" step="1">'));
         cursor++;
       }
     }
@@ -155,10 +152,10 @@
 
     for (let i = 0; i < numOutputs; i++){
       $(address(0, cursor)).append($('<b>').html('Output ' + (i + 1)));
-      $(address(1, cursor)).append($('<input type="text" id="outputName' + i + '">'));
-      $(address(2, cursor)).append($('<input class="wide" type="text" id="outputFormula' + i + '">'));
-      $(address(3, cursor)).append($('<input type="checkbox" id="outputExecute' + i + '">'));
-      $(address(4, cursor)).append($('<input type="number" id="outputSeconds' + i + '" min="0" step="1">'));
+      $(address(1, cursor)).append($('<input type="text" id="nameOutput' + i + '">'));
+      $(address(2, cursor)).append($('<input class="wide" type="text" id="formulaOutput' + i + '">'));
+      $(address(3, cursor)).append($('<input type="checkbox" id="executeOutput' + i + '">'));
+      $(address(4, cursor)).append($('<input type="number" id="secondsOutput' + i + '" min="0" step="1">'));
       cursor++;
     }
 
@@ -166,28 +163,67 @@
 
     for (let i = 0; i < numInputs; i++){
       $(address(0, cursor)).append($('<b>').html('Input ' + (i + 1)));
-      $(address(1, cursor)).append($('<input type="text" id="inputName' + i + '">'));
-      $(address(2, cursor)).append($('<input class="wide" type="text" id="inputFormula' + i + '">'));
+      $(address(1, cursor)).append($('<input type="text" id="nameInput' + i + '">'));
+      $(address(2, cursor)).append($('<input class="wide" type="text" id="formulaInput' + i + '">'));
 
-      $(address(4, cursor)).append($('<input type="number" id="inputSeconds' + i + '" min="0" step="1">'));
+      $(address(4, cursor)).append($('<input type="number" id="secondsInput' + i + '" min="0" step="1">'));
       cursor++;
     }
 
-    for (var i = 0; i < 2; i++)
+    for (var i = 0; i < 10; i++)
     {
-      var conf = config.serial[i];
+      var conf = config.table[i];
       Object.keys(conf).forEach(function(key) 
       {
+        let target = $(`#${key}Table${i}`);
         if (typeof(conf[key]) === "boolean")
         {
-          $(`#${key}${i}`).prop('checked', conf[key]);
+          target.prop('checked', conf[key]);
         }
         else
         {
-          $(`#${key}${i}`).val(conf[key]);
+         target.val(conf[key]);
         }
       });
     }
+
+    for (var i = 0; i < 10; i++)
+    {
+      var conf = config.output[i];
+      Object.keys(conf).forEach(function(key) 
+      {
+        let target = $(`#${key}Output${i}`);
+        if (typeof(conf[key]) === "boolean")
+        {
+          target.prop('checked', conf[key]);
+        }
+        else
+        {
+         target.val(conf[key]);
+        }
+      });
+    }
+
+    for (var i = 0; i < 5; i++)
+    {
+      var conf = config.input[i];
+      Object.keys(conf).forEach(function(key) 
+      {
+        let target = $(`#${key}Input${i}`);
+        if (typeof(conf[key]) === "boolean")
+        {
+          target.prop('checked', conf[key]);
+        }
+        else
+        {
+         target.val(conf[key]);
+        }
+      });
+    }
+
+    $('#triggerCom').val(config.triggerCom);
+    $('#searchColumn').val(config.searchColumn);
+    $('#saveToFile').prop('checked', config.saveToFile);
 
     var socket = io();
 
@@ -209,12 +245,33 @@
     function setSettings(){
       if (confirm("Do you really want to save these settings??"))
       {
-        for (var i = 0; i < 2; i++)
+        for (var i = 0; i < 10; i++)
         {
-          var conf = config.serial[i];
+          var conf = config.table[i];
           Object.keys(conf).forEach(function(key) 
           {
-            let element = $(`#${key}${i}`);
+            let element = $(`#${key}Table${i}`);
+            console.log(`#${key}Table${i}`);
+            if (element.length!=0)
+            {
+              if (typeof(conf[key]) === "boolean")
+              {
+                conf[key] = element.prop('checked');
+              }
+              else if (!isNaN(parseInt(conf[key])))
+              {
+                conf[key] = Number(element.val());
+              }
+              else
+              {
+                conf[key] = element.val();
+              }
+            }
+          });
+          var conf = config.output[i];
+          Object.keys(conf).forEach(function(key) 
+          {
+            let element = $(`#${key}Output${i}`);
             if (element.length!=0)
             {
               if (typeof(conf[key]) === "boolean")
@@ -232,6 +289,33 @@
             }
           });
         }
+        for (var i = 0; i < 5; i++)
+        {
+          var conf = config.input[i];
+          Object.keys(conf).forEach(function(key) 
+          {
+            let element = $(`#${key}Input${i}`);
+            if (element.length!=0)
+            {
+              if (typeof(conf[key]) === "boolean")
+              {
+                conf[key] = element.prop('checked');
+              }
+              else if (!isNaN(parseInt(conf[key])))
+              {
+                conf[key] = Number(element.val());
+              }
+              else
+              {
+                conf[key] = element.val();
+              }
+            }
+          });
+        }
+        config.triggerCom = Number($('#triggerCom').val());
+        config.searchColumn = $('#searchColumn').val();
+        config.saveToFile = $('#saveToFile').prop('checked');
+
         socket.emit('settings',config);
         setTimeout(function(){ 
           window.location.href = '/';

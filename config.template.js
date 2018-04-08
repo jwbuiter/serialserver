@@ -226,6 +226,9 @@ var config ={
     6,
     13,
   ],
+  triggerCom : 0,
+  searchColumn : 'A',
+  saveToFile : true,
 
   exposeUpload: false,
   testMode: false
