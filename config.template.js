@@ -216,11 +216,6 @@ var config ={
       seconds : 0,
       GPIO : 21,
     },
-    19,
-    16,
-    26,
-    20,
-    21,
   ], 
 
   name : 'MBDCcom01',
