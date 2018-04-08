@@ -18,8 +18,8 @@ var remainingEntries = [];
 var onlineGPIO = new Gpio(config.onlineGPIO, 'out');
 
 var comGPIO = [];
-comGPIO[0] = new Gpio(config.com0GPIO, 'out');
-comGPIO[1] = new Gpio(config.com1GPIO, 'out');
+comGPIO[0] = new Gpio(config.comGPIO[0], 'out');
+comGPIO[1] = new Gpio(config.comGPIO[1], 'out');
 
 onlineGPIO.writeSync(1);
 
