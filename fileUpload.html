@@ -59,7 +59,8 @@
 
     $(address(6, 0)).append($('<select id ="triggerCom">').html('<option value="0">Com 0</option><option value="1">Com 1</option>'));
     $(address(6, 1)).append($('<input type="text" id="searchColumn">'));
-    $(address(6, 2)).append($('<input type="checkbox" id="saveToFile">'));
+    $(address(6, 2)).append($('<select id ="searchCom">').html('<option value="0">Com 0</option><option value="1">Com 1</option>'));
+    $(address(6, 3)).append($('<input type="checkbox" id="saveToFile">'));
 
     $(address(0, 4)).append($('<b>').html('Table'));
     $(address(1, 4)).append($('<b>').html('Name'));
@@ -223,6 +224,7 @@
 
     $('#triggerCom').val(config.triggerCom);
     $('#searchColumn').val(config.searchColumn);
+    $('#searchCom').val(config.searchCom);
     $('#saveToFile').prop('checked', config.saveToFile);
 
     var socket = io();
@@ -234,7 +236,6 @@
     }
 
     function goSubmit(){
-      console.log('test');
       $('#uploadForm').submit();
     }
 
@@ -251,7 +252,7 @@
           Object.keys(conf).forEach(function(key) 
           {
             let element = $(`#${key}Table${i}`);
-            console.log(`#${key}Table${i}`);
+
             if (element.length!=0)
             {
               if (typeof(conf[key]) === "boolean")
@@ -313,7 +314,8 @@
           });
         }
         config.triggerCom = Number($('#triggerCom').val());
-        config.searchColumn = $('#searchColumn').val();
+        config.searchCom = Number($('#searchCom').val());
+        config.searchColumn = Number($('#searchColumn').val());
         config.saveToFile = $('#saveToFile').prop('checked');
 
         socket.emit('settings',config);

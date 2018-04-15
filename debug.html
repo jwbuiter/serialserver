@@ -8,29 +8,27 @@
       table { width: 100%; text-align: center; border: none; border-collapse: collapse;}
       tr { height: 29px; }
       td { text-align: center; font-size: 25px; border-style: bold; }
-	  .excelTopRow {background-color: cyan; }
-	  .excel {font-weight: bold;}
       .header { background-color: yellow; font-weight: bold;}
       .result { background-color: #98FB98;}
       .buttons {position: fixed; right: 0; top: 30px; font-size:20px;}
       .logo {position: fixed; left: 0; top: 30px;}
-      .excelEntries{ font-size: 30px; color: black; }
+      .table{ font-size: 30px; color: black; background-color: cyan; font-weight: bold;}
+      .output.off{ background-color: #98FB98; }
+      .output.on{ background-color: red;}
+      .output.execute{ background-color: #FFC000 }
+      .output.manual{ background-color: #CC66FF }
+      .input.off{ background-color: #CCFFCC; }
+      .input.on{ background-color: yellow;}
+      .input.manual{ background-color: #FFCCFF; }
       #fileLoader {font-size: 30px; }
     </style>
 </head>
 <body>
   <table id="content">
-    <tr>
-      <td class="header" id="headername"></td>
-      <td class="header" id="headerip"></td>
-      <td class="header" id="headertime"></td>
-      <td class="header" id="headerdate"></td>
-      <td class="header" id="headerqs"></td>
-    </tr>
   </table>
   <div class = "buttons">
-	<img id = "uploadButton" src = "/res/upload.png" height="30" width="30" onclick="javascript:goFileUpload()">
-	
+    <img id = "uploadButton" src = "/res/upload.png" height="30" width="30" onclick="javascript:goFileUpload()">
+
     <img src = "/res/settings.svg" height="30" width="30" onclick="javascript:goSettings()">
 
     <img src = "/res/restart.ico"  height="30" width="30" onclick="javascript:goRestart()">
@@ -44,6 +42,20 @@
   <script src="/res/jquery-1.11.1.js"></script>
   <script src="/config.js"></script>
   <script>
+    var socket = io();
+    const numColumns = 5;
+    const numRows = 24;
+
+    const numTable = config.table.length;
+
+    const numOutputs = config.output.length;
+    const numInputs = config.input.length;
+
+
+    function address(rowNum, columnNum){
+      return '#c' + columnNum + 'r' + rowNum;
+    }
+
     function goSettings(){
       if (confirm("Do you want to go to the settings?")){
         window.location.href = '/settings'; //relative to domain
@@ -77,8 +89,37 @@
       return date.getHours() + ':' + ("0" + date.getMinutes()).slice(-2) + ':' + ("0" + date.getSeconds()).slice(-2);
     }
 
-    $('#headername').html(config.name); 
-    $('#headerqs').html(config.QS);
+    if (!config.exposeUpload){
+      $('#uploadButton').remove();
+    }
+    if (config.testMode){
+      $('#shutDownButton').remove();
+    }
+
+    for (let i = 0; i < numRows; i++){
+      var currentRow = $('<tr>');
+      $('#content').append(currentRow);
+      for (let j = 0; j < numColumns; j++){
+        currentRow.append($('<td>').attr('id', address(j, i).slice(1)));
+      }
+    }
+
+    for (let i = 0; i < numColumns; i++){
+      $(address(i, 0)).addClass('header');
+    }
+
+    $(address(0, 0)).html(config.name); 
+    socket.on('ip', function(msg){
+      $(address(1, 0)).html(msg);
+    });
+    socket.on('time', function(msg){
+      $(address(2, 0)).html(printTime(msg));
+      $(address(3, 0)).html(printDate(msg));
+    });
+    $(address(4, 0)).html(config.QS);
+
+
+    let cursor = 0;
 
     let logoSizeSet = false;
     for (var i = 0; i<config.serial.length; i++){
@@ -92,55 +133,67 @@
         $('#logo').height(Math.min(140, conf.entries*30)*0.95);
       }
 
-      $('#content').append($('<tr>'));
+      cursor ++;
 
       for (var j = 0; j<conf.entries; j++){
-        var row = $('<tr>');
-        if((j===conf.entries-1))
-          row.addClass('result');
-        $('#content').append(row);
-
-        if (j===conf.entries-1)
-          row.append($('<td>'+conf.name+ '</td>'));
-        else
-          row.append($('<td>'));
-        row.append($('<td>').html(j+1));
-        row.append($('<td>').attr('id', conf.name+'time'+j));
-        row.append($('<td>').attr('id', conf.name+'entry'+j));
+        cursor++;
+        if((j===conf.entries-1)){
+          for (let i = 0; i < numColumns-1; i++){
+            $(address(i, cursor)).addClass('result');
+          }
+          $(address(0, cursor)).html(conf.name);
+          if (conf.average){
+            $(address(4, cursor)).addClass(conf.name + 'avg')
+            $(address(4, cursor)).addClass('result');
+          }
+        }
         if (j===conf.entries-2 && conf.average)
-          row.append($('<td>').html( 'Average' ));
-        if (j===conf.entries-1 && conf.average)
-          row.append($('<td>').attr('id', conf.name + 'avg'));
+          $(address(4, cursor)).html( 'Average' );
+
+        $(address(1, cursor)).html(j+1);
+        $(address(2, cursor)).addClass(conf.name+'time'+j);
+        $(address(3, cursor)).addClass(conf.name+'entry'+j);
       }
     }
+
+    cursor +=2;
   
-    if (!config.exposeUpload){
-      $('#uploadButton').remove();
-    }
-    else {
-      $('#content').append($('<tr>'));
-      var excelTopRow = $('<tr>').addClass('excelTopRow excel');
-      var excelBottomRow = $('<tr>').addClass('excel');
-      $('#content').append(excelTopRow);
-      $('#content').append(excelBottomRow);
-      excelTopRow.append($('<td>').html('ID'));
-      excelTopRow.append($('<td>').html('Age'));
-      excelTopRow.append($('<td>').html('Teats'));
-      excelTopRow.append($('<td>').html('Index'));
-      excelTopRow.append($('<td>').html('Life Gain'));
-      excelBottomRow.append($('<td>').attr('id', 'excelRFID'));
-      excelBottomRow.append($('<td>').attr('id', 'excelBirthDate'));
-      excelBottomRow.append($('<td>').attr('id', 'excelNumTeats'));
-      excelBottomRow.append($('<td>').attr('id', 'excelIndex'));
-      excelBottomRow.append($('<td>').attr('id', 'excelGrowthRate'));
+    for (let i = 0; i < numTable; i++){
+      let conf = config.table[i];
+
+      if (!conf.formula)
+        continue;
+
+      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).html(conf.name || (String.fromCharCode(65 + i % numColumns) + (i % numColumns + 1)));
+      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).addClass('table');
+      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).html('-')
+      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).addClass('table'+i);
+      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).addClass('table');
     }
 
-    if (config.testMode){
-      $('#shutDownButton').remove();
+    cursor += 2 * numTable/numColumns + 1;
+
+    for (let i = 0; i < numOutputs; i++){
+      let conf = config.output[i];
+
+      if (!conf.formula)
+        continue;
+
+      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).html(conf.name );
+      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).addClass('output'+i);
+      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).addClass('output');
+    }
+   
+    cursor +=2* numOutputs/numColumns ;
+
+    for (let i = 0; i < numInputs; i++){
+      let conf = config.input[i];
+
+      $(address(i % numColumns, cursor +  Math.floor(i/numColumns))).html(conf.name );
+      $(address(i % numColumns, cursor +  Math.floor(i/numColumns))).addClass('input'+i);
+      $(address(i % numColumns, cursor +  Math.floor(i/numColumns))).addClass('input');
     }
 
-
-    var socket = io();
     var previousEntry = [];
     var previousTime = [];
     for(var i = 0; i<config.serial.length; i++){
@@ -163,49 +216,30 @@
 
       for(var j = 0; j<config.serial[i].entries; j++){
         if (j<config.serial[i].entries-1){
-          $('#' + config.serial[i].name+'time'+j).html($('#' + config.serial[i].name+'time'+(j + 1)).html());
-          $('#' + config.serial[i].name+'entry'+j).html($('#' + config.serial[i].name+'entry'+(j + 1)).html());
+          $('.' + config.serial[i].name+'time'+j).html($('.' + config.serial[i].name+'time'+(j + 1)).html());
+          $('.' + config.serial[i].name+'entry'+j).html($('.' + config.serial[i].name+'entry'+(j + 1)).html());
         }
         else{
-          $('#' + config.serial[i].name+'time'+j).html(printTime(msg.entryTime));
-          $('#' + config.serial[i].name+'entry'+j).html(msg.entry);
+          $('.' + config.serial[i].name+'time'+j).html(printTime(msg.entryTime));
+          $('.' + config.serial[i].name+'entry'+j).html(msg.entry);
         }
       }
     });
 
-    socket.on('excelEntry', function(msg){
-	  if (msg.RFID !== 'Not found'){
-		  $('#excelRFID').html(msg.RFID);
-		  $('#excelBirthDate').html(Math.floor(msg.age).toString() || '');
-		  $('#excelNumTeats').html(msg.aantalSpenen);
-		  $('#excelIndex').html(msg.index);
-		  $('#excelGrowthRate').html(msg.growthRate);
-	} else {
-		$('#excelRFID').html(msg.RFID);
-		  $('#excelBirthDate').html('');
-		  $('#excelNumTeats').html('');
-		  $('#excelIndex').html('');
-		  $('#excelGrowthRate').html('');
-	}
-	  console.log('got excel entry');
+    socket.on('value', function(msg){
+      $('.'+msg.name).html(msg.value);
     });
+
+    socket.on('state', function(msg){
+      $('.'+msg.name).removeClass('on off manual').addClass(msg.state);
+    })
 
     socket.on('average', function(msg){
       for(var i = 0; i<config.serial.length; i++)
         if (msg.name===config.serial[i].name){
-          $('#' + config.serial[i].name+'avg').html(msg.entry);
+          $('.' + config.serial[i].name+'avg').html(msg.entry);
         }
     });
-
-    socket.on('ip', function(msg){
-      $('#headerip').html(msg);
-    });
-
-    socket.on('time', function(msg){
-
-      $('#headertime').html(printTime(msg));
-      $('#headerdate').html(printDate(msg));
-    })
   </script>
 </body>
 </html>

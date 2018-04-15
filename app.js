@@ -12,14 +12,40 @@ var serialPort = require('serialport');
 var Gpio = require('onoff').Gpio;
 var config = require('./config');
 
+const tableColumns = 5;
+
 var latestLogEntry = [];
+var tableContent = [];
 var entryList = {};
 var remainingEntries = [];
 var onlineGPIO = new Gpio(config.onlineGPIO, 'out');
 
-var comGPIO = [];
-comGPIO[0] = new Gpio(config.comGPIO[0], 'out');
-comGPIO[1] = new Gpio(config.comGPIO[1], 'out');
+var comGPIO = config.comGPIO.map(element =>{
+  return new Gpio(element, 'out')
+});
+
+var outputGPIO = config.output.map(element =>{
+  return new Gpio(element.GPIO, 'out')
+});
+
+var inputGPIO = config.input.map((element, index) =>{
+  let newInput = new Gpio(element.GPIO, 'in');
+  newInput.watch((err, val)=>{
+    io.emit('value', {name: 'input' + index, value: val});
+    switch(element.formula){
+      case 'exe':
+        execute();
+        break;
+      case 'exebl':
+        break;
+      case 'exeup':
+        break;
+      case 'exedo':
+        break;
+    }
+  });
+  return new Gpio(element.GPIO, 'in');
+});
 
 onlineGPIO.writeSync(1);
 
@@ -31,7 +57,7 @@ if (fs.existsSync(__dirname + '/data/data.xls')){
 }
  
 
-function decode(entry, config, index){
+function decode(entry, config){
   let decodedEntry;
   let time = new Date();
 
@@ -49,38 +75,6 @@ function decode(entry, config, index){
 
   io.emit('entry', {name : config.name, entryTime: time.getTime(), entry : decodedEntry});
   
-  if (excelFile){
-    console.log(index);
-    if (index === 1){
-      justReadRFID = decodedEntry;
-    }
-    if (index === 0 && justReadRFID !== undefined){
-      let foundRow = excelFile[0].data.find((row) =>{
-        return (row[0] === justReadRFID);
-      });
-      let currentWeigth = decodedEntry;
-      if (foundRow){
-        console.log('found row');
-        let birthDate = foundRow[1] - 25569;
-        let todayDate = new Date().getTime()/1000/86400;
-        let aantalSpenen = foundRow[2] || 0;
-        let index = foundRow[3] || 0;
-        let age = todayDate - birthDate;
-        let growthRate = 1000*(currentWeigth - 1.5)/(age);
-        growthRate = Math.round(growthRate);
-        let sendData = {RFID: justReadRFID, aantalSpenen, age, index, growthRate, currentWeigth};
-        console.log(sendData);
-        io.emit('excelEntry', sendData);
-      }
-      else
-      { 
-        let sendData = {RFID: 'Not found'};
-        io.emit('excelEntry', sendData);
-      }
-      justReadRFID = undefined;
-    }
-  }
-   
   if (config.average)
   {
     let averageList = entryList[config.name];
@@ -96,6 +90,22 @@ function decode(entry, config, index){
   return decodedEntry;
 }
 
+function handleTable(index){
+  if (index === config.triggerCom){
+    let foundRow = excelFile[0].data.find((row) =>{
+      return (row[config.searchColumn] === latestLogEntry[config.searchCom]);
+    });
+    if (foundRow){
+      calculateValues(foundRow);  
+    }
+    else
+    { 
+      let sendData = {RFID: 'Not found'};
+      io.emit('excelEntry', sendData);
+    }
+  }
+}
+
 function average(list){
   if (list.length===0)
     return 0;
@@ -105,6 +115,78 @@ function average(list){
     sum+=list[j];
 
   return (sum / list.length);
+}
+
+function execute(){
+  config.output.map((element, index)=>{
+    if (element.execute){
+      let result = calculateFormula(element.fomula);
+      io.emit('state', {name: 'table' + index, state: result});
+      outputGPIO[index].writeSync(result);
+    }
+  });
+}
+
+function calculateValues(excelRow){
+  config.table.map((element, index)=>{
+    let result = calculateFormula(element.formula, excelRow);
+    console.log(result);
+    if (element.factor === 0 && typeof(result) === 'string'){
+      result = result.slice(-element.digits);
+    } else {
+      result = (result*element.factor).toFixed(element.digits);
+    }
+    tableContent[index]=result;
+    io.emit('value', {name: 'table' + index, value: result});
+  });
+}
+
+function calculateFormula(formula, excelRow){
+  formula = formula.replace(/#[A-G][0-9]/g, (x) =>{
+
+    let row = x.charCodeAt(1) - 65;
+    let column = parseInt(x[2]);
+    return tableContent[row*tableColumns + column - 1];
+
+  }).replace(/#I[0-9]/g, (x) =>{
+
+    x=parseInt(x[2]);
+    return inputGPIO[x].readSync();
+
+  }).replace(/#O[0-9]/g, (x) =>{
+
+    x=parseInt(x[2]);
+    return outputGPIO[x].readSync();
+
+  }).replace(/\$[A-Z]/g, (x) =>{
+
+    x = x.charCodeAt(1) - 65;
+    if (typeof(excelRow[x]) === 'string'){
+      return '\'' + excelRow[x] + '\'';
+    }
+    else{
+      return excelRow[x];
+    }
+
+  }).replace(/com[0-9]/g, (x) =>{
+
+    x=parseInt(x[3]);
+    if (config.serial[x].factor === 0){
+      return '\'' + latestLogEntry[x] + '\'';
+    }
+    else{
+      return latestLogEntry[x];
+    }
+
+  }).replace(/date/g, (x) =>{
+
+    return new Date().getTime()/1000/86400 + 25569;
+
+  }).replace('and', '&&')
+  .replace('or', '||');
+
+  console.log(excelRow);
+  return eval(formula) || '';
 }
 
 for(i = 0; i < config.serial.length; i++){
@@ -118,8 +200,13 @@ for(i = 0; i < config.serial.length; i++){
     var conf = config.serial[index];
 
     if (config.testMode){
-      setInterval(()=> decode(conf.testMessage, conf, index), conf.timeout * 1000);
-      latestLogEntry[index] = decode(conf.testMessage, conf, index);
+      setInterval(()=> {
+        decode(conf.testMessage, conf);
+        if (excelFile){
+          handleTable(index);
+        }
+      }, conf.timeout * 1000);
+      latestLogEntry[index] = decode(conf.testMessage, conf);
     } else {
 
       var port = new serialPort(conf.port, {
@@ -161,8 +248,11 @@ for(i = 0; i < config.serial.length; i++){
 
           let newEntry = (remainingEntries[index].slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries[index].length:(nextEntryEnd+nextEntry))).toString();
           
-          latestLogEntry[index] = decode(newEntry, conf, index);
-            
+          latestLogEntry[index] = decode(newEntry, conf);
+          if (excelFile){
+            handleTable(index);
+          }
+
           remainingEntries[index]=remainingEntries[index].slice(nextEntry + nextEntryEnd);
           //console.log(remainingEntries);
         }  

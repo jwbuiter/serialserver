@@ -227,7 +227,8 @@ var config ={
     13,
   ],
   triggerCom : 0,
-  searchColumn : 'A',
+  searchColumn : 0,
+  searchCom : 1,
   saveToFile : true,
 
   exposeUpload: false,
