@@ -15,11 +15,13 @@
       .table{ font-size: 30px; color: black; background-color: cyan; font-weight: bold;}
       .output.off{ background-color: #98FB98; }
       .output.on{ background-color: red;}
-      .output.execute{ background-color: #FFC000 }
-      .output.manual{ background-color: #CC66FF }
+      .output.execute{ background-color: #FFC000; }
+      .output.forcedOn{ background-color: #CC66FF; }
+      .output.forcedOff{ background-color: #FFCCFF; }
       .input.off{ background-color: #CCFFCC; }
       .input.on{ background-color: yellow;}
-      .input.manual{ background-color: #FFCCFF; }
+      .input.forcedOn{background-color: #CC66FF; }
+      .input.forcedOff{ background-color: #FFCCFF; }
       #fileLoader {font-size: 30px; }
     </style>
 </head>
@@ -51,7 +53,6 @@
     const numOutputs = config.output.length;
     const numInputs = config.input.length;
 
-
     function address(rowNum, columnNum){
       return '#c' + columnNum + 'r' + rowNum;
     }
@@ -73,11 +74,19 @@
         window.location.href = '/restart'; //relative to domain
       }
     }
-	
-	function goFileUpload(){
+
+    function goFileUpload(){
       if (confirm("Do you really want to upload a file?")){
         window.location.href = '/fileupload'; //relative to domain
       }
+    }
+
+    function clickOutput(index){
+      socket.emit('forceOutput', index);
+    }
+
+    function clickInput(index){
+      socket.emit('forceInput', index);
     }
 
     function printDate(time){
@@ -88,6 +97,7 @@
       var date = new Date(time);
       return date.getHours() + ':' + ("0" + date.getMinutes()).slice(-2) + ':' + ("0" + date.getSeconds()).slice(-2);
     }
+
 
     if (!config.exposeUpload){
       $('#uploadButton').remove();
@@ -181,7 +191,8 @@
 
       $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).html(conf.name );
       $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).addClass('output'+i);
-      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).addClass('output');
+      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).addClass('output off');
+      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).click(function (){ clickOutput(i)});
     }
    
     cursor +=2* numOutputs/numColumns ;
@@ -191,7 +202,8 @@
 
       $(address(i % numColumns, cursor +  Math.floor(i/numColumns))).html(conf.name );
       $(address(i % numColumns, cursor +  Math.floor(i/numColumns))).addClass('input'+i);
-      $(address(i % numColumns, cursor +  Math.floor(i/numColumns))).addClass('input');
+      $(address(i % numColumns, cursor +  Math.floor(i/numColumns))).addClass('input off');
+      $(address(i % numColumns, cursor +  Math.floor(i/numColumns))).click(function (){ clickInput(i)});
     }
 
     var previousEntry = [];
@@ -231,7 +243,7 @@
     });
 
     socket.on('state', function(msg){
-      $('.'+msg.name).removeClass('on off manual').addClass(msg.state);
+      $('.'+msg.name).removeClass('on off forcedOn forcedOff execute').addClass(msg.state);
     })
 
     socket.on('average', function(msg){

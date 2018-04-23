@@ -1,0 +1,344 @@
+<!doctype html>
+<html>
+<head>
+  <title>MBDCcomUnit</title>
+   <style>
+      *{font-size: 25px; padding:0;}
+      table { text-align: center; border: none; border-collapse: collapse;}
+      tr { height: 29px; }
+      td { text-align: center;  border-style: bold; width: 12vw; height: 29px;}
+      td.small { font-size: 15px; }
+      input {text-align: center; width: 11vw;}
+      input.wide {width: 28vw;}
+      input[type="submit"]{width: auto;}
+      select { width: 12vw; }
+    </style>
+</head>
+<body>
+  <div style="display: block; margin:0 auto;">
+    <table id="content">
+    </table>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/res/jquery-1.11.1.js"></script>
+  <script src="/config.js"></script>
+  <script type="text/javascript">
+    const numColumns = 7;
+    const numRows = 33;
+
+    const tableNumbers = 5;
+    const tableLetters = 2;
+
+    const numOutputs = 10;
+    const numInputs = 5;
+
+
+    function address(rowNum, columnNum){
+      return '#c' + columnNum + 'r' + rowNum;
+    }
+
+    for (let i = 0; i < numRows; i++){
+      var currentRow = $('<tr>');
+      $('#content').append(currentRow);
+      for (let j = 0; j < numColumns; j++){
+        currentRow.append($('<td>').attr('id', address(j, i).slice(1)));
+      }
+    }
+    $(address(0, 0)).append($('<b>').html('Trigger'));
+    $(address(1, 0)).append($('<b>').html('Search'));
+    $(address(2, 0)).append($('<b>').html('Save to file'));
+    $(address(3, 0)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
+    $(address(4, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
+    $(address(5, 0)).append($('<input type="button" value="Save config" onclick="javascript:goDebug()">'));
+    $(address(6, 0)).append($('<input type="button" value="Load config" onclick="javascript:setSettings()">'));
+
+
+    $(address(0, 1)).append($('<select id ="triggerCom">').html('<option value="0">Com 0</option><option value="1">Com 1</option>'));
+    $(address(1, 1)).append($('<input type="text" id="searchColumn">'));
+    $(address(2, 1)).append($('<select id ="searchCom">').html('<option value="0">Com 0</option><option value="1">Com 1</option>'));
+    $(address(3, 1)).append($('<input type="checkbox" id="saveToFile">'));
+
+    $(address(0, 3)).append($('<b>').html('Table'));
+    $(address(1, 3)).append($('<b>').html('Name'));
+    $(address(2, 3)).append($('<b>').html('Formula'));
+    $(address(3, 3)).append($('<b>').html('Factor'));
+    $(address(4, 3)).append($('<b>').html('Digits/round.'));
+    $(address(5, 3)).append($('<b>').html('Command'));
+    $(address(6, 3)).append($('<b>').html('Value'));
+
+    var commands = [
+      'com0',
+      'com1',
+      'date',
+      '$A',
+      '#A1',
+      '#O1',
+      '#I1',
+      '#',
+      'and',
+      'or',
+      '( )',
+      '==',
+      '!=',
+      '>',
+      '>=',
+      '<',
+      '<=',
+      '+',
+      '-',
+      '*',
+      '/',
+    ];
+
+    var meanings = [
+      'value com0',
+      'value com1',
+      'date today',
+      'value input-file column A',
+      'value table #A1',
+      'value output 1 (0 or 1)',
+      'value input 1 (0 or 1)',
+      'manual input',
+      'meets both commands',
+      'meets 1 of the commands',
+      'priority',
+      'equal to',
+      'not equal to',
+      'greater than',
+      'greater or equal to',
+      'less than',
+      'less or equal to',
+      'add',
+      'substract',
+      'multiply',
+      'divide',
+    ];
+
+    for (let i = 0; i < commands.length; i++){
+      $(address(5, i + 4)).html(commands[i]);
+      $(address(5, i + 4)).addClass('small');
+      $(address(6, i + 4)).html(meanings[i]);
+      $(address(6, i + 4)).addClass('small');
+    }
+
+    var cursor = 4;
+    for (let i = 0; i < tableLetters; i++){
+      for (let j = 0; j < tableNumbers; j++){
+        $(address(0, cursor)).append($('<b>').html('#' + String.fromCharCode(65 + i) + (j + 1)));
+        $(address(1, cursor)).append($('<input type="text" id="nameTable' + (i*tableNumbers + j) + '">'));
+        $(address(2, cursor)).append($('<input class="wide" type="text" id="formulaTable' + (i*tableNumbers + j) + '">'));
+        $(address(3, cursor)).append($('<input type="number" id="factorTable' + (i*tableNumbers + j) +'">'));
+        $(address(4, cursor)).append($('<input type="number" id="digitsTable' + (i*tableNumbers + j) + '" min="0" step="1">'));
+        cursor++;
+      }
+    }
+      
+    cursor ++;
+    $(address(1, cursor)).append($('<b>').html('Name'));
+    $(address(2, cursor)).append($('<b>').html('Formula'));
+    $(address(3, cursor)).append($('<b>').html('Execute'));
+    $(address(4, cursor)).append($('<b>').html('Seconds'));
+
+    cursor++;
+
+    for (let i = 0; i < numOutputs; i++){
+      $(address(0, cursor)).append($('<b>').html('Output ' + (i + 1)));
+      $(address(1, cursor)).append($('<input type="text" id="nameOutput' + i + '">'));
+      $(address(2, cursor)).append($('<input class="wide" type="text" id="formulaOutput' + i + '">'));
+      $(address(3, cursor)).append($('<input type="checkbox" id="executeOutput' + i + '">'));
+      $(address(4, cursor)).append($('<input type="number" id="secondsOutput' + i + '" min="0" step="1">'));
+      cursor++;
+    }
+
+    cursor++;
+    $(address(1, cursor)).append($('<b>').html('Name'));
+    $(address(2, cursor)).append($('<b>').html('Formula'));
+    $(address(5, cursor)).append($('<b>').html('Command'));
+    $(address(6, cursor)).append($('<b>').html('Meaning'));
+    cursor++;
+
+    var inputCommands = [
+      'exe',
+      'exedo',
+      'exeup',
+      'exebl',
+    ];
+
+    var inputMeanings = [
+      'execute button',
+      'execute down',
+      'execute up',
+      'execute block',
+    ];
+    for (let i = 0; i < inputCommands.length; i++){
+      $(address(5, i + cursor)).html(inputCommands[i]);
+      $(address(5, i + cursor)).addClass('small');
+      $(address(6, i + cursor)).html(inputMeanings[i]);
+      $(address(6, i + cursor)).addClass('small');
+    }
+
+    for (let i = 0; i < numInputs; i++){
+      $(address(0, cursor)).append($('<b>').html('Input ' + (i + 1)));
+      $(address(1, cursor)).append($('<input type="text" id="nameInput' + i + '">'));
+      $(address(2, cursor)).append($('<input class="wide" type="text" id="formulaInput' + i + '">'));
+      cursor++;
+    }
+
+    for (var i = 0; i < 10; i++)
+    {
+      var conf = config.table[i];
+      Object.keys(conf).forEach(function(key) 
+      {
+        let target = $(`#${key}Table${i}`);
+        if (typeof(conf[key]) === "boolean")
+        {
+          target.prop('checked', conf[key]);
+        }
+        else
+        {
+         target.val(conf[key]);
+        }
+      });
+    }
+
+    for (var i = 0; i < 10; i++)
+    {
+      var conf = config.output[i];
+      Object.keys(conf).forEach(function(key) 
+      {
+        let target = $(`#${key}Output${i}`);
+        if (typeof(conf[key]) === "boolean")
+        {
+          target.prop('checked', conf[key]);
+        }
+        else
+        {
+         target.val(conf[key]);
+        }
+      });
+    }
+
+    for (var i = 0; i < 5; i++)
+    {
+      var conf = config.input[i];
+      Object.keys(conf).forEach(function(key) 
+      {
+        let target = $(`#${key}Input${i}`);
+        if (typeof(conf[key]) === "boolean")
+        {
+          target.prop('checked', conf[key]);
+        }
+        else
+        {
+         target.val(conf[key]);
+        }
+      });
+    }
+
+    $('#triggerCom').val(config.triggerCom);
+    $('#searchColumn').val(config.searchColumn);
+    $('#searchCom').val(config.searchCom);
+    $('#saveToFile').prop('checked', config.saveToFile);
+
+    var socket = io();
+
+    function setDate(){
+      let dateTimeString = $('#date').val() + ' ' + $('#time').val()
+      let dateTime = Date.parse(dateTimeString);
+      socket.emit('setDateTime', dateTime/1000);
+    }
+
+    function goSubmit(){
+      $('#uploadForm').submit();
+    }
+
+    function goDebug(){
+      window.location.href = '/';
+    }
+
+    function setSettings(){
+      if (confirm("Do you really want to save these settings??"))
+      {
+        for (var i = 0; i < 10; i++)
+        {
+          var conf = config.table[i];
+          Object.keys(conf).forEach(function(key) 
+          {
+            let element = $(`#${key}Table${i}`);
+
+            if (element.length!=0)
+            {
+              if (typeof(conf[key]) === "boolean")
+              {
+                conf[key] = element.prop('checked');
+              }
+              else if (typeof(conf[key]) === 'number')
+              {
+                conf[key] = Number(element.val());
+              }
+              else
+              {
+                conf[key] = element.val();
+              }
+            }
+          });
+          var conf = config.output[i];
+          Object.keys(conf).forEach(function(key) 
+          {
+            let element = $(`#${key}Output${i}`);
+            if (element.length!=0)
+            {
+              if (typeof(conf[key]) === "boolean")
+              {
+                conf[key] = element.prop('checked');
+              }
+              else if (typeof(conf[key]) === 'number')
+              {
+                conf[key] = Number(element.val());
+              }
+              else
+              {
+                conf[key] = element.val();
+              }
+            }
+          });
+        }
+        for (var i = 0; i < 5; i++)
+        {
+          var conf = config.input[i];
+          Object.keys(conf).forEach(function(key) 
+          {
+            let element = $(`#${key}Input${i}`);
+            if (element.length!=0)
+            {
+              if (typeof(conf[key]) === "boolean")
+              {
+                conf[key] = element.prop('checked');
+              }
+              else if (typeof(conf[key]) === 'number')
+              {
+                conf[key] = Number(element.val());
+              }
+              else
+              {
+                conf[key] = element.val();
+              }
+            }
+          });
+        }
+        config.triggerCom = Number($('#triggerCom').val());
+        config.searchCom = Number($('#searchCom').val());
+        config.searchColumn = Number($('#searchColumn').val());
+        config.saveToFile = $('#saveToFile').prop('checked');
+
+        socket.emit('settings',config);
+        setTimeout(function(){ 
+          window.location.href = '/';
+        }, 1000);
+      }
+    }
+
+  </script>
+</body>
+</html>

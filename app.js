@@ -20,6 +20,13 @@ var entryList = {};
 var remainingEntries = [];
 var onlineGPIO = new Gpio(config.onlineGPIO, 'out');
 
+var executeBlock = false;
+var executeUp = true;
+var numExecuting = 0;
+
+var outputForced = new Array(config.output.length ).fill(0);
+var inputForced = new Array(config.input.length ).fill(0);
+
 var comGPIO = config.comGPIO.map(element =>{
   return new Gpio(element, 'out')
 });
@@ -31,18 +38,8 @@ var outputGPIO = config.output.map(element =>{
 var inputGPIO = config.input.map((element, index) =>{
   let newInput = new Gpio(element.GPIO, 'in');
   newInput.watch((err, val)=>{
-    io.emit('value', {name: 'input' + index, value: val});
-    switch(element.formula){
-      case 'exe':
-        execute();
-        break;
-      case 'exebl':
-        break;
-      case 'exeup':
-        break;
-      case 'exedo':
-        break;
-    }
+    if (!inputForced[index])
+      handleInput(index, val);
   });
   return new Gpio(element.GPIO, 'in');
 });
@@ -106,6 +103,55 @@ function handleTable(index){
   }
 }
 
+function handleInput(index, value){
+  let state;
+  if (inputForced[index]){
+    state = (value)?'forcedOn':'forcedOff';
+  }
+  else{
+    state = (value)?'on':'off';
+  }
+
+  io.emit('state', {name: 'input' + index, state});
+  switch(config.input[index].formula){
+    case 'exe':
+      if (value === 1 && !executeBlock && executeUp){
+        execute();
+      }
+      break;
+    case 'exebl':
+      executeBlock = (value === 1);
+      break;
+    case 'exeup':
+      if (value)
+        executeUp = true;
+      break;
+    case 'exedo':
+      if (value)
+          executeUp = false;
+      break;
+  }
+  
+}
+
+function handleOutput(){
+  config.output.map((element, index)=>{
+    if (!outputForced[index]){
+      let result = calculateFormula(element.formula);
+      if (element.execute){
+        if (outputGPIO[index].readSync())
+          result = 'on';
+        else
+            result = result?'execute':'off';
+      } else {
+        outputGPIO[index].writeSync(result);
+        result = result?'on':'off';
+      }
+      io.emit('state', {name: 'output' + index, state: result});
+    }
+  });
+}
+
 function average(list){
   if (list.length===0)
     return 0;
@@ -117,12 +163,68 @@ function average(list){
   return (sum / list.length);
 }
 
-function execute(){
+function emitState(type, index){
+  let state;
+  switch(type){
+    case 'output':
+      if (outputForced[index]){
+        state = (outputForced[index]-1)?'forcedOn':'forcedOff';
+      }
+      else{
+        state = (outputGPIO[index].readSync())?'on':'off';
+      }
+    break;
+    case 'input':
+      if (inputForced[index]){
+        state = (inputForced[index]-1)?'forcedOn':'forcedOff';
+      }
+      else{
+        state = (inputGPIO[index].readSync())?'on':'off';
+      }
+    break;
+  }
+  io.emit('state', {name:  type + index, state});
+}
+
+function emitAllState(){
+  config.input.map((element, index)=>{
+    let state;
+    if (inputForced[index]){
+      state = (inputForced[index]-1)?'forcedOn':'forcedOff';
+    }
+    else{
+      state = (inputGPIO[index].readSync())?'on':'off';
+    }
+    io.emit('state', {name: 'input' + index, state});
+  });
+
   config.output.map((element, index)=>{
-    if (element.execute){
-      let result = calculateFormula(element.fomula);
-      io.emit('state', {name: 'table' + index, state: result});
+    let state;
+    if (outputForced[index]){
+      state = (outputForced[index]-1)?'forcedOn':'forcedOff';
+    }
+    else{
+      state = (outputGPIO[index].readSync())?'on':'off';
+    }
+    io.emit('state', {name: 'output' + index, state});
+  });
+}
+
+function execute(){
+  if (numExecuting!=0) return;
+  console.log('execute')
+  config.output.map((element, index)=>{
+    if (element.execute && !outputForced[index]){
+      let result = calculateFormula(element.formula);
+      io.emit('state', {name: 'output' + index, state: result});
       outputGPIO[index].writeSync(result);
+      numExecuting++;
+      setTimeout(()=>{
+        console.log('stop execute'+index)
+        outputGPIO[index].writeSync(0);
+        io.emit('state', {name: 'output' + index, state:'off'});
+        numExecuting--;
+      }, element.seconds*1000);
     }
   });
 }
@@ -130,7 +232,6 @@ function execute(){
 function calculateValues(excelRow){
   config.table.map((element, index)=>{
     let result = calculateFormula(element.formula, excelRow);
-    console.log(result);
     if (element.factor === 0 && typeof(result) === 'string'){
       result = result.slice(-element.digits);
     } else {
@@ -146,37 +247,36 @@ function calculateFormula(formula, excelRow){
 
     let row = x.charCodeAt(1) - 65;
     let column = parseInt(x[2]);
-    return tableContent[row*tableColumns + column - 1];
+    return 'tableContent[' + (row*tableColumns + column - 1) + ']';
 
   }).replace(/#I[0-9]/g, (x) =>{
 
     x=parseInt(x[2]);
-    return inputGPIO[x].readSync();
+    if (inputForced[x])
+      return inputForced[x]-1;
+    else
+      return inputGPIO[x].readSync();
 
   }).replace(/#O[0-9]/g, (x) =>{
 
     x=parseInt(x[2]);
-    return outputGPIO[x].readSync();
+    if (outputForced[x])
+      return outputForced[x]-1;
+    else
+      return outputGPIO[x].readSync();
 
   }).replace(/\$[A-Z]/g, (x) =>{
 
     x = x.charCodeAt(1) - 65;
-    if (typeof(excelRow[x]) === 'string'){
-      return '\'' + excelRow[x] + '\'';
-    }
-    else{
-      return excelRow[x];
-    }
+    return 'excelRow['+x+']';
 
   }).replace(/com[0-9]/g, (x) =>{
 
     x=parseInt(x[3]);
-    if (config.serial[x].factor === 0){
-      return '\'' + latestLogEntry[x] + '\'';
-    }
-    else{
-      return latestLogEntry[x];
-    }
+    if (config.serial[x].factor === 0)
+      return 'latestLogEntry[' + x + ']';
+    else
+      return 'Number(latestLogEntry[' + x + '])';
 
   }).replace(/date/g, (x) =>{
 
@@ -185,8 +285,8 @@ function calculateFormula(formula, excelRow){
   }).replace('and', '&&')
   .replace('or', '||');
 
-  console.log(excelRow);
-  return eval(formula) || '';
+  let result = eval(formula);
+  return (typeof(result)==='undefined')?'':result;
 }
 
 for(i = 0; i < config.serial.length; i++){
@@ -205,6 +305,7 @@ for(i = 0; i < config.serial.length; i++){
         if (excelFile){
           handleTable(index);
         }
+        handleOutput();
       }, conf.timeout * 1000);
       latestLogEntry[index] = decode(conf.testMessage, conf);
     } else {
@@ -249,9 +350,10 @@ for(i = 0; i < config.serial.length; i++){
           let newEntry = (remainingEntries[index].slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries[index].length:(nextEntryEnd+nextEntry))).toString();
           
           latestLogEntry[index] = decode(newEntry, conf);
-          if (excelFile){
+          if(excelFile){
             handleTable(index);
           }
+          handleOutput();
 
           remainingEntries[index]=remainingEntries[index].slice(nextEntry + nextEntryEnd);
           //console.log(remainingEntries);
@@ -304,9 +406,14 @@ app.get('/settings', function(request, response){
     response.sendFile('settings.html', { root: __dirname});
 });
 
-app.get('/fileupload', function(request, response){
+if (config.exposeUpload){
+  app.get('/fileupload', function(request, response){
     response.sendFile('fileUpload.html', { root: __dirname});
-});
+  });
+  app.get('/filesettings', function(request, response){
+    response.sendFile('fileSettings.html', { root: __dirname});
+  });
+}
 
 app.get('/config.js', function(request, response){
     response.sendFile('config.js', { root: __dirname});
@@ -375,6 +482,7 @@ app.post('/upload', (req, res) => {
 io.on('connection', function(socket){
   console.log('a user connected');
   socket.emit('ip', ip.address());
+  emitAllState();
 
   socket.on('settings', function(config){
 
@@ -407,6 +515,24 @@ io.on('connection', function(socket){
         return;
       }
     });
+  });
+
+  socket.on('forceInput', index =>{
+    inputForced[index] = (inputForced[index]+1)%3;
+    if (inputForced[index]){
+      handleInput(index, inputForced[index]-1);
+    }
+    else {
+      handleInput(index, inputGPIO[index].readSync());
+    }
+    handleOutput();
+    emitState('input', index);
+  });
+
+  socket.on('forceOutput', index =>{
+    outputForced[index] = (outputForced[index]+1)%3;
+    handleOutput();
+    emitState('output', index);
   });
 });
 

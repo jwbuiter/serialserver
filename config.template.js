@@ -189,31 +189,26 @@ var config ={
     {
       name : '',
       formula : '',
-      seconds : 0,
       GPIO : 19,
     },
     {
       name : '',
       formula : '',
-      seconds : 0,
       GPIO : 16,
     },
     {
       name : '',
       formula : '',
-      seconds : 0,
       GPIO : 26,
     },
     {
       name : '',
       formula : '',
-      seconds : 0,
       GPIO : 20,
     },
     {
       name : '',
       formula : '',
-      seconds : 0,
       GPIO : 21,
     },
   ], 
