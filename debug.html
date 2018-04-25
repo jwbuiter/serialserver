@@ -7,7 +7,8 @@
       body { font-style: : Helvetica, Arial; font-size: 0px;}
       table { width: 100%; text-align: center; border: none; border-collapse: collapse;}
       tr { height: 29px; }
-      td { text-align: center; font-size: 25px; border-style: bold; }
+      td { text-align: center; font-size: 25px; border-style: bold;}
+      input { text-align: center; font-size: 25px; border-style: bold; }
       .header { background-color: yellow; font-weight: bold;}
       .result { background-color: #98FB98;}
       .buttons {position: fixed; right: 0; top: 30px; font-size:20px;}
@@ -176,7 +177,12 @@
 
       $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).html(conf.name || (String.fromCharCode(65 + i % numColumns) + (i % numColumns + 1)));
       $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).addClass('table');
-      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).html('-')
+      if (conf.formula == '#'){
+        $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).html('<input type="text" id="manual' + i + '">')
+      }
+      else{
+        $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).html('-')
+      }
       $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).addClass('table'+i);
       $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).addClass('table');
     }

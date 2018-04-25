@@ -20,10 +20,9 @@
     "express": "^4.16.2",
     "express-fileupload": "^0.4.0",
     "ip": "^1.1.5",
-    "node-xlsx": "^0.12.0",
     "onoff": "^2.0.0",
     "serialport": "^6.0.5",
     "socket.io": "^2.0.4",
-    "xlsx": "^0.12.2"
+    "xlsx": "^0.12.10"
   }
 }

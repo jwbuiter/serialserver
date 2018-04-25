@@ -6,11 +6,12 @@ var server = app.listen(config.port);
 var io = require('socket.io').listen(server);
 var fs = require('fs');
 var ip = require("ip");
-var xlsx = require('node-xlsx');
+var XLSX = require('xlsx');
 const { exec } = require('child_process');
 var serialPort = require('serialport');
 var Gpio = require('onoff').Gpio;
 var config = require('./config');
+var aux = require('./auxiliaryFunctions')
 
 const tableColumns = 5;
 
@@ -47,10 +48,12 @@ var inputGPIO = config.input.map((element, index) =>{
 onlineGPIO.writeSync(1);
 
 // For reading the excel file
-var excelFile;
 var justReadRFID;
+var excelSheet;
 if (fs.existsSync(__dirname + '/data/data.xls')){
-  excelFile = xlsx.parse(__dirname + '/data/data.xls');
+  let excelFile = XLSX.readFile(__dirname + '/data/data.xls');
+  let sheetName = excelFile.Workbook.Sheets[0].name;
+  excelSheet = aux.sheetToArray(excelFile.Sheets[sheetName]);
 }
  
 
@@ -89,7 +92,7 @@ function decode(entry, config){
 
 function handleTable(index){
   if (index === config.triggerCom){
-    let foundRow = excelFile[0].data.find((row) =>{
+    let foundRow = excelSheet.find((row) =>{
       return (row[config.searchColumn] === latestLogEntry[config.searchCom]);
     });
     if (foundRow){
@@ -231,7 +234,10 @@ function execute(){
 
 function calculateValues(excelRow){
   config.table.map((element, index)=>{
+    if (element.formula == '#') return;
+
     let result = calculateFormula(element.formula, excelRow);
+    console.log(result);
     if (element.factor === 0 && typeof(result) === 'string'){
       result = result.slice(-element.digits);
     } else {
@@ -302,7 +308,7 @@ for(i = 0; i < config.serial.length; i++){
     if (config.testMode){
       setInterval(()=> {
         decode(conf.testMessage, conf);
-        if (excelFile){
+        if (excelSheet){
           handleTable(index);
         }
         handleOutput();
@@ -350,7 +356,7 @@ for(i = 0; i < config.serial.length; i++){
           let newEntry = (remainingEntries[index].slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries[index].length:(nextEntryEnd+nextEntry))).toString();
           
           latestLogEntry[index] = decode(newEntry, conf);
-          if(excelFile){
+          if(excelSheet){
             handleTable(index);
           }
           handleOutput();
