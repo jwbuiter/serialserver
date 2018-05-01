@@ -94,11 +94,15 @@
       var date = new Date(time);
       return date.getDate() + '-' + (date.getMonth()+1) + '-' + (date.getYear()+1900);
     }
+
     function printTime(time){
       var date = new Date(time);
       return date.getHours() + ':' + ("0" + date.getMinutes()).slice(-2) + ':' + ("0" + date.getSeconds()).slice(-2);
     }
 
+    function manualChange(index){
+      socket.emit('manual', {index, value: $('#manual'+index).val()})
+    }
 
     if (!config.exposeUpload){
       $('#uploadButton').remove();
@@ -178,10 +182,10 @@
       $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).html(conf.name || (String.fromCharCode(65 + i % numColumns) + (i % numColumns + 1)));
       $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).addClass('table');
       if (conf.formula == '#'){
-        $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).html('<input type="text" id="manual' + i + '">')
+        $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).html('<input onkeyup="manualChange('+i+')" type="text" id="manual' + i + '">');
       }
       else{
-        $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).html('-')
+        $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).html('-');
       }
       $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).addClass('table'+i);
       $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).addClass('table');
@@ -258,6 +262,17 @@
           $('.' + config.serial[i].name+'avg').html(msg.entry);
         }
     });
+
+    socket.on('clear', function(){
+      for(var i = 0; i<config.table.length; i++){
+        if (config.table[i].formula == '#'){
+          $('#manual'+i).val('');
+        }
+        else{
+          $('.table'+i).html('');
+        }
+      }
+    })
   </script>
 </body>
 </html>

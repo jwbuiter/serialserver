@@ -16,7 +16,7 @@ var aux = require('./auxiliaryFunctions')
 const tableColumns = 5;
 
 var latestLogEntry = [];
-var tableContent = [];
+var tableContent = new Array(config.output.length ).fill('');
 var entryList = {};
 var remainingEntries = [];
 var onlineGPIO = new Gpio(config.onlineGPIO, 'out');
@@ -55,7 +55,15 @@ if (fs.existsSync(__dirname + '/data/data.xls')){
   let sheetName = excelFile.Workbook.Sheets[0].name;
   excelSheet = aux.sheetToArray(excelFile.Sheets[sheetName]);
 }
- 
+
+var fileName;
+var saveArray = [];
+if (config.saveToFile){
+  fileName = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + '.csv';
+  saveArray[0]=['date'].concat(config.table.map(element=>element.name));
+  console.log(saveArray);
+}
+
 
 function decode(entry, config){
   let decodedEntry;
@@ -120,6 +128,8 @@ function handleInput(index, value){
     case 'exe':
       if (value === 1 && !executeBlock && executeUp){
         execute();
+      } else if (value === 0 && !executeBlock && executeUp){
+        io.emit('clear');
       }
       break;
     case 'exebl':
@@ -230,6 +240,17 @@ function execute(){
       }, element.seconds*1000);
     }
   });
+  if (fileName){
+    let newRow = [new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')];
+    newRow = newRow.concat(tableContent);
+    saveArray.push(newRow);
+
+    let wb = XLSX.utils.book_new();
+    let ws = XLSX.utils.aoa_to_sheet(saveArray);
+    XLSX.utils.book_append_sheet(wb, ws, 'data');
+    XLSX.writeFile(wb, __dirname + '/save/' + fileName);
+    console.log(saveArray);
+  }
 }
 
 function calculateValues(excelRow){
@@ -237,7 +258,6 @@ function calculateValues(excelRow){
     if (element.formula == '#') return;
 
     let result = calculateFormula(element.formula, excelRow);
-    console.log(result);
     if (element.factor === 0 && typeof(result) === 'string'){
       result = result.slice(-element.digits);
     } else {
@@ -441,24 +461,6 @@ app.get('/restart', (request, response) => {
   process.exit();
 });
 
-app.get('/terminal', (request, response) => {
-  response.send('<meta http-equiv="refresh" content="0; url=/" /><title>MBDCcomUnit</title>Opening terminal.')
-  console.log('test');
-  exec('export DISPLAY=:1 && xhost +localhost', (err, stdout, stderr) => {
-    if (err) {
-      console.error(`exec error: ${err}`);
-      return;
-    }
-  });
-  exec('DISPLAY=:1 lxterminal', (err, stdout, stderr) => {
-    if (err) {
-      console.error(`exec error: ${err}`);
-      return;
-    }
-  });
-  exec('bash DISPLAY=:1 lxterminal');
-});
-
 app.use('/res', express.static('res'))
 
 app.use('/upload', fileUpload());
@@ -540,6 +542,11 @@ io.on('connection', function(socket){
     handleOutput();
     emitState('output', index);
   });
+
+  socket.on('manual', msg =>{
+    tableContent[msg.index] = msg.value;
+    console.log(msg.value);
+  })
 });
 
 setInterval(() =>{

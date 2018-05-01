@@ -1,4 +1,6 @@
 config.js
 seriallog*.txt
 data/*
+save/*
 !data/.gitkeep
+!save/.gitkeep
