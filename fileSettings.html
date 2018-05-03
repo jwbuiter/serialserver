@@ -46,12 +46,14 @@
       }
     }
     $(address(0, 0)).append($('<b>').html('Trigger'));
-    $(address(1, 0)).append($('<b>').html('Search'));
-    $(address(2, 0)).append($('<b>').html('Save to file'));
-    $(address(3, 0)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
-    $(address(4, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
-    $(address(5, 0)).append($('<input type="button" value="Save config" onclick="javascript:goDebug()">'));
-    $(address(6, 0)).append($('<input type="button" value="Load config" onclick="javascript:setSettings()">'));
+    $(address(1, 0)).append($('<b>').html('Search Column'));
+    $(address(2, 0)).append($('<b>').html('Search Com'));
+    $(address(3, 0)).append($('<b>').html('Save to file'));
+
+    $(address(5, 0)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
+    $(address(6, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
+    //$(address(5, 0)).append($('<input type="button" value="Save config" onclick="javascript:goDebug()">'));
+    //$(address(6, 0)).append($('<input type="button" value="Load config" onclick="javascript:setSettings()">'));
 
 
     $(address(0, 1)).append($('<select id ="triggerCom">').html('<option value="0">Com 0</option><option value="1">Com 1</option>'));
