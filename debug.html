@@ -7,14 +7,14 @@
       body { font-style: : Helvetica, Arial; font-size: 0px;}
       table { width: 100%; text-align: center; border: none; border-collapse: collapse;}
       tr { height: 29px; }
-      td { text-align: center; font-size: 25px; border-style: bold;}
-      input { text-align: center; font-size: 25px; border-style: bold; }
-      .header { background-color: yellow; font-weight: bold;}
+      td { text-align: center; font-size: 25px;}
+      input { text-align: center; font-size: 25px;}
+      .header { background-color: yellow;}
       .result { background-color: #98FB98;}
       .buttons {position: fixed; right: 0; top: 30px; font-size:20px;}
       .logo {position: fixed; left: 0; top: 30px;}
-      .table{ font-size: 30px; color: black; background-color: cyan; font-weight: bold;}
-      .output.off{ background-color: #98FB98; }
+      .table{color: black; background-color: cyan;}
+      .output.off{ background-color: #3fd35d; }
       .output.on{ background-color: red;}
       .output.execute{ background-color: #FFC000; }
       .output.forcedOn{ background-color: #CC66FF; }
@@ -47,14 +47,23 @@
   <script>
     var socket = io();
     const numColumns = 5;
-    const numRows = 24;
+    var numRows = 0;
 
     const numTable = config.table.length;
 
     const numOutputs = config.output.length;
     const numInputs = config.input.length;
 
-    function address(rowNum, columnNum){
+    function address(columnNum, rowNum){
+      while (rowNum>=numRows){
+        console.log(numRows);
+        var currentRow = $('<tr>');
+        $('#content').append(currentRow);
+        for (let i = 0; i < numColumns; i++){
+          currentRow.append($('<td>').attr('id', 'c' + i + 'r' + numRows));
+        }
+        numRows++;
+      }
       return '#c' + columnNum + 'r' + rowNum;
     }
 
@@ -111,14 +120,6 @@
       $('#shutDownButton').remove();
     }
 
-    for (let i = 0; i < numRows; i++){
-      var currentRow = $('<tr>');
-      $('#content').append(currentRow);
-      for (let j = 0; j < numColumns; j++){
-        currentRow.append($('<td>').attr('id', address(j, i).slice(1)));
-      }
-    }
-
     for (let i = 0; i < numColumns; i++){
       $(address(i, 0)).addClass('header');
     }
@@ -172,50 +173,88 @@
     }
 
     cursor +=2;
-  
-    for (let i = 0; i < numTable; i++){
-      let conf = config.table[i];
+    
+    let tableUsed = false;
+    let rowUsed = false;
+    let newRows = Math.ceil(numTable/numColumns);
+    let index = 0;
+    for (let i = 0; i < newRows; i++){
+      for (let j = 0; j < numColumns; j++){
+        let conf = config.table[index];
+        
+        if (conf.formula)
+        {
+          rowUsed = true;
+          tableUsed = true;
 
-      if (!conf.formula)
-        continue;
-
-      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).html(conf.name || (String.fromCharCode(65 + i % numColumns) + (i % numColumns + 1)));
-      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).addClass('table');
-      if (conf.formula == '#'){
-        $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).html('<input onkeyup="manualChange('+i+')" type="text" id="manual' + i + '">');
+          $(address(j, cursor )).html(conf.name || (String.fromCharCode(65 + index % numColumns) + (index % numColumns + 1)));
+          $(address(j, cursor )).addClass('table');
+          if (conf.formula == '#'){
+            $(address(j, cursor + 1)).html('<input onkeyup="manualChange('+index+')" type="text" id="manual' + index + '">');
+          }
+          else{
+            $(address(j, cursor + 1)).html('-');
+          }
+          $(address(j, cursor + 1)).addClass('table'+index);
+          $(address(j, cursor + 1)).addClass('table');
+        }
+        index++;
       }
-      else{
-        $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).html('-');
+
+      if (rowUsed)
+        cursor += 2;
+        
+      rowUsed = false;
+    }
+    
+    if (tableUsed){
+      cursor ++;
+    }
+    
+    newRows = Math.ceil(numOutputs/numColumns);
+    index=0;
+    for (let i = 0; i < newRows; i++){
+      for (let j = 0; j < numColumns; j++){
+        let conf = config.output[i*numColumns + j];
+
+        if (conf.formula){
+          rowUsed = true;
+
+          $(address(j, cursor)).html(conf.name );
+          $(address(j, cursor)).addClass('output'+index);
+          $(address(j, cursor)).addClass('output off');
+          $(address(j, cursor)).click(function (){ clickOutput(index)});
+        }
+        index++;
       }
-      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).addClass('table'+i);
-      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns) + 1)).addClass('table');
+      if (rowUsed)
+        cursor += 2;
+        
+      rowUsed = false;
     }
 
-    cursor += 2 * numTable/numColumns + 1;
+    newRows = Math.ceil(numInputs/numColumns);
+    index = 0;
+    for (let i = 0; i < newRows; i++){
+      for (let j = 0; j< numColumns; j++){
+        let conf = config.input[i*numColumns + j];
 
-    for (let i = 0; i < numOutputs; i++){
-      let conf = config.output[i];
-
-      if (!conf.formula)
-        continue;
-
-      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).html(conf.name );
-      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).addClass('output'+i);
-      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).addClass('output off');
-      $(address(i % numColumns, cursor +  2*Math.floor(i/numColumns))).click(function (){ clickOutput(i)});
+        if (conf.formula){
+          rowUsed = true;
+      
+          $(address(j, cursor )).html(conf.name );
+          $(address(j, cursor )).addClass('input'+index);
+          $(address(j, cursor )).addClass('input off');
+          $(address(j, cursor )).click(function (){ clickInput(index)});
+        }
+        index++;
+      }
+      if (rowUsed)
+        cursor += 2;
+        
+      rowUsed = false;
     }
-   
-    cursor +=2* numOutputs/numColumns ;
-
-    for (let i = 0; i < numInputs; i++){
-      let conf = config.input[i];
-
-      $(address(i % numColumns, cursor +  Math.floor(i/numColumns))).html(conf.name );
-      $(address(i % numColumns, cursor +  Math.floor(i/numColumns))).addClass('input'+i);
-      $(address(i % numColumns, cursor +  Math.floor(i/numColumns))).addClass('input off');
-      $(address(i % numColumns, cursor +  Math.floor(i/numColumns))).click(function (){ clickInput(i)});
-    }
-
+    console.log(cursor);
     var previousEntry = [];
     var previousTime = [];
     for(var i = 0; i<config.serial.length; i++){
@@ -253,6 +292,7 @@
     });
 
     socket.on('state', function(msg){
+      console.log(msg);
       $('.'+msg.name).removeClass('on off forcedOn forcedOff execute').addClass(msg.state);
     })
 

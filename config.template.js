@@ -223,8 +223,9 @@ var config ={
   ],
   triggerCom : 0,
   searchColumn : 0,
-  searchCom : 1,
+  waitForOther : true,
   saveToFile : true,
+  useFile : true,
 
   exposeUpload: false,
   testMode: false

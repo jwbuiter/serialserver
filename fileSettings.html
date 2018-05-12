@@ -47,8 +47,10 @@
     }
     $(address(0, 0)).append($('<b>').html('Trigger'));
     $(address(1, 0)).append($('<b>').html('Search Column'));
-    $(address(2, 0)).append($('<b>').html('Search Com'));
+    $(address(2, 0)).append($('<b>').html('Wait for other'));
     $(address(3, 0)).append($('<b>').html('Save to file'));
+    $(address(4, 0)).append($('<b>').html('Use file'));
+
 
     $(address(5, 0)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
     $(address(6, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
@@ -58,8 +60,10 @@
 
     $(address(0, 1)).append($('<select id ="triggerCom">').html('<option value="0">Com 0</option><option value="1">Com 1</option>'));
     $(address(1, 1)).append($('<input type="text" id="searchColumn">'));
-    $(address(2, 1)).append($('<select id ="searchCom">').html('<option value="0">Com 0</option><option value="1">Com 1</option>'));
+    $(address(2, 1)).append($('<input type="checkbox" id="waitForOther">'));
     $(address(3, 1)).append($('<input type="checkbox" id="saveToFile">'));
+    $(address(4, 1)).append($('<input type="checkbox" id="useFile">'));
+    
 
     $(address(0, 3)).append($('<b>').html('Table'));
     $(address(1, 3)).append($('<b>').html('Name'));
@@ -240,8 +244,9 @@
 
     $('#triggerCom').val(config.triggerCom);
     $('#searchColumn').val(config.searchColumn);
-    $('#searchCom').val(config.searchCom);
+    $('#waitForOther').prop('checked', config.waitForOther);
     $('#saveToFile').prop('checked', config.saveToFile);
+    $('#useFile').prop('checked', config.useFile);
 
     var socket = io();
 
@@ -330,14 +335,15 @@
           });
         }
         config.triggerCom = Number($('#triggerCom').val());
-        config.searchCom = Number($('#searchCom').val());
         config.searchColumn = Number($('#searchColumn').val());
+        config.waitForOther = $('#waitForOther').prop('checked');
         config.saveToFile = $('#saveToFile').prop('checked');
-
+        config.useFile = $('#useFile').prop('checked');
+        
         socket.emit('settings',config);
         setTimeout(function(){ 
           window.location.href = '/';
-        }, 1000);
+        }, 5000);
       }
     }
 
