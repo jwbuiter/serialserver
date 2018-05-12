@@ -583,3 +583,5 @@ process.on ('SIGINT', () => {
   console.log ('\nCTRL+C...');
   process.exit (0);
 });
+
+handleOutput();
