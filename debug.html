@@ -92,6 +92,7 @@
     }
 
     function clickOutput(index){
+      console.log(index);
       socket.emit('forceOutput', index);
     }
 
@@ -186,7 +187,7 @@
         {
           rowUsed = true;
           tableUsed = true;
-
+          
           $(address(j, cursor )).html(conf.name || (String.fromCharCode(65 + index % numColumns) + (index % numColumns + 1)));
           $(address(j, cursor )).addClass('table');
           if (conf.formula == '#'){
@@ -215,15 +216,16 @@
     index=0;
     for (let i = 0; i < newRows; i++){
       for (let j = 0; j < numColumns; j++){
-        let conf = config.output[i*numColumns + j];
+        let conf = config.output[index];
 
         if (conf.formula){
           rowUsed = true;
-
+          
+          let argument = index;
           $(address(j, cursor)).html(conf.name );
           $(address(j, cursor)).addClass('output'+index);
           $(address(j, cursor)).addClass('output off');
-          $(address(j, cursor)).click(function (){ clickOutput(index)});
+          $(address(j, cursor)).click(function (){ clickOutput(argument)});
         }
         index++;
       }
@@ -239,13 +241,14 @@
       for (let j = 0; j< numColumns; j++){
         let conf = config.input[i*numColumns + j];
 
-        if (conf.formula){
+        if (conf.name){
           rowUsed = true;
       
+          let argument = index;
           $(address(j, cursor )).html(conf.name );
           $(address(j, cursor )).addClass('input'+index);
           $(address(j, cursor )).addClass('input off');
-          $(address(j, cursor )).click(function (){ clickInput(index)});
+          $(address(j, cursor )).click(function (){ clickInput(argument)});
         }
         index++;
       }
