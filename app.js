@@ -157,7 +157,7 @@ function handleOutput(){
         else
             result = result?'execute':'off';
       } else {
-        outputGPIO[index].writeSync(result);
+        outputGPIO[index].writeSync(result?1:0);
         result = result?'on':'off';
       }
       io.emit('state', {name: 'output' + index, state: result});
@@ -279,17 +279,17 @@ function calculateFormula(formula, excelRow){
 
     x=parseInt(x[2]);
     if (inputForced[x])
-      return inputForced[x]-1;
+      return (inputForced[x]-1)?'true':'false';
     else
-      return inputGPIO[x].readSync();
+      return inputGPIO[x].readSync()?'true':'false';
 
   }).replace(/#O[0-9]/g, (x) =>{
 
     x=parseInt(x[2]);
     if (outputForced[x])
-      return outputForced[x]-1;
+      return (outputForced[x]-1)?'true':'false';
     else
-      return outputGPIO[x].readSync();
+      return outputGPIO[x].readSync()?'true':'false';
 
   }).replace(/\$[A-Z]/g, (x) =>{
 
