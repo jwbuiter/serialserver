@@ -559,6 +559,9 @@ io.on('connection', function(socket){
     if (outputForced[index]>0){
       outputGPIO[index].writeSync(outputForced[index]-1);
     }
+    if (outputForced[index]==0 && config.output[index].execute){
+      outputGPIO[index].writeSync(0);
+    }
     handleOutput();
     emitState('output', index);
   });
