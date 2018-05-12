@@ -539,6 +539,9 @@ io.on('connection', function(socket){
 
   socket.on('forceOutput', index =>{
     outputForced[index] = (outputForced[index]+1)%3;
+    if (outputForced[index]-1>0){
+      outputGPIO[index].writeSync(outputForced[index]-1);
+    }
     handleOutput();
     emitState('output', index);
   });
