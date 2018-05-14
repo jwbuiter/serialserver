@@ -64,7 +64,9 @@
     }
 
     function goFileSettings(){
-      window.location.href = '/filesettings';
+      if (confirm("Do you want to go to the file settings?")){
+        window.location.href = '/filesettings';
+      }
     }
   </script>
 </body>

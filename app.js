@@ -111,7 +111,7 @@ function handleTable(index){
       return (row[config.searchColumn] === latestLogEntry[config.triggerCom]);
     });
   }
-  else {
+  if (!foundRow){
     foundRow = new Array(26).fill('');
   }
   calculateValues(foundRow);
@@ -272,7 +272,9 @@ function calculateValues(excelRow){
     let result = calculateFormula(element.formula, excelRow);
     if (element.factor === 0 && typeof(result) === 'string'){
       result = result.slice(-element.digits);
-    } else {
+    } else if (typeof(result) === 'boolean'){
+      result = result?1:0;
+    }else {
       result = (result*element.factor).toFixed(element.digits);
     }
     tableContent[index]=result;
@@ -289,7 +291,7 @@ function calculateFormula(formula, excelRow){
 
   }).replace(/#I[0-9]/g, (x) =>{
 
-    x=parseInt(x[2]);
+    x=parseInt(x[2])-1;
     if (inputForced[x])
       return (inputForced[x]-1)?'true':'false';
     else
@@ -297,7 +299,7 @@ function calculateFormula(formula, excelRow){
 
   }).replace(/#O[0-9]/g, (x) =>{
 
-    x=parseInt(x[2]);
+    x=parseInt(x[2])-1;
     if (outputForced[x])
       return (outputForced[x]-1)?'true':'false';
     else
@@ -346,6 +348,7 @@ for(i = 0; i < config.serial.length; i++){
         handleOutput();
       }, conf.timeout * 1000);
       latestLogEntry[index] = decode(conf.testMessage, conf);
+      triggerValues[index] = latestLogEntry[index];
     } else {
 
       var port = new serialPort(conf.port, {
