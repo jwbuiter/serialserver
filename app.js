@@ -27,7 +27,9 @@ var executeUp = true;
 
 var outputExecuting = new Array(config.output.length ).fill(0);
 var outputForced = new Array(config.output.length ).fill(0);
+var outputForcedLast = new Array(config.output.length ).fill(false);
 var inputForced = new Array(config.input.length ).fill(0);
+var inputForcedLast = new Array(config.input.length).fill(false);
 
 var comGPIO = config.comGPIO.map(element =>{
   return new Gpio(element, 'out')
@@ -41,8 +43,11 @@ var inputGPIO = config.input.map((element, index) =>{
   let newInput = new Gpio(element.GPIO, 'in', 'both');
   newInput.watch((err, val)=>{
     console.log('input'+index+' changed');
-    if (!inputForced[index])
-      handleInput(index, val);
+    if (!inputForced[index]){
+      handleInput(index, inputGPIO[index].readSync());
+      handleTable();
+      handleOutput();
+    }
   });
   return newInput;
 });
@@ -57,6 +62,7 @@ if (fs.existsSync(__dirname + '/data/data.xls')){
   let sheetName = excelFile.Workbook.Sheets[0].name;
   excelSheet = aux.sheetToArray(excelFile.Sheets[sheetName]);
 }
+var foundRow = new Array(26).fill('');
 
 var fileName;
 var saveArray = [];
@@ -99,23 +105,30 @@ function decode(entry, config){
   return decodedEntry;
 }
 
-function handleTable(index){
+function handleTable(){
   if (config.waitForOther && triggerValues.reduce((acc, cur) => (acc || (cur == null)), false)){
     console.log('other value not yet defined');
     return;
   }
   
-  let foundRow;
   if (config.useFile && excelSheet){
     foundRow = excelSheet.find((row) =>{
       return (row[config.searchColumn] === latestLogEntry[config.triggerCom]);
     });
   }
+
+  if (!foundRow && config.useFile){
+    io.emit('notfound', true);
+  }
+  else{
+    io.emit('notfound', false);
+  }
+
   if (!foundRow){
     foundRow = new Array(26).fill('');
   }
-  calculateValues(foundRow);
-  
+
+  calculateValues();
 }
 
 function handleInput(index, value){
@@ -149,7 +162,6 @@ function handleInput(index, value){
           executeUp = false;
       break;
   }
-  
 }
 
 function handleOutput(){
@@ -265,24 +277,24 @@ function executeStop(){
   });
 }
 
-function calculateValues(excelRow){
+function calculateValues(){
   config.table.map((element, index)=>{
     if (element.formula == '#') return;
 
-    let result = calculateFormula(element.formula, excelRow);
-    if (element.factor === 0 && typeof(result) === 'string'){
-      result = result.slice(-element.digits);
+    let result = calculateFormula(element.formula);
+    if (typeof(result) === 'number'){
+      result = result.toFixed(element.digits); 
     } else if (typeof(result) === 'boolean'){
       result = result?1:0;
     }else {
-      result = (result*element.factor).toFixed(element.digits);
+      result = result.slice(-element.digits);
     }
     tableContent[index]=result;
     io.emit('value', {name: 'table' + index, value: result});
   });
 }
 
-function calculateFormula(formula, excelRow){
+function calculateFormula(formula){
   formula = formula.replace(/#[A-G][0-9]/g, (x) =>{
 
     let row = x.charCodeAt(1) - 65;
@@ -308,7 +320,7 @@ function calculateFormula(formula, excelRow){
   }).replace(/\$[A-Z]/g, (x) =>{
 
     x = x.charCodeAt(1) - 65;
-    return 'excelRow['+x+']';
+    return 'foundRow['+x+']';
 
   }).replace(/com[0-9]/g, (x) =>{
 
@@ -324,8 +336,25 @@ function calculateFormula(formula, excelRow){
 
   }).replace('and', '&&')
   .replace('or', '||');
-
-  let result = eval(formula);
+  let result;
+  try {
+    result = eval(formula);
+  }
+  catch (err) {
+    if (fs.existsSync('config.lastgood.js')){
+      fs.copyFileSync('config.lastgood.js', 'config.js');
+    }
+    else
+    {
+      fs.copyFileSync('config.template.js', 'config.js');
+    }
+    
+    setTimeout(function(){ 
+      onlineGPIO.writeSync(0);
+      io.emit('error', err.message);
+      process.exit();
+    }, 5000);
+  }
   return (typeof(result)==='undefined')?'':result;
 }
 
@@ -343,7 +372,7 @@ for(i = 0; i < config.serial.length; i++){
       setInterval(()=> {
         decode(conf.testMessage, conf);
         if (excelSheet){
-          handleTable(index);
+          handleTable();
         }
         handleOutput();
       }, conf.timeout * 1000);
@@ -397,8 +426,7 @@ for(i = 0; i < config.serial.length; i++){
           }
           triggerValues[index] = latestLogEntry[index];
           
-          handleTable(index);
-          
+          handleTable();
           handleOutput();
 
           remainingEntries[index]=remainingEntries[index].slice(nextEntry + nextEntryEnd);
@@ -513,12 +541,15 @@ io.on('connection', function(socket){
   emitAllState();
 
   socket.on('settings', function(config){
+    const name = 'config.js';
+
+    fs.copyFileSync(name, 'config.lastgood.js');
 
     let conf = JSON.stringify(config, null, 2).replace(/"/g, "'")
       .replace(/\\u00[0-9]{2}/g, match => String.fromCharCode(parseInt(match.slice(-2), 16)))
       .replace(/'[\w]+':/g, match => match.slice(1,-2)+' :');
 
-    const name = 'config.js';
+    
     try {
       fs.accessSync(name);
       fs.unlinkSync(name);
@@ -546,25 +577,53 @@ io.on('connection', function(socket){
   });
 
   socket.on('forceInput', index =>{
-    inputForced[index] = (inputForced[index]+1)%3;
+    if (inputForced[index]){
+      if (inputForcedLast[index]){
+        inputForcedLast[index] = false;
+        inputForced[index] = 0;
+      }
+      else {
+        inputForcedLast[index] = true;
+        inputForced[index] = 3 - inputForced[index];
+      }
+    }
+    else {
+      inputForced[index] = 2 - inputGPIO[index].readSync();
+    }
+
     if (inputForced[index]){
       handleInput(index, inputForced[index]-1);
     }
     else {
       handleInput(index, inputGPIO[index].readSync());
     }
+    handleTable();
     handleOutput();
     emitState('input', index);
   });
 
   socket.on('forceOutput', index =>{
-    outputForced[index] = (outputForced[index]+1)%3;
+    if (outputForced[index]){
+      if (outputForcedLast[index]){
+        outputForcedLast[index] = false;
+        outputForced[index] = 0;
+      }
+      else {
+        outputForcedLast[index] = true;
+        outputForced[index] = 3 - outputForced[index];
+      }
+    }
+    else {
+      outputForced[index] = 2 - outputGPIO[index].readSync();
+    }
+    
     if (outputForced[index]>0){
       outputGPIO[index].writeSync(outputForced[index]-1);
     }
     if (outputForced[index]==0 && config.output[index].execute){
       outputGPIO[index].writeSync(0);
     }
+    handleTable();
     handleOutput();
     emitState('output', index);
   });

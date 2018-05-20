@@ -5,15 +5,16 @@
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box;}
       body { font-style: : Helvetica, Arial; font-size: 0px;}
-      table { width: 100%; text-align: center; border: none; border-collapse: collapse;}
+      table { width: 100vw; text-align: center; border: none; border-collapse: collapse;}
       tr { height: 29px; }
-      td { text-align: center; font-size: 25px;}
+      td { text-align: center; font-size: 25px; max-width: 25vw;}
       input { text-align: center; font-size: 25px;}
       .header { background-color: yellow;}
       .result { background-color: #98FB98;}
       .buttons {position: fixed; right: 0; top: 30px; font-size:20px;}
       .logo {position: fixed; left: 0; top: 30px;}
       .table{color: black; background-color: cyan;}
+      .table.notfound{ background-color: red; }
       .output.off{ background-color: #3fd35d; }
       .output.on{ background-color: red;}
       .output.execute{ background-color: #FFC000; }
@@ -191,7 +192,7 @@
           $(address(j, cursor )).html(conf.name || (String.fromCharCode(65 + index % numColumns) + (index % numColumns + 1)));
           $(address(j, cursor )).addClass('table');
           if (conf.formula == '#'){
-            $(address(j, cursor + 1)).html('<input onkeyup="manualChange('+index+')" type="text" id="manual' + index + '">');
+            $(address(j, cursor + 1)).html('<input size="'+ conf.digits +'"" onkeyup="manualChange('+index+')" type="text" id="manual' + index + '">');
           }
           else{
             $(address(j, cursor + 1)).html('-');
@@ -304,6 +305,17 @@
         if (msg.name===config.serial[i].name){
           $('.' + config.serial[i].name+'avg').html(msg.entry);
         }
+    });
+
+    socket.on('notfound', function(msg){
+      $('.table').removeClass('notfound');
+      if (msg){
+        $('.table').addClass('notfound');
+      }
+    });
+
+    socket.on('error', function(msg){
+      alert(msg);
     });
 
     socket.on('clear', function(){

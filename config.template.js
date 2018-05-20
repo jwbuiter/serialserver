@@ -51,61 +51,61 @@ var config ={
     {
       name : '',
       formula : '',
-      factor : 0,
+      numeric : false,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      factor : 0,
+      numeric : false,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      factor : 0,
+      numeric : false,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      factor : 0,
+      numeric : false,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      factor : 0,
+      numeric : false,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      factor : 0,
+      numeric : false,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      factor : 0,
+      numeric : false,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      factor : 0,
+      numeric : false,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      factor : 0,
+      numeric : false,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      factor : 0,
+      numeric : false,
       digits : 0
     },
   ],
