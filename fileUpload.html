@@ -3,19 +3,16 @@
 <head>
   <title>MBDCcomUnit</title>
    <style>
-      *{font-size: 25px; padding:0;}
+      *{font-size: 25px; padding:0; margin: 0;}
       table { text-align: center; border: none; border-collapse: collapse;}
       tr { height: 29px; }
-      td { text-align: center;  border-style: bold; width: 12vw; height: 29px;}
-      td.small { font-size: 15px; }
-      input {text-align: center; width: 12vw;}
-      input.wide {width: 28vw;}
-      input[type="submit"]{width: auto;}
-      select { width: 12vw; }
+      td { text-align: center;  border-style: bold; height: 29px;}
+      input {text-align: center; width: 100%;}
+      select { width: 100%; }
     </style>
 </head>
 <body>
-  <div style="display: block; margin:0 auto;">
+  <div>
     <table id="content">
     </table>
   </div>
@@ -24,8 +21,9 @@
   <script src="/res/jquery-1.11.1.js"></script>
   <script src="/config.js"></script>
   <script type="text/javascript">
-    const numColumns = 7;
-    const numRows = 8;
+    var columnWidths = [10, 20, 60, 10]
+    const numColumns = 4;
+    const numRows = 11;
 
     function address(rowNum, columnNum){
       return '#c' + columnNum + 'r' + rowNum;
@@ -35,16 +33,21 @@
       var currentRow = $('<tr>');
       $('#content').append(currentRow);
       for (let j = 0; j < numColumns; j++){
-        currentRow.append($('<td>').attr('id', address(j, i).slice(1)));
+        newCell = $('<td>').attr('id', address(j, i).slice(1));
+        
+        newCell.css('max-width', columnWidths[j] + 'vw');
+        newCell.css('width', columnWidths[j] + 'vw');
+
+        currentRow.append(newCell);
       }
     }
 
     $(address(1, 6)).append($('<b>').html('File upload'));
-    $(address(3, 6)).append($('<form id="uploadForm" action="upload" method="post" enctype="multipart/form-data">').html('<input class="wide" id="fileLocation" type="file" name="importFile" accept=".xls">'));
-    $(address(3, 7)).append($('<input type="button" value="Import .xls" onclick="javascript:goSubmit()">'));
+    $(address(2, 6)).append($('<form id="uploadForm" action="upload" method="post" enctype="multipart/form-data">').html('<input class="wide" id="fileLocation" type="file" name="importFile" accept=".xls">'));
+    $(address(2, 8)).append($('<input type="button" style="width: 50%" value="Import .xls" onclick="javascript:goSubmit()">'));
+    $(address(2, 8)).append($('<input type="button" style="width: 50%" value="Cancel" onclick="javascript:goDebug()">'));
 
-    $(address(4, 6)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
-    $(address(5, 6)).append($('<input type="button" value="File settings" onclick="javascript:goFileSettings()">'));
+    $(address(2, 10)).append($('<input type="button" value="File settings" onclick="javascript:goFileSettings()">'));
 
 
     var socket = io();

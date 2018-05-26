@@ -4,11 +4,12 @@
   <title>MBDCcomUnit</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box;}
-      body { font-style: : Helvetica, Arial; font-size: 0px;}
+      body { font-style: : Helvetica, Arial; font-size: 0;}
       table { width: 100vw; text-align: center; border: none; border-collapse: collapse;}
       tr { height: 29px; }
       td { text-align: center; font-size: 25px; max-width: 25vw;}
       input { text-align: center; font-size: 25px;}
+      input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
       .header { background-color: yellow;}
       .result { background-color: #98FB98;}
       .buttons {position: fixed; right: 0; top: 30px; font-size:20px;}
@@ -19,12 +20,11 @@
       .output.on{ background-color: red;}
       .output.execute{ background-color: #FFC000; }
       .output.forcedOn{ background-color: #CC66FF; }
-      .output.forcedOff{ background-color: #FFCCFF; }
+      .output.forcedOff{ background-color: #EEBBEE; }
       .input.off{ background-color: #CCFFCC; }
       .input.on{ background-color: yellow;}
       .input.forcedOn{background-color: #CC66FF; }
-      .input.forcedOff{ background-color: #FFCCFF; }
-      #fileLoader {font-size: 30px; }
+      .input.forcedOff{ background-color: #EEBBEE; }
     </style>
 </head>
 <body>
@@ -57,7 +57,6 @@
 
     function address(columnNum, rowNum){
       while (rowNum>=numRows){
-        console.log(numRows);
         var currentRow = $('<tr>');
         $('#content').append(currentRow);
         for (let i = 0; i < numColumns; i++){
@@ -93,7 +92,6 @@
     }
 
     function clickOutput(index){
-      console.log(index);
       socket.emit('forceOutput', index);
     }
 
@@ -111,8 +109,18 @@
       return date.getHours() + ':' + ("0" + date.getMinutes()).slice(-2) + ':' + ("0" + date.getSeconds()).slice(-2);
     }
 
+    function manualIncrement(index){
+      $('#manual'+index).val(Number($('#manual'+index).val())+1);
+      manualChange(index);
+    }
+
+    function manualDecrement(index){
+      $('#manual'+index).val(Number($('#manual'+index).val())-1);
+      manualChange(index);
+    }
+
     function manualChange(index){
-      socket.emit('manual', {index, value: $('#manual'+index).val()})
+      socket.emit('manual', {index : index, value: $('#manual'+index).val()})
     }
 
     if (!config.exposeUpload){
@@ -192,7 +200,14 @@
           $(address(j, cursor )).html(conf.name || (String.fromCharCode(65 + index % numColumns) + (index % numColumns + 1)));
           $(address(j, cursor )).addClass('table');
           if (conf.formula == '#'){
-            $(address(j, cursor + 1)).html('<input size="'+ conf.digits +'"" onkeyup="manualChange('+index+')" type="text" id="manual' + index + '">');
+            if (conf.numeric){
+              $(address(j, cursor + 1)).html('<input style="height:33px; width:33px" value="-" onclick="manualDecrement('+index+')" type="button">');
+              $(address(j, cursor + 1)).append('<input style="width:'+ conf.digits +'vw" onkeyup="manualChange('+index+')" type="number" min="0" step="1" id="manual' + index + '">');
+              $(address(j, cursor + 1)).append('<input style="height:33px; width:33px" value="+" onclick="manualIncrement('+index+')" type="button">');
+            }
+            else{
+              $(address(j, cursor + 1)).html('<input style="width:'+ (conf.digits*2) +'vw" onkeyup="manualChange('+index+')" type="text" id="manual' + index + '">');
+            }
           }
           else{
             $(address(j, cursor + 1)).html('-');
@@ -258,7 +273,6 @@
         
       rowUsed = false;
     }
-    console.log(cursor);
     var previousEntry = [];
     var previousTime = [];
     for(var i = 0; i<config.serial.length; i++){
@@ -296,7 +310,6 @@
     });
 
     socket.on('state', function(msg){
-      console.log(msg);
       $('.'+msg.name).removeClass('on off forcedOn forcedOff execute').addClass(msg.state);
     })
 
@@ -325,6 +338,12 @@
         }
         else{
           $('.table'+i).html('');
+        }
+      }
+      for(var i = 0; i<config.serial.length; i++){
+        for(var j = 0; j<config.serial[i].entries; j++){
+          $('.' + config.serial[i].name+'time'+j).html('');
+          $('.' + config.serial[i].name+'entry'+j).html('');
         }
       }
     })

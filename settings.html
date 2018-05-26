@@ -15,6 +15,7 @@
     <tr>
       <td><h2>Settings com 0</h2></td>
       <td><h2>Settings com 1</h2></td>
+      <td><b>Test Mode</b><input type="checkbox" id="testMode"></td>
     </tr>
     <tr>
       <td><input type="number" id="baudRate0" min="0" step="1"></td>
@@ -138,6 +139,7 @@
         }
       });
     }
+    $('#testMode').prop('checked', config.testMode);
 
     var socket = io();
 
@@ -177,6 +179,8 @@
             }
           });
         }
+        config.testMode = $('#testMode').prop('checked');
+
         socket.emit('settings',config);
         setTimeout(function(){ 
           window.location.href = '/';

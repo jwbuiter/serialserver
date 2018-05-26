@@ -3,20 +3,18 @@
 <head>
   <title>MBDCcomUnit</title>
    <style>
-      *{font-size: 25px; padding:0;}
+      *{font-size: 25px; padding:0; margin: 0; }
       table { text-align: center; border: none; border-collapse: collapse;}
       tr { height: 29px; }
-      td { text-align: center;  border-style: bold; width: 12vw; height: 29px;}
+      td { text-align: center;  border-style: bold; height: 29px;}
       td.small { font-size: 15px; }
-      input {text-align: center; width: 11vw;}
-      input.wide {width: 28vw;}
+      input {text-align: center; width: 100%;}
       input[type="submit"]{width: auto;}
-      select { width: 12vw; }
-      select.wide {width: 28vw;}
+      select { width: 100%;}
     </style>
 </head>
 <body>
-  <div style="display: block; margin:0 auto;">
+  <div>
     <table id="content">
     </table>
   </div>
@@ -25,6 +23,14 @@
   <script src="/res/jquery-1.11.1.js"></script>
   <script src="/config.js"></script>
   <script type="text/javascript">
+    if (screen.width>1000){
+      var columnWidths = [12, 12, 28, 12, 12, 12, 12];
+    }
+    else{
+      var columnWidths = [14, 15, 25, 12, 18, 14, 16];
+      $('#content').css('width', columnWidths.reduce(function(acc, val) { return acc + val; }) + 'vw');
+    }
+    
     var socket = io();
     const numColumns = 7;
     var numRows = 0;
@@ -39,7 +45,10 @@
         var currentRow = $('<tr>');
         $('#content').append(currentRow);
         for (let i = 0; i < numColumns; i++){
-          currentRow.append($('<td>').attr('id', 'c' + i + 'r' + numRows));
+          var newCell = $('<td>').attr('id', 'c' + i + 'r' + numRows);
+          newCell.css('max-width', columnWidths[i] + 'vw');
+           newCell.css('width', columnWidths[i] + 'vw');
+          currentRow.append(newCell);
         }
         numRows++;
       }
@@ -48,22 +57,23 @@
 
     $(address(0, 0)).append($('<b>').html('Trigger'));
     $(address(1, 0)).append($('<b>').html('Search Column'));
-    $(address(2, 0)).append($('<b>').html('Wait for second COM'));
-    $(address(3, 0)).append($('<b>').html('Save to file'));
-    $(address(2, 2)).append($('<b>').html('Use file'));
-    $(address(3, 2)).append($('<b>').html('Test mode'));
-    $(address(5, 0)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
-    $(address(6, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
-    $(address(5, 1)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
-    $(address(6, 1)).append($('<input type="button" value="Load config" onclick="javascript:loadConfig()">'));
     $(address(0, 1)).append($('<select id ="triggerCom">').html('<option value="0">COM 0</option><option value="1">COM 1</option>'));
     $(address(1, 1)).append($('<input type="text" id="searchColumn">'));
+
+    $(address(5, 1)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
+    $(address(5, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
+    $(address(6, 0)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
+    $(address(6, 1)).append($('<input type="button" value="Load config" onclick="javascript:loadConfig()">'));
+    $(address(6, 2)).append($('<input type="button" value="Load default" onclick="javascript:loadDefault()">'));
+
+    $(address(2, 0)).append($('<b>').html('Wait for second COM'));
+    $(address(3, 0)).append($('<b>').html('Save to file'));
+    $(address(4, 0)).append($('<b>').html('Use file'));
     $(address(2, 1)).append($('<input type="checkbox" id="waitForOther">'));
     $(address(3, 1)).append($('<input type="checkbox" id="saveToFile">'));
-    $(address(2, 3)).append($('<input type="checkbox" id="useFile">'));
-    $(address(3, 3)).append($('<input type="checkbox" id="testMode">'));
+    $(address(4, 1)).append($('<input type="checkbox" id="useFile">'));
     
-    var cursor = 5;
+    var cursor = 4;
 
     $(address(0, cursor)).append($('<b>').html('Table'));
     $(address(1, cursor)).append($('<b>').html('Name'));
@@ -136,13 +146,14 @@
         cursor++;
       }
     }
-      
     cursor ++;
+
     $(address(1, cursor)).append($('<b>').html('Name'));
     $(address(2, cursor)).append($('<b>').html('Formula'));
     $(address(3, cursor)).append($('<b>').html('Execute'));
     $(address(4, cursor)).append($('<b>').html('Seconds'));
     cursor++;
+
     for (let i = 0; i < numOutputs; i++){
       $(address(0, cursor)).append($('<b>').html('Output ' + (i + 1)));
       $(address(1, cursor)).append($('<input type="text" id="nameOutput' + i + '">'));
@@ -152,14 +163,29 @@
       cursor++;
     }
     cursor++;
+
     $(address(1, cursor)).append($('<b>').html('Name'));
     $(address(2, cursor)).append($('<b>').html('Command'));
+    $(address(4, cursor)).append($('<b>').html('Follow'));
     cursor++;
+
     for (let i = 0; i < numInputs; i++){
       $(address(0, cursor)).append($('<b>').html('Input ' + (i + 1)));
       $(address(1, cursor)).append($('<input type="text" id="nameInput' + i + '">'));
-      $(address(2, cursor)).append($('<select selected=" " class="wide" id="formulaInput' + i + '">').html('<option value=""></option><option value="exe">Execute</option><option value="exebl">Execute block</option>'));
+
+      let commandSelect = $('<select selected=" " class="wide" id="formulaInput' + i + '">');
+      commandSelect.append('<option value=""></option><option value="exe">Execute</option><option value="exebl">Execute block</option>');
+      $(address(2, cursor)).append(commandSelect);
+
+      let followSelect = $('<select selected="-1" id="followInput' + i + '">');
+      followSelect.append('<option value="-1">None</option>');
+      for (let j = 0; j < numOutputs; j++){
+        followSelect.append('<option value="'+j+'"">Output '+(j+1)+'</option>');
+      }
+      $(address(4, cursor)).append(followSelect);
+
       cursor++;
+      address(3, cursor);
     }
     function fillIn(){
       for (var i = 0; i < 10; i++)
@@ -216,7 +242,6 @@
       $('#waitForOther').prop('checked', config.waitForOther);
       $('#saveToFile').prop('checked', config.saveToFile);
       $('#useFile').prop('checked', config.useFile);
-      $('#testMode').prop('checked', config.testMode);
     }
 
     function putInConfig(){
@@ -291,7 +316,6 @@
       config.waitForOther = $('#waitForOther').prop('checked');
       config.saveToFile = $('#saveToFile').prop('checked');
       config.useFile = $('#useFile').prop('checked');
-      config.testMode = $('#testMode').prop('checked');
     } 
     function setDate(){
       let dateTimeString = $('#date').val() + ' ' + $('#time').val()
@@ -306,27 +330,11 @@
     }
     function saveConfig(){
       putInConfig();
-      let conf = JSON.stringify(config, null, 2).replace(/"/g, "'")
-      .replace(/\\u00[0-9]{2}/g, match => String.fromCharCode(parseInt(match.slice(-2), 16)))
-      .replace(/'[\w]+':/g, match => match.slice(1,-2)+' :');
-      conf = 'var config =' + conf + ';\n\nmodule.exports = config;';
+      var name= prompt("Please enter the name for the new config file:", "config.js");
 
-      var file = new Blob([conf]);
-      if (window.navigator.msSaveOrOpenBlob) // IE10+
-          window.navigator.msSaveOrOpenBlob(file, 'config.js');
-      else { // Others
-          var a = document.createElement("a"),
-                  url = URL.createObjectURL(file);
-          a.href = url;
-          a.download = 'config.js';
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(function() {
-              document.body.removeChild(a);
-              window.URL.revokeObjectURL(url);  
-          }, 0); 
-      }
+      socket.emit('save', {name: name, config: config});
     }
+
     function setSettings(){
       if (confirm("Do you really want to save these settings??"))
       {
@@ -338,6 +346,7 @@
         }, 5000);
       }
     }
+
     fillIn();
   </script>
 </body>

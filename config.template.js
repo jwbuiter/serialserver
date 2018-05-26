@@ -189,26 +189,31 @@ var config ={
     {
       name : '',
       formula : '',
+      follow : -1,
       GPIO : 19,
     },
     {
       name : '',
       formula : '',
+      follow : -1,
       GPIO : 16,
     },
     {
       name : '',
       formula : '',
+      follow : -1,
       GPIO : 26,
     },
     {
       name : '',
       formula : '',
+      follow : -1,
       GPIO : 20,
     },
     {
       name : '',
       formula : '',
+      follow : -1,
       GPIO : 21,
     },
   ], 
@@ -223,9 +228,10 @@ var config ={
   ],
   triggerCom : 0,
   searchColumn : 0,
-  waitForOther : true,
-  saveToFile : true,
-  useFile : true,
+  waitForOther : false,
+  saveToFile : false,
+  saveFileLocation : '/home/pi/Documents',
+  useFile : false,
 
   exposeUpload: false,
   testMode: false

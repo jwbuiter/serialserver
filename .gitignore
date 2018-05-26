@@ -2,6 +2,6 @@ config.js
 config.lastgood.js
 seriallog*.txt
 data/*
-save/*
+configs/*
 !data/.gitkeep
-!save/.gitkeep
+!configs/.gitkeep

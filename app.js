@@ -15,8 +15,7 @@ var aux = require('./auxiliaryFunctions')
 
 const tableColumns = 5;
 
-var latestLogEntry = [];
-var triggerValues = new Array(config.serial.length ).fill(null);
+var latestLogEntry = new Array(config.serial.length ).fill('0');
 var tableContent = new Array(config.output.length ).fill('');
 var entryList = {};
 var remainingEntries = [];
@@ -28,8 +27,10 @@ var executeUp = true;
 var outputExecuting = new Array(config.output.length ).fill(0);
 var outputForced = new Array(config.output.length ).fill(0);
 var outputForcedLast = new Array(config.output.length ).fill(false);
+
 var inputForced = new Array(config.input.length ).fill(0);
 var inputForcedLast = new Array(config.input.length).fill(false);
+var inputFollowing = new Array(config.input.length ).fill(0);
 
 var comGPIO = config.comGPIO.map(element =>{
   return new Gpio(element, 'out')
@@ -43,7 +44,7 @@ var inputGPIO = config.input.map((element, index) =>{
   let newInput = new Gpio(element.GPIO, 'in', 'both');
   newInput.watch((err, val)=>{
     console.log('input'+index+' changed');
-    if (!inputForced[index]){
+    if (!inputForced[index] && !inputFollowing[index]){
       handleInput(index, inputGPIO[index].readSync());
       handleTable();
       handleOutput();
@@ -106,7 +107,7 @@ function decode(entry, config){
 }
 
 function handleTable(){
-  if (config.waitForOther && triggerValues.reduce((acc, cur) => (acc || (cur == null)), false)){
+  if (config.waitForOther && latestLogEntry.reduce((acc, cur) => (acc || (cur == '0')), false)){
     console.log('other value not yet defined');
     return;
   }
@@ -132,6 +133,8 @@ function handleTable(){
 }
 
 function handleInput(index, value){
+  value = value;
+
   let state;
   if (inputForced[index]){
     state = (value)?'forcedOn':'forcedOff';
@@ -147,6 +150,7 @@ function handleInput(index, value){
         execute();
       } else if (value === 0 && !executeBlock && executeUp){
         io.emit('clear');
+        latestLogEntry = new Array(config.serial.length).fill('0');
         executeStop();
       }
       break;
@@ -174,11 +178,27 @@ function handleOutput(){
         else
             result = result?'execute':'off';
       } else {
-        outputGPIO[index].writeSync(result?1:0);
+        setOutput(index, result?1:0);
         result = result?'on':'off';
       }
       io.emit('state', {name: 'output' + index, state: result});
     }
+  });
+}
+
+function setOutput(index, value){
+  outputGPIO[index].writeSync(value);
+  config.input.forEach((element, inputIndex) =>{
+    if (element.follow == index){
+      if (inputFollowing[inputIndex] == value)
+        return;
+
+      inputFollowing[inputIndex] = value;
+      
+      if (!inputGPIO[inputIndex].readSync()){
+        handleInput(inputIndex, value);
+      }
+    } 
   });
 }
 
@@ -212,7 +232,7 @@ function emitState(type, index){
         state = (inputForced[index]-1)?'forcedOn':'forcedOff';
       }
       else{
-        state = (inputGPIO[index].readSync())?'on':'off';
+        state = (inputGPIO[index].readSync() | inputFollowing[index])?'on':'off';
       }
       
     break;
@@ -240,13 +260,13 @@ function execute(){
   config.output.map((element, index)=>{
     if (element.execute && !outputForced[index]){
       let result = calculateFormula(element.formula);
-      outputGPIO[index].writeSync(result?1:0);
+      setOutput(index, result?1:0);
       emitState('output', index);
       outputExecuting[index]=1;
       if (element.seconds != 0){
         setTimeout(()=>{
           console.log('stop execute'+index)
-          outputGPIO[index].writeSync(0);
+          setOutput(index, 0);
           emitState('output', index);
           outputExecuting[index]=0;
         }, element.seconds*1000);
@@ -261,7 +281,7 @@ function execute(){
     let wb = XLSX.utils.book_new();
     let ws = XLSX.utils.aoa_to_sheet(saveArray);
     XLSX.utils.book_append_sheet(wb, ws, 'data');
-    XLSX.writeFile(wb, __dirname + '/save/' + fileName);
+    XLSX.writeFile(wb, config.saveFileLocation.replace(/\/+$/g, '') + '/'+ fileName);
     console.log(saveArray);
   }
 }
@@ -270,7 +290,7 @@ function execute(){
 function executeStop(){
   config.output.map((element, index) => {
     if (element.execute && element.seconds == 0 && outputExecuting[index]==1){
-      outputGPIO[index].writeSync(0);
+      setOutput(index, 0);
       emitState('output', index);
       outputExecuting[index]=0;
     }
@@ -282,12 +302,12 @@ function calculateValues(){
     if (element.formula == '#') return;
 
     let result = calculateFormula(element.formula);
-    if (typeof(result) === 'number'){
-      result = result.toFixed(element.digits); 
+    if (element.numeric){
+      result = Number(result).toFixed(element.digits); 
     } else if (typeof(result) === 'boolean'){
       result = result?1:0;
     }else {
-      result = result.slice(-element.digits);
+      result = String(result).slice(-element.digits);
     }
     tableContent[index]=result;
     io.emit('value', {name: 'table' + index, value: result});
@@ -307,7 +327,7 @@ function calculateFormula(formula){
     if (inputForced[x])
       return (inputForced[x]-1)?'true':'false';
     else
-      return inputGPIO[x].readSync()?'true':'false';
+      return (inputGPIO[x].readSync() | inputFollowing[x])?'true':'false';
 
   }).replace(/#O[0-9]/g, (x) =>{
 
@@ -359,7 +379,6 @@ function calculateFormula(formula){
 }
 
 for(i = 0; i < config.serial.length; i++){
-  latestLogEntry[i] = '0';
   remainingEntries[i] = Buffer('0');
 
   if (config.serial[i].average)
@@ -370,14 +389,13 @@ for(i = 0; i < config.serial.length; i++){
 
     if (config.testMode){
       setInterval(()=> {
-        decode(conf.testMessage, conf);
+        latestLogEntry[index] = decode(conf.testMessage, conf);
         if (excelSheet){
           handleTable();
         }
         handleOutput();
       }, conf.timeout * 1000);
       latestLogEntry[index] = decode(conf.testMessage, conf);
-      triggerValues[index] = latestLogEntry[index];
     } else {
 
       var port = new serialPort(conf.port, {
@@ -419,12 +437,12 @@ for(i = 0; i < config.serial.length; i++){
 
           let newEntry = (remainingEntries[index].slice(nextEntry + Buffer(conf.prefix).length, (nextEntryEnd===0)?remainingEntries[index].length:(nextEntryEnd+nextEntry))).toString();
           
-          latestLogEntry[index] = decode(newEntry, conf);
+          newEntry = decode(newEntry, conf);
           
-          if (index == config.triggerCom && latestLogEntry[index] != triggerValues[index]){
-            triggerValues = new Array(config.serial.length ).fill(null);
+          if (index == config.triggerCom && latestLogEntry[index] != newEntry){
+            latestLogEntry = new Array(config.serial.length).fill('0');
           }
-          triggerValues[index] = latestLogEntry[index];
+          latestLogEntry[index] = newEntry;
           
           handleTable();
           handleOutput();
@@ -538,6 +556,8 @@ app.post('/upload', (req, res) => {
 io.on('connection', function(socket){
   console.log('a user connected');
   socket.emit('ip', ip.address());
+  handleTable();
+  handleOutput();
   emitAllState();
 
   socket.on('settings', function(config){
@@ -588,14 +608,14 @@ io.on('connection', function(socket){
       }
     }
     else {
-      inputForced[index] = 2 - inputGPIO[index].readSync();
+      inputForced[index] = 2 - (inputGPIO[index].readSync() | inputFollowing[index]);
     }
 
     if (inputForced[index]){
       handleInput(index, inputForced[index]-1);
     }
     else {
-      handleInput(index, inputGPIO[index].readSync());
+      handleInput(index, (inputGPIO[index].readSync() | inputFollowing[index]));
     }
     handleTable();
     handleOutput();
@@ -618,10 +638,10 @@ io.on('connection', function(socket){
     }
     
     if (outputForced[index]>0){
-      outputGPIO[index].writeSync(outputForced[index]-1);
+      setOutput(index, outputForced[index]-1);
     }
     if (outputForced[index]==0 && config.output[index].execute){
-      outputGPIO[index].writeSync(0);
+      setOutput(index, 0);
     }
     handleTable();
     handleOutput();
@@ -630,6 +650,8 @@ io.on('connection', function(socket){
 
   socket.on('manual', msg =>{
     tableContent[msg.index] = msg.value;
+    handleTable();
+    handleOutput();
     console.log(msg.value);
   })
 });
