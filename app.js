@@ -69,7 +69,7 @@ var fileName;
 var saveArray = [];
 if (config.saveToFile){
   fileName = new Date().toISOString().replace(/T/, '_').replace(/:/g,'-').replace(/\..+/, '') + '.csv';
-  saveArray[0]=['date'].concat(config.table.map(element=>element.name));
+  saveArray[0]=['date', config.serial[0].name, config.serial[1].name].concat(config.table.map(element=>element.name));
   console.log(saveArray);
 }
 
@@ -274,7 +274,7 @@ function execute(){
     }
   });
   if (fileName){
-    let newRow = [new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')];
+    let newRow = [new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''), latestLogEntry[0], latestLogEntry[1]];
     newRow = newRow.concat(tableContent);
     saveArray.push(newRow);
 
