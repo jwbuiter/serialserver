@@ -47,7 +47,8 @@
     $(address(2, 8)).append($('<input type="button" style="width: 50%" value="Import .xls" onclick="javascript:goSubmit()">'));
     $(address(2, 8)).append($('<input type="button" style="width: 50%" value="Cancel" onclick="javascript:goDebug()">'));
 
-    $(address(2, 10)).append($('<input type="button" value="File settings" onclick="javascript:goFileSettings()">'));
+    $(address(2, 10)).append($('<input type="button" style="width: 50%" value="File settings" onclick="javascript:goFileSettings()">'));
+    $(address(2, 10)).append($('<input type="button" style="width: 50%" value="Download logs" onclick="javascript:goDownload()">'));
 
 
     var socket = io();
@@ -69,6 +70,12 @@
     function goFileSettings(){
       if (confirm("Do you want to go to the file settings?")){
         window.location.href = '/filesettings';
+      }
+    }
+
+    function goDownload(){
+      if (confirm("Do you want to go to the log download page?")){
+        window.location.href = '/download';
       }
     }
   </script>

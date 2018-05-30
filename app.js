@@ -499,6 +499,16 @@ app.get('/settings', function(request, response){
     response.sendFile('settings.html', { root: __dirname});
 });
 
+app.get('/download', function(request, response){
+  if (request.query.file){
+    response.download(config.saveFileLocation.replace(/\/+$/g, '') + '/'+ request.query.file);
+  }
+  else{
+    response.sendFile('download.html', { root: __dirname});
+  }
+  
+});
+
 if (config.exposeUpload){
   app.get('/fileupload', function(request, response){
     response.sendFile('fileUpload.html', { root: __dirname});
@@ -594,6 +604,12 @@ io.on('connection', function(socket){
         console.error(`exec error: ${err}`);
         return;
       }
+    });
+  });
+
+  socket.on('getFileList', ()=>{
+    fs.readdir(config.saveFileLocation, (err, files) =>{
+      socket.emit('fileList', files.filter((element)=>element.endsWith('.csv')));
     });
   });
 

@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+  <title>MBDCcomUnit</title>
+   <style>
+      *{font-size: 25px; padding:0; margin: 0; }
+      div {position: relative; margin: auto; margin-top: 50px; width: 50%;}
+      ul { list-style-type: none;}
+      input[type="button"] {position: absolute; right: 0; font-size: 20px;}
+    </style>
+</head>
+<body>
+  <div >
+    <ul id="content">
+    </ul>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/res/jquery-1.11.1.js"></script>
+  <script type="text/javascript">
+    var fileList;
+    function downloadFile(index){
+      window.location.href = '/download?file='+fileList[index];
+    }
+
+    var socket = io();
+
+    socket.emit('getFileList');
+
+    socket.on('fileList', function(list){
+      fileList = list;
+      if (list.length==0){
+        $('#content').append($('<li>').append('No files found'));
+        return;
+      }
+
+      list.forEach((element, index) => {
+        let newItem = $('<li>').append('<span>'+element+'</span>').append('<input type="button" value="Download" onclick="javascript:downloadFile('+index+')">');
+        $('#content').append(newItem);
+      });
+    });
+  </script>
+</body>
+</html>
