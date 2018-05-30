@@ -69,7 +69,7 @@ var fileName;
 var saveArray = [];
 if (config.saveToFile){
   fileName = new Date().toISOString().replace(/T/, '_').replace(/:/g,'-').replace(/\..+/, '') + '.csv';
-  saveArray[0]=['date', config.serial[0].name, config.serial[1].name].concat(config.table.map(element=>element.name));
+  saveArray[0]=['date'].concat(config.serial.map(element=>element.name)).concat(config.table.map(element=>element.name));
   console.log(saveArray);
 }
 
@@ -274,7 +274,8 @@ function execute(){
     }
   });
   if (fileName){
-    let newRow = [new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''), latestLogEntry[0], latestLogEntry[1]];
+    let newRow = [new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')];
+    newRow = newRow.concat(latestLogEntry);
     newRow = newRow.concat(tableContent);
     saveArray.push(newRow);
 
@@ -597,6 +598,8 @@ io.on('connection', function(socket){
   });
 
   socket.on('forceInput', index =>{
+    let previousForced = inputForced[index];
+
     if (inputForced[index]){
       if (inputForcedLast[index]){
         inputForcedLast[index] = false;
@@ -614,7 +617,7 @@ io.on('connection', function(socket){
     if (inputForced[index]){
       handleInput(index, inputForced[index]-1);
     }
-    else {
+    else if (previousForced-1 != (inputGPIO[index].readSync() | inputFollowing[index])) {
       handleInput(index, (inputGPIO[index].readSync() | inputFollowing[index]));
     }
     handleTable();
@@ -637,10 +640,10 @@ io.on('connection', function(socket){
       outputForced[index] = 2 - outputGPIO[index].readSync();
     }
     
-    if (outputForced[index]>0){
+    if (outputForced[index]){
       setOutput(index, outputForced[index]-1);
     }
-    if (outputForced[index]==0 && config.output[index].execute){
+    else if (config.output[index].execute){
       setOutput(index, 0);
     }
     handleTable();
