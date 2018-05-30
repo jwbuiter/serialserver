@@ -68,7 +68,7 @@ var foundRow = new Array(26).fill('');
 var fileName;
 var saveArray = [];
 if (config.saveToFile){
-  fileName = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '') + '.csv';
+  fileName = new Date().toISOString().replace(/T/, '_').replace(/:/g,'-').replace(/\..+/, '') + '.csv';
   saveArray[0]=['date'].concat(config.table.map(element=>element.name));
   console.log(saveArray);
 }
@@ -409,6 +409,7 @@ for(i = 0; i < config.serial.length; i++){
       });
 
       port.on('readable', function() {
+        console.log(remainingEntries);
         comGPIO[index].writeSync(1);
         setTimeout(() => comGPIO[index].writeSync(0), 250);
 
@@ -448,7 +449,6 @@ for(i = 0; i < config.serial.length; i++){
           handleOutput();
 
           remainingEntries[index]=remainingEntries[index].slice(nextEntry + nextEntryEnd);
-          //console.log(remainingEntries);
         }  
       });
     }
