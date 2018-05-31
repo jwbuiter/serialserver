@@ -575,7 +575,7 @@ io.on('connection', function(socket){
   handleOutput();
   emitAllState();
 
-  socket.on('settings', function(config){
+  socket.on('settings', config =>{
     const name = 'config.js';
 
     fs.copyFileSync(name, 'config.lastgood.js');
@@ -602,7 +602,41 @@ io.on('connection', function(socket){
     process.exit();
   });
 
-  socket.on('setDateTime', (dateTime) =>{
+  socket.on('save', msg =>{
+    let name = __dirname + '/configs/' + msg.name + '.js';
+    let conf = JSON.stringify(msg.config, null, 2).replace(/"/g, "'")
+      .replace(/\\u00[0-9]{2}/g, match => String.fromCharCode(parseInt(match.slice(-2), 16)))
+      .replace(/'[\w]+':/g, match => match.slice(1,-2)+' :');
+
+    try {
+      fs.accessSync(name);
+      fs.unlinkSync(name);
+    } 
+    catch (err) {
+    }
+
+    conf = 'var config =' + conf + ';\n\nmodule.exports = config;';
+    fs.writeFileSync(name, conf, (err) => {  
+      if (err) console.log(err);
+
+      console.log('Config saved!');
+    });
+  });
+
+  socket.on('load', name =>{
+    fs.copyFileSync('config.js', 'config.lastgood.js');
+    fs.copyFileSync('configs/'+name, 'config.js');
+    onlineGPIO.writeSync(0);
+    process.exit();
+  });
+
+  socket.on('loadDefault', ()=>{
+    fs.copyFileSync('config.template.js', 'config.js');
+    onlineGPIO.writeSync(0);
+    process.exit();
+  });
+
+  socket.on('setDateTime', dateTime =>{
     exec(`timedatectl set-time @${dateTime}`, (err, stdout, stderr) => {
       if (err) {
         console.error(`exec error: ${err}`);
@@ -614,6 +648,12 @@ io.on('connection', function(socket){
   socket.on('getFileList', ()=>{
     fs.readdir(constants.saveFileLocation, (err, files) =>{
       socket.emit('fileList', files.filter((element)=>element.endsWith('.csv')));
+    });
+  });
+
+  socket.on('getConfigList', ()=>{
+    fs.readdir(__dirname + '/configs', (err, files) =>{
+      socket.emit('configList', files.filter((element)=>element.endsWith('.js')));
     });
   });
 

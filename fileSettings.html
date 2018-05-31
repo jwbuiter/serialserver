@@ -6,11 +6,15 @@
       *{font-size: 25px; padding:0; margin: 0; }
       table { text-align: center; border: none; border-collapse: collapse;}
       tr { height: 29px; }
-      td { text-align: center;  border-style: bold; height: 29px;}
+      td { position: relative; text-align: center;  border-style: bold; height: 29px;}
       td.small { font-size: 15px; }
       input {text-align: center; width: 100%;}
       input[type="submit"]{width: auto;}
+      input.config {width: 20%; position: absolute; right: 5px; font-size: 20px;}
       select { width: 100%;}
+      #list {width: 50vw;text-align: left; position: absolute; right: 100%; z-index: 2; background-color: white; border: 1px solid black; padding: 5px;}
+      ul { list-style-type: none;}
+      li {margin: 0 0 3px 0;}
     </style>
 </head>
 <body>
@@ -32,6 +36,8 @@
     }
     
     var socket = io();
+    var configList;
+
     const numColumns = 7;
     var numRows = 0;
     const tableNumbers = 5;
@@ -63,7 +69,7 @@
     $(address(5, 1)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
     $(address(5, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
     $(address(6, 0)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
-    $(address(6, 1)).append($('<input type="button" value="Load config" onclick="javascript:loadConfig()">'));
+    $(address(6, 1)).append($('<input type="button" value="Load config" onclick="javascript:loadConfigList()">'));
     $(address(6, 2)).append($('<input type="button" value="Load default" onclick="javascript:loadDefault()">'));
 
     $(address(2, 0)).append($('<b>').html('Wait for second COM'));
@@ -330,14 +336,30 @@
     }
     function saveConfig(){
       putInConfig();
-      var name= prompt("Please enter the name for the new config file:", "config.js");
+      var name= prompt("Please enter the name for the new config file:", "config");
 
       socket.emit('save', {name: name, config: config});
     }
-
+    function loadConfig(index){
+      socket.emit('load', configList[index]);
+      closeList();
+      setTimeout(function(){ 
+          window.location.href = '/filesettings';
+        }, 5000);
+    }
+    function loadConfigList(){
+      socket.emit('getConfigList');
+    }
+    function closeList(){
+      $('#list').remove();
+    }
+    function loadDefault(){
+      if (confirm("Do you really want to return to the default settings?")){
+        socket.emit('loadDefault');
+      }
+    }
     function setSettings(){
-      if (confirm("Do you really want to save these settings??"))
-      {
+      if (confirm("Do you really want to save these settings?")){
         putInConfig()
         
         socket.emit('settings',config);
@@ -346,6 +368,24 @@
         }, 5000);
       }
     }
+
+    socket.on('configList', function(list){
+      $('#list').remove();
+      $(address(6, 1)).append( $('<div id="list">').append('<ul>'));
+
+      configList=list;
+      
+      if (list.length==0){
+        $('ul').append($('<li>').append('No configs found'));
+      }
+      else{
+        list.forEach((element, index) => {
+          let newItem = $('<li>').append('<span>'+element+'</span>').append('<input type="button" class="config" value="Load" onclick="javascript:loadConfig('+index+')">');
+          $('ul').append(newItem);
+        });
+      }
+      $('ul').append($('<li>').append('<input type="button" value="Close" onclick="javascript:closeList()">'));
+    });
 
     fillIn();
   </script>
