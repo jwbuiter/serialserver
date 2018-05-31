@@ -217,10 +217,6 @@ var config ={
       GPIO : 21,
     },
   ], 
-
-  name : 'MBDCcom01',
-  QS : '000 000 000',
-  port : 80,
   onlineGPIO : 5,
   comGPIO : [
     6,
@@ -230,11 +226,8 @@ var config ={
   searchColumn : 0,
   waitForOther : false,
   saveToFile : false,
-  saveFileLocation : '/home/pi/Documents',
   useFile : false,
-
-  exposeUpload: false,
-  testMode: false
+  testMode: false,
 };
 
 module.exports = config;

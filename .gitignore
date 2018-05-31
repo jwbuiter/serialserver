@@ -1,5 +1,6 @@
 config.js
 config.lastgood.js
+config.static.js
 seriallog*.txt
 data/*
 configs/*

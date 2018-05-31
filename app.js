@@ -1,8 +1,9 @@
 var config = require('./config');
+var constants = require('./config.static');
 var express = require('express');
 var fileUpload = require('express-fileupload');
 var app = express();
-var server = app.listen(config.port);
+var server = app.listen(constants.port);
 var io = require('socket.io').listen(server);
 var fs = require('fs');
 var ip = require("ip");
@@ -10,7 +11,6 @@ var XLSX = require('xlsx');
 const { exec } = require('child_process');
 var serialPort = require('serialport');
 var Gpio = require('onoff').Gpio;
-var config = require('./config');
 var aux = require('./auxiliaryFunctions')
 
 const tableColumns = 5;
@@ -282,7 +282,7 @@ function execute(){
     let wb = XLSX.utils.book_new();
     let ws = XLSX.utils.aoa_to_sheet(saveArray);
     XLSX.utils.book_append_sheet(wb, ws, 'data');
-    XLSX.writeFile(wb, config.saveFileLocation.replace(/\/+$/g, '') + '/'+ fileName);
+    XLSX.writeFile(wb, constants.saveFileLocation.replace(/\/+$/g, '') + '/'+ fileName);
     console.log(saveArray);
   }
 }
@@ -501,7 +501,7 @@ app.get('/settings', function(request, response){
 
 app.get('/download', function(request, response){
   if (request.query.file){
-    response.download(config.saveFileLocation.replace(/\/+$/g, '') + '/'+ request.query.file);
+    response.download(constants.saveFileLocation.replace(/\/+$/g, '') + '/'+ request.query.file);
   }
   else{
     response.sendFile('download.html', { root: __dirname});
@@ -509,7 +509,7 @@ app.get('/download', function(request, response){
   
 });
 
-if (config.exposeUpload){
+if (constants.exposeUpload){
   app.get('/fileupload', function(request, response){
     response.sendFile('fileUpload.html', { root: __dirname});
   });
@@ -520,6 +520,10 @@ if (config.exposeUpload){
 
 app.get('/config.js', function(request, response){
     response.sendFile('config.js', { root: __dirname});
+});
+
+app.get('/config.static.js', function(request, response){
+  response.sendFile('config.static.js', { root: __dirname});
 });
 
 app.get('/shutdown', (request, response) => {
@@ -608,7 +612,7 @@ io.on('connection', function(socket){
   });
 
   socket.on('getFileList', ()=>{
-    fs.readdir(config.saveFileLocation, (err, files) =>{
+    fs.readdir(constants.saveFileLocation, (err, files) =>{
       socket.emit('fileList', files.filter((element)=>element.endsWith('.csv')));
     });
   });
@@ -687,4 +691,4 @@ process.on ('SIGINT', () => {
   process.exit (0);
 });
 
-handleOutput();
+handleOutput(); 
