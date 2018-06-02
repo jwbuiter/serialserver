@@ -4,9 +4,9 @@
   <title>MBDCcomUnit</title>
    <style>
       *{font-size: 25px; padding:0; margin: 0; }
-      div {position: relative; margin: auto; margin-top: 50px; width: 50%;}
-      ul { list-style-type: none;}
-      input[type="button"] {position: absolute; right: 0; font-size: 20px;}
+      div {position: relative; margin: auto; margin-top: 50px; width: 80%;}
+      ul { list-style-type: none; overflow: hidden;}
+      input[type="button"] {float: right; font-size: 20px;}
     </style>
 </head>
 <body>
@@ -19,25 +19,45 @@
   <script src="/res/jquery-1.11.1.js"></script>
   <script type="text/javascript">
     var fileList;
+    var socket = io();
+
     function downloadFile(index){
       window.location.href = '/download?file='+fileList[index];
     }
 
-    var socket = io();
+    function deleteFile(index){
+      if (confirm("Do you really want to delete "+fileList[index]+"?")){
+        socket.emit('delete', fileList[index]);
+        socket.emit('getFileList');
+      }
+    }
+
+    function goDebug(){
+      window.location.href = '/';
+    }
 
     socket.emit('getFileList');
 
     socket.on('fileList', function(list){
       fileList = list;
+
+      $('#content').contents().remove();
       if (list.length==0){
         $('#content').append($('<li>').append('No files found'));
-        return;
+      }
+      else{
+        list.forEach((element, index) => {
+          let newItem = $('<li>').append('<span>'+element+'</span>')
+            .append('<input type="button" value="Download" onclick="javascript:downloadFile('+index+')">')
+            .append('<input type="button" value="Delete" onclick="javascript:deleteFile('+index+')">');
+          $('#content').append(newItem);
+        });
       }
 
-      list.forEach((element, index) => {
-        let newItem = $('<li>').append('<span>'+element+'</span>').append('<input type="button" value="Download" onclick="javascript:downloadFile('+index+')">');
-        $('#content').append(newItem);
-      });
+      let newItem = $('<li>')
+        .append('<input type="button" value="Cancel" onclick="javascript:goDebug()">');
+      $('#content').append(newItem);
+      
     });
   </script>
 </body>

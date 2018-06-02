@@ -21,4 +21,13 @@ function sheetToArray(sheet){
   return result;
 };
 
-module.exports={sheetToArray};
+function assert(condition, message){
+  if (!condition){
+    message = message || "Assertion failed";
+    if (typeof Error !== "undefined") {
+      throw new Error(message);
+    }
+    throw message; // Fallback
+  }
+}
+module.exports={sheetToArray, assert};

@@ -1,9 +1,9 @@
 var constants = {
-  name : 'MBDCcomTU',
-  QS : '722 984 682',
+  name : 'MBDCcom01',
+  QS : '000 000 000',
   port : 80,
   saveFileLocation : '/home/pi/Documents',
-  exposeUpload : true,
+  exposeUpload : false,
 }
 
 module.exports = constants;

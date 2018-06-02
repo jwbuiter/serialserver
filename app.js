@@ -11,7 +11,7 @@ var XLSX = require('xlsx');
 const { exec } = require('child_process');
 var serialPort = require('serialport');
 var Gpio = require('onoff').Gpio;
-var aux = require('./auxiliaryFunctions')
+var {sheetToArray, assert} = require('./auxiliaryFunctions')
 
 const tableColumns = 5;
 
@@ -23,6 +23,7 @@ var onlineGPIO = new Gpio(config.onlineGPIO, 'out');
 
 var executeBlock = false;
 var executeUp = true;
+var executing = false;
 
 var outputExecuting = new Array(config.output.length ).fill(0);
 var outputForced = new Array(config.output.length ).fill(0);
@@ -61,14 +62,15 @@ var excelSheet;
 if (fs.existsSync(__dirname + '/data/data.xls')){
   let excelFile = XLSX.readFile(__dirname + '/data/data.xls');
   let sheetName = excelFile.Workbook.Sheets[0].name;
-  excelSheet = aux.sheetToArray(excelFile.Sheets[sheetName]);
+  excelSheet = sheetToArray(excelFile.Sheets[sheetName]);
 }
 var foundRow = new Array(26).fill('');
 
 var fileName;
 var saveArray = [];
 if (config.saveToFile){
-  fileName = new Date().toISOString().replace(/T/, '_').replace(/:/g,'-').replace(/\..+/, '') + '.csv';
+  let date = new Date();
+  fileName = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().replace(/T/, '_').replace(/:/g,'-').replace(/\..+/, '') + '.csv';
   saveArray[0]=['date'].concat(config.serial.map(element=>element.name)).concat(config.table.map(element=>element.name));
   console.log(saveArray);
 }
@@ -148,9 +150,12 @@ function handleInput(index, value){
     case 'exe':
       if (value === 1 && !executeBlock && executeUp){
         execute();
-      } else if (value === 0 && !executeBlock && executeUp){
+        executing = true;
+      } else if (value === 0 && executing){
+        executing = false;
         io.emit('clear');
         latestLogEntry = new Array(config.serial.length).fill('0');
+        tableContent = new Array(config.output.length ).fill('');
         executeStop();
       }
       break;
@@ -274,7 +279,8 @@ function execute(){
     }
   });
   if (fileName){
-    let newRow = [new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')];
+    let date = new Date();
+    let newRow = [new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().replace(/T/, ' ').replace(/\..+/, '')];
     newRow = newRow.concat(latestLogEntry);
     newRow = newRow.concat(tableContent);
     saveArray.push(newRow);
@@ -311,54 +317,66 @@ function calculateValues(){
       result = String(result).slice(-element.digits);
     }
     tableContent[index]=result;
+    console.log(result);
     io.emit('value', {name: 'table' + index, value: result});
   });
 }
 
 function calculateFormula(formula){
-  formula = formula.replace(/#[A-G][0-9]/g, (x) =>{
-
-    let row = x.charCodeAt(1) - 65;
-    let column = parseInt(x[2]);
-    return 'tableContent[' + (row*tableColumns + column - 1) + ']';
-
-  }).replace(/#I[0-9]/g, (x) =>{
-
-    x=parseInt(x[2])-1;
-    if (inputForced[x])
-      return (inputForced[x]-1)?'true':'false';
-    else
-      return (inputGPIO[x].readSync() | inputFollowing[x])?'true':'false';
-
-  }).replace(/#O[0-9]/g, (x) =>{
-
-    x=parseInt(x[2])-1;
-    if (outputForced[x])
-      return (outputForced[x]-1)?'true':'false';
-    else
-      return outputGPIO[x].readSync()?'true':'false';
-
-  }).replace(/\$[A-Z]/g, (x) =>{
-
-    x = x.charCodeAt(1) - 65;
-    return 'foundRow['+x+']';
-
-  }).replace(/com[0-9]/g, (x) =>{
-
-    x=parseInt(x[3]);
-    if (config.serial[x].factor === 0)
-      return 'latestLogEntry[' + x + ']';
-    else
-      return 'Number(latestLogEntry[' + x + '])';
-
-  }).replace(/date/g, (x) =>{
-
-    return new Date().getTime()/1000/86400 + 25569;
-
-  }).replace('and', '&&')
-  .replace('or', '||');
   let result;
   try {
+    formula = formula.replace(/#[A-G][0-9]/g, (x) =>{
+
+      let row = x.charCodeAt(1) - 65;
+      let column = parseInt(x[2]);
+      assert((row*tableColumns + column - 1)>=0 && (row*tableColumns + column - 1)<tableContent.length, 'Out of bounds of table contents');
+
+      return 'tableContent[' + (row*tableColumns + column - 1) + ']';
+
+    }).replace(/#I[0-9]/g, (x) =>{
+
+      x=parseInt(x[2])-1;
+      assert(x>=0 && x<config.input.length, 'Input index out of bounds');
+
+      if (inputForced[x])
+        return (inputForced[x]-1)?'true':'false';
+      else
+        return (inputGPIO[x].readSync() | inputFollowing[x])?'true':'false';
+
+    }).replace(/#O[0-9]/g, (x) =>{
+
+      x=parseInt(x[2])-1;
+      assert(x>=0 && x<config.output.length, 'Output index out of bounds');
+
+      if (outputForced[x])
+        return (outputForced[x]-1)?'true':'false';
+      else
+        return outputGPIO[x].readSync()?'true':'false';
+
+    }).replace(/\$[A-Z]/g, (x) =>{
+
+      x = x.charCodeAt(1) - 65;
+      assert(x>=0 && x<foundRow.length, 'Out of bounds of excel table');
+
+      return 'foundRow['+x+']';
+
+    }).replace(/com[0-9]/g, (x) =>{
+
+      x=parseInt(x[3]);
+      assert(x>=0 && x<config.serial.length, 'Com port out of bounds');
+
+      if (config.serial[x].factor === 0)
+        return 'latestLogEntry[' + x + ']';
+      else
+        return 'Number(latestLogEntry[' + x + '])';
+
+    }).replace(/date/g, (x) =>{
+
+      return new Date().getTime()/1000/86400 + 25569;
+
+    }).replace('and', '&&')
+    .replace('or', '||');
+  
     result = eval(formula);
   }
   catch (err) {
@@ -628,6 +646,15 @@ io.on('connection', function(socket){
     fs.copyFileSync('configs/'+name, 'config.js');
     onlineGPIO.writeSync(0);
     process.exit();
+  });
+
+  socket.on('delete', name =>{
+    try {
+      fs.accessSync(constants.saveFileLocation.replace(/\/+$/g, '') + '/'+ name);
+      fs.unlinkSync(constants.saveFileLocation.replace(/\/+$/g, '') + '/'+ name);
+    } 
+    catch (err) {
+    }
   });
 
   socket.on('loadDefault', ()=>{
