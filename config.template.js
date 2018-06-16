@@ -191,35 +191,40 @@ var config ={
       formula : '',
       follow : -1,
       GPIO : 19,
-      timeout : 500,
+      timeout : 200,
+      invert : false
     },
     {
       name : '',
       formula : '',
       follow : -1,
       GPIO : 16,
-      timeout : 500,
+      timeout : 200,
+      invert : false
     },
     {
       name : '',
       formula : '',
       follow : -1,
       GPIO : 26,
-      timeout : 500,
+      timeout : 200,
+      invert : false
     },
     {
       name : '',
       formula : '',
       follow : -1,
       GPIO : 20,
-      timeout : 500,
+      timeout : 200,
+      invert : false
     },
     {
       name : '',
       formula : '',
       follow : -1,
       GPIO : 21,
-      timeout : 500,
+      timeout : 200,
+      invert : false
     },
   ], 
   onlineGPIO : 5,
@@ -233,6 +238,8 @@ var config ={
   saveToFile : false,
   useFile : false,
   testMode: false,
+
+  version: '0.0'
 };
 
 module.exports = config;

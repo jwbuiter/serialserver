@@ -50,6 +50,7 @@
     var socket = io();
     const numColumns = 5;
     var numRows = 0;
+    alert('test');
 
     const numTable = config.table.length;
 
@@ -202,12 +203,12 @@
           $(address(j, cursor )).addClass('table');
           if (conf.formula == '#'){
             if (conf.numeric){
-              $(address(j, cursor + 1)).html('<input style="height:33px; width:33px" value="-" onclick="manualDecrement('+index+')" type="button">');
-              $(address(j, cursor + 1)).append('<input style="width:'+ conf.digits +'vw" onkeyup="manualChange('+index+')" type="number" min="0" step="1" id="manual' + index + '">');
-              $(address(j, cursor + 1)).append('<input style="height:33px; width:33px" value="+" onclick="manualIncrement('+index+')" type="button">');
+              $(address(j, cursor + 1)).html('<input style="height:33px; width:33px" value="-" onclick="javascript:manualDecrement('+index+')" type="button">');
+              $(address(j, cursor + 1)).append('<input style="width:'+ conf.digits +'vw" onkeyup="javascript:manualChange('+index+')" type="number" min="0" step="1" id="manual' + index + '">');
+              $(address(j, cursor + 1)).append('<input style="height:33px; width:33px" value="+" onclick="javascript:manualIncrement('+index+')" type="button">');
             }
             else{
-              $(address(j, cursor + 1)).html('<input style="width:'+ (conf.digits*2) +'vw" onkeyup="manualChange('+index+')" type="text" id="manual' + index + '">');
+              $(address(j, cursor + 1)).html('<input style="width:'+ (conf.digits*2) +'vw" onkeyup="javascript:manualChange('+index+')" type="text" id="manual' + index + '">');
             }
           }
           else{

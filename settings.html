@@ -116,6 +116,7 @@
     <tr>
       <td><input type="button" value="Save settings and restart" onclick="javascript:setSettings()"></td>
       <td><input type="button" value="Cancel" onclick="javascript:goDebug()"></td>
+      <td id="version"></td>
     </tr>
   </table>
 </div>
@@ -140,6 +141,7 @@
       });
     }
     $('#testMode').prop('checked', config.testMode);
+    $('#version').append($('<b>').html('Version:' + config.version));
 
     var socket = io();
 

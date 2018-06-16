@@ -32,6 +32,8 @@ var outputForcedLast = new Array(config.output.length ).fill(false);
 var inputForced = new Array(config.input.length ).fill(0);
 var inputForcedLast = new Array(config.input.length).fill(false);
 var inputFollowing = new Array(config.input.length ).fill(0);
+var inputDebounceTimeout = new Array(config.input.length ).fill(setTimeout(()=>console.log('bla'),1));
+var inputDebouncedState = new Array(config.input.length ).fill(0);
 
 var comGPIO = config.comGPIO.map(element =>{
   return new Gpio(element, 'out')
@@ -42,13 +44,16 @@ var outputGPIO = config.output.map(element =>{
 });
 
 var inputGPIO = config.input.map((element, index) =>{
+
   let newInput = new Gpio(element.GPIO, 'in', 'both');
+
+  inputDebouncedState[index] = newInput.readSync();
+
   newInput.watch((err, val)=>{
-    console.log('input'+index+' changed');
     if (!inputForced[index] && !inputFollowing[index]){
-      handleInput(index, inputGPIO[index].readSync());
-      handleTable();
-      handleOutput();
+      setTimeout(()=>{
+        handleInputDebounce(index, inputGPIO[index].readSync());
+      },10);
     }
   });
   return newInput;
@@ -134,6 +139,17 @@ function handleTable(){
   calculateValues();
 }
 
+function handleInputDebounce(index,value){
+  clearTimeout(inputDebounceTimeout[index]);
+
+  inputDebounceTimeout[index] = setTimeout(()=>{
+    inputDebouncedState[index]=value;
+    handleInput(index, value);
+    handleTable();
+    handleOutput();
+  },config.input[index].timeout);
+}
+
 function handleInput(index, value){
   value = value;
 
@@ -195,13 +211,14 @@ function setOutput(index, value){
   outputGPIO[index].writeSync(value);
   config.input.forEach((element, inputIndex) =>{
     if (element.follow == index){
-      if (inputFollowing[inputIndex] == value)
+      if (inputFollowing[inputIndex] == value^element.invert)
         return;
 
-      inputFollowing[inputIndex] = value;
-      
-      if (!inputGPIO[inputIndex].readSync()){
-        handleInput(inputIndex, value);
+      inputFollowing[inputIndex] = value^element.invert;
+      console.log('input'+inputIndex +':' + (element.invert ^ value))
+
+      if (inputDebouncedState[inputIndex] != value ^ element.invert){
+        handleInputDebounce(inputIndex, element.invert ^ value);
       }
     } 
   });
@@ -237,7 +254,7 @@ function emitState(type, index){
         state = (inputForced[index]-1)?'forcedOn':'forcedOff';
       }
       else{
-        state = (inputGPIO[index].readSync() | inputFollowing[index])?'on':'off';
+        state = (inputDebouncedState[index] | inputFollowing[index])?'on':'off';
       }
       
     break;
@@ -341,7 +358,7 @@ function calculateFormula(formula){
       if (inputForced[x])
         return (inputForced[x]-1)?'true':'false';
       else
-        return (inputGPIO[x].readSync() | inputFollowing[x])?'true':'false';
+        return (inputDebouncedState[x] | inputFollowing[x])?'true':'false';
 
     }).replace(/#O[0-9]/g, (x) =>{
 
@@ -621,7 +638,7 @@ io.on('connection', function(socket){
   });
 
   socket.on('save', msg =>{
-    let name = __dirname + '/configs/' + msg.name + '.js';
+    let name = __dirname + '/configs/' + msg.name +'V'+ config.version+ '.js';
     let conf = JSON.stringify(msg.config, null, 2).replace(/"/g, "'")
       .replace(/\\u00[0-9]{2}/g, match => String.fromCharCode(parseInt(match.slice(-2), 16)))
       .replace(/'[\w]+':/g, match => match.slice(1,-2)+' :');
@@ -642,11 +659,17 @@ io.on('connection', function(socket){
   });
 
   socket.on('load', name =>{
-    fs.copyFileSync('config.js', 'config.lastgood.js');
-    fs.copyFileSync('configs/'+name, 'config.js');
-    onlineGPIO.writeSync(0);
-    process.exit();
+    socket.emit('config', fs.readFileSync('configs/'+name).toString().replace('module.exports = config;', ''));
   });
+
+  socket.on('deleteConfig', name=>{
+    try {
+      fs.accessSync('configs/'+name);
+      fs.unlinkSync('configs/'+name);
+    } 
+    catch (err) {
+    }
+  })
 
   socket.on('delete', name =>{
     try {
@@ -698,14 +721,14 @@ io.on('connection', function(socket){
       }
     }
     else {
-      inputForced[index] = 2 - (inputGPIO[index].readSync() | inputFollowing[index]);
+      inputForced[index] = 2 - (inputDebouncedState[index] | inputFollowing[index]);
     }
 
     if (inputForced[index]){
-      handleInput(index, inputForced[index]-1);
+      handleInputDebounce(index, inputForced[index]-1);
     }
-    else if (previousForced-1 != (inputGPIO[index].readSync() | inputFollowing[index])) {
-      handleInput(index, (inputGPIO[index].readSync() | inputFollowing[index]));
+    else if (previousForced-1 != (inputDebouncedState[index] | inputFollowing[index])) {
+      handleInputDebounce(index, (inputDebouncedState[index] | inputFollowing[index]));
     }
     handleTable();
     handleOutput();

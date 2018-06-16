@@ -10,9 +10,9 @@
       td.small { font-size: 15px; }
       input {text-align: center; width: 100%;}
       input[type="submit"]{width: auto;}
-      input.config {width: 20%; position: absolute; right: 5px; font-size: 20px;}
+      input.config {width: 20%; float:right; font-size: 20px;}
       select { width: 100%;}
-      #list {width: 50vw;text-align: left; position: absolute; right: 100%; z-index: 2; background-color: white; border: 1px solid black; padding: 5px;}
+      #list {width: 50vw;text-align: left; position: absolute; right: 100%; top: 2.5em;z-index: 2; background-color: white; border: 1px solid black; padding: 5px;}
       ul { list-style-type: none;}
       li {margin: 0 0 3px 0;}
     </style>
@@ -71,6 +71,7 @@
     $(address(6, 0)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
     $(address(6, 1)).append($('<input type="button" value="Load config" onclick="javascript:loadConfigList()">'));
     $(address(6, 2)).append($('<input type="button" value="Load default" onclick="javascript:loadDefault()">'));
+    $(address(5, 2)).append($('<b>').html('Version: '+config.version));
 
     $(address(2, 0)).append($('<b>').html('Wait for second COM'));
     $(address(3, 0)).append($('<b>').html('Save to file'));
@@ -172,7 +173,9 @@
 
     $(address(1, cursor)).append($('<b>').html('Name'));
     $(address(2, cursor)).append($('<b>').html('Command'));
+    $(address(3, cursor)).append($('<b>').html('Timeout'));
     $(address(4, cursor)).append($('<b>').html('Follow'));
+    $(address(5, cursor)).append($('<b>').html('Invert'));
     cursor++;
 
     for (let i = 0; i < numInputs; i++){
@@ -182,6 +185,7 @@
       let commandSelect = $('<select selected=" " class="wide" id="formulaInput' + i + '">');
       commandSelect.append('<option value=""></option><option value="exe">Execute</option><option value="exebl">Execute block</option>');
       $(address(2, cursor)).append(commandSelect);
+      $(address(3, cursor)).append($('<input type="number" id="timeoutInput' + i + '" min="0" step="1">'));
 
       let followSelect = $('<select selected="-1" id="followInput' + i + '">');
       followSelect.append('<option value="-1">None</option>');
@@ -189,7 +193,7 @@
         followSelect.append('<option value="'+j+'"">Output '+(j+1)+'</option>');
       }
       $(address(4, cursor)).append(followSelect);
-
+      $(address(5, cursor)).append($('<input type="checkbox" id="invertInput' + i + '">'));
       cursor++;
       address(3, cursor);
     }
@@ -248,6 +252,62 @@
       $('#waitForOther').prop('checked', config.waitForOther);
       $('#saveToFile').prop('checked', config.saveToFile);
       $('#useFile').prop('checked', config.useFile);
+    }
+    function clear(){
+      for (var i = 0; i < 10; i++)
+      {
+        var conf = config.table[i];
+        Object.keys(conf).forEach(function(key) 
+        {
+          console.log(key)
+          let target = $(`#${key}Table${i}`);
+          if (typeof(conf[key]) === "boolean")
+          {
+            target.prop('checked', false);
+          }
+          else
+          {
+           target.val('');
+          }
+        });
+      }
+      for (var i = 0; i < 10; i++)
+      {
+        var conf = config.output[i];
+        Object.keys(conf).forEach(function(key) 
+        {
+          let target = $(`#${key}Output${i}`);
+          if (typeof(conf[key]) === "boolean")
+          {
+            target.prop('checked', false);
+          }
+          else
+          {
+           target.val('');
+          }
+        });
+      }
+      for (var i = 0; i < 5; i++)
+      {
+        var conf = config.input[i];
+        Object.keys(conf).forEach(function(key) 
+        {
+          let target = $(`#${key}Input${i}`);
+          if (typeof(conf[key]) === "boolean")
+          {
+            target.prop('checked', false);
+          }
+          else
+          {
+           target.val('');
+          }
+        });
+      }
+      $('#triggerCom').val('');
+      $('#searchColumn').val('');
+      $('#waitForOther').prop('checked', false);
+      $('#saveToFile').prop('checked', false);
+      $('#useFile').prop('checked', false);
     }
 
     function putInConfig(){
@@ -323,6 +383,8 @@
       config.saveToFile = $('#saveToFile').prop('checked');
       config.useFile = $('#useFile').prop('checked');
     } 
+
+
     function setDate(){
       let dateTimeString = $('#date').val() + ' ' + $('#time').val()
       let dateTime = Date.parse(dateTimeString);
@@ -342,10 +404,6 @@
     }
     function loadConfig(index){
       socket.emit('load', configList[index]);
-      closeList();
-      setTimeout(function(){ 
-          window.location.href = '/filesettings';
-        }, 5000);
     }
     function loadConfigList(){
       socket.emit('getConfigList');
@@ -368,6 +426,12 @@
         }, 5000);
       }
     }
+    function deleteConfig(index){
+      if (confirm("Do you really want to delete "+configList[index]+"?")){
+        socket.emit('deleteConfig', configList[index]);
+        socket.emit('getConfigList');
+      }
+    }
 
     socket.on('configList', function(list){
       $('#list').remove();
@@ -380,12 +444,20 @@
       }
       else{
         list.forEach((element, index) => {
-          let newItem = $('<li>').append('<span>'+element+'</span>').append('<input type="button" class="config" value="Load" onclick="javascript:loadConfig('+index+')">');
+          let newItem = $('<li>').append('<span>'+element+'</span>')
+            .append('<input type="button" class="config" value="Load" onclick="javascript:loadConfig('+index+')">')
+            .append('<input type="button" class="config" value="Delete" onclick="javascript:deleteConfig('+index+')">');
           $('ul').append(newItem);
         });
       }
       $('ul').append($('<li>').append('<input type="button" value="Close" onclick="javascript:closeList()">'));
     });
+
+    socket.on('config', function(newConfig){
+      eval(newConfig);
+      console.log(newConfig);
+      fillIn();
+    })
 
     fillIn();
   </script>
