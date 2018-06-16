@@ -428,7 +428,7 @@ for(i = 0; i < config.serial.length; i++){
       });
 
       port.on('readable', function() {
-        console.log(remainingEntries);
+        //console.log(remainingEntries);
         comGPIO[index].writeSync(1);
         setTimeout(() => comGPIO[index].writeSync(0), 250);
 
