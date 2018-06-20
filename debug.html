@@ -50,7 +50,6 @@
     var socket = io();
     const numColumns = 5;
     var numRows = 0;
-    alert('test');
 
     const numTable = config.table.length;
 
@@ -67,6 +66,16 @@
         numRows++;
       }
       return '#c' + columnNum + 'r' + rowNum;
+    }
+
+    function shiftEntries(index){
+      var numEntries = config.serial[index].entries
+      var name = config.serial[index].name;
+
+      for(var i = 0; i<numEntries-1; i++){
+        $('.' + name +'time'+i).html($('.' + name +'time'+(i + 1)).html());
+        $('.' + name +'entry'+i).html($('.' + name +'entry'+(i + 1)).html());
+      }
     }
 
     function goSettings(){
@@ -294,17 +303,14 @@
       previousTime[i]=date.getTime();
       previousEntry[i]=msg.entry;
 
+      var lastIndex = config.serial[i].entries - 1;
 
-      for(var j = 0; j<config.serial[i].entries; j++){
-        if (j<config.serial[i].entries-1){
-          $('.' + config.serial[i].name+'time'+j).html($('.' + config.serial[i].name+'time'+(j + 1)).html());
-          $('.' + config.serial[i].name+'entry'+j).html($('.' + config.serial[i].name+'entry'+(j + 1)).html());
-        }
-        else{
-          $('.' + config.serial[i].name+'time'+j).html(printTime(msg.entryTime));
-          $('.' + config.serial[i].name+'entry'+j).html(msg.entry);
-        }
-      }
+      if ($('.' + config.serial[i].name+'time'+lastIndex).html())
+        shiftEntries(i);
+
+      $('.' + config.serial[i].name+'time'+lastIndex).html(printTime(msg.entryTime));
+      $('.' + config.serial[i].name+'entry'+lastIndex).html(msg.entry);
+      
     });
 
     socket.on('value', function(msg){
@@ -343,10 +349,12 @@
         }
       }
       for(var i = 0; i<config.serial.length; i++){
-        for(var j = 0; j<config.serial[i].entries; j++){
-          $('.' + config.serial[i].name+'time'+j).html('');
-          $('.' + config.serial[i].name+'entry'+j).html('');
-        }
+        var lastIndex = config.serial[i].entries - 1;
+        if ($('.' + config.serial[i].name+'time'+lastIndex).html())
+          shiftEntries(i);
+        
+        $('.' + config.serial[i].name+'time'+lastIndex).html('');
+        $('.' + config.serial[i].name+'entry'+lastIndex).html('');
       }
     })
   </script>

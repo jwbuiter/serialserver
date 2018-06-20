@@ -659,7 +659,7 @@ io.on('connection', function(socket){
   });
 
   socket.on('load', name =>{
-    socket.emit('config', fs.readFileSync('configs/'+name).toString().replace('module.exports = config;', ''));
+    socket.emit('config', fs.readFileSync('configs/'+name).toString().replace('module.exports = config;', '').replace(/^var /,''));
   });
 
   socket.on('deleteConfig', name=>{
@@ -681,9 +681,7 @@ io.on('connection', function(socket){
   });
 
   socket.on('loadDefault', ()=>{
-    fs.copyFileSync('config.template.js', 'config.js');
-    onlineGPIO.writeSync(0);
-    process.exit();
+    socket.emit('config', fs.readFileSync('config.template.js').toString().replace('module.exports = config;', '').replace(/^var /,''));
   });
 
   socket.on('setDateTime', dateTime =>{

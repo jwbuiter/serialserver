@@ -47,7 +47,6 @@
 
     function address(columnNum, rowNum){
       while (rowNum>=numRows){
-        console.log(numRows);
         var currentRow = $('<tr>');
         $('#content').append(currentRow);
         for (let i = 0; i < numColumns; i++){
@@ -203,7 +202,6 @@
         var conf = config.table[i];
         Object.keys(conf).forEach(function(key) 
         {
-          console.log(key)
           let target = $(`#${key}Table${i}`);
           if (typeof(conf[key]) === "boolean")
           {
@@ -252,62 +250,6 @@
       $('#waitForOther').prop('checked', config.waitForOther);
       $('#saveToFile').prop('checked', config.saveToFile);
       $('#useFile').prop('checked', config.useFile);
-    }
-    function clear(){
-      for (var i = 0; i < 10; i++)
-      {
-        var conf = config.table[i];
-        Object.keys(conf).forEach(function(key) 
-        {
-          console.log(key)
-          let target = $(`#${key}Table${i}`);
-          if (typeof(conf[key]) === "boolean")
-          {
-            target.prop('checked', false);
-          }
-          else
-          {
-           target.val('');
-          }
-        });
-      }
-      for (var i = 0; i < 10; i++)
-      {
-        var conf = config.output[i];
-        Object.keys(conf).forEach(function(key) 
-        {
-          let target = $(`#${key}Output${i}`);
-          if (typeof(conf[key]) === "boolean")
-          {
-            target.prop('checked', false);
-          }
-          else
-          {
-           target.val('');
-          }
-        });
-      }
-      for (var i = 0; i < 5; i++)
-      {
-        var conf = config.input[i];
-        Object.keys(conf).forEach(function(key) 
-        {
-          let target = $(`#${key}Input${i}`);
-          if (typeof(conf[key]) === "boolean")
-          {
-            target.prop('checked', false);
-          }
-          else
-          {
-           target.val('');
-          }
-        });
-      }
-      $('#triggerCom').val('');
-      $('#searchColumn').val('');
-      $('#waitForOther').prop('checked', false);
-      $('#saveToFile').prop('checked', false);
-      $('#useFile').prop('checked', false);
     }
 
     function putInConfig(){
@@ -399,8 +341,8 @@
     function saveConfig(){
       putInConfig();
       var name= prompt("Please enter the name for the new config file:", "config");
-
-      socket.emit('save', {name: name, config: config});
+      if (name)
+        socket.emit('save', {name: name, config: config});
     }
     function loadConfig(index){
       socket.emit('load', configList[index]);
