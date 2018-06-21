@@ -239,7 +239,7 @@ var config ={
   useFile : false,
   testMode: false,
 
-  version: '0.0'
+  version: '1.0'
 };
 
 module.exports = config;
