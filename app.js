@@ -82,12 +82,16 @@ if (config.saveToFile){
   switch(config.resetFile){
     case 'interval':
       setInterval(()=>{
+        saveArray = [];
         fileName=timeString();
+        saveArray[0]=['date'].concat(config.serial.map(element=>element.name)).concat(config.table.map(element=>element.name));
       },(Number(time[0])*60 + Number(time[1]))*60*1000);
     break;
     case 'time':
       schedule.scheduleJob(time[0]+' '+time[1]+' * * *', ()=>{
+        saveArray = [];
         fileName=timeString();
+        saveArray[0]=['date'].concat(config.serial.map(element=>element.name)).concat(config.table.map(element=>element.name));
       });
     break;
   }
