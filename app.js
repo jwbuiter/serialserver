@@ -11,7 +11,9 @@ var XLSX = require('xlsx');
 const { exec } = require('child_process');
 var serialPort = require('serialport');
 var Gpio = require('onoff').Gpio;
-var {sheetToArray, assert} = require('./auxiliaryFunctions')
+var schedule = require('node-schedule');
+
+var {sheetToArray, assert, timeString} = require('./auxiliaryFunctions')
 
 const tableColumns = 5;
 
@@ -74,10 +76,22 @@ var foundRow = new Array(26).fill('');
 var fileName;
 var saveArray = [];
 if (config.saveToFile){
-  let date = new Date();
-  fileName = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().replace(/T/, '_').replace(/:/g,'-').replace(/\..+/, '') + '.csv';
+  fileName = timeString();
+  let time = config.fileResetValue.split(':');
+
+  switch(config.resetFile){
+    case 'interval':
+      setInterval(()=>{
+        fileName=timeString();
+      },(Number(time[0])*60 + Number(time[1]))*60*1000);
+    break;
+    case 'time':
+      schedule.scheduleJob(time[0]+' '+time[1]+' * * *', ()=>{
+        fileName=timeString();
+      });
+    break;
+  }
   saveArray[0]=['date'].concat(config.serial.map(element=>element.name)).concat(config.table.map(element=>element.name));
-  console.log(saveArray);
 }
 
 function decode(entry, config){
@@ -140,6 +154,7 @@ function handleTable(){
 }
 
 function handleInputDebounce(index,value){
+  console.log('Input'+index+' changed to '+value)
   clearTimeout(inputDebounceTimeout[index]);
 
   inputDebounceTimeout[index] = setTimeout(()=>{
@@ -334,7 +349,6 @@ function calculateValues(){
       result = String(result).slice(-element.digits);
     }
     tableContent[index]=result;
-    console.log(result);
     io.emit('value', {name: 'table' + index, value: result});
   });
 }
@@ -695,13 +709,13 @@ io.on('connection', function(socket){
 
   socket.on('getFileList', ()=>{
     fs.readdir(constants.saveFileLocation, (err, files) =>{
-      socket.emit('fileList', files.filter((element)=>element.endsWith('.csv')));
+      socket.emit('fileList', files.filter((element)=>element.endsWith('.csv')).sort().reverse());
     });
   });
 
   socket.on('getConfigList', ()=>{
     fs.readdir(__dirname + '/configs', (err, files) =>{
-      socket.emit('configList', files.filter((element)=>element.endsWith('.js')));
+      socket.emit('configList', files.filter((element)=>element.endsWith('.js')).sort());
     });
   });
 
@@ -725,8 +739,8 @@ io.on('connection', function(socket){
     if (inputForced[index]){
       handleInputDebounce(index, inputForced[index]-1);
     }
-    else if (previousForced-1 != (inputDebouncedState[index] | inputFollowing[index])) {
-      handleInputDebounce(index, (inputDebouncedState[index] | inputFollowing[index]));
+    else if (previousForced-1 != (inputGPIO[index].readSync() | inputFollowing[index])) {
+      handleInputDebounce(index, (inputGPIO[index].readSync() | inputFollowing[index]));
     }
     handleTable();
     handleOutput();

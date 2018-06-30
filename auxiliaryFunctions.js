@@ -30,4 +30,10 @@ function assert(condition, message){
     throw message; // Fallback
   }
 }
-module.exports={sheetToArray, assert};
+
+function timeString(){
+  let date = new Date();
+  return new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().replace(/T/, '_').replace(/:/g,'-').replace(/\..+/, '') + '.csv';
+}
+
+module.exports={sheetToArray, assert, timeString};

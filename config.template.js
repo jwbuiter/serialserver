@@ -191,7 +191,7 @@ var config ={
       formula : '',
       follow : -1,
       GPIO : 19,
-      timeout : 200,
+      timeout : 20,
       invert : false
     },
     {
@@ -199,7 +199,7 @@ var config ={
       formula : '',
       follow : -1,
       GPIO : 16,
-      timeout : 200,
+      timeout : 20,
       invert : false
     },
     {
@@ -207,7 +207,7 @@ var config ={
       formula : '',
       follow : -1,
       GPIO : 26,
-      timeout : 200,
+      timeout : 20,
       invert : false
     },
     {
@@ -215,7 +215,7 @@ var config ={
       formula : '',
       follow : -1,
       GPIO : 20,
-      timeout : 200,
+      timeout : 20,
       invert : false
     },
     {
@@ -223,7 +223,7 @@ var config ={
       formula : '',
       follow : -1,
       GPIO : 21,
-      timeout : 200,
+      timeout : 20,
       invert : false
     },
   ], 
@@ -237,9 +237,11 @@ var config ={
   waitForOther : false,
   saveToFile : false,
   useFile : false,
+  resetFile : 'off',
+  fileResetValue : '00:00',
   testMode: false,
 
-  version: '1.0'
+  version: '2.0'
 };
 
 module.exports = config;
