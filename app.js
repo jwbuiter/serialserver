@@ -196,6 +196,7 @@ function handleInput(index, value){
       break;
     case 'exebl':
       executeBlock = (value === 1);
+      console.log({executeBlock});
       break;
     case 'exeup':
       if (value)
