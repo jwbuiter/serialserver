@@ -231,7 +231,21 @@ function handleOutput(){
           result = 'on';
         else
             result = result?'execute':'off';
-      } else {
+      } 
+      else if (element.seconds) {
+        if (!(outputGPIO[index].readSync()) && result){
+          setOutput(index, 1);
+          setTimeout( () => {
+            setOutput(index, 0);
+            emitState('output', index);
+          }, element.seconds*1000);
+          result = 'on';
+        }
+        else {
+          result = outputGPIO[index].readSync()?'on':'off';
+        }
+      }
+      else{
         setOutput(index, result?1:0);
         result = result?'on':'off';
       }
@@ -738,7 +752,7 @@ io.on('connection', function(socket){
   });
 
   socket.on('forceInput', index =>{
-    inputs[index].cycleForced();
+    //inputs[index].cycleForced();
 
     let previousForced = inputForced[index];
 
