@@ -14,8 +14,9 @@ const Gpio = require('onoff').Gpio;
 var schedule = require('node-schedule');
 
 const {sheetToArray, assert, timeString} = require('./auxiliaryFunctions')
-const input = require('./input');
-const output = require('./output');
+const Input = require('./input');
+const Output = require('./output');
+const Parser = require('./parser');
 
 
 const tableColumns = 5;
@@ -27,7 +28,6 @@ var remainingEntries = [];
 var onlineGPIO = new Gpio(config.onlineGPIO, 'out');
 
 var executeBlock = false;
-var executeUp = true;
 var executing = false;
 
 var outputExecuting = new Array(config.output.length ).fill(0);
@@ -44,10 +44,14 @@ var comGPIO = config.comGPIO.map(element =>{
   return new Gpio(element, 'out')
 });
 
-/*const inputs = config.input.map(element => new input(element));
-const outputs = config.output.map(element => {
+/*
+const parser = new Parser(tableContent, latestlogEntry)
+const input = config.input.map(element => new Input(element, parser));
+const output = config.output.map(element => {
   const followers = {};
-  return new output(element, followers);
+  return new Output(element, followers, parser);
+parser.setInputs(input);
+parser.setOutputs(output);
 });*/
 
 var outputGPIO = config.output.map(element =>{
@@ -196,7 +200,7 @@ function handleInput(index, value){
   io.emit('state', {name: 'input' + index, state});
   switch(config.input[index].formula){
     case 'exe':
-      if (value === 1 && !executeBlock && executeUp){
+      if (value === 1 && !executeBlock){
         execute();
         executing = true;
       } else if (value === 0 && executing){
@@ -210,14 +214,6 @@ function handleInput(index, value){
     case 'exebl':
       executeBlock = (value === 1);
       console.log({executeBlock});
-      break;
-    case 'exeup':
-      if (value)
-        executeUp = true;
-      break;
-    case 'exedo':
-      if (value)
-          executeUp = false;
       break;
   }
 }

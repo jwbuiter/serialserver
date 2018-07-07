@@ -1,9 +1,12 @@
 const Gpio = require('onoff').Gpio;
 
-class input {
+class Input {
 
-  constructor(config){
+  constructor(config, parser){
+    this.parser = parser;
+
     this.name = config.name;
+    this.formula = config.formula;
     this.GPIO = new Gpio(config.GPIO, 'in', 'both');
     this.follow = config.follow;
     this.timeoutLenght = config.timeout;
@@ -16,23 +19,55 @@ class input {
     this.debouncedState = 0;
 
     this.GPIO.watch((err, val)=>{
-    if (!this.forced && !this.following){
-      setTimeout(()=>{
-        this.setState(this.GPIO.readSync());
-      },10);
-    }
-  });
+      if (!this.forced && !this.following){
+        setTimeout(()=>{
+          this.setState(this.GPIO.readSync());
+        },10);
+      }
+    });
   }
 
-  setState(newState){
+  setStateDebounce(newState){
     clearTimeout(this.timeout);
 
     this.timeout = setTimeout(()=>{
       this.debouncedState = newState;
-      //handleInput(index, value);
+      setState(newState);
       //handleTable();
       //handleOutput();
     }, this.timeoutLenght);
+  }
+
+  setState(newState){
+
+    let state;
+    if (this.forced){
+      state = (newState)?'forcedOn':'forcedOff';
+    }
+    else{
+      state = (newState)?'on':'off';
+    }
+
+    //io.emit('state', {name: 'input' + index, state});
+
+    switch(this.formula){
+      case 'exe':
+        if (value === 1 && !executeBlock){
+          execute();
+          executing = true;
+        } else if (value === 0 && executing){
+          executing = false;
+          io.emit('clear');
+          latestLogEntry = new Array(config.serial.length).fill('0');
+          tableContent = new Array(config.output.length ).fill('');
+          executeStop();
+        }
+        break;
+      case 'exebl':
+        executeBlock = (value === 1);
+        console.log({executeBlock});
+        break;
+    }
   }
 
   getState(){
@@ -66,10 +101,10 @@ class input {
     }
 
     if (this.forced){
-      this.setState(this.forced-1);
+      this.setStateDebounce(this.forced-1);
     }
     else if (previousForced-1 != (this.GPIO.readSync() | this.following)) {
-      this.setState((this.GPIO.readSync() | this.following));
+      this.setStateDebounce((this.GPIO.readSync() | this.following));
     }
 
     //handleTable();
@@ -79,4 +114,4 @@ class input {
 
 }
 
-module.exports = input;
+module.exports = Input;

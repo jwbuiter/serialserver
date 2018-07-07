@@ -1,12 +1,16 @@
 const Gpio = require('onoff').Gpio;
 
-class output {
+class Output {
 
-  constructor(config, followers){
+  constructor(config, followers, parser){
+    this.parser = parser;
+
     this.name = config.name;
+    this.formula = config.formula;
     this.GPIO = new Gpio(element.GPIO, 'out')
     this.execute = config.execute;
     this.seconds = config.seconds;
+
     this.followers = followers;
 
     this.forced = 0;
@@ -22,15 +26,52 @@ class output {
   });
   }
 
-  setState(newState){
-    clearTimeout(this.timeout);
+  handle(){
+    if (this.forced)
+      return;
+    
+    let result = parser.calculateFormula(this.formula);
+    if (this.execute){
+      result = this.GPIO.readSync()?'on':result?'execute':'off';
+    } 
+    else if (this.seconds) {
+      if (!(this.GPIO.readSync()) && result){
+        this.setState(1);
+        setTimeout(() => {
+          this.setState(0);
+          //emitState('output', index);
+        }, this.seconds*1000);
+        result = 'on';
+      }
+      else {
+        result = this.GPIO.readSync()?'on':'off';
+      }
+    }
+    else{
+      this.setState(result?1:0);
+      result = result?'on':'off';
+    }
+    //io.emit('state', {name: 'output' + index, state: result});
+  
+  }
 
-    this.timeout = setTimeout(()=>{
-      this.debouncedState = newState;
-      //handleInput(index, value);
-      //handleTable();
-      //handleOutput();
-    }, this.timeoutLenght);
+  setState(newState){
+    this.GPIO.writeSync(newState);
+    followers.forEach((follower)=>{
+      if (follower.isForced())
+        return;
+
+      if (inputFollowing[inputIndex] == value^element.invert)
+        return;
+
+      inputFollowing[inputIndex] = value^element.invert;
+      console.log('input'+inputIndex +':' + (element.invert ^ value))
+
+      if (inputDebouncedState[inputIndex] != value ^ element.invert){
+        handleInputDebounce(inputIndex, element.invert ^ value);
+      }
+
+    });
   }
 
   getState(){
@@ -77,4 +118,4 @@ class output {
 
 }
 
-module.exports = output;
+module.exports = Output;
