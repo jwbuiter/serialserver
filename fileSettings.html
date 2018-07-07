@@ -7,6 +7,7 @@
       table { text-align: center; border: none; border-collapse: collapse;}
       tr { height: 29px; }
       td { position: relative; text-align: center;  border-style: bold; height: 29px;}
+      td.right { text-align: right; }
       td.small { font-size: 15px; }
       input {text-align: center; width: 100%;}
       input[type="submit"]{width: auto;}
@@ -76,7 +77,8 @@
     $(address(2, 0)).append($('<b>').html('Wait for second COM'));
     $(address(3, 0)).append($('<b>').html('Save to file'));
     $(address(4, 0)).append($('<b>').html('Use file'));
-    $(address(2, 2)).append($('<b>').html('File reset'));
+    $(address(2, 2)).append($('<b>').html('File reset: '));
+    $(address(2, 2)).addClass('right');
     $(address(2, 1)).append($('<input type="checkbox" id="waitForOther">'));
     $(address(3, 1)).append($('<input type="checkbox" id="saveToFile">'));
     $(address(4, 1)).append($('<input type="checkbox" id="useFile">'));

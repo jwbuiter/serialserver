@@ -10,10 +10,13 @@ var ip = require("ip");
 var XLSX = require('xlsx');
 const { exec } = require('child_process');
 var serialPort = require('serialport');
-var Gpio = require('onoff').Gpio;
+const Gpio = require('onoff').Gpio;
 var schedule = require('node-schedule');
 
-var {sheetToArray, assert, timeString} = require('./auxiliaryFunctions')
+const {sheetToArray, assert, timeString} = require('./auxiliaryFunctions')
+const input = require('./input');
+const output = require('./output');
+
 
 const tableColumns = 5;
 
@@ -41,9 +44,17 @@ var comGPIO = config.comGPIO.map(element =>{
   return new Gpio(element, 'out')
 });
 
+/*const inputs = config.input.map(element => new input(element));
+const outputs = config.output.map(element => {
+  const followers = {};
+  return new output(element, followers);
+});*/
+
 var outputGPIO = config.output.map(element =>{
   return new Gpio(element.GPIO, 'out')
 });
+
+
 
 var inputGPIO = config.input.map((element, index) =>{
 
@@ -727,6 +738,8 @@ io.on('connection', function(socket){
   });
 
   socket.on('forceInput', index =>{
+    inputs[index].cycleForced();
+
     let previousForced = inputForced[index];
 
     if (inputForced[index]){
@@ -755,6 +768,8 @@ io.on('connection', function(socket){
   });
 
   socket.on('forceOutput', index =>{
+    
+
     if (outputForced[index]){
       if (outputForcedLast[index]){
         outputForcedLast[index] = false;
