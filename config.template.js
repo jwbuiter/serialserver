@@ -51,61 +51,61 @@ var config ={
     {
       name : '',
       formula : '',
-      numeric : false,
+      numeric : true,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      numeric : false,
+      numeric : true,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      numeric : false,
+      numeric : true,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      numeric : false,
+      numeric : true,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      numeric : false,
+      numeric : true,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      numeric : false,
+      numeric : true,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      numeric : false,
+      numeric : true,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      numeric : false,
+      numeric : true,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      numeric : false,
+      numeric : true,
       digits : 0
     },
     {
       name : '',
       formula : '',
-      numeric : false,
+      numeric : true,
       digits : 0
     },
   ],
@@ -239,6 +239,12 @@ var config ={
   useFile : false,
   resetFile : 'off',
   fileResetValue : '00:00',
+  autoFTP : false,
+  FTPAddress : 'ftp.mbdc.nl',
+  FTPUserPassword : 'com:Com1234',
+  selfLearning : 'off',
+  selfLearningNumber : 0,
+  selfLearningTolerance : 0,
   testMode: false,
 
   version: '2.0'

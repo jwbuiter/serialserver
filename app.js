@@ -1,5 +1,5 @@
 var config = require('./config');
-var constants = require('./config.static');
+const constants = require('./config.static');
 var express = require('express');
 var fileUpload = require('express-fileupload');
 var app = express();
@@ -11,12 +11,29 @@ var XLSX = require('xlsx');
 const { exec } = require('child_process');
 var serialPort = require('serialport');
 const Gpio = require('onoff').Gpio;
+
 var schedule = require('node-schedule');
 
-const {sheetToArray, assert, timeString} = require('./auxiliaryFunctions')
+const {sheetToArray, assert, timeString, ftpUpload} = require('./auxiliaryFunctions')
 const Input = require('./input');
 const Output = require('./output');
 const Parser = require('./parser');
+
+function resetLog(){
+  if (config.autoFTP && fileName){
+    let address = config.FTPAddress.split('/')[0];
+    let folder = config.FTPAddress.split('/')[1];
+    let user = config.FTPUserPassword.split(':')[0];
+    let password = config.FTPUserPassword.split(':')[1];
+    let localPath = constants.saveFileLocation.replace(/\/+$/g, '') + '/';
+
+    ftpUpload(address, folder, user, password, localPath, fileName);  
+  }
+
+  saveArray = [];
+  fileName=timeString();
+  saveArray[0]=['date'].concat(config.serial.map(element=>element.name)).concat(config.table.map(element=>element.name));
+}
 
 
 const tableColumns = 5;
@@ -89,30 +106,22 @@ if (fs.existsSync(__dirname + '/data/data.xls')){
 var foundRow = new Array(26).fill('');
 
 var fileName;
-var saveArray = [];
+var saveArray;
 if (config.saveToFile){
-  fileName = timeString();
+  resetLog();
   let time = config.fileResetValue.split(':');
-  console.log(config.resetFile)
   switch(config.resetFile){
     case 'interval':
       setInterval(()=>{
-        saveArray = [];
-        fileName=timeString();
-        saveArray[0]=['date'].concat(config.serial.map(element=>element.name)).concat(config.table.map(element=>element.name));
+        resetLog();
       },(Number(time[0])*60 + Number(time[1]))*60*1000);
     break;
     case 'time':
-      console.log(time[1]+' '+time[0]+' * * *');
       schedule.scheduleJob(time[1]+' '+time[0]+' * * *', ()=>{
-        console.log('reset now')
-        saveArray = [];
-        fileName=timeString();
-        saveArray[0]=['date'].concat(config.serial.map(element=>element.name)).concat(config.table.map(element=>element.name));
+        resetLog();
       });
     break;
   }
-  saveArray[0]=['date'].concat(config.serial.map(element=>element.name)).concat(config.table.map(element=>element.name));
 }
 
 function decode(entry, config){
@@ -375,9 +384,9 @@ function calculateFormula(formula){
 
       let row = x.charCodeAt(1) - 65;
       let column = parseInt(x[2]);
-      assert((row*tableColumns + column - 1)>=0 && (row*tableColumns + column - 1)<tableContent.length, 'Out of bounds of table contents');
+      assert((row*constants.tableColumns + column - 1)>=0 && (row*constants.tableColumns + column - 1)<tableContent.length, 'Out of bounds of table contents');
 
-      return 'tableContent[' + (row*tableColumns + column - 1) + ']';
+      return 'tableContent[' + (row*constants.tableColumns + column - 1) + ']';
 
     }).replace(/#I[0-9]/g, (x) =>{
 
@@ -666,7 +675,7 @@ io.on('connection', function(socket){
     process.exit();
   });
 
-  socket.on('save', msg =>{
+  socket.on('saveConfig', msg =>{
     let name = __dirname + '/configs/' + msg.name +'V'+ config.version+ '.js';
     let conf = JSON.stringify(msg.config, null, 2).replace(/"/g, "'")
       .replace(/\\u00[0-9]{2}/g, match => String.fromCharCode(parseInt(match.slice(-2), 16)))
@@ -687,7 +696,7 @@ io.on('connection', function(socket){
     });
   });
 
-  socket.on('load', name =>{
+  socket.on('loadConfig', name =>{
     socket.emit('config', fs.readFileSync('configs/'+name).toString().replace('module.exports = config;', '').replace(/^var /,''));
   });
 
@@ -700,13 +709,23 @@ io.on('connection', function(socket){
     }
   })
 
-  socket.on('delete', name =>{
+  socket.on('deleteLog', name =>{
     try {
       fs.accessSync(constants.saveFileLocation.replace(/\/+$/g, '') + '/'+ name);
       fs.unlinkSync(constants.saveFileLocation.replace(/\/+$/g, '') + '/'+ name);
     } 
     catch (err) {
     }
+  });
+
+  socket.on('uploadLog', name =>{
+    let address = config.FTPAddress.split('/')[0];
+    let folder = config.FTPAddress.split('/')[1];
+    let user = config.FTPUserPassword.split(':')[0];
+    let password = config.FTPUserPassword.split(':')[1];
+    let localPath = constants.saveFileLocation.replace(/\/+$/g, '') + '/';
+
+    ftpUpload(address, folder, user, password, localPath, name);
   });
 
   socket.on('loadDefault', ()=>{
@@ -722,9 +741,9 @@ io.on('connection', function(socket){
     });
   });
 
-  socket.on('getFileList', ()=>{
+  socket.on('getLogList', ()=>{
     fs.readdir(constants.saveFileLocation, (err, files) =>{
-      socket.emit('fileList', files.filter((element)=>element.endsWith('.csv')).sort().reverse());
+      socket.emit('logList', files.filter((element)=>element.endsWith('.csv')).sort().reverse());
     });
   });
 

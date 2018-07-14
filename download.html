@@ -27,8 +27,14 @@
 
     function deleteFile(index){
       if (confirm("Do you really want to delete "+fileList[index]+"?")){
-        socket.emit('delete', fileList[index]);
-        socket.emit('getFileList');
+        socket.emit('deleteLog', fileList[index]);
+        socket.emit('getLogList');
+      }
+    }
+
+    function uploadFile(index){
+      if (confirm("Do you really want to upload "+fileList[index]+"?")){
+        socket.emit('uploadLog', fileList[index]);
       }
     }
 
@@ -36,9 +42,9 @@
       window.location.href = '/';
     }
 
-    socket.emit('getFileList');
+    socket.emit('getLogList');
 
-    socket.on('fileList', function(list){
+    socket.on('logList', function(list){
       fileList = list;
 
       $('#content').contents().remove();
@@ -48,6 +54,7 @@
       else{
         list.forEach((element, index) => {
           let newItem = $('<li>').append('<span>'+element+'</span>')
+            .append('<input type="button" value="Upload" onclick="javascript:uploadFile('+index+')">')
             .append('<input type="button" value="Download" onclick="javascript:downloadFile('+index+')">')
             .append('<input type="button" value="Delete" onclick="javascript:deleteFile('+index+')">');
           $('#content').append(newItem);

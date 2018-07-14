@@ -63,9 +63,34 @@
     }
 
     $(address(0, 0)).append($('<b>').html('Trigger'));
-    $(address(1, 0)).append($('<b>').html('Search Column'));
+    $(address(1, 0)).append($('<b>').html('Use file'));
+    $(address(2, 0)).append($('<b>').html('Wait for second COM'));
+    $(address(3, 0)).append($('<b>').html('Search Column'));
+    $(address(4, 0)).append($('<b>').html('Save to file'));
+
     $(address(0, 1)).append($('<select id ="triggerCom">').html('<option value="0">COM 0</option><option value="1">COM 1</option>'));
-    $(address(1, 1)).append($('<input type="text" id="searchColumn">'));
+    $(address(1, 1)).append($('<input type="checkbox" id="useFile">'));
+    $(address(2, 1)).append($('<input type="checkbox" id="waitForOther">'));
+    $(address(3, 1)).append($('<input type="text" id="searchColumn">'));
+    $(address(4, 1)).append($('<input type="checkbox" id="saveToFile">'));
+
+    $(address(0, 2)).append($('<b>').html('File reset'));
+    $(address(1, 2)).append($('<b>').html('Time'));
+    $(address(2, 2)).append($('<b>').html('Automatic FTP'));
+    $(address(3, 2)).append($('<b>').html('Address/Folder'));
+    $(address(4, 2)).append($('<b>').html('User:Password'));
+
+    $(address(0, 3)).append($('<select id ="resetFile">').html('<option value="off">Off</option><option value="interval">Interval</option><option value="time">Time of day</option>'));
+    $(address(1, 3)).append($('<input type="time" id="fileResetValue">'));
+    $(address(2, 3)).append($('<input type="checkbox" id="autoFTP">'));
+    $(address(3, 3)).append($('<input type="text" style="font-size: 19px" id="FTPAddress">'));
+    $(address(4, 3)).append($('<input type="text" style="font-size: 19px" id="FTPUserPassword">'));
+
+    $(address(0, 4)).append($('<b>').html('Self-learning'));
+    $(address(1, 4)).append($('<select id ="selfLearning">').html('<option value="off">Off</option><option value="com1">Com 0</option><option value="com1">Com 1</option>'));
+    $(address(2, 4)).append($('<b>').html('Number'));
+
+    $(address(4, 4)).append($('<b>').html('Tolerance(%)'));
 
     $(address(5, 1)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
     $(address(5, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
@@ -74,18 +99,7 @@
     $(address(6, 2)).append($('<input type="button" value="Load default" onclick="javascript:loadDefault()">'));
     $(address(5, 2)).append($('<b>').html('Version: '+config.version));
 
-    $(address(2, 0)).append($('<b>').html('Wait for second COM'));
-    $(address(3, 0)).append($('<b>').html('Save to file'));
-    $(address(4, 0)).append($('<b>').html('Use file'));
-    $(address(2, 2)).append($('<b>').html('File reset: '));
-    $(address(2, 2)).addClass('right');
-    $(address(2, 1)).append($('<input type="checkbox" id="waitForOther">'));
-    $(address(3, 1)).append($('<input type="checkbox" id="saveToFile">'));
-    $(address(4, 1)).append($('<input type="checkbox" id="useFile">'));
-    $(address(3, 2)).append($('<select id ="resetFile">').html('<option value="off">Off</option><option value="interval">Interval</option><option value="time">Time of day</option>'));
-    $(address(4, 2)).append($('<input type="time" id="fileResetValue">'));
-
-    var cursor = 4;
+    var cursor = 6;
 
     $(address(0, cursor)).append($('<b>').html('Table'));
     $(address(1, cursor)).append($('<b>').html('Name'));
@@ -151,10 +165,10 @@
     for (let i = 0; i < tableLetters; i++){
       for (let j = 0; j < tableNumbers; j++){
         $(address(0, cursor)).append($('<b>').html('#' + String.fromCharCode(65 + i) + (j + 1)));
-        $(address(1, cursor)).append($('<input type="text" id="nameTable' + (i*tableNumbers + j) + '">'));
-        $(address(2, cursor)).append($('<input class="wide" type="text" id="formulaTable' + (i*tableNumbers + j) + '">'));
-        $(address(3, cursor)).append($('<input type="checkbox" id="numericTable' + (i*tableNumbers + j) +'">'));
-        $(address(4, cursor)).append($('<input type="number" id="digitsTable' + (i*tableNumbers + j) + '" min="0" step="1">'));
+        $(address(1, cursor)).append($('<input type="text" id="nametable' + (i*tableNumbers + j) + '">'));
+        $(address(2, cursor)).append($('<input class="wide" type="text" id="formulatable' + (i*tableNumbers + j) + '">'));
+        $(address(3, cursor)).append($('<input type="checkbox" id="numerictable' + (i*tableNumbers + j) +'">'));
+        $(address(4, cursor)).append($('<input type="number" id="digitstable' + (i*tableNumbers + j) + '" min="0" step="1">'));
         cursor++;
       }
     }
@@ -168,10 +182,10 @@
 
     for (let i = 0; i < numOutputs; i++){
       $(address(0, cursor)).append($('<b>').html('Output ' + (i + 1)));
-      $(address(1, cursor)).append($('<input type="text" id="nameOutput' + i + '">'));
-      $(address(2, cursor)).append($('<input class="wide" type="text" id="formulaOutput' + i + '">'));
-      $(address(3, cursor)).append($('<input type="checkbox" id="executeOutput' + i + '">'));
-      $(address(4, cursor)).append($('<input type="number" id="secondsOutput' + i + '" min="0" step="1">'));
+      $(address(1, cursor)).append($('<input type="text" id="nameoutput' + i + '">'));
+      $(address(2, cursor)).append($('<input class="wide" type="text" id="formulaoutput' + i + '">'));
+      $(address(3, cursor)).append($('<input type="checkbox" id="executeoutput' + i + '">'));
+      $(address(4, cursor)).append($('<input type="number" id="secondsoutput' + i + '" min="0" step="1">'));
       cursor++;
     }
     cursor++;
@@ -185,156 +199,113 @@
 
     for (let i = 0; i < numInputs; i++){
       $(address(0, cursor)).append($('<b>').html('Input ' + (i + 1)));
-      $(address(1, cursor)).append($('<input type="text" id="nameInput' + i + '">'));
+      $(address(1, cursor)).append($('<input type="text" id="nameinput' + i + '">'));
 
-      let commandSelect = $('<select selected=" " class="wide" id="formulaInput' + i + '">');
+      let commandSelect = $('<select selected=" " class="wide" id="formulainput' + i + '">');
       commandSelect.append('<option value=""></option><option value="exe">Execute</option><option value="exebl">Execute block</option>');
       $(address(2, cursor)).append(commandSelect);
-      $(address(3, cursor)).append($('<input type="checkbox" id="invertInput' + i + '">'));
+      $(address(3, cursor)).append($('<input type="checkbox" id="invertinput' + i + '">'));
 
-      let followSelect = $('<select selected="-1" id="followInput' + i + '">');
+      let followSelect = $('<select selected="-1" id="followinput' + i + '">');
       followSelect.append('<option value="-1">None</option>');
       for (let j = 0; j < numOutputs; j++){
         followSelect.append('<option value="'+j+'"">Output '+(j+1)+'</option>');
       }
       $(address(4, cursor)).append(followSelect);
-      $(address(5, cursor)).append($('<input type="number" id="timeoutInput' + i + '" min="0" step="1">'));
+      $(address(5, cursor)).append($('<input type="number" id="timeoutinput' + i + '" min="0" step="1">'));
       
       cursor++;
       address(3, cursor);
     }
+
     function fillIn(){
-      for (var i = 0; i < 10; i++)
-      {
-        var conf = config.table[i];
-        Object.keys(conf).forEach(function(key) 
-        {
-          let target = $(`#${key}Table${i}`);
-          if (typeof(conf[key]) === "boolean")
-          {
-            target.prop('checked', conf[key]);
+      for (let property in config){
+        if (typeof(config[property])==='object'){
+          for (let i = 0; i<config[property].length; i++){
+            let element = (config[property])[i];
+
+            for (let subproperty in element){
+              let source = $('#'+subproperty+property+i);
+
+              if (!source.length) continue;
+
+              switch (typeof(element[subproperty])){
+                case 'boolean':
+                  source.prop('checked', element[subproperty]);
+                  break;
+                case 'number':
+                  source.val(element[subproperty]);
+                  break;
+                case 'string':
+                  source.val(element[subproperty]);
+                  break;
+              }
+            }
           }
-          else
-          {
-           target.val(conf[key]);
+        }
+        else {
+          let source = $('#'+property);
+
+          if (!source.length) continue;
+
+          switch (typeof(config[property])){
+            case 'boolean':
+              source.prop('checked', config[property]);
+              break;
+            case 'number':
+              source.val(config[property]);
+              break;
+            case 'string':
+              source.val(config[property]);
+              break;
           }
-        });
+        }
       }
-      for (var i = 0; i < 10; i++)
-      {
-        var conf = config.output[i];
-        Object.keys(conf).forEach(function(key) 
-        {
-          let target = $(`#${key}Output${i}`);
-          if (typeof(conf[key]) === "boolean")
-          {
-            target.prop('checked', conf[key]);
-          }
-          else
-          {
-           target.val(conf[key]);
-          }
-        });
-      }
-      for (var i = 0; i < 5; i++)
-      {
-        var conf = config.input[i];
-        Object.keys(conf).forEach(function(key) 
-        {
-          let target = $(`#${key}Input${i}`);
-          if (typeof(conf[key]) === "boolean")
-          {
-            target.prop('checked', conf[key]);
-          }
-          else
-          {
-           target.val(conf[key]);
-          }
-        });
-      }
-      $('#triggerCom').val(config.triggerCom);
-      $('#searchColumn').val(config.searchColumn);
-      $('#waitForOther').prop('checked', config.waitForOther);
-      $('#saveToFile').prop('checked', config.saveToFile);
-      $('#useFile').prop('checked', config.useFile);
-      $('#resetFile').val(config.resetFile);
-      $('#fileResetValue').val(config.fileResetValue);
     }
 
     function putInConfig(){
-      for (var i = 0; i < 10; i++)
-      {
-        var conf = config.table[i];
-        Object.keys(conf).forEach(function(key) 
-        {
-          let element = $(`#${key}Table${i}`);
-          if (element.length!=0)
-          {
-            if (typeof(conf[key]) === "boolean")
-            {
-              conf[key] = element.prop('checked');
-            }
-            else if (typeof(conf[key]) === 'number')
-            {
-              conf[key] = Number(element.val());
-            }
-            else
-            {
-              conf[key] = element.val();
-            }
-          }
-        });
-        var conf = config.output[i];
-        Object.keys(conf).forEach(function(key) 
-        {
-          let element = $(`#${key}Output${i}`);
-          if (element.length!=0)
-          {
-            if (typeof(conf[key]) === "boolean")
-            {
-              conf[key] = element.prop('checked');
-            }
-            else if (typeof(conf[key]) === 'number')
-            {
-              conf[key] = Number(element.val());
-            }
-            else
-            {
-              conf[key] = element.val();
+      for (let property in config){
+        if (typeof(config[property])==='object'){
+          for (let i = 0; i<config[property].length; i++){
+            let element = (config[property])[i];
+
+            for (let subproperty in element){
+              let source = $('#'+subproperty+property+i);
+
+              if (!source.length) continue;
+
+              switch (typeof(element[subproperty])){
+                case 'boolean':
+                  element[subproperty] = source.prop('checked');
+                  break;
+                case 'number':
+                  element[subproperty] = Number(source.val());
+                  break;
+                case 'string':
+                  element[subproperty] = source.val();
+                  break;
+              }
             }
           }
-        });
+        }
+        else {
+          let source = $('#'+property);
+
+          if (!source.length) continue;
+
+          switch (typeof(config[property])){
+            case 'boolean':
+              config[property] = source.prop('checked');
+              break;
+            case 'number':
+              config[property] = Number(source.val());
+              break;
+            case 'string':
+              config[property] = source.val();
+              break;
+          }
+        }
       }
-      for (var i = 0; i < 5; i++)
-      {
-        var conf = config.input[i];
-        Object.keys(conf).forEach(function(key) 
-        {
-          let element = $(`#${key}Input${i}`);
-          if (element.length!=0)
-          {
-            if (typeof(conf[key]) === "boolean")
-            {
-              conf[key] = element.prop('checked');
-            }
-            else if (typeof(conf[key]) === 'number')
-            {
-              conf[key] = Number(element.val());
-            }
-            else
-            {
-              conf[key] = element.val();
-            }
-          }
-        });
-      }
-      config.triggerCom = Number($('#triggerCom').val());
-      config.searchColumn = Number($('#searchColumn').val());
-      config.waitForOther = $('#waitForOther').prop('checked');
-      config.saveToFile = $('#saveToFile').prop('checked');
-      config.useFile = $('#useFile').prop('checked');
-      config.resetFile = $('#resetFile').val();
-      config.fileResetValue = $('#fileResetValue').val();
     } 
 
 
@@ -353,10 +324,10 @@
       putInConfig();
       var name= prompt("Please enter the name for the new config file:", "config");
       if (name)
-        socket.emit('save', {name: name, config: config});
+        socket.emit('saveConfig', {name: name, config: config});
     }
     function loadConfig(index){
-      socket.emit('load', configList[index]);
+      socket.emit('loadConfig', configList[index]);
     }
     function loadConfigList(){
       socket.emit('getConfigList');

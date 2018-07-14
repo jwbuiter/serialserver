@@ -1,4 +1,6 @@
-var XLSX = require('xlsx');
+const XLSX = require('xlsx');
+const Client = require('ftp');
+const fs = require('fs');
 
 function sheetToArray(sheet){
   var result = [];
@@ -36,4 +38,18 @@ function timeString(){
   return new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().replace(/T/, '_').replace(/:/g,'-').replace(/\..+/, '') + '.csv';
 }
 
-module.exports={sheetToArray, assert, timeString};
+function ftpUpload(host, folder, user, password, localFilePath, localFileName){
+  let c = new Client();
+  c.on('ready', function() {
+    c.mkdir(folder, true, ()=>{
+      c.put(localFilePath + localFileName, folder + '/' + localFileName, function(err) {
+        if (err) throw err;
+        c.end();
+      });
+    });
+  });
+  // connect to localhost:21 as anonymous
+  c.connect({host, user, password});
+}
+
+module.exports={sheetToArray, assert, timeString, ftpUpload};
