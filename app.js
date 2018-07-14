@@ -11,7 +11,6 @@ var XLSX = require('xlsx');
 const { exec } = require('child_process');
 var serialPort = require('serialport');
 const Gpio = require('onoff').Gpio;
-
 var schedule = require('node-schedule');
 
 const {sheetToArray, assert, timeString, ftpUpload} = require('./auxiliaryFunctions')
@@ -35,9 +34,6 @@ function resetLog(){
   saveArray[0]=['date'].concat(config.serial.map(element=>element.name)).concat(config.table.map(element=>element.name));
 }
 
-
-const tableColumns = 5;
-
 var latestLogEntry = new Array(config.serial.length ).fill('0');
 var tableContent = new Array(config.output.length ).fill('');
 var entryList = {};
@@ -57,10 +53,6 @@ var inputFollowing = new Array(config.input.length ).fill(0);
 var inputDebounceTimeout = new Array(config.input.length ).fill(setTimeout(()=>console.log('bla'),1));
 var inputDebouncedState = new Array(config.input.length ).fill(0);
 
-var comGPIO = config.comGPIO.map(element =>{
-  return new Gpio(element, 'out')
-});
-
 /*
 const parser = new Parser(tableContent, latestlogEntry)
 const input = config.input.map(element => new Input(element, parser));
@@ -71,11 +63,13 @@ parser.setInputs(input);
 parser.setOutputs(output);
 });*/
 
+var comGPIO = config.comGPIO.map(element =>{
+  return new Gpio(element, 'out')
+});
+
 var outputGPIO = config.output.map(element =>{
   return new Gpio(element.GPIO, 'out')
 });
-
-
 
 var inputGPIO = config.input.map((element, index) =>{
 
@@ -105,6 +99,10 @@ if (fs.existsSync(__dirname + '/data/data.xls')){
 }
 var foundRow = new Array(26).fill('');
 
+
+var learnedAverage;
+var learnValues=[];
+
 var fileName;
 var saveArray;
 if (config.saveToFile){
@@ -122,6 +120,16 @@ if (config.saveToFile){
       });
     break;
   }
+}
+
+function learn(value){
+  learnValues.push(value);
+  let indicesList = [];
+  /*for (let i = 0; i<learnValues.length-1; i++){
+    if tolerated(learnValues[i], value, config.selfLearningTolerance){
+      indicesList.push();
+    }
+  }*/
 }
 
 function decode(entry, config){
@@ -339,13 +347,40 @@ function execute(){
     let newRow = [new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().replace(/T/, ' ').replace(/\..+/, '')];
     newRow = newRow.concat(latestLogEntry);
     newRow = newRow.concat(tableContent);
-    saveArray.push(newRow);
+    let learningValue;
 
-    let wb = XLSX.utils.book_new();
-    let ws = XLSX.utils.aoa_to_sheet(saveArray);
-    XLSX.utils.book_append_sheet(wb, ws, 'data');
-    XLSX.writeFile(wb, constants.saveFileLocation.replace(/\/+$/g, '') + '/'+ fileName);
-    console.log(saveArray);
+
+    switch (config.selfLearning){
+      case 'off':
+        saveArray.push(newRow);
+        break;
+      case 'com0':
+        learningValue = latestlogEntry[0];
+        break;
+      case 'com1':
+        learningValue = latestlogEntry[1];
+        break;
+    }   
+
+    if (!learnedAverage && !(config.selfLearning==='off')){
+      saveArray.push(newRow);
+      learn(learningValue);
+    }
+    
+    if (learnedAverage){
+      let tolerance = config.selfLearningTolerance/100;
+      if (learningValue < learnedAverage*(1+tolerance) && learningValue < learnedAverage*(1+tolerance)){
+        saveArray.push(newRow);
+      }
+    }
+
+    if (learnedAverage || config.selfLearning==='off'){
+      let wb = XLSX.utils.book_new();
+      let ws = XLSX.utils.aoa_to_sheet(saveArray);
+      XLSX.utils.book_append_sheet(wb, ws, 'data');
+      XLSX.writeFile(wb, constants.saveFileLocation.replace(/\/+$/g, '') + '/'+ fileName);
+      console.log(saveArray);
+    }
   }
 }
 

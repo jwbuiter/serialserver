@@ -74,23 +74,31 @@
     $(address(3, 1)).append($('<input type="text" id="searchColumn">'));
     $(address(4, 1)).append($('<input type="checkbox" id="saveToFile">'));
 
-    $(address(0, 2)).append($('<b>').html('File reset'));
-    $(address(1, 2)).append($('<b>').html('Time'));
-    $(address(2, 2)).append($('<b>').html('Automatic FTP'));
-    $(address(3, 2)).append($('<b>').html('Address/Folder'));
-    $(address(4, 2)).append($('<b>').html('User:Password'));
+    for (let i = 0; i<5; i++){
+      $(address(i, 2)).append($('<hr>'));
+    }
 
-    $(address(0, 3)).append($('<select id ="resetFile">').html('<option value="off">Off</option><option value="interval">Interval</option><option value="time">Time of day</option>'));
-    $(address(1, 3)).append($('<input type="time" id="fileResetValue">'));
-    $(address(2, 3)).append($('<input type="checkbox" id="autoFTP">'));
-    $(address(3, 3)).append($('<input type="text" style="font-size: 19px" id="FTPAddress">'));
-    $(address(4, 3)).append($('<input type="text" style="font-size: 19px" id="FTPUserPassword">'));
+    $(address(0, 3)).append($('<b>').html('File reset'));
+    $(address(1, 3)).append($('<b>').html('Time'));
+    $(address(2, 3)).append($('<b>').html('Automatic FTP'));
+    $(address(3, 3)).append($('<b>').html('Address/Folder'));
+    $(address(4, 3)).append($('<b>').html('User:Password'));
 
-    $(address(0, 4)).append($('<b>').html('Self-learning'));
-    $(address(1, 4)).append($('<select id ="selfLearning">').html('<option value="off">Off</option><option value="com1">Com 0</option><option value="com1">Com 1</option>'));
-    $(address(2, 4)).append($('<b>').html('Number'));
+    $(address(0, 4)).append($('<select id ="resetFile">').html('<option value="off">Off</option><option value="interval">Interval</option><option value="time">Time of day</option>'));
+    $(address(1, 4)).append($('<input type="time" id="fileResetValue">'));
+    $(address(2, 4)).append($('<input type="checkbox" id="autoFTP">'));
+    $(address(3, 4)).append($('<input type="text" style="font-size: 19px" id="FTPAddress">'));
+    $(address(4, 4)).append($('<input type="text" style="font-size: 19px" id="FTPUserPassword">'));
 
-    $(address(4, 4)).append($('<b>').html('Tolerance(%)'));
+    for (let i = 0; i<5; i++){
+      $(address(i, 5)).append($('<hr>'));
+    }
+
+    $(address(0, 6)).append($('<b>').html('Self-learning'));
+    $(address(1, 6)).append($('<select id ="selfLearning">').html('<option value="off">Off</option><option value="com1">Com 0</option><option value="com1">Com 1</option>'));
+    $(address(2, 6)).append($('<b>').html('Number'));
+
+    $(address(4, 6)).append($('<b>').html('Tolerance(%)'));
 
     $(address(5, 1)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
     $(address(5, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
@@ -99,7 +107,7 @@
     $(address(6, 2)).append($('<input type="button" value="Load default" onclick="javascript:loadDefault()">'));
     $(address(5, 2)).append($('<b>').html('Version: '+config.version));
 
-    var cursor = 6;
+    var cursor = 8;
 
     $(address(0, cursor)).append($('<b>').html('Table'));
     $(address(1, cursor)).append($('<b>').html('Name'));
