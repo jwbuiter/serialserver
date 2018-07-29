@@ -341,6 +341,9 @@
 
     socket.on('clear', function(){
       for(var i = 0; i<config.table.length; i++){
+        if (!config.table[i].resetOnExe)
+          continue;
+        
         if (config.table[i].formula == '#'){
           $('#manual'+i).val('');
         }

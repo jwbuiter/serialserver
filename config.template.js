@@ -52,61 +52,71 @@ var config ={
       name : '',
       formula : '',
       numeric : true,
-      digits : 0
+      digits : 0,
+      resetOnExe : true,
     },
     {
       name : '',
       formula : '',
       numeric : true,
-      digits : 0
+      digits : 0,
+      resetOnExe : true,
     },
     {
       name : '',
       formula : '',
       numeric : true,
-      digits : 0
+      digits : 0,
+      resetOnExe : true,
     },
     {
       name : '',
       formula : '',
       numeric : true,
-      digits : 0
+      digits : 0,
+      resetOnExe : true,
     },
     {
       name : '',
       formula : '',
       numeric : true,
-      digits : 0
+      digits : 0,
+      resetOnExe : true,
     },
     {
       name : '',
       formula : '',
       numeric : true,
-      digits : 0
+      digits : 0,
+      resetOnExe : true,
     },
     {
       name : '',
       formula : '',
       numeric : true,
-      digits : 0
+      digits : 0,
+      resetOnExe : true,
     },
     {
       name : '',
       formula : '',
       numeric : true,
-      digits : 0
+      digits : 0,
+      resetOnExe : true,
     },
     {
       name : '',
       formula : '',
       numeric : true,
-      digits : 0
+      digits : 0,
+      resetOnExe : true,
     },
     {
       name : '',
       formula : '',
       numeric : true,
-      digits : 0
+      digits : 0,
+      resetOnExe : true,
     },
   ],
 

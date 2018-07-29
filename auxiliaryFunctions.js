@@ -38,16 +38,19 @@ function timeString(){
   return new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().replace(/T/, '_').replace(/:/g,'-').replace(/\..+/, '') + '.csv';
 }
 
-function ftpUpload(host, folder, user, password, localFilePath, localFileName){
+function ftpUpload(host, folder, user, password, localFilePath, localFileName, response){
   let c = new Client();
   c.on('ready', function() {
     c.mkdir(folder, true, ()=>{
       c.put(localFilePath + localFileName, folder + '/' + localFileName, function(err) {
-        if (err) throw err;
         c.end();
+        response(false);
       });
     });
   });
+  c.on('error', (err)=>{
+    response(err);
+  })
   // connect to localhost:21 as anonymous
   c.connect({host, user, password});
 }

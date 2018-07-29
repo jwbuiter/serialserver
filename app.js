@@ -460,6 +460,13 @@ function calculateFormula(formula){
       else
         return 'Number(latestLogEntry[' + x + '])';
 
+    }).replace(/\&[a-zA-Z0-9]+/g, (x) =>{
+      let operator = x.slice(1,3);
+      let functions = { 
+        tn : ()=> saveArray.length - 1,
+      }
+      return functions[operator]().toString();
+
     }).replace(/date/g, (x) =>{
 
       return new Date().getTime()/1000/86400 + 25569;
@@ -755,12 +762,20 @@ io.on('connection', function(socket){
 
   socket.on('uploadLog', name =>{
     let address = config.FTPAddress.split('/')[0];
-    let folder = config.FTPAddress.split('/')[1];
+    let folder = config.FTPAddress.split('/')[1] || '';
     let user = config.FTPUserPassword.split(':')[0];
     let password = config.FTPUserPassword.split(':')[1];
     let localPath = constants.saveFileLocation.replace(/\/+$/g, '') + '/';
 
-    ftpUpload(address, folder, user, password, localPath, name);
+    ftpUpload(address, folder, user, password, localPath, name, (error)=>{
+      if (error){
+        socket.emit('uploadLogResponse', error.message)
+      }
+      else {
+         socket.emit('uploadLogResponse', 'Successfully uploaded log file');
+      }
+    });
+     
   });
 
   socket.on('loadDefault', ()=>{

@@ -66,6 +66,10 @@
       $('#content').append(newItem);
       
     });
+
+    socket.on('uploadLogResponse', (response)=>{
+      alert(response);
+    });
   </script>
 </body>
 </html>
