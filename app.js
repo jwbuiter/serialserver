@@ -464,6 +464,10 @@ function calculateFormula(formula){
       let operator = x.slice(1,3);
       let functions = { 
         tn : ()=> saveArray.length - 1,
+        to : ()=> 0,
+        mi : ()=> 0,
+        ma : ()=> 0,
+        sp : ()=> 0,
       }
       return functions[operator]().toString();
 
