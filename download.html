@@ -6,7 +6,7 @@
       *{font-size: 25px; padding:0; margin: 0; }
       div {position: relative; margin: auto; margin-top: 50px; width: 80%;}
       ul { list-style-type: none; overflow: hidden;}
-      input[type="button"] {float: right; font-size: 20px;}
+      input[type="button"] {float: right; font-size: 20px; width: 18%;}
     </style>
 </head>
 <body>
@@ -22,7 +22,7 @@
     var socket = io();
 
     function downloadFile(index){
-      window.location.href = '/download?file='+fileList[index];
+      window.location.href = '/downloadLog?file='+fileList[index];
     }
 
     function deleteFile(index){

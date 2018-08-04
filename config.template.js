@@ -253,8 +253,10 @@ var config ={
   FTPAddress : 'ftp.mbdc.nl',
   FTPUserPassword : 'com:Com1234',
   selfLearning : 'off',
-  selfLearningNumber : 0,
-  selfLearningTolerance : 0,
+  selfLearningNumber : 10,
+  selfLearningTolerance : 25,
+  calibrationMin : 1,
+  calibrationMax : 1000,
   testMode: false,
 
   version: '2.0'

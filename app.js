@@ -461,15 +461,40 @@ function calculateFormula(formula){
         return 'Number(latestLogEntry[' + x + '])';
 
     }).replace(/\&[a-zA-Z0-9]+/g, (x) =>{
+      if (!saveArray)
+        return '0';
+      
       let operator = x.slice(1,3);
+
+      x = x.slice(3);
+
+      if (isNaN(Number(x)))
+          x = (x.charCodeAt(0) - 65)*constants.tableColumns + Number(x[1]) + 2;
+      else
+        x = Number(x) + 1;
+
+      if (saveArray[0][x] === undefined)
+        return '0';
+      
+      let data = saveArray.filter((elem, i)=>i>0).map((elem)=>Number(elem[x]));
+
+      if (data.length === 0)
+        return '0';
+
       let functions = { 
-        tn : ()=> saveArray.length - 1,
-        to : ()=> 0,
-        mi : ()=> 0,
-        ma : ()=> 0,
-        sp : ()=> 0,
+        tn : (x)=> data.length,
+        to : (x)=> data.reduce((acc, cur)=>acc+cur, 0),
+        mi : (x)=> data.reduce((acc, cur)=>Math.min(acc, cur)),
+        ma : (x)=> data.reduce((acc, cur)=>Math.max(acc, cur)),
+        sp : (x)=> {
+          let mean = data.reduce((acc, cur)=>acc+cur, 0) / (data.length || 1);
+          let spread = data.reduce((acc, cur)=> acc + (cur - mean)*(cur - mean), 0);
+          return Math.sqrt(spread / (data.length || 1));
+        },
       }
-      return functions[operator]().toString();
+      
+      return functions[operator](x).toString();
+      
 
     }).replace(/date/g, (x) =>{
 
@@ -477,7 +502,7 @@ function calculateFormula(formula){
 
     }).replace('and', '&&')
     .replace('or', '||');
-  
+
     result = eval(formula);
   }
   catch (err) {
@@ -618,7 +643,11 @@ app.get('/settings', function(request, response){
     response.sendFile('settings.html', { root: __dirname});
 });
 
-app.get('/download', function(request, response){
+app.get('/downloadConfig', function(request, response){
+  response.download('configs/'+ request.query.file);
+});
+
+app.get('/downloadLog', function(request, response){
   if (request.query.file){
     response.download(constants.saveFileLocation.replace(/\/+$/g, '') + '/'+ request.query.file);
   }
@@ -627,6 +656,7 @@ app.get('/download', function(request, response){
   }
   
 });
+
 
 if (constants.exposeUpload){
   app.get('/fileupload', function(request, response){
@@ -676,12 +706,35 @@ app.post('/upload', (req, res) => {
   // Use the mv() method to place the file somewhere on your server
   sampleFile.mv(__dirname + '/data/data.xls', function(err) {
     if (err){
-        return res.status(500).send(err);
-  }
+      return res.status(500).send(err);
+    }
+
     console.log(__dirname + '/data/data.xls');
-    res.send('<meta http-equiv="refresh" content="5; url=/" /><title>MBDCcomUnit</title> File uploaded.')
+    res.send('<meta http-equiv="refresh" content="5; url=/" /><title>MBDCcomUnit</title> File uploaded.');
     onlineGPIO.writeSync(0);
     process.exit();
+  });
+  
+
+});
+
+app.use('/uploadConfig', fileUpload());
+
+app.post('/uploadConfig', (req, res) => {
+  if (!req.files.importConfig){
+    return res.send('<meta http-equiv="refresh" content="1; url=/filesettings" /><title>MBDCcomUnit</title> No files were uploaded.')
+  }
+ 
+  // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+  let sampleFile = req.files.importConfig;
+ 
+  // Use the mv() method to place the file somewhere on your server
+  sampleFile.mv(__dirname + '/configs/' + sampleFile.name, function(err) {
+    if (err){
+      return res.status(500).send(err);
+    }
+
+    res.send('<meta http-equiv="refresh" content="1; url=/filesettings" /><title>MBDCcomUnit</title> Config uploaded.');
   });
   
 
