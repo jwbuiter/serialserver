@@ -250,13 +250,26 @@ var config ={
   resetFile : 'off',
   fileResetValue : '00:00',
   autoFTP : false,
-  FTPAddress : 'ftp.mbdc.nl',
-  FTPUserPassword : 'com:Com1234',
+
+  FTP: [
+    {
+      addressFolder : 'ftp.mbdc.nl',
+      userPassword : 'com:Com1234',
+    },
+    {
+      addressFolder : '',
+      userPassword : '',
+    },
+  ],
+  
   selfLearning : 'off',
   selfLearningNumber : 10,
   selfLearningTolerance : 25,
+  selfLearningReset : 'fileReset',
+  selfLearningResetValue : '00:00',
   calibrationMin : 1,
   calibrationMax : 1000,
+
   testMode: false,
 
   version: '2.0'

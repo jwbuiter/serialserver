@@ -2,6 +2,8 @@ const XLSX = require('xlsx');
 const Client = require('ftp');
 const fs = require('fs');
 
+const constants = require('./config.static');
+
 function sheetToArray(sheet){
   var result = [];
   var row;
@@ -38,11 +40,17 @@ function timeString(){
   return new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().replace(/T/, '_').replace(/:/g,'-').replace(/\..+/, '') + '.csv';
 }
 
-function ftpUpload(host, folder, user, password, localFilePath, localFileName, response){
+function ftpUpload(addressFolder, userPassword, fileName, response){
+  const host = addressFolder.split('/')[0];
+  const folder = addressFolder.split('/')[1] || '';
+  const user = userPassword.split(':')[0];
+  const password = userPassword.split(':')[1];
+  const localPath = constants.saveFileLocation.replace(/\/+$/g, '') + '/';
+
   let c = new Client();
   c.on('ready', function() {
     c.mkdir(folder, true, ()=>{
-      c.put(localFilePath + localFileName, folder + '/' + localFileName, function(err) {
+      c.put(localPath + fileName, folder + '/' + fileName, function(err) {
         c.end();
         response(false);
       });
@@ -51,7 +59,12 @@ function ftpUpload(host, folder, user, password, localFilePath, localFileName, r
   c.on('error', (err)=>{
     response(err);
   })
+
   // connect to localhost:21 as anonymous
+  if (!(user && password)){
+    response({message: 'No username and password set'});
+    return;
+  }
   c.connect({host, user, password});
 }
 

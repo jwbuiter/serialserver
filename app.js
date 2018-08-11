@@ -2,6 +2,7 @@ var config = require('./config');
 const constants = require('./config.static');
 var express = require('express');
 var fileUpload = require('express-fileupload');
+var zip = require('express-zip');
 var app = express();
 var server = app.listen(constants.port);
 var io = require('socket.io').listen(server);
@@ -20,13 +21,9 @@ const Parser = require('./parser');
 
 function resetLog(){
   if (config.autoFTP && fileName){
-    let address = config.FTPAddress.split('/')[0];
-    let folder = config.FTPAddress.split('/')[1];
-    let user = config.FTPUserPassword.split(':')[0];
-    let password = config.FTPUserPassword.split(':')[1];
-    let localPath = constants.saveFileLocation.replace(/\/+$/g, '') + '/';
-
-    ftpUpload(address, folder, user, password, localPath, fileName);  
+    config.FTP.forEach(({addressFolder, userPassword}) => {
+      ftpUpload(addressFolder, userPassword, fileName);
+    });
   }
 
   saveArray = [];
@@ -40,7 +37,7 @@ var entryList = {};
 var remainingEntries = [];
 var onlineGPIO = new Gpio(config.onlineGPIO, 'out');
 
-var executeBlock = false;
+var executeBlock = new Array(config.input.length).fill(false);
 var executing = false;
 
 var outputExecuting = new Array(config.output.length ).fill(0);
@@ -217,7 +214,7 @@ function handleInput(index, value){
   io.emit('state', {name: 'input' + index, state});
   switch(config.input[index].formula){
     case 'exe':
-      if (value === 1 && !executeBlock){
+      if (value === 1 && !(executeBlock.reduce((acc, cur) => acc || cur))){
         execute();
         executing = true;
       } else if (value === 0 && executing){
@@ -229,7 +226,7 @@ function handleInput(index, value){
       }
       break;
     case 'exebl':
-      executeBlock = (value === 1);
+      executeBlock[index] = (value === 1);
       console.log({executeBlock});
       break;
   }
@@ -648,7 +645,11 @@ app.get('/downloadConfig', function(request, response){
 });
 
 app.get('/downloadLog', function(request, response){
-  if (request.query.file){
+  if (request.query.multiFile){
+    fileList = request.query.multiFile.split(',').map((element) => ({path: constants.saveFileLocation.replace(/\/+$/g, '')+'/'+element, name: element}));
+    response.zip(fileList, timeString().split('.')[0] + '.zip');
+  }
+  else if (request.query.file){
     response.download(constants.saveFileLocation.replace(/\/+$/g, '') + '/'+ request.query.file);
   }
   else{
@@ -774,6 +775,10 @@ io.on('connection', function(socket){
     process.exit();
   });
 
+  socket.on('configExists', name => {
+    socket.emit('configExistsResult', {result: fs.existsSync( __dirname + '/configs/' + name +'V'+ config.version+ '.js'), name});
+  })
+
   socket.on('saveConfig', msg =>{
     let name = __dirname + '/configs/' + msg.name +'V'+ config.version+ '.js';
     let conf = JSON.stringify(msg.config, null, 2).replace(/"/g, "'")
@@ -817,14 +822,10 @@ io.on('connection', function(socket){
     }
   });
 
-  socket.on('uploadLog', name =>{
-    let address = config.FTPAddress.split('/')[0];
-    let folder = config.FTPAddress.split('/')[1] || '';
-    let user = config.FTPUserPassword.split(':')[0];
-    let password = config.FTPUserPassword.split(':')[1];
-    let localPath = constants.saveFileLocation.replace(/\/+$/g, '') + '/';
+  socket.on('uploadLog', ({name, index}) =>{
+    const {addressFolder, userPassword} = config.FTP[index];
 
-    ftpUpload(address, folder, user, password, localPath, name, (error)=>{
+    ftpUpload(addressFolder, userPassword, name, (error)=>{
       if (error){
         socket.emit('uploadLogResponse', error.message)
       }

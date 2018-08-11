@@ -161,6 +161,11 @@
     let logoSizeSet = false;
     for (var i = 0; i<config.serial.length; i++){
       let conf = config.serial[i];
+      if (conf.average){
+        conf.entries = 1;
+        config.serial[i].entries=1;
+      }
+      
       if (conf.name==='')
         continue;
 
@@ -180,7 +185,7 @@
           }
           $(address(0, cursor)).html(conf.name);
           if (conf.average){
-            $(address(4, cursor)).addClass(conf.name + 'avg')
+            $(address(4, cursor)).addClass(conf.name.replace(' ', '_') + 'avg')
             $(address(4, cursor)).addClass('result');
           }
         }
@@ -188,8 +193,8 @@
           $(address(4, cursor)).html( 'Average' );
 
         $(address(1, cursor)).html(j+1);
-        $(address(2, cursor)).addClass(conf.name+'time'+j);
-        $(address(3, cursor)).addClass(conf.name+'entry'+j);
+        $(address(2, cursor)).addClass(conf.name.replace(' ', '_')+'time'+j);
+        $(address(3, cursor)).addClass(conf.name.replace(' ', '_')+'entry'+j);
       }
     }
 
@@ -295,6 +300,8 @@
       for(var i = 0; i<config.serial.length; i++)
         if (msg.name===config.serial[i].name)
           break;  //store value of i for correct serial entry
+
+      msg.name = msg.name.replace(' ', '_');
         
       var date = new Date()
       if (msg.entry==previousEntry[i] && date.getTime()<previousTime[i] + config.serial[i].timeout*1000)
@@ -305,11 +312,11 @@
 
       var lastIndex = config.serial[i].entries - 1;
 
-      if ($('.' + config.serial[i].name+'time'+lastIndex).html())
+      if ($('.' + msg.name+'time'+lastIndex).html())
         shiftEntries(i);
 
-      $('.' + config.serial[i].name+'time'+lastIndex).html(printTime(msg.entryTime));
-      $('.' + config.serial[i].name+'entry'+lastIndex).html(msg.entry);
+      $('.' + msg.name+'time'+lastIndex).html(printTime(msg.entryTime));
+      $('.' + msg.name+'entry'+lastIndex).html(msg.entry);
       
     });
 
@@ -341,8 +348,12 @@
 
     socket.on('clear', function(){
       for(var i = 0; i<config.table.length; i++){
-        if (!config.table[i].resetOnExe)
+        if (!config.table[i].resetOnExe){
+          if (config.table[i].formula == '#'){
+            manualChange(i);
+          }
           continue;
+        }
         
         if (config.table[i].formula == '#'){
           $('#manual'+i).val('');

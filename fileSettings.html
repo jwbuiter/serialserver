@@ -14,7 +14,7 @@
       input[type="time"]{font-size: 19px;}
       input.config {width: 20%; float:right; font-size: 20px;}
       select { width: 100%;}
-      #list {width: 50vw;text-align: left; position: absolute; right: 100%; top: 2.5em;z-index: 2; background-color: white; border: 1px solid black; padding: 5px;}
+      #list {width: 50vw;text-align: left; position: absolute; right: 100%; top: 1.5em; z-index: 2; background-color: white; border: 1px solid black; padding: 5px;}
       ul { list-style-type: none;}
       li {margin: 0 0 3px 0;}
     </style>
@@ -28,6 +28,7 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="/res/jquery-1.11.1.js"></script>
   <script src="/config.js"></script>
+  <script src="/config.static.js"></script>
   <script type="text/javascript">
     if (screen.width>1000){
       var columnWidths = [12, 12, 28, 12, 12, 12, 12, 12];
@@ -63,7 +64,7 @@
     }
 
     $(address(0, 0)).append($('<b>').html('Trigger'));
-    $(address(1, 0)).append($('<b>').html('Use file'));
+    $(address(1, 0)).append($('<b>').html('Use import file'));
     $(address(2, 0)).append($('<b>').html('Wait for second COM'));
     $(address(3, 0)).append($('<b>').html('Search Column'));
     $(address(4, 0)).append($('<b>').html('Save to file'));
@@ -74,50 +75,67 @@
     $(address(3, 1)).append($('<input type="text" id="searchColumn">'));
     $(address(4, 1)).append($('<input type="checkbox" id="saveToFile">'));
 
-    for (let i = 0; i<5; i++){
+    $(address(5, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
+    $(address(6, 0)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
+    $(address(7, 0)).append($('<b>').html('Version: '+config.version));
+    $(address(5, 1)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
+    $(address(6, 1)).append($('<input type="button" value="Load config" onclick="javascript:loadConfigList()">'));
+    $(address(7, 1)).append($('<input type="button" value="Load default" onclick="javascript:loadDefault()">'));
+    
+
+    for (let i = 0; i<7; i++){
       $(address(i, 2)).append($('<hr>'));
     }
 
     $(address(0, 3)).append($('<b>').html('File reset'));
     $(address(1, 3)).append($('<b>').html('Time'));
     $(address(2, 3)).append($('<b>').html('Automatic FTP'));
-    $(address(3, 3)).append($('<b>').html('Address / Folder'));
-    $(address(4, 3)).append($('<b>').html('User : Password'));
+    $(address(3, 3)).append($('<b>').html('1-Address / Folder'));
+    $(address(4, 3)).append($('<b>').html('1-User : Password'));
+    $(address(5, 3)).append($('<b>').html('2-Address / Folder'));
+    $(address(6, 3)).append($('<b>').html('2-User : Password'));
 
     $(address(0, 4)).append($('<select id ="resetFile">').html('<option value="off">Off</option><option value="interval">Interval</option><option value="time">Time of day</option>'));
     $(address(1, 4)).append($('<input type="time" id="fileResetValue">'));
     $(address(2, 4)).append($('<input type="checkbox" id="autoFTP">'));
-    $(address(3, 4)).append($('<input type="text" style="font-size: 19px" id="FTPAddress">'));
-    $(address(4, 4)).append($('<input type="text" style="font-size: 19px" id="FTPUserPassword">'));
+    $(address(3, 4)).append($('<input type="text" style="font-size: 19px" id="addressFolderFTP0">'));
+    $(address(4, 4)).append($('<input type="text" style="font-size: 19px" id="userPasswordFTP0">'));
+    $(address(5, 4)).append($('<input type="text" style="font-size: 19px" id="addressFolderFTP1">'));
+    $(address(6, 4)).append($('<input type="text" style="font-size: 19px" id="userPasswordFTP1">'));
 
-    for (let i = 0; i<5; i++){
+    for (let i = 0; i<8; i++){
       $(address(i, 5)).append($('<hr>'));
     }
 
-    $(address(0, 6)).append($('<b>').html('Self-learning'));
-    $(address(1, 6)).append($('<b>').html('Number'));
-    $(address(2, 6)).append($('<b>').html('Tolerance(%)'));
-    $(address(3, 6)).append($('<b>').html('#SCmin'));
-    $(address(4, 6)).append($('<b>').html('#SCmax'));
+    var cursor = 6;
 
-    $(address(0, 7)).append($('<select id ="selfLearning">').html('<option value="off">Off</option><option value="com1">Com 0</option><option value="com1">Com 1</option>'));
-    $(address(1, 7)).append($('<input type="number" id="selfLearningNumber" min="0" step="1">'));
-    $(address(2, 7)).append($('<input type="number" id="selfLearningTolerance" min="0" step="1">'));
-    $(address(3, 7)).append($('<input type="number" id="calibrationMin" min="0" step="1">'));
-    $(address(4, 7)).append($('<input type="number" id="calibrationMax" min="0" step="1">'));
+    if(constants.selfLearning){
 
-    for (let i = 0; i<5; i++){
-      $(address(i, 8)).append($('<hr>'));
+      $(address(0, 6)).append($('<b>').html('Self-learning'));
+      $(address(1, 6)).append($('<b>').html('Number'));
+      $(address(2, 6)).append($('<b>').html('Tolerance(%)'));
+      $(address(3, 6)).append($('<b>').html('#SCmin'));
+      $(address(4, 6)).append($('<b>').html('#SCmax'));
+      $(address(5, 6)).append($('<b>').html('Reset'));
+      $(address(6, 6)).append($('<b>').html('Time'));
+      $(address(7, 6)).html('#SC #SCmin #SCmax').addClass('small');
+      
+
+      $(address(0, 7)).append($('<select id ="selfLearning">').html('<option value="off">Off</option><option value="com1">Com 0</option><option value="com1">Com 1</option>'));
+      $(address(1, 7)).append($('<input type="number" id="selfLearningNumber" min="0" step="1">'));
+      $(address(2, 7)).append($('<input type="number" id="selfLearningTolerance" min="0" step="1">'));
+      $(address(3, 7)).append($('<input type="number" id="calibrationMin" min="0" step="1">'));
+      $(address(4, 7)).append($('<input type="number" id="calibrationMax" min="0" step="1">'));
+      $(address(5, 7)).append($('<select id ="selfLearningReset">').html('<option value="off">Off</option><option value="fileReset">File Reset</option><option value="interval">Interval</option><option value="time">Time of day</option>'));
+      $(address(6, 7)).append($('<input type="time" id="selfLearningResetValue">'));
+      $(address(7, 7)).html('#SN #ST').addClass('small');
+
+      for (let i = 0; i<8; i++){
+        $(address(i, 8)).append($('<hr>'));
+      }
+      cursor+=3;
     }
-
-    $(address(5, 1)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
-    $(address(5, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
-    $(address(6, 0)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
-    $(address(6, 1)).append($('<input type="button" value="Load config" onclick="javascript:loadConfigList()">'));
-    $(address(6, 2)).append($('<input type="button" value="Load default" onclick="javascript:loadDefault()">'));
-    $(address(5, 2)).append($('<b>').html('Version: '+config.version));
-
-    var cursor = 10;
+    cursor++;
 
     $(address(0, cursor)).append($('<b>').html('Table'));
     $(address(1, cursor)).append($('<b>').html('Name'));
@@ -372,7 +390,7 @@
       putInConfig();
       var name= prompt("Please enter the name for the new config file:", "config");
       if (name)
-        socket.emit('saveConfig', {name: name, config: config});
+        socket.emit('configExists', name);
     }
     function loadConfig(index){
       socket.emit('loadConfig', configList[index]);
@@ -460,6 +478,12 @@
       console.log(newConfig);
       fillIn();
     })
+
+    socket.on('configExistsResult', ({result, name}) =>{
+      if (!result || confirm("File already exists, do you want to overwrite?")){
+        socket.emit('saveConfig', {name: name, config: config});
+      }
+    });
 
     fillIn();
   </script>

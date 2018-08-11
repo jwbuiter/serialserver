@@ -4,6 +4,7 @@ var constants = {
   port : 80,
   saveFileLocation : '/home/pi/Documents',
   exposeUpload : false,
+  selfLearning : false,
   tableColumns : 5,
 }
 

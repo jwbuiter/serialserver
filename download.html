@@ -4,9 +4,9 @@
   <title>MBDCcomUnit</title>
    <style>
       *{font-size: 25px; padding:0; margin: 0; }
-      div {position: relative; margin: auto; margin-top: 50px; width: 80%;}
+      div {position: relative; margin: auto; margin-top: 50px; width: 90%;}
       ul { list-style-type: none; overflow: hidden;}
-      input[type="button"] {float: right; font-size: 20px; width: 18%;}
+      input[type="button"] {float: right; font-size: 20px; width: 15%;}
     </style>
 </head>
 <body>
@@ -32,9 +32,24 @@
       }
     }
 
-    function uploadFile(index){
+    function uploadFile(index, FTPIndex){
       if (confirm("Do you really want to upload "+fileList[index]+"?")){
-        socket.emit('uploadLog', fileList[index]);
+        socket.emit('uploadLog', {name:fileList[index], index: FTPIndex});
+      }
+    } 
+
+    function deleteAll(){
+      if (confirm("Do you really want to delete all logs?")){
+        for(let i=0; i<fileList.length; i++){
+          socket.emit('deleteLog', fileList[i]); 
+        }
+      socket.emit('getLogList');
+      }
+    }
+
+    function downloadAll(){
+      if (confirm("Do you really want to download all logs?")){
+        window.location.href = '/downloadLog?multiFile='+fileList; 
       }
     }
 
@@ -54,7 +69,8 @@
       else{
         list.forEach((element, index) => {
           let newItem = $('<li>').append('<span>'+element+'</span>')
-            .append('<input type="button" value="Upload" onclick="javascript:uploadFile('+index+')">')
+            .append('<input type="button" value="FTP 2" onclick="javascript:uploadFile('+index+', 1)">')
+            .append('<input type="button" value="FTP 1" onclick="javascript:uploadFile('+index+', 0)">')
             .append('<input type="button" value="Download" onclick="javascript:downloadFile('+index+')">')
             .append('<input type="button" value="Delete" onclick="javascript:deleteFile('+index+')">');
           $('#content').append(newItem);
@@ -62,7 +78,9 @@
       }
 
       let newItem = $('<li>')
-        .append('<input type="button" value="Cancel" onclick="javascript:goDebug()">');
+        .append('<input type="button" value="Cancel" onclick="javascript:goDebug()">')
+        .append('<input type="button" value="Downl. all" style="margin-right:15%" onclick="javascript:downloadAll()">')
+        .append('<input type="button" value="Delete all" onclick="javascript:deleteAll()">');
       $('#content').append(newItem);
       
     });
