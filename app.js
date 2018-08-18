@@ -15,14 +15,17 @@ const Gpio = require('onoff').Gpio;
 var schedule = require('node-schedule');
 
 const {sheetToArray, assert, timeString, ftpUpload} = require('./auxiliaryFunctions')
+const recovery = require('./recovery.js');
 const Input = require('./input');
 const Output = require('./output');
 const Parser = require('./parser');
 
+recovery.bootCheck();
+
 function resetLog(){
   if (config.autoFTP && fileName){
-    config.FTP.forEach(({addressFolder, userPassword}) => {
-      ftpUpload(addressFolder, userPassword, fileName);
+    config.FTP.forEach(({addressFolder, userPassword}, index) => {
+      setTimeout(()=>ftpUpload(addressFolder, userPassword, fileName), index * 500);
     });
   }
 
@@ -35,7 +38,7 @@ var latestLogEntry = new Array(config.serial.length ).fill('0');
 var tableContent = new Array(config.output.length ).fill('');
 var entryList = {};
 var remainingEntries = [];
-var onlineGPIO = new Gpio(config.onlineGPIO, 'out');
+var onlineGPIO = new Gpio(constants.onlinePin, 'out');
 
 var executeBlock = new Array(config.input.length).fill(false);
 var executing = false;
@@ -47,7 +50,7 @@ var outputForcedLast = new Array(config.output.length ).fill(false);
 var inputForced = new Array(config.input.length ).fill(0);
 var inputForcedLast = new Array(config.input.length).fill(false);
 var inputFollowing = new Array(config.input.length ).fill(0);
-var inputDebounceTimeout = new Array(config.input.length ).fill(setTimeout(()=>console.log('bla'),1));
+var inputDebounceTimeout = new Array(config.input.length ).fill(setTimeout(()=> 0 ,1));
 var inputDebouncedState = new Array(config.input.length ).fill(0);
 
 /*
@@ -60,17 +63,17 @@ parser.setInputs(input);
 parser.setOutputs(output);
 });*/
 
-var comGPIO = config.comGPIO.map(element =>{
+var comGPIO = constants.comPin.map(element =>{
   return new Gpio(element, 'out')
 });
 
-var outputGPIO = config.output.map(element =>{
-  return new Gpio(element.GPIO, 'out')
+var outputGPIO = constants.outputPin.map(element =>{
+  return new Gpio(element, 'out')
 });
 
-var inputGPIO = config.input.map((element, index) =>{
+var inputGPIO = constants.inputPin.map((element, index) =>{
 
-  let newInput = new Gpio(element.GPIO, 'in', 'both');
+  let newInput = new Gpio(element, 'in', 'both');
 
   inputDebouncedState[index] = newInput.readSync();
 
@@ -219,9 +222,7 @@ function handleInput(index, value){
         executing = true;
       } else if (value === 0 && executing){
         executing = false;
-        io.emit('clear');
-        latestLogEntry = new Array(config.serial.length).fill('0');
-        tableContent = new Array(config.output.length ).fill('');
+        resetState();
         executeStop();
       }
       break;
@@ -230,6 +231,12 @@ function handleInput(index, value){
       console.log({executeBlock});
       break;
   }
+}
+
+function resetState(){
+  io.emit('clear');
+  latestLogEntry = new Array(config.serial.length).fill('0');
+  tableContent = new Array(config.output.length ).fill('');
 }
 
 function handleOutput(){
@@ -488,6 +495,12 @@ function calculateFormula(formula){
           let spread = data.reduce((acc, cur)=> acc + (cur - mean)*(cur - mean), 0);
           return Math.sqrt(spread / (data.length || 1));
         },
+        un : (x)=> data.reduce((acc, cur)=>{
+          if (acc.includes(cur))
+            return acc;
+          else
+            return acc.push(cur);
+        }, []).length,
       }
       
       return functions[operator](x).toString();
@@ -503,18 +516,10 @@ function calculateFormula(formula){
     result = eval(formula);
   }
   catch (err) {
-    if (fs.existsSync('config.lastgood.js')){
-      fs.copyFileSync('config.lastgood.js', 'config.js');
-    }
-    else
-    {
-      fs.copyFileSync('config.template.js', 'config.js');
-    }
-    
     setTimeout(function(){ 
       onlineGPIO.writeSync(0);
       io.emit('error', err.message);
-      process.exit();
+      recovery.reset();
     }, 5000);
   }
   return (typeof(result)==='undefined')?'':result;
@@ -589,6 +594,7 @@ for(i = 0; i < config.serial.length; i++){
           
           handleTable();
           handleOutput();
+
 
           remainingEntries[index]=remainingEntries[index].slice(nextEntry + nextEntryEnd);
         }  

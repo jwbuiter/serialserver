@@ -12,13 +12,14 @@ var config ={
       name : 'Weight',
       average : false,                  // Whether the input should be averaged, either true or false
       timeout: 60,                  // When not averaging: the number of milliseconds to way to show the same response in a row.
+      timeoutReset: false,          // Whether to reset the value of the com after the timeout expires
       digits : 3,                      // When input is numeric, the number of decimals to show, otherwise the cuttof for the last shown characters
       entries : 5,                     // The number of entries shown in debug. In case where averaging is on also the number of averages to take. Also the number of entries shown in debug
       factor : 1,                      // Multiplication factor in the case of numerical input, 0 if input is not numerical
       alwaysPositive: true,            // If this is set to true, numerical input will automatically be made positive if it is negative
 
-      prefix : 'ST,GS,',                  // String preceding serial data
-      postfix : 'KG',                   // String following serial data
+      prefix : 'ST,GS',                  // String preceding serial data
+      postfix : 'kg',                   // String following serial data
 
       testMessage : '123.123'              // In test mode: the entry that will be emitted
     },
@@ -34,6 +35,7 @@ var config ={
       name : 'RFID',
       average : false,
       timeout: 60,
+      timeoutReset: false,
       digits : 15,
       entries : 5,
       factor : 0,
@@ -127,70 +129,60 @@ var config ={
       formula : '',
       execute : false,
       seconds : 0,
-      GPIO : 4,
     },
     {
       name : '',
       formula : '',
       execute : false,
       seconds : 0,
-      GPIO : 17,
     },
     {
       name : '',
       formula : '',
       execute : false,
       seconds : 0,
-      GPIO : 18,
     },
     {
       name : '',
       formula : '',
       execute : false,
       seconds : 0,
-      GPIO : 27,
     },
     {
       name : '',
       formula : '',
       execute : false,
       seconds : 0,
-      GPIO : 22,
     },
     {
       name : '',
       formula : '',
       execute : false,
       seconds : 0,
-      GPIO : 23,
     },
     {
       name : '',
       formula : '',
       execute : false,
       seconds : 0,
-      GPIO : 24,
     },
     {
       name : '',
       formula : '',
       execute : false,
       seconds : 0,
-      GPIO : 10,
     },
     {
       name : '',
       formula : '',
       execute : false,
       seconds : 0,
-      GPIO : 9,
     },
     {
       name : '',
       formula : '',
       execute : false,
       seconds : 0,
-      GPIO : 25,
     },
   ],
 
@@ -200,7 +192,6 @@ var config ={
       name : '',
       formula : '',
       follow : -1,
-      GPIO : 19,
       timeout : 20,
       invert : false
     },
@@ -208,7 +199,6 @@ var config ={
       name : '',
       formula : '',
       follow : -1,
-      GPIO : 16,
       timeout : 20,
       invert : false
     },
@@ -216,7 +206,6 @@ var config ={
       name : '',
       formula : '',
       follow : -1,
-      GPIO : 26,
       timeout : 20,
       invert : false
     },
@@ -224,7 +213,6 @@ var config ={
       name : '',
       formula : '',
       follow : -1,
-      GPIO : 20,
       timeout : 20,
       invert : false
     },
@@ -232,20 +220,15 @@ var config ={
       name : '',
       formula : '',
       follow : -1,
-      GPIO : 21,
       timeout : 20,
       invert : false
     },
   ], 
-  onlineGPIO : 5,
-  comGPIO : [
-    6,
-    13,
-  ],
   triggerCom : 0,
   searchColumn : 0,
   waitForOther : false,
   saveToFile : false,
+  resetTrigger : 'off',
   useFile : false,
   resetFile : 'off',
   fileResetValue : '00:00',
@@ -267,8 +250,8 @@ var config ={
   selfLearningTolerance : 25,
   selfLearningReset : 'fileReset',
   selfLearningResetValue : '00:00',
-  calibrationMin : 1,
-  calibrationMax : 1000,
+  selfLearningStartCalibration: 25,
+  selfLearningStartTolerance: 50,
 
   testMode: false,
 

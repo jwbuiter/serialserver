@@ -68,20 +68,21 @@
     $(address(2, 0)).append($('<b>').html('Wait for second COM'));
     $(address(3, 0)).append($('<b>').html('Search Column'));
     $(address(4, 0)).append($('<b>').html('Save to file'));
+    $(address(5, 0)).append($('<b>').html('Reset on 0'));  
 
     $(address(0, 1)).append($('<select id ="triggerCom">').html('<option value="0">COM 0</option><option value="1">COM 1</option>'));
     $(address(1, 1)).append($('<input type="checkbox" id="useFile">'));
     $(address(2, 1)).append($('<input type="checkbox" id="waitForOther">'));
     $(address(3, 1)).append($('<input type="text" id="searchColumn">'));
     $(address(4, 1)).append($('<input type="checkbox" id="saveToFile">'));
+    $(address(5, 1)).append($('<select id ="resetTrigger">').html('<option value="off">Off</option><option value="on">On</option><option value="com0">COM 0</option><option value="com1">COM 1</option>'));
 
-    $(address(5, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
-    $(address(6, 0)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
-    $(address(7, 0)).append($('<b>').html('Version: '+config.version));
-    $(address(5, 1)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
-    $(address(6, 1)).append($('<input type="button" value="Load config" onclick="javascript:loadConfigList()">'));
-    $(address(7, 1)).append($('<input type="button" value="Load default" onclick="javascript:loadDefault()">'));
-    
+    $(address(6, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
+    $(address(7, 0)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
+    $(address(6, 1)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
+    $(address(7, 1)).append($('<input type="button" value="Load config" onclick="javascript:loadConfigList()">'));
+    $(address(7, 2)).append($('<input type="button" value="Load default" onclick="javascript:loadDefault()">'));
+    $(address(7, 3)).append($('<b>').html('Version: '+config.version));
 
     for (let i = 0; i<7; i++){
       $(address(i, 2)).append($('<hr>'));
@@ -90,10 +91,10 @@
     $(address(0, 3)).append($('<b>').html('File reset'));
     $(address(1, 3)).append($('<b>').html('Time'));
     $(address(2, 3)).append($('<b>').html('Automatic FTP'));
-    $(address(3, 3)).append($('<b>').html('1-Address / Folder'));
-    $(address(4, 3)).append($('<b>').html('1-User : Password'));
-    $(address(5, 3)).append($('<b>').html('2-Address / Folder'));
-    $(address(6, 3)).append($('<b>').html('2-User : Password'));
+    $(address(3, 3)).append($('<b>').html('1-Adr / Folder'));
+    $(address(4, 3)).append($('<b>').html('1-User : Passw'));
+    $(address(5, 3)).append($('<b>').html('2-Adr / Folder'));
+    $(address(6, 3)).append($('<b>').html('2-User : Passw'));
 
     $(address(0, 4)).append($('<select id ="resetFile">').html('<option value="off">Off</option><option value="interval">Interval</option><option value="time">Time of day</option>'));
     $(address(1, 4)).append($('<input type="time" id="fileResetValue">'));
@@ -114,8 +115,8 @@
       $(address(0, 6)).append($('<b>').html('Self-learning'));
       $(address(1, 6)).append($('<b>').html('Number'));
       $(address(2, 6)).append($('<b>').html('Tolerance(%)'));
-      $(address(3, 6)).append($('<b>').html('#SCmin'));
-      $(address(4, 6)).append($('<b>').html('#SCmax'));
+      $(address(3, 6)).append($('<b>').html('Start #SCS'));
+      $(address(4, 6)).append($('<b>').html('Start Tolerance+'));
       $(address(5, 6)).append($('<b>').html('Reset'));
       $(address(6, 6)).append($('<b>').html('Time'));
       $(address(7, 6)).html('#SC #SCmin #SCmax').addClass('small');
@@ -124,8 +125,8 @@
       $(address(0, 7)).append($('<select id ="selfLearning">').html('<option value="off">Off</option><option value="com1">Com 0</option><option value="com1">Com 1</option>'));
       $(address(1, 7)).append($('<input type="number" id="selfLearningNumber" min="0" step="1">'));
       $(address(2, 7)).append($('<input type="number" id="selfLearningTolerance" min="0" step="1">'));
-      $(address(3, 7)).append($('<input type="number" id="calibrationMin" min="0" step="1">'));
-      $(address(4, 7)).append($('<input type="number" id="calibrationMax" min="0" step="1">'));
+      $(address(3, 7)).append($('<input type="number" id="selfLearningStartCalibration" min="0" step="1">'));
+      $(address(4, 7)).append($('<input type="number" id="selfLearningStartTolerance" min="0" step="1">'));
       $(address(5, 7)).append($('<select id ="selfLearningReset">').html('<option value="off">Off</option><option value="fileReset">File Reset</option><option value="interval">Interval</option><option value="time">Time of day</option>'));
       $(address(6, 7)).append($('<input type="time" id="selfLearningResetValue">'));
       $(address(7, 7)).html('#SN #ST').addClass('small');
@@ -145,8 +146,10 @@
     $(address(5, cursor)).append($('<b>').html('Reset on exe'));
     $(address(6, cursor)).append($('<b>').html('Command').addClass('small'));
     $(address(7, cursor)).append($('<b>').html('Value').addClass('small'));
+    
     var commands = [
       'com0',
+      'com1',
       'date',
       '$A',
       '#A1',
@@ -166,12 +169,10 @@
       '-',
       '*',
       '/',
-      '#SC #SCmin #SCmax',
-      '#SN',
-      '#ST'
     ];
     var meanings = [
       'value com0',
+      'value com1',
       'date today',
       'value input-file column A',
       'value table #A1',
@@ -191,9 +192,6 @@
       'substract',
       'multiply',
       'divide',
-      'self-learning calibration',
-      'self-learning number',
-      'self-learning time'
     ];
     cursor++;
     for (let i = 0; i < commands.length; i++){
@@ -237,14 +235,15 @@
     $(address(3, cursor)).append($('<b>').html('Invert'));
     $(address(4, cursor)).append($('<b>').html('Follow'));
     $(address(5, cursor)).append($('<b>').html('Timeout'));
-    $(address(6, cursor)).append($('<b>').html('Logfile').addClass('small'));
-    $(address(7, cursor)).append($('<b>').html('X: 0/1/A1/B5').addClass('small'));
+    $(address(6, cursor-1)).append($('<b>').html('Logfile').addClass('small'));
+    $(address(7, cursor-1)).append($('<b>').html('X: 0/1/A1/B5').addClass('small'));
     var commands = [
       '&tn',
       '&toX',
       '&miX',
       '&maX',
       '&spX',
+      '&unX',
     ];
     var meanings = [
       'total number',
@@ -252,14 +251,15 @@
       'minimum',
       'maximum',
       'spread',
+      'number unique',
     ];
-    cursor++;
     for (let i = 0; i < commands.length; i++){
       $(address(6, i + cursor)).html(commands[i]);
       $(address(6, i + cursor)).addClass('small');
       $(address(7, i + cursor)).html(meanings[i]);
       $(address(7, i + cursor)).addClass('small');
     }
+    cursor++;
 
     for (let i = 0; i < numInputs; i++){
       $(address(0, cursor)).append($('<b>').html('Input ' + (i + 1)));
