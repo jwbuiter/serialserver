@@ -1,3 +1,5 @@
+const recovery = require('./recovery.js');
+recovery.bootCheck();
 var config = require('./config');
 const constants = require('./config.static');
 var express = require('express');
@@ -15,12 +17,11 @@ const Gpio = require('onoff').Gpio;
 var schedule = require('node-schedule');
 
 const {sheetToArray, assert, timeString, ftpUpload} = require('./auxiliaryFunctions')
-const recovery = require('./recovery.js');
+
 const Input = require('./input');
 const Output = require('./output');
 const Parser = require('./parser');
 
-recovery.bootCheck();
 
 function resetLog(){
   if (config.autoFTP && fileName){

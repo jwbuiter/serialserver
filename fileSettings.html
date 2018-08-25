@@ -67,7 +67,7 @@
     $(address(1, 0)).append($('<b>').html('Use import file'));
     $(address(2, 0)).append($('<b>').html('Wait for second COM'));
     $(address(3, 0)).append($('<b>').html('Search Column'));
-    $(address(4, 0)).append($('<b>').html('Save to file'));
+    $(address(4, 0)).append($('<b>').html('Save to log'));
     $(address(5, 0)).append($('<b>').html('Reset on 0'));  
 
     $(address(0, 1)).append($('<select id ="triggerCom">').html('<option value="0">COM 0</option><option value="1">COM 1</option>'));
@@ -88,7 +88,7 @@
       $(address(i, 2)).append($('<hr>'));
     }
 
-    $(address(0, 3)).append($('<b>').html('File reset'));
+    $(address(0, 3)).append($('<b>').html('Log reset'));
     $(address(1, 3)).append($('<b>').html('Time'));
     $(address(2, 3)).append($('<b>').html('Automatic FTP'));
     $(address(3, 3)).append($('<b>').html('1-Adr / Folder'));
@@ -115,7 +115,7 @@
       $(address(0, 6)).append($('<b>').html('Self-learning'));
       $(address(1, 6)).append($('<b>').html('Number'));
       $(address(2, 6)).append($('<b>').html('Tolerance(%)'));
-      $(address(3, 6)).append($('<b>').html('Start #SCS'));
+      $(address(3, 6)).append($('<b>').html('Start #CS'));
       $(address(4, 6)).append($('<b>').html('Start Tolerance+'));
       $(address(5, 6)).append($('<b>').html('Reset'));
       $(address(6, 6)).append($('<b>').html('Time'));
@@ -174,7 +174,7 @@
       'value com0',
       'value com1',
       'date today',
-      'value input-file column A',
+      'value import file column A',
       'value table #A1',
       'value output 1 (0 or 1)',
       'value input 1 (0 or 1)',

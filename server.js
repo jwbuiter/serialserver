@@ -1,3 +1,4 @@
+require('./recovery.js').bootCheck();
 const modules = {
   authentication: require('./modules/authentication/AuthenticationModule'),
   ftp: require('./modules/ftp/FTPModule'),

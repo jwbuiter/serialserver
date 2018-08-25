@@ -17,6 +17,7 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/res/jquery-1.11.1.js"></script>
+  <script src="/config.js"></script>
   <script type="text/javascript">
     var fileList;
     var socket = io();
@@ -68,9 +69,10 @@
       }
       else{
         list.forEach((element, index) => {
+          let emptyButton = '<input type="button">';
           let newItem = $('<li>').append('<span>'+element+'</span>')
-            .append('<input type="button" value="FTP 2" onclick="javascript:uploadFile('+index+', 1)">')
-            .append('<input type="button" value="FTP 1" onclick="javascript:uploadFile('+index+', 0)">')
+            .append(config.FTP[1].addressFolder?'<input type="button" value="FTP 2" onclick="javascript:uploadFile('+index+', 1)">':emptyButton)
+            .append(config.FTP[0].addressFolder?'<input type="button" value="FTP 1" onclick="javascript:uploadFile('+index+', 0)">':emptyButton)
             .append('<input type="button" value="Download" onclick="javascript:downloadFile('+index+')">')
             .append('<input type="button" value="Delete" onclick="javascript:deleteFile('+index+')">');
           $('#content').append(newItem);
