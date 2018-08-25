@@ -2,8 +2,8 @@ const Gpio = require('onoff').Gpio;
 
 class Output {
 
-  constructor(config, followers, parser){
-    this.parser = parser;
+  constructor(config, store){
+    this.store = store;
 
     this.name = config.name;
     this.formula = config.formula;

@@ -14,7 +14,7 @@ module.exports = function(state = initialState, action) {
   switch(action.type) {
     case COM_ENTRY:
       const {index, entry} = action.payload;
-      const newEntries = state.entries;
+      const newEntries = Obect.assign({},state.entries);
       newEntries[index] = entry;
       return {
         ...state,
