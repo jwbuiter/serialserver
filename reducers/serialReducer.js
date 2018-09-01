@@ -17,7 +17,7 @@ module.exports = function(state = initialState, action) {
   switch(action.type) {
     case SERIAL_ENTRY:{
       const {index, entry} = action.payload;
-      const newComs = Obect.assign({}, state.coms);
+      const newComs = Object.assign({}, state.coms);
       newComs[index].entry = entry;
       return {
         ...state,
@@ -26,7 +26,7 @@ module.exports = function(state = initialState, action) {
     }
     case SERIAL_AVERAGE:{
       const {index, average} = action.payload;
-      const newComs = Obect.assign({}, state.coms);
+      const newComs = Object.assign({}, state.coms);
       newComs[index].average = average;
       return {
         ...state,
@@ -36,7 +36,7 @@ module.exports = function(state = initialState, action) {
     case SERIAL_RESET:{
       if (action.payload){
         const index = action.payload;
-        const newComs = Obect.assign({}, state.coms);
+        const newComs = Object.assign({}, state.coms);
         newComs[index] = initialState[index];
         return {
           ...state,

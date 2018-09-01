@@ -28,7 +28,8 @@ class Output {
         case OUTPUT_EXECUTING_CHANGED:
         case OUTPUT_RESULT_CHANGED:
         case OUTPUT_FORCED_CHANGED:{
-          this.GPIO.writeSync(this.store.getState().output.ports[this.index].state);
+          if (this.index === lastAction.payload.index)
+            this.GPIO.writeSync(this.store.getState().output.ports[this.index].state);
           break;
         }
         case HANDLE_OUTPUT:{

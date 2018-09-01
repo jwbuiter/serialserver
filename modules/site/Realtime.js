@@ -2,6 +2,7 @@ const { exec } = require('child_process');
 const socketio = require('socket.io');
 const fs = require('fs');
 const path = require('path');
+const ip = require('ip');
 
 const constants = require('../../config.static.js');
 
@@ -59,9 +60,8 @@ class Realtime{
         case INPUT_FOLLOWING_CHANGED:
         case INPUT_FORCED_CHANGED:
         case INPUT_PHYSICAL_CHANGED: {
-          const {index} = lastAction;
+          const {index} = lastAction.payload;
           const port = state.input.ports[index];
-          const result = results[isForced?1:0][state?1:0];
 
           this.emitInput(port, index);
           break;
@@ -69,9 +69,9 @@ class Realtime{
         case OUTPUT_RESULT_CHANGED:
         case OUTPUT_FORCED_CHANGED:
         case OUTPUT_EXECUTING_CHANGED: {
-          const {index} = lastAction;
+          const {index} = lastAction.payload;
           const port = state.input.ports[index];
-          //const result = executing?results[isForced?1:0][state?1:0];
+
           this.emitOutput(port, index);
           break;
         }
@@ -131,7 +131,10 @@ class Realtime{
         'forceOutput': this.forceOutput,
       }
 
+
+
       for(let command in commands){
+        commands[command] = commands[command].bind(this);
         socket.on(command, msg => commands[command](socket, msg));
       }
     });
@@ -163,13 +166,14 @@ class Realtime{
 
   emitAllState(){
     const state = this.store.getState();
+    console.log(state.inputs)
 
     state.input.ports.forEach((port, index) => {
-      emitInput(port, index)
+      this.emitInput(port, index)
     });
 
     state.output.ports.forEach((port, index) => {
-      emitOutput(port, index)
+      this.emitOutput(port, index)
     });
   }
 
@@ -288,6 +292,7 @@ class Realtime{
         this.store.dispatch({
           type: INPUT_FORCED_CHANGED,
           payload: {
+            index,
             isForced: false,
             previousForced: true,
             forcedState: false,
@@ -297,6 +302,7 @@ class Realtime{
         this.store.dispatch({
           type: INPUT_FORCED_CHANGED,
           payload: {
+            index,
             isForced: true,
             previousForced: true,
             forcedState: !port.forcedState,
@@ -307,12 +313,14 @@ class Realtime{
       this.store.dispatch({
         type: INPUT_FORCED_CHANGED,
         payload: {
+          index,
           isForced: true,
           previousForced: false,
           forcedState: !port.state,
         }
       });
     }
+    this.emitAllState();
     this.store.dispatch({type: HANDLE_TABLE});
     this.store.dispatch({type: HANDLE_OUTPUT});
   }
@@ -325,6 +333,7 @@ class Realtime{
         this.store.dispatch({
           type: OUTPUT_FORCED_CHANGED,
           payload: {
+            index,
             isForced: false,
             previousForced: true,
             forcedState: false,
@@ -334,6 +343,7 @@ class Realtime{
         this.store.dispatch({
           type: OUTPUT_FORCED_CHANGED,
           payload: {
+            index,
             isForced: true,
             previousForced: true,
             forcedState: !port.forcedState,
@@ -344,12 +354,14 @@ class Realtime{
       this.store.dispatch({
         type: OUTPUT_FORCED_CHANGED,
         payload: {
+          index,
           isForced: true,
           previousForced: false,
           forcedState: !port.state,
         }
       });
     }
+    this.emitAllState();
     this.store.dispatch({type: HANDLE_TABLE});
     this.store.dispatch({type: HANDLE_OUTPUT});
   }

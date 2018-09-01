@@ -11,36 +11,43 @@ const  {
 const configPath = path.join(__dirname, '../..', 'configs');
 
 class RecoveryModule {
-  constructor(store){
-    this.store = store;
+  constructor(){
+    this.onlinePin =new Gpio(onlinePin, 'out');
 
     const resetGPIO = new Gpio(resetPin, 'in');
 
-    if (!resetGPIO.readSync()){
-      reset();
+    if (!fs.existsSync(path.join(configPath, 'current.js'))){
+      console.log('No config found, config will be reset to template.')
+      this.reset();
+      this.shutdown();
+    }
 
-      const onlineGPIO = new Gpio(onlinePin, 'out');
+    if (!resetGPIO.readSync()){
+      this.reset();
 
       setInterval(() =>{
-        onlineGPIO.writeSync(!onlineGPIO.readSync());
+        this.onlineGPIO.writeSync(!this.onlineGPIO.readSync());
         if (resetGPIO.readSync())
-          shutdown();
+        this.shutdown();
       }, 1000);
     }
-      
+  }
+
+  bindStore(store){
+    this.store = store;
 
     this.store.subscribe(()=>{
       const lastAction = this.store.getState().lastAction;
       switch (lastAction.type){
         case ERROR_OCCURRED:{
           setTimeout(()=>{
-            reset();
-            shutdown();
+            this.reset();
+            this.shutdown();
           }, 5000);
           break;
         }
         case SHUTDOWN:{
-          shutdown();
+          this.shutdown();
         }
       }
     });
@@ -59,7 +66,7 @@ class RecoveryModule {
   }
 
   shutdown(){
-    onlinePin.writeSync(0);
+    this.onlinePin.writeSync(0);
     console.log('Rebooting...');
     process.exit();
   }

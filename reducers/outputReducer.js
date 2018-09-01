@@ -23,18 +23,18 @@ function calculateState(port, index){
 
   if (output.ports[index].execute)
     if (port.executing)
-      return result;
+      return port.result;
     else
       return false;
   
-  return result;
+  return port.result;
 }
 
 module.exports = function(state = initialState, action) {
   switch(action.type) {
     case OUTPUT_RESULT_CHANGED:{
       const {index, result} = action.payload;
-      const newPorts = Obect.assign({},state.ports);
+      const newPorts = Object.assign({},state.ports);
       newPorts[index].result = result;
       newPorts[index].state = calculateState(newPorts[index], index);
       return {
@@ -44,7 +44,7 @@ module.exports = function(state = initialState, action) {
     }
     case OUTPUT_FORCED_CHANGED:{
       const {index, isForced, previousForced, forcedState} = action.payload;
-      const newPorts = Obect.assign({},state.ports);
+      const newPorts = Object.assign({},state.ports);
       newPorts[index].isForced = isForced;
       newPorts[index].previousForced = previousForced;
       newPorts[index].forcedState = forcedState;
@@ -56,7 +56,7 @@ module.exports = function(state = initialState, action) {
     }
     case OUTPUT_EXECUTING_CHANGED:{
       const {index, executing} = action.payload;
-      const newPorts = Obect.assign({},state.ports);
+      const newPorts = Object.assign({},state.ports);
       newPorts[index].executing = executing;
       newPorts[index].state = calculateState(newPorts[index], index);
       return {

@@ -40,8 +40,11 @@ class Input {
         case INPUT_FOLLOWING_CHANGED:
         case INPUT_PHYSICAL_CHANGED:
         case INPUT_FORCED_CHANGED:{
-          const state = this.store.getState().input.ports[this.index].state;
-          handleInput(state)
+          if (this.index === lastAction.payload.index){
+            const state = this.store.getState().input.ports[this.index].state;
+            this.handleInput(state)
+          }
+          break;
         }
         /*
         case OUTPUT_STATE_CHANGED:
@@ -87,7 +90,7 @@ class Input {
     clearTimeout(this.debounce);
 
     this.debounce = setTimeout(()=>{
-      dispatchState(state);
+      this.dispatchState(state);
       this.store.dispatch({type : HANDLE_TABLE});
       this.store.dispatch({type : HANDLE_OUTPUT});
       

@@ -29,7 +29,7 @@ class siteModule {
     this.functionRoutes = {
       '/downloadConfig': (req, res) => res.download(path.join(__dirname, '../..', 'configs', req.query.file)),
       '/downloadLog':(req, res) => {
-        if (request.query.multiFile){
+        if (req.query.multiFile){
           fileList = req.query.multiFile.split(',').map((element) => ({path: path.join(constants.saveFileLocation, element), name: element}));
           res.zip(fileList, timeString().split('.')[0] + '.zip');
         }

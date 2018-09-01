@@ -15,7 +15,7 @@ module.exports = function(state = initialState, action) {
   switch(action.type) {
     case LOG_ENTRY:{
       const entry = action.payload;
-      const newEntries =  Obect.assign({}, state.entries);
+      const newEntries =  Object.assign({}, state.entries);
       newEntries[state.numEntries + 1] = entry;
       return {
         ...state,

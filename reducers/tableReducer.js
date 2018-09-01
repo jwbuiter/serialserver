@@ -15,7 +15,7 @@ module.exports = function(state = initialState, action) {
   switch(action.type) {
     case TABLE_ENTRY:{
       const {index, entry} = action.payload;
-      const newEntries = Obect.assign({},state.entries);
+      const newEntries = Object.assign({},state.entries);
       newEntries[index] = entry;
       return {
         ...state,
@@ -25,7 +25,7 @@ module.exports = function(state = initialState, action) {
     case TABLE_RESET:{
       if (action.payload){
         const index = action.payload;
-        const newEntries = Obect.assign({},state.entries);
+        const newEntries = Object.assign({},state.entries);
         newEntries[index] = initialState.entries[index];
         return {
           ...state,

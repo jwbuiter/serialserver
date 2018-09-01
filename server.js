@@ -1,8 +1,9 @@
-const store = require('./store.js');
-
 const usedModules = {
-  recovery: new (require('./modules/recovery/RecoveryModule'))(store)
+  recovery: new (require('./modules/recovery/RecoveryModule'))()
 };
+
+const store = require('./store.js');
+usedModules.recovery.bindStore(store);
 
 const modules = {
   authentication: require('./modules/authentication/AuthenticationModule'),
@@ -18,6 +19,8 @@ const modules = {
 
 const {enabledModules} = require('./config.static');
 const config = require('./configs/current');
+
+
 
 for(const moduleName in modules){
   if (enabledModules[moduleName]){

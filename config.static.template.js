@@ -31,6 +31,18 @@ var constants = {
     13,
   ],
   onlinePin : 5,
+  enabledModules: {
+    authentication: true,
+    ftp: true,
+    input: true,
+    logger: true,
+    output: true,
+    site: true,
+    selfLearning: true,
+    serial: true,
+    table: true,
+  },
+  version: '2.1',
 }
 
 module.exports = constants;

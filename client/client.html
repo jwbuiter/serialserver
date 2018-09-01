@@ -44,7 +44,7 @@
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/res/jquery-1.11.1.js"></script>
-  <script src="/config.js"></script>
+  <script src="/current.js"></script>
   <script src="/config.static.js"></script>
   <script>
     var socket = io();
@@ -69,8 +69,8 @@
     }
 
     function shiftEntries(index){
-      var numEntries = config.serial[index].entries
-      var name = config.serial[index].name;
+      var numEntries = config.serial.coms[index].entries
+      var name = config.serial.coms[index].name;
 
       for(var i = 0; i<numEntries-1; i++){
         $('.' + name +'time'+i).html($('.' + name +'time'+(i + 1)).html());
@@ -137,7 +137,7 @@
     if (!constants.exposeUpload){
       $('#uploadButton').remove();
     }
-    if (config.testMode){
+    if (config.serial.testMode){
       $('#shutDownButton').remove();
     }
 

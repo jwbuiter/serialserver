@@ -99,16 +99,16 @@ class Parser{
     return functions[operator](x).toString();
   }
 
-  parse(){
+  parse(formula){
     let result;
     try {
       formula = formula
-        .replace(/#[A-G][0-9]/g, parseTable)
-        .replace(/#I[0-9]/g, parseInput)
-        .replace(/#O[0-9]/g, parseOutput)
-        .replace(/\$[A-Z]/g, parseExcel)
-        .replace(/com[0-9]/g, parseCom)
-        .replace(/\&[a-zA-Z0-9]+/g, parseStatistic)
+        .replace(/#[A-G][0-9]/g, this.parseTable)
+        .replace(/#I[0-9]/g, this.parseInput)
+        .replace(/#O[0-9]/g, this.parseOutput)
+        .replace(/\$[A-Z]/g, this.parseExcel)
+        .replace(/com[0-9]/g, this.parseCom)
+        .replace(/\&[a-zA-Z0-9]+/g, this.parseStatistic)
         .replace(/date/g, (new Date().getTime()/1000/86400 + 25569).toString())
         .replace('and', '&&')
         .replace('or', '||');
