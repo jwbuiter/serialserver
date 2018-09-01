@@ -1,8 +1,7 @@
 class TableModule {
   constructor(config, store){
     this.store = store;
-
-    this = {...this, config};
+    Object.assign(this, config);
   }
 }
 

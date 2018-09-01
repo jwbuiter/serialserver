@@ -5,4 +5,5 @@ seriallog*.txt
 data/*
 configs/*
 !data/.gitkeep
-!configs/.gitkeep
+!configs/template.js
+

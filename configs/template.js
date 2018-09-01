@@ -1,6 +1,6 @@
 var config ={
   serial : {
-    testMode : true,
+    testMode : false,
     resetTrigger : 'off',
     coms : [
       {
@@ -11,12 +11,12 @@ var config ={
         parity : 'none',
         RTSCTS : true,
         XONXOFF : false,
-        name : 'Gewicht',
+        name : 'Weight',
         average : false,
-        timeout : 10,
+        timeout : 60,
         timeoutReset : false,
-        digits : 1,
-        entries : 1,
+        digits : 3,
+        entries : 5,
         factor : 1,
         alwaysPositive : true,
         prefix : 'ST,GS',
@@ -31,12 +31,12 @@ var config ={
         parity : 'none',
         RTSCTS : true,
         XONXOFF : false,
-        name : 'E-Nummer',
+        name : 'RFID',
         average : false,
-        timeout : 10,
+        timeout : 60,
         timeoutReset : false,
-        digits : 10,
-        entries : 1,
+        digits : 15,
+        entries : 5,
         factor : 0,
         alwaysPositive : false,
         prefix : '#',
@@ -47,79 +47,79 @@ var config ={
   },
 
   table : {
-    trigger : 1,
-    useFile : true,
-    waitForOther : true,
+    trigger : 0,
+    useFile : false,
+    waitForOther : false,
     searchColumn : 0,
     cells : [
       {
-        name : 'Nummer',
-        formula : '$B',
-        numeric : false,
-        digits : 16,
-        resetOnExe : true
-      },
-      {
-        name : 'Leeftijd',
-        formula : 'date-$C',
+        name : '',
+        formula : '',
         numeric : true,
         digits : 0,
         resetOnExe : true
       },
       {
-        name : 'Spenen',
-        formula : '$D',
+        name : '',
+        formula : '',
         numeric : true,
         digits : 0,
         resetOnExe : true
       },
       {
-        name : 'Index',
-        formula : '$E',
+        name : '',
+        formula : '',
         numeric : true,
         digits : 0,
         resetOnExe : true
       },
       {
-        name : 'Levensgroei',
-        formula : '(com0-1.5)/#A2*1000',
+        name : '',
+        formula : '',
         numeric : true,
         digits : 0,
         resetOnExe : true
       },
       {
-        name : 'Aantal',
-        formula : '&tn',
+        name : '',
+        formula : '',
         numeric : true,
         digits : 0,
-        resetOnExe : false
+        resetOnExe : true
       },
       {
-        name : 'Tot Gewicht',
-        formula : '&to0',
+        name : '',
+        formula : '',
         numeric : true,
         digits : 0,
-        resetOnExe : false
+        resetOnExe : true
       },
       {
-        name : 'Gem Gewicht',
-        formula : '&to0/&tn',
-        numeric : true,
-        digits : 1,
-        resetOnExe : false
-      },
-      {
-        name : 'Uniformiteit',
-        formula : '(#B3-&sp0)/#B3*100',
+        name : '',
+        formula : '',
         numeric : true,
         digits : 0,
-        resetOnExe : false
+        resetOnExe : true
       },
       {
-        name : 'Notitie',
-        formula : '#',
-        numeric : false,
-        digits : 10,
+        name : '',
+        formula : '',
+        numeric : true,
+        digits : 0,
+        resetOnExe : true
+      },
+      {
+        name : '',
+        formula : '',
+        numeric : true,
+        digits : 0,
+        resetOnExe : true
+      },
+      {
+        name : '',
+        formula : '',
+        numeric : true,
+        digits : 0,
         resetOnExe : true
       }
     ],
@@ -128,120 +128,120 @@ var config ={
   output : {
     ports : [
       {
-        name : 'Poort In',
-        formula : 'com0<1 and #O3==0',
+        name : '',
+        formula : '',
         execute : false,
-        seconds : 0
+        seconds : 0,
       },
       {
-        name : 'Poort Uit',
-        formula : 'com0>1',
-        execute : true,
-        seconds : 0
-      },
-      {
-        name : 'Seperator',
-        formula : 'com0>2',
-        execute : true,
-        seconds : 0
-      },
-      {
-        name : 'Mark Index',
-        formula : '#A4>80',
-        execute : true,
-        seconds : 1
-      },
-      {
-        name : 'Mark Groei',
-        formula : '#A5>2',
-        execute : true,
-        seconds : 1
-      },
-      {
-        name : 'Gereed',
-        formula : 'com0==0 or com1==0',
+        name : '',
+        formula : '',
         execute : false,
-        seconds : 0
+        seconds : 0,
       },
       {
-        name : 'Uitgang 7',
-        formula : '#I2',
+        name : '',
+        formula : '',
         execute : false,
-        seconds : 0
+        seconds : 0,
       },
       {
-        name : 'Uitgang 8',
-        formula : '#I3',
+        name : '',
+        formula : '',
         execute : false,
-        seconds : 0
+        seconds : 0,
       },
       {
-        name : 'Uitgang 9',
-        formula : '#I4',
+        name : '',
+        formula : '',
         execute : false,
-        seconds : 0
+        seconds : 0,
       },
       {
-        name : 'Uitgang 10',
-        formula : '#I4',
-        execute : true,
-        seconds : 0
-      }
+        name : '',
+        formula : '',
+        execute : false,
+        seconds : 0,
+      },
+      {
+        name : '',
+        formula : '',
+        execute : false,
+        seconds : 0,
+      },
+      {
+        name : '',
+        formula : '',
+        execute : false,
+        seconds : 0,
+      },
+      {
+        name : '',
+        formula : '',
+        execute : false,
+        seconds : 0,
+      },
+      {
+        name : '',
+        formula : '',
+        execute : false,
+        seconds : 0,
+      },
     ],
-  }
+  },
 
   input : {
     ports : [
       {
-        name : 'Blokkering',
-        formula : 'exebl',
-        follow : 5,
-        timeout : 20,
-        invert : false
-      },
-      {
-        name : 'Ingang 2',
+        name : '',
         formula : '',
         follow : -1,
         timeout : 20,
         invert : false
       },
       {
-        name : 'Ingang 3',
+        name : '',
         formula : '',
         follow : -1,
         timeout : 20,
         invert : false
       },
       {
-        name : 'Ingang 4',
+        name : '',
         formula : '',
         follow : -1,
         timeout : 20,
         invert : false
       },
       {
-        name : 'Uitvoeren',
-        formula : 'exe',
+        name : '',
+        formula : '',
         follow : -1,
         timeout : 20,
         invert : false
-      }
+      },
+      {
+        name : '',
+        formula : '',
+        follow : -1,
+        timeout : 20,
+        invert : false
+      },
     ],
   },
 
   logger : {
-    enabled : true,
-    reset : 'off',
+    writeToFile : false,
+    resetMode : 'off',
     resetValue : '00:00',
   },
 
   FTP : {
     automatic : false,
-    bla : [
-      {
-        addressFolder : '192.168.1.110',
-        userPassword : 'com:Com1234'
+    targets : [
+      {  
+        addressFolder : 'ftp.mbdc.nl',
+        userPassword : 'com:Com1234',
       },
       {
         addressFolder : '',

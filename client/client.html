@@ -1,0 +1,376 @@
+<!doctype html>
+<html>
+<head>
+  <title>MBDCcomUnit</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box;}
+      body { font-style: Helvetica, Arial; font-size: 0;}
+      table { width: 100vw; text-align: center; border: none; border-collapse: collapse;}
+      tr { height: 29px; }
+      td { text-align: center; font-size: 25px; max-width: 25vw;}
+      input { text-align: center; font-size: 25px;}
+      input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
+      .header { background-color: yellow;}
+      .result { background-color: #98FB98;}
+      .buttons {position: fixed; right: 0; top: 30px; font-size:20px;}
+      .logo {position: fixed; left: 0; top: 30px;}
+      .table{color: black; background-color: cyan;}
+      .table.notfound{ background-color: red; }
+      .output.off{ background-color: #3fd35d; }
+      .output.on{ background-color: red;}
+      .output.execute{ background-color: #FFC000; }
+      .output.forcedOn{ background-color: #CC66FF; }
+      .output.forcedOff{ background-color: #EEBBEE; }
+      .input.off{ background-color: #CCFFCC; }
+      .input.on{ background-color: yellow;}
+      .input.forcedOn{background-color: #CC66FF; }
+      .input.forcedOff{ background-color: #EEBBEE; }
+    </style>
+</head>
+<body>
+  <table id="content">
+  </table>
+  <div class = "buttons">
+    <img id = "uploadButton" src = "/res/upload.png" height="30" width="30" onclick="javascript:goFileUpload()">
+
+    <img src = "/res/settings.svg" height="30" width="30" onclick="javascript:goSettings()">
+
+    <img src = "/res/restart.ico"  height="30" width="30" onclick="javascript:goRestart()">
+    
+    <img id = "shutDownButton" src = "/res/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
+  </div>
+  <div class = "logo">
+    <img id = "logo" src = "/res/mbdc.jpg">
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/res/jquery-1.11.1.js"></script>
+  <script src="/config.js"></script>
+  <script src="/config.static.js"></script>
+  <script>
+    var socket = io();
+    const numColumns = 5;
+    var numRows = 0;
+
+    const numTable = config.table.cells.length;
+
+    const numOutputs = config.output.ports.length;
+    const numInputs = config.input.ports.length;
+
+    function address(columnNum, rowNum){
+      while (rowNum>=numRows){
+        var currentRow = $('<tr>');
+        $('#content').append(currentRow);
+        for (let i = 0; i < numColumns; i++){
+          currentRow.append($('<td>').attr('id', 'c' + i + 'r' + numRows));
+        }
+        numRows++;
+      }
+      return '#c' + columnNum + 'r' + rowNum;
+    }
+
+    function shiftEntries(index){
+      var numEntries = config.serial[index].entries
+      var name = config.serial[index].name;
+
+      for(var i = 0; i<numEntries-1; i++){
+        $('.' + name +'time'+i).html($('.' + name +'time'+(i + 1)).html());
+        $('.' + name +'entry'+i).html($('.' + name +'entry'+(i + 1)).html());
+      }
+    }
+
+    function goSettings(){
+      if (confirm("Do you want to go to the settings?")){
+        window.location.href = '/settings'; //relative to domain
+      }
+    }
+
+    function goShutdown(){
+      if (confirm("Do you really want to shut down?")){
+        window.location.href = '/shutdown'; //relative to domain
+      }
+    }
+
+    function goRestart(){
+      if (confirm("Do you really want to restart?")){
+        window.location.href = '/restart'; //relative to domain
+      }
+    }
+
+    function goFileUpload(){
+      if (confirm("Do you really want to upload a file?")){
+        window.location.href = '/fileupload'; //relative to domain
+      }
+    }
+
+    function clickOutput(index){
+      socket.emit('forceOutput', index);
+    }
+
+    function clickInput(index){
+      socket.emit('forceInput', index);
+    }
+
+    function printDate(time){
+      var date = new Date(time);
+      return date.getDate() + '-' + (date.getMonth()+1) + '-' + (date.getYear()+1900);
+    }
+
+    function printTime(time){
+      var date = new Date(time);
+      return date.getHours() + ':' + ("0" + date.getMinutes()).slice(-2) + ':' + ("0" + date.getSeconds()).slice(-2);
+    }
+
+    function manualIncrement(index){
+      $('#manual'+index).val(Number($('#manual'+index).val())+1);
+      manualChange(index);
+    }
+
+    function manualDecrement(index){
+      $('#manual'+index).val(Number($('#manual'+index).val())-1);
+      manualChange(index);
+    }
+
+    function manualChange(index){
+      socket.emit('manual', {index : index, value: $('#manual'+index).val()})
+    }
+
+    if (!constants.exposeUpload){
+      $('#uploadButton').remove();
+    }
+    if (config.testMode){
+      $('#shutDownButton').remove();
+    }
+
+    for (let i = 0; i < numColumns; i++){
+      $(address(i, 0)).addClass('header');
+    }
+
+    $(address(0, 0)).html(constants.name); 
+    socket.on('ip', function(msg){
+      $(address(1, 0)).html(msg);
+    });
+    socket.on('time', function(msg){
+      $(address(2, 0)).html(printTime(msg));
+      $(address(3, 0)).html(printDate(msg));
+    });
+    $(address(4, 0)).html(constants.QS);
+
+
+    let cursor = 0;
+
+    let logoSizeSet = false;
+    for (var i = 0; i<config.serial.coms.length; i++){
+      let conf = config.serial.coms[i];
+      if (conf.average){
+        conf.entries = 1;
+        config.serial.coms[i].entries=1;
+      }
+      
+      if (conf.name==='')
+        continue;
+
+      if (!logoSizeSet)
+      {
+        logoSizeSet = true;
+        $('#logo').height(Math.min(140, conf.entries*30)*0.95);
+      }
+
+      cursor ++;
+
+      for (var j = 0; j<conf.entries; j++){
+        cursor++;
+        if((j===conf.entries-1)){
+          for (let i = 0; i < numColumns-1; i++){
+            $(address(i, cursor)).addClass('result');
+          }
+          $(address(0, cursor)).html(conf.name);
+          if (conf.average){
+            $(address(4, cursor)).addClass(conf.name.replace(' ', '_') + 'avg')
+            $(address(4, cursor)).addClass('result');
+          }
+        }
+        if (j===conf.entries-2 && conf.average)
+          $(address(4, cursor)).html( 'Average' );
+
+        $(address(1, cursor)).html(j+1);
+        $(address(2, cursor)).addClass(conf.name.replace(' ', '_')+'time'+j);
+        $(address(3, cursor)).addClass(conf.name.replace(' ', '_')+'entry'+j);
+      }
+    }
+
+    cursor +=2;
+    
+    let tableUsed = false;
+    let rowUsed = false;
+    let newRows = Math.ceil(numTable/numColumns);
+    let index = 0;
+    for (let i = 0; i < newRows; i++){
+      for (let j = 0; j < numColumns; j++){
+        let conf = config.table.cells[index];
+        
+        if (conf.formula)
+        {
+          rowUsed = true;
+          tableUsed = true;
+          
+          $(address(j, cursor )).html(conf.name || (String.fromCharCode(65 + index % numColumns) + (index % numColumns + 1)));
+          $(address(j, cursor )).addClass('table');
+          if (conf.formula == '#'){
+            if (conf.numeric){
+              $(address(j, cursor + 1)).html('<input style="height:33px; width:33px" value="-" onclick="javascript:manualDecrement('+index+')" type="button">');
+              $(address(j, cursor + 1)).append('<input style="width:'+ conf.digits +'vw" onkeyup="javascript:manualChange('+index+')" type="number" min="0" step="1" id="manual' + index + '">');
+              $(address(j, cursor + 1)).append('<input style="height:33px; width:33px" value="+" onclick="javascript:manualIncrement('+index+')" type="button">');
+            }
+            else{
+              $(address(j, cursor + 1)).html('<input style="width:'+ (conf.digits*2) +'vw" onkeyup="javascript:manualChange('+index+')" type="text" id="manual' + index + '">');
+            }
+          }
+          else{
+            $(address(j, cursor + 1)).html('-');
+          }
+          $(address(j, cursor + 1)).addClass('table'+index);
+          $(address(j, cursor + 1)).addClass('table');
+        }
+        index++;
+      }
+
+      if (rowUsed)
+        cursor += 2;
+        
+      rowUsed = false;
+    }
+    
+    if (tableUsed){
+      cursor ++;
+    }
+    
+    newRows = Math.ceil(numOutputs/numColumns);
+    index=0;
+    for (let i = 0; i < newRows; i++){
+      for (let j = 0; j < numColumns; j++){
+        let conf = config.output.ports[index];
+
+        if (conf.formula){
+          rowUsed = true;
+          
+          let argument = index;
+          $(address(j, cursor)).html(conf.name );
+          $(address(j, cursor)).addClass('output'+index);
+          $(address(j, cursor)).addClass('output off');
+          $(address(j, cursor)).click(function (){ clickOutput(argument)});
+        }
+        index++;
+      }
+      if (rowUsed)
+        cursor += 2;
+        
+      rowUsed = false;
+    }
+
+    newRows = Math.ceil(numInputs/numColumns);
+    index = 0;
+    for (let i = 0; i < newRows; i++){
+      for (let j = 0; j< numColumns; j++){
+        let conf = config.input.ports[i*numColumns + j];
+
+        if (conf.name){
+          rowUsed = true;
+      
+          let argument = index;
+          $(address(j, cursor )).html(conf.name );
+          $(address(j, cursor )).addClass('input'+index);
+          $(address(j, cursor )).addClass('input off');
+          $(address(j, cursor )).click(function (){ clickInput(argument)});
+        }
+        index++;
+      }
+      if (rowUsed)
+        cursor += 2;
+        
+      rowUsed = false;
+    }
+    var previousEntry = [];
+    var previousTime = [];
+    for(var i = 0; i<config.serial.coms.length; i++){
+      previousEntry[i] = '';
+      previousTime[i] = 0;
+    }
+
+    socket.on('entry', function(msg){
+      for(var i = 0; i<config.serial.comslength; i++)
+        if (msg.name===config.serial.coms[i].name)
+          break;  //store value of i for correct serial entry
+
+      msg.name = msg.name.replace(' ', '_');
+        
+      var date = new Date()
+      if (msg.entry==previousEntry[i] && date.getTime()<previousTime[i] + config.serial.coms[i].timeout*1000)
+        return;
+
+      previousTime[i]=date.getTime();
+      previousEntry[i]=msg.entry;
+
+      var lastIndex = config.serial.coms[i].entries - 1;
+
+      if ($('.' + msg.name+'time'+lastIndex).html())
+        shiftEntries(i);
+
+      $('.' + msg.name+'time'+lastIndex).html(printTime(msg.entryTime));
+      $('.' + msg.name+'entry'+lastIndex).html(msg.entry);
+      
+    });
+
+    socket.on('value', function(msg){
+      $('.'+msg.name).html(msg.value);
+    });
+
+    socket.on('state', function(msg){
+      $('.'+msg.name).removeClass('on off forcedOn forcedOff execute').addClass(msg.state);
+    })
+
+    socket.on('average', function(msg){
+      for(var i = 0; i<config.serial.coms.length; i++)
+        if (msg.name===config.serial.coms[i].name){
+          $('.' + config.serial.coms[i].name+'avg').html(msg.entry);
+        }
+    });
+
+    socket.on('notfound', function(msg){
+      $('.table').removeClass('notfound');
+      if (msg){
+        $('.table').addClass('notfound');
+      }
+    });
+
+    socket.on('error', function(msg){
+      alert(msg);
+    });
+
+    socket.on('clear', function(){
+      for(var i = 0; i<config.table.cells.length; i++){
+        if (!config.table.cells[i].resetOnExe){
+          if (config.table.cells[i].formula == '#'){
+            manualChange(i);
+          }
+          continue;
+        }
+        
+        if (config.table.cells[i].formula == '#'){
+          $('#manual'+i).val('');
+        }
+        else{
+          $('.table'+i).html('');
+        }
+      }
+      for(var i = 0; i<config.serial.coms.length; i++){
+        var lastIndex = config.serial.coms[i].entries - 1;
+        if ($('.' + config.serial.coms[i].name+'time'+lastIndex).html())
+          shiftEntries(i);
+        
+        $('.' + config.serial.coms[i].name+'time'+lastIndex).html('');
+        $('.' + config.serial.coms[i].name+'entry'+lastIndex).html('');
+      }
+    })
+  </script>
+</body>
+</html>

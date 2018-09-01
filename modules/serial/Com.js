@@ -10,7 +10,7 @@ class Com {
   constructor(index, config, store){
     this.index = index;
     this.store = store;
-    this = {...this, config};
+    Object.assign(this, config);
 
     this.remainingEntries = Buffer('0');
     this.averageList = [];
@@ -42,7 +42,7 @@ class Com {
         // read new entries into buffer
         this.remainingEntries = Buffer.concat([this.remainingEntries, port.read()]);
 
-        const nextEntry, nextEntryEnd;
+        let nextEntry, nextEntryEnd;
         
         if (this.remainingEntries.length===0)
           return;
@@ -101,13 +101,13 @@ class Com {
     } else {
       // Entry should be numeric if this is true
       entry = entry.replace(/ /g,''); // remove spaces inside number
-      const numericValue = parseFloat(entry)*this.factor);
+      const numericValue = parseFloat(entry)*this.factor;
       numericValue = this.alwaysPositive?Math.abs(numericValue):numericValue;
 
       decodedEntry = numericValue.toFixed(this.digits);
 
       if (this.average){
-        for (let i = config.entries-1; i > 0; i--)
+        for (let i = this.entries-1; i > 0; i--)
         {
           if (this.averageList[i - 1]){
             this.averageList[i] = this.averageList[i - 1];

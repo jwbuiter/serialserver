@@ -1,42 +1,70 @@
 const {
-  OUTPUT_STATE_CHANGED,
+  OUTPUT_RESULT_CHANGED,
   OUTPUT_FORCED_CHANGED,
   OUTPUT_EXECUTING_CHANGED,
-} = require('../actions/types.js');
+} = require('../actions/types');
 
-const {output} = require('../config.js');
+const {output} = require('../configs/current');
 
 const initialState = {
-  states: Array(output.length).fill(false),
-  forced: Array(output.length).fill(false),
-  executing: Array(output.length).fill(false),
+  ports: Array(output.ports.length).fill({
+    state: false,
+    result: false,
+    isForced: false,
+    previousForced: false,
+    forcedState: false,
+    executing: false,
+  }),
 };
+
+function calculateState(port, index){
+  if (port.isForced)
+    return port.forcedState;
+
+  if (output.ports[index].execute)
+    if (port.executing)
+      return result;
+    else
+      return false;
+  
+  return result;
+}
 
 module.exports = function(state = initialState, action) {
   switch(action.type) {
-  case OUTPUT_STATE_CHANGED:
-    const {index, state} = action.payload;
-    const newStates = Obect.assign({},state.states);
-    newStates[index] = state
-    return {
-      ...state,
-      states: newStates,
+    case OUTPUT_RESULT_CHANGED:{
+      const {index, result} = action.payload;
+      const newPorts = Obect.assign({},state.ports);
+      newPorts[index].result = result;
+      newPorts[index].state = calculateState(newPorts[index], index);
+      return {
+        ...state,
+        ports: newPorts,
+      }
     }
-  case OUTPUT_FORCED_CHANGED:
-    const {index, forced} = action.payload;
-    const newForced = Obect.assign({},state.forced);
-    newForced[index] = forced;
-    return {
-      ...state,
-      forced: newForced,
+    case OUTPUT_FORCED_CHANGED:{
+      const {index, isForced, previousForced, forcedState} = action.payload;
+      const newPorts = Obect.assign({},state.ports);
+      newPorts[index].isForced = isForced;
+      newPorts[index].previousForced = previousForced;
+      newPorts[index].forcedState = forcedState;
+      newPorts[index].state = calculateState(newPorts[index], index);
+      return {
+        ...state,
+        ports: newPorts,
+      }
     }
+    case OUTPUT_EXECUTING_CHANGED:{
+      const {index, executing} = action.payload;
+      const newPorts = Obect.assign({},state.ports);
+      newPorts[index].executing = executing;
+      newPorts[index].state = calculateState(newPorts[index], index);
+      return {
+        ...state,
+        ports: newPorts,
+      }
+    }
+    default:
+      return state;
   }
-  case OUTPUT_EXECUTING_CHANGED:
-  const {index, executing} = action.payload;
-  const newExecuting = Obect.assign({},state.executing);
-  newExecuting[index] = executing;
-  return {
-    ...state,
-    executing: newExecuting,
-  }
-};
+}

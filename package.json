@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/jwbuiter/serialserver#readme",
   "dependencies": {
+    "dateformat": "^3.0.3",
     "express": "^4.16.2",
     "express-fileupload": "^0.4.0",
     "express-zip": "^2.0.1",

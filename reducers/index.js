@@ -4,6 +4,7 @@ const outputReducer = require('./outputReducer');
 const inputReducer = require('./inputReducer');
 const tableReducer = require('./tableReducer');
 const lastActionReducer = require('./lastActionReducer');
+const loggerReducer = require('./loggerReducer');
 
 module.exports = combineReducers({
   serial: serialReducer,
@@ -11,4 +12,5 @@ module.exports = combineReducers({
   input: inputReducer,
   table: tableReducer,
   lastAction: lastActionReducer,
+  logger: loggerReducer,
 });

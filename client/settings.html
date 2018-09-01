@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+<head>
+  <title>MBDCcomUnit</title>
+   <style>
+      table {text-align: center; border: none; border-collapse: collapse;}
+      tr { height: 40px; }
+      td { text-align: center; font-size: 18px; border-style: bold; width: 200px; }
+      input {text-align: center;}
+    </style>
+</head>
+<body>
+<div style="display: block; width: 600px; margin:0 auto;">
+  <table>
+    <tr>
+      <td><h2>Settings com 0</h2></td>
+      <td><h2>Settings com 1</h2></td>
+      <td><b>Test Mode</b><input type="checkbox" id="testMode"></td>
+    </tr>
+    <tr>
+      <td><input type="number" id="baudRate0" min="0" step="1"></td>
+      <td><input type="number" id="baudRate1" min="0" step="1"></td>
+      <td>Baudrate</td>
+    </tr>
+    <tr>
+      <td><input type="number" id="stopBits0" min="0" step="1"></td>
+      <td><input type="number" id="stopBits1" min="0" step="1"></td>
+      <td>Number of stop bits</td>
+    </tr>
+    <tr>
+      <td><input type="number" id="bits0" min="0" step="1"></td>
+      <td><input type="number" id="bits1" min="0" step="1"></td>
+      <td>Number of Data bits</td>
+    </tr>
+    <tr>
+      <td>
+        <select id ="parity0">
+          <option value="none">None</option>
+          <option value="even">Even</option>
+          <option value="odd">Odd</option>
+          <option value="mark">Mark</option>
+          <option value="space">Space</option>
+        </select>
+      </td>
+      <td>
+        <select id ="parity1">
+          <option value="none">None</option>
+          <option value="even">Even</option>
+          <option value="odd">Odd</option>
+          <option value="mark">Mark</option>
+          <option value="space">Space</option>
+        </select>
+      </td>
+      <td>Parity</td>
+    </tr>
+    <tr>
+      <td><input type="checkbox" id="RTSCTS0"></td>
+      <td><input type="checkbox" id="RTSCTS1"></td>
+      <td>RTSCTS</td>
+    </tr>
+    <tr>
+      <td><input type="checkbox" id="XONXOFF0"></td>
+      <td><input type="checkbox" id="XONXOFF1"></td>
+      <td>XONXOFF</td>
+    </tr>
+    <tr>
+      <td><input type="text" id="name0"></td>
+      <td><input type="text" id="name1"></td>
+      <td>Name</td>
+    </tr>
+    <tr>
+      <td><input type="number" id="entries0" min="0" step="1"></td>
+      <td><input type="number" id="entries1" min="0" step="1"></td>
+      <td>Number of entries</td>
+    </tr>
+    <tr>
+      <td><input type="checkbox" id="average0"></td>
+      <td><input type="checkbox" id="average1"></td>
+      <td>Take average</td>
+    </tr>
+    <tr>
+      <td><input type="number" id="factor0"></td>
+      <td><input type="number" id="factor1"></td>
+      <td>Factor</td>
+    </tr>
+    <tr>
+      <td><input type="number" id="digits0" min="0" step="1"></td>
+      <td><input type="number" id="digits1" min="0" step="1"></td>
+      <td>Digits/rounding</td>
+    </tr>
+    <tr>
+      <td><input type="checkbox" id="alwaysPositive0"></td>
+      <td><input type="checkbox" id="alwaysPositive1"></td>
+      <td>Always positive</td>
+    </tr>
+    <tr>
+      <td><input type="number" id="timeout0" min="0" step="1"></td>
+      <td><input type="number" id="timeout1" min="0" step="1"></td>
+      <td>Timeout in seconds</td>
+    </tr>
+    <tr>
+      <td><input type="checkbox" id="timeoutReset0"></td>
+      <td><input type="checkbox" id="timeoutReset1"></td>
+      <td>Reset after timeout</td>
+    </tr>
+    <tr>
+      <td><input type="text" id="prefix0"></td>
+      <td><input type="text" id="prefix1"></td>
+      <td>Prefix</td>
+    </tr>
+    <tr>
+      <td><input type="text" id="postfix0"></td>
+      <td><input type="text" id="postfix1"></td>
+      <td>Postfix</td>
+    </tr>
+    <tr>
+      <td><input type="date" id="date"></td>
+      <td><input type="time" id="time"></td>
+      <td><input type="button" value="Change date and time" onclick="javascript:setDate()"></td>
+    </tr>
+    <tr>
+      <td><input type="button" value="Save settings and restart" onclick="javascript:setSettings()"></td>
+      <td><input type="button" value="Cancel" onclick="javascript:goDebug()"></td>
+      <td id="version"></td>
+    </tr>
+  </table>
+</div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/res/jquery-1.11.1.js"></script>
+  <script src="/config.js"></script>
+  <script type="text/javascript">
+    for (var i = 0; i < 2; i++)
+    {
+      var conf = config.serial[i];
+      Object.keys(conf).forEach(function(key) 
+      {
+        if (typeof(conf[key]) === "boolean")
+        {
+          $(`#${key}${i}`).prop('checked', conf[key]);
+        }
+        else
+        {
+          $(`#${key}${i}`).val(conf[key]);
+        }
+      });
+    }
+    $('#testMode').prop('checked', config.testMode);
+    $('#version').append($('<b>').html('Version:' + config.version));
+
+    var socket = io();
+
+    function setDate(){
+      let dateTimeString = $('#date').val() + ' ' + $('#time').val()
+      let dateTime = Date.parse(dateTimeString);
+      socket.emit('setDateTime', dateTime/1000);
+    }
+
+    function goDebug(){
+      window.location.href = '/';
+    }
+
+    function setSettings(){
+      if (confirm("Do you really want to save these settings??"))
+      {
+        for (var i = 0; i < 2; i++)
+        {
+          var conf = config.serial[i];
+          Object.keys(conf).forEach(function(key) 
+          {
+            let element = $(`#${key}${i}`);
+            if (element.length!=0)
+            {
+              if (typeof(conf[key]) === "boolean")
+              {
+                conf[key] = element.prop('checked');
+              }
+              else if (!isNaN(parseInt(conf[key])))
+              {
+                conf[key] = Number(element.val());
+              }
+              else
+              {
+                conf[key] = element.val();
+              }
+            }
+          });
+        }
+        config.testMode = $('#testMode').prop('checked');
+
+        socket.emit('settings',config);
+        setTimeout(function(){ 
+          window.location.href = '/';
+        }, 5000);
+      }
+    }
+
+  </script>
+</body>
+</html>

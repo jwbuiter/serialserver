@@ -2,47 +2,51 @@ const {
   SERIAL_ENTRY,
   SERIAL_AVERAGE,
   SERIAL_RESET,
-} = require('../actions/types.js');
+} = require('../actions/types');
 
-const {serial} = require('../config.js');
+const {serial} = require('../configs/current');
 
 const initialState = {
-  entries: Array(serial.coms.length).fill('0'),
-  averages: Array(serial.coms.length).fill('0'),
+  coms: Array(serial.coms.length).fill({
+    entry: '0',
+    average: '0',
+  })
 };
 
 module.exports = function(state = initialState, action) {
   switch(action.type) {
-  case SERIAL_ENTRY:
-    const {index, entry} = action.payload;
-    const newEntries = Obect.assign({}, state.entries);
-    newEntries[index] = entry;
-    return {
-      ...state,
-      entries: newEntries,
-    }
-  case SERIAL_AVERAGE:
-    const {index, average} = action.payload;
-    const newAverages = Object.assign({}, state.averages);
-    newAverages[index] = average;
-    return {
-      ...state,
-      averages: newAverages,
-    }
-  case SERIAL_RESET:
-    if (action.payload){
-      const index = action.payload;
-      const newEntries = Obect.assign({}, state.entries);
-      newEntries[index] = initialState.entries[index];
+    case SERIAL_ENTRY:{
+      const {index, entry} = action.payload;
+      const newComs = Obect.assign({}, state.coms);
+      newComs[index].entry = entry;
       return {
         ...state,
-        entries: newEntries,
-      }
-    } else {
-      return {
-        ...state,
-        entries: initialState.entries,
+        coms, newComs,
       }
     }
+    case SERIAL_AVERAGE:{
+      const {index, average} = action.payload;
+      const newComs = Obect.assign({}, state.coms);
+      newComs[index].average = average;
+      return {
+        ...state,
+        coms, newComs,
+      }
+    }
+    case SERIAL_RESET:{
+      if (action.payload){
+        const index = action.payload;
+        const newComs = Obect.assign({}, state.coms);
+        newComs[index] = initialState[index];
+        return {
+          ...state,
+          coms, newComs,
+        }
+      } else {
+        return initialState;
+      }
+    }
+    default:
+      return state;
   }
 };

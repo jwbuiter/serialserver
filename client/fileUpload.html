@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+<head>
+  <title>MBDCcomUnit</title>
+   <style>
+      *{font-size: 25px; padding:0; margin: 0;}
+      table { text-align: center; border: none; border-collapse: collapse;}
+      tr { height: 29px; }
+      td { text-align: center;  border-style: bold; height: 29px;}
+      input {text-align: center; width: 100%;}
+      select { width: 100%; }
+    </style>
+</head>
+<body>
+  <div>
+    <table id="content">
+    </table>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/res/jquery-1.11.1.js"></script>
+  <script src="/config.js"></script>
+  <script type="text/javascript">
+    var columnWidths = [10, 20, 60, 10]
+    const numColumns = 4;
+    const numRows = 11;
+
+    function address(rowNum, columnNum){
+      return '#c' + columnNum + 'r' + rowNum;
+    }
+
+    for (let i = 0; i < numRows; i++){
+      var currentRow = $('<tr>');
+      $('#content').append(currentRow);
+      for (let j = 0; j < numColumns; j++){
+        newCell = $('<td>').attr('id', address(j, i).slice(1));
+        
+        newCell.css('max-width', columnWidths[j] + 'vw');
+        newCell.css('width', columnWidths[j] + 'vw');
+
+        currentRow.append(newCell);
+      }
+    }
+
+    $(address(1, 6)).append($('<b>').html('File upload'));
+    $(address(2, 6)).append($('<form id="uploadForm" action="upload" method="post" enctype="multipart/form-data">').html('<input class="wide" id="fileLocation" type="file" name="importFile" accept=".xls">'));
+    $(address(2, 8)).append($('<input type="button" style="width: 50%" value="Import .xls" onclick="javascript:goSubmit()">'));
+    $(address(2, 8)).append($('<input type="button" style="width: 50%" value="Cancel" onclick="javascript:goDebug()">'));
+
+    $(address(2, 10)).append($('<input type="button" style="width: 50%" value="File settings" onclick="javascript:goFileSettings()">'));
+    $(address(2, 10)).append($('<input type="button" style="width: 50%" value="Logfiles" onclick="javascript:goDownload()">'));
+
+
+    var socket = io();
+
+    function setDate(){
+      let dateTimeString = $('#date').val() + ' ' + $('#time').val()
+      let dateTime = Date.parse(dateTimeString);
+      socket.emit('setDateTime', dateTime/1000);
+    }
+
+    function goSubmit(){
+      $('#uploadForm').submit();
+    }
+
+    function goDebug(){
+      window.location.href = '/';
+    }
+
+    function goFileSettings(){
+      if (confirm("Do you want to go to the file settings?")){
+        window.location.href = '/filesettings';
+      }
+    }
+
+    function goDownload(){
+      window.location.href = '/downloadLog';
+    }
+  </script>
+</body>
+</html>
