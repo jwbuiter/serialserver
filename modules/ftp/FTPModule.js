@@ -37,10 +37,11 @@ function upload(addressFolder, userPassword, fileName){
 }
 
 function FTPModule(config, store) {
+  console.log('FTP')
   const {targets, automatic} = config;
 
   store.listen((lastAction)=>{
-    console.log(lastAction.type)
+    //console.log(lastAction.type)
     switch (lastAction.type){
       case LOG_SAVE:{
         const {fileName, ftpIndex}= lastAction.payload;

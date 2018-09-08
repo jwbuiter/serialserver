@@ -1,5 +1,4 @@
 const {
-  SL_START,
   SL_ENTRY,
   SL_RESET,
   SL_SUCCESS,
@@ -15,9 +14,10 @@ function SelfLearningModule(config, store) {
     return {};
 
   const comIndex = Number(enabled[3]);
+  console.log('SL enabled on com'+comIndex)
 
   store.listen(lastAction =>{
-    switch (lastAction){
+    switch (lastAction.type){
       case LOG_RESET:{
         store.dispatch({type: SL_RESET});
       }
@@ -44,19 +44,28 @@ function SelfLearningModule(config, store) {
               return acc;
             }, false)
           );
+          const maxMatched = matchedEntries.reduce((acc, cur) => Math.max(acc, cur))
+          const minMatched = matchedEntries.reduce((acc, cur) => Math.min(acc, cur))
 
-          const calibration = matchedEntries.reduce((sum, entry) => sum + entry.value, 0)/matchedEntries.length;
+          const calibration = (minMatched + maxMatched)/2;
+          const matchedTolerance = (maxMatched - calibration)/calibration;
+
+          const success = successfullMatches.length>number?2:1;
           store.dispatch({
             type: SL_SUCCESS,
-            success: successfullMatches.length,
-            calibration,
-            tolerance,
-            comIndex,
+            payload: {
+              success,
+              calibration,
+              matchedTolerance,
+              comIndex,
+            }
           });
         }
         break;
       }
       case EXECUTE_START:{
+        if (store.getState().selfLearning.success) break;
+
         const newEntry = Number(store.getState().serial.coms[comIndex].entry);
         if (isNaN(newEntry) || !isFinite(newEntry)){
           console.log('Received self learning entry which is not a number, ignoring');
@@ -68,11 +77,10 @@ function SelfLearningModule(config, store) {
           payload: newEntry,
         });
       }
-
     }
   });
 
-  store.dispatch({ type: SL_START});
+  store.dispatch({ type: SL_RESET});
   return {};
 }
 

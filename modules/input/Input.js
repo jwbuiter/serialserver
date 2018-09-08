@@ -33,9 +33,7 @@ function Input(index, config, store) {
         const stillExecuting = reduxState.output.ports.reduce((acc, cur) => acc || cur.executing, false);
 
         if (state && !(blocked) && !(stillExecuting)){
-          console.log('execute')
           store.dispatch({type: EXECUTE_START});
-          console.log('execute')
         } else if (!state && stillExecuting){
           store.dispatch({type: EXECUTE_STOP});
           store.dispatch({type: SERIAL_RESET});
@@ -60,14 +58,14 @@ function Input(index, config, store) {
     store.dispatch({
       type : INPUT_PHYSICAL_CHANGED,
       payload : {
-        entry : state,
+        physical : state,
         index,
       }
     });
   }
 
   function setStateDebounce(state){
-    clearTimeout(thisdebounce);
+    clearTimeout(debounce);
 
     debounce = setTimeout(()=>{
       dispatchState(state);
@@ -79,7 +77,7 @@ function Input(index, config, store) {
 
   myGPIO.watch((err, val)=>{
     setTimeout(()=>{
-      setStateDebounce(myGPIO.readSync());
+      setStateDebounce(myGPIO.readSync()?true:false);
     },10);
   });
 
@@ -90,8 +88,8 @@ function Input(index, config, store) {
       case INPUT_PHYSICAL_CHANGED:
       case INPUT_FORCED_CHANGED:{
         if (index === lastAction.payload.index){
-          const state = store.getState().input.ports[index].state;
-          handleInput(state)
+          //console.log(state.input.ports[index].state)
+          handleInput(state.input.ports[index].state)
         }
         break;
       }

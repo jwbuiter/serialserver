@@ -31,7 +31,7 @@ module.exports = function(state = initialState, action) {
       
       const newComs = Array.from(state.coms);
       newComs[index].entry = entry;
-      
+      newComs[index].time = new Date();
       return {
         ...state,
         coms: newComs,
@@ -48,7 +48,7 @@ module.exports = function(state = initialState, action) {
       }
     }
     case SERIAL_RESET:{
-      if (action.payload){
+      if (typeof(action.payload) !== 'undefined'){
         const index = action.payload;
 
         const newHistories = Array.from(state.histories);
@@ -60,8 +60,7 @@ module.exports = function(state = initialState, action) {
         }
 
         const newComs = Array.from(state.coms);
-        newComs[index] = initialState[index];
-
+        newComs[index] = initialState.coms[index];
         return {
           ...state,
           coms: newComs,
@@ -70,14 +69,13 @@ module.exports = function(state = initialState, action) {
       } else {
         const newHistories = Array.from(state.histories).map((history, index) => {
           if (state.coms[index].entry){
-            history[index].push({
+            history.push({
               entry: state.coms[index].entry,
               time: state.coms[index].time,
             });
           }
           return history;
         });
-
         return {
           ...state,
           coms: initialState.coms,

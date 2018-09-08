@@ -129,8 +129,9 @@ function SiteModule(config, store) {
     app.get('/com'+i, (req, res) =>{
       const com = store.getState().serial.coms[i];
       let sendString='<title>MBDCcomUnit</title>';
+      console.log(store.getState().serial);
 
-      if (com.average === '0'){
+      if (com.average === ''){
         sendString += com.entry;
       } else {
         sendString += com.average;

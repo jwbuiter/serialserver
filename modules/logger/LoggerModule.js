@@ -43,8 +43,8 @@ function LoggerModule(config, store) {
     switch (lastAction.type){
       case EXECUTE_START:{
         let newRow = [dateFormat(new Date(),'yyyy-mm-dd HH:MM:ss')];
-        newRow = newRow.concat(state.serial.entries);
-        newRow = newRow.concat(state.table.entries);
+        newRow = newRow.concat(state.serial.coms.map(com=>com.entry));
+        newRow = newRow.concat(state.table.cells.map(cell=>cell.entry));
         
         store.dispatch({
           type: LOG_ENTRY,

@@ -22,6 +22,7 @@ const {
   FTP_SUCCESS,
   FTP_FAILURE,
   SL_RESET,
+  SL_SUCCESS,
   TABLE_RESET,
   TABLE_ENTRY,
   ERROR_OCCURRED,
@@ -82,8 +83,8 @@ function Realtime(server, config, store){
       io.emit('table', {index, value: cell.entry, manual: cell.manual});
     })
 
-    state.serial.histories.forEach((history, index) => 
-      history.forEach({entry, time} => {
+    state.serial.histories.forEach((history, index) => {
+      history.forEach(({entry, time}) => {
         io.emit('entry', {index, entryTime: time, entry});
       });
     });
@@ -92,6 +93,10 @@ function Realtime(server, config, store){
       io.emit('entry', {index, entryTime: time, entry});
       io.emit('average', {index, average});
     });
+
+    const {success, matchedTolerance} = state.selfLearning;
+    io.emit('selfLearning', {success, matchedTolerance});
+
     
   }
   
@@ -336,7 +341,13 @@ function Realtime(server, config, store){
         break;
       }
       case SERIAL_RESET: {
-        io.emit('clear');
+        if (typeof(lastAction.payload) !== 'undefined'){
+          const index = lastAction.payload;
+
+          io.emit('entry', {index, entry: '', entryTime: new Date().getTime()})
+        } else {
+          io.emit('clear');
+        }
         break;
       }
       case TABLE_ENTRY: {
@@ -360,6 +371,13 @@ function Realtime(server, config, store){
 
         io.emit('uploadLogResponse', err.message);
         break;
+      }
+      case SL_RESET: {
+        io.emit('selfLearning', {success: 0});
+      }
+      case SL_SUCCESS: {
+        const {success, matchedTolerance} = lastAction.payload;
+        io.emit('selfLearning', {success, matchedTolerance});
       }
     }
   });

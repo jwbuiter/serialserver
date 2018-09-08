@@ -9,10 +9,32 @@ const {
 } = require('../../actions/types.js');
 
 function Com(index, config, store) {
-  const {testMode, testMessage, timeout, port, baudRate, bits, stopBits, parity, RTSCTS, XONXOFF, prefix, postfix, digits, factor, average, alwaysPositive, entries, triggerCom} = config;
+  const {
+    testMode, 
+    testMessage, 
+    timeout, 
+    port, 
+    baudRate, 
+    bits, 
+    stopBits, 
+    parity, 
+    RTSCTS, 
+    XONXOFF, 
+    prefix, 
+    postfix, 
+    digits, 
+    factor, 
+    average, 
+    alwaysPositive, 
+    entries, 
+    triggerCom,
+    timeoutReset,
+  } = config;
 
   let remainingEntries = Buffer('0');
   let averageList = [];
+
+  let myTimeout = setTimeout(()=> 0 ,1);
 
   function dispatch(entry){
     store.dispatch({
@@ -66,9 +88,23 @@ function Com(index, config, store) {
     // if the test mode is enabled, dispatch an entry containing the test message every timeout
     const dispatchTest = () => {
       dispatch(decode(testMessage));
-    };
+    }
+    const dispatchNothing = () => {
+      dispatch(decode('0'));
+    }
+
     dispatchTest();
-    setInterval(dispatchTest, timeout * 1000);
+
+    if (timeoutReset){
+      setTimeout(() => {
+        dispatchNothing();
+        setInterval(dispatchNothing, 2 * timeout * 1000);
+      }, timeout *1000);
+      setInterval(dispatchTest, 2 * timeout * 1000);
+
+    } else {
+      setInterval(dispatchTest, timeout * 1000);
+    }
   } else {
     
     const myPort = new serialPort(port, {
@@ -117,10 +153,22 @@ function Com(index, config, store) {
           store.dispatch({
             type : SERIAL_RESET,
           });
+          console.log('clear')
         }
 
-        dispatch(newEntry);
-        
+        if(newEntry !== store.getState().serial.coms[index].entry){
+          dispatch(newEntry);
+          if (timeoutReset){
+            clearTimeout(myTimeout);
+            myTimeout = setTimeout(() => {
+              store.dispatch({
+                type : SERIAL_RESET,
+                payload: index,
+              });
+            }, timeout*1000);
+          }
+        }
+
         remainingEntries = remainingEntries.slice(nextEntry + nextEntryEnd);
       }  
     });

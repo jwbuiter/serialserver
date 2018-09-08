@@ -25,7 +25,7 @@ function Output(index, config, store) {
       case OUTPUT_RESULT_CHANGED:
       case OUTPUT_FORCED_CHANGED:{
         if (index === lastAction.payload.index)
-          myGPIO.writeSync(store.getState().output.ports[index].state);
+          myGPIO.writeSync(store.getState().output.ports[index].state?1:0);
         break;
       }
       case HANDLE_OUTPUT:{

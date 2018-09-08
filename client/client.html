@@ -25,6 +25,9 @@
       .input.on{ background-color: yellow;}
       .input.forcedOn{background-color: #CC66FF; }
       .input.forcedOff{ background-color: #EEBBEE; }
+      .selfLearning.inProgress{ background-color: yellow;}
+      .selfLearning.done{ background-color: #3fd35d; }
+      .selfLearning.warning { background-color: #FFC000;}
     </style>
 </head>
 <body>
@@ -70,11 +73,10 @@
 
     function shiftEntries(index){
       var numEntries = config.serial.coms[index].entries
-      var name = config.serial.coms[index].name;
 
-      for(var i = 0; i<numEntries-1; i++){
-        $('.' + name +'time'+i).html($('.' + name +'time'+(i + 1)).html());
-        $('.' + name +'entry'+i).html($('.' + name +'entry'+(i + 1)).html());
+      for(var i = numEntries; i>0; i--){
+        $('.com' + index +'time'+i).html($('.com' + index +'time'+(i - 1)).html());
+        $('.com' + index +'entry'+i).html($('.com' + index +'entry'+(i - 1)).html());
       }
     }
 
@@ -178,27 +180,28 @@
       cursor ++;
 
       for (var j = 0; j<conf.entries; j++){
-        cursor++;
-        if((j===conf.entries-1)){
+        const entryCursor = cursor + conf.entries - j;
+        if((j===0)){
           for (let i = 0; i < numColumns-1; i++){
-            $(address(i, cursor)).addClass('result');
+            $(address(i, entryCursor)).addClass('result');
           }
-          $(address(0, cursor)).html(conf.name);
+          $(address(0, entryCursor)).html(conf.name);
           if (conf.average){
-            $(address(4, cursor)).addClass('com' + i + 'avg')
-            $(address(4, cursor)).addClass('result');
+            $(address(4, entryCursor)).addClass('com' + i + 'avg')
+            $(address(4, entryCursor)).addClass('result');
           }
         }
-        if (j===conf.entries-2 && conf.average)
-          $(address(4, cursor)).html( 'Average' );
+        if (j===1 && conf.average)
+          $(address(4, entryCursor)).html( 'Average' );
 
-        $(address(1, cursor)).html(j+1);
-        $(address(2, cursor)).addClass('com'+i+'time'+j);
-        $(address(3, cursor)).addClass('com'+i+'entry'+j);
+        $(address(1, entryCursor)).html(j+1);
+        $(address(2, entryCursor)).addClass('com'+i+'time'+j);
+        $(address(3, entryCursor)).addClass('com'+i+'entry'+j);
       }
+      cursor += conf.entries;
     }
 
-    cursor +=2;
+    cursor += 2;
     
     let tableUsed = false;
     let rowUsed = false;
@@ -300,9 +303,8 @@
       const {index, entryTime, entry} = msg;
 
       if ($('.com' + index +'entry0').html())
-        shiftEntries(i);
+        shiftEntries(index);
 
-      var lastIndex = config.serial.coms[index].entries - 1;
 
       $('.com' + index +'time0').html(printTime(entryTime));
       $('.com' + index +'entry0').html(entry);
@@ -313,7 +315,7 @@
       if (msg.manual){
         $('#manual'+msg.index).val(msg.value);
       } else {
-        $('.'+msg.name).html(msg.value);
+        $('.table'+msg.index).html(msg.value);
       }
     });
 
@@ -361,7 +363,36 @@
         $('.' + config.serial.coms[i].name+'time'+lastIndex).html('');
         $('.' + config.serial.coms[i].name+'entry'+lastIndex).html('');
       }
-    })
+    });
+
+    if (config.selfLearning.enabled !== 'off'){
+      socket.on('selfLearning', (msg) => {
+        console.log(msg)
+        const {success} = msg;
+        const tolerance = config.selfLearning.tolerance;
+        let color, text = 'SL: ';
+
+        if (success){
+          if(success>1){
+            color = 'warning';
+          } else {
+            color = 'done';
+          }
+          const {matchedTolerance} = msg;
+
+          text += (matchedTolerance*100) + '% ' + (Math.round(10*(tolerance - matchedTolerance*100))/10);
+        } else {
+          color = 'inProgress';
+          text = text + tolerance + '%';
+        }
+
+        for(let i = 1; i < 4; i++){
+          $(address(i, 1)).removeClass('inProgress done warning');
+          $(address(i, 1)).addClass('selfLearning ' + color);
+        }
+        $(address(2, 1)).html(text);
+      });
+    }
   </script>
 </body>
 </html>

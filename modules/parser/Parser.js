@@ -55,8 +55,8 @@ function Parser(store){
   }
   
   function parseStatistic(x){
-    if (!saveArray)
-      return '0';
+    //if (!saveArray)
+     // return '0';
     
     let operator = x.slice(1,3);
   
@@ -66,9 +66,7 @@ function Parser(store){
       x = (x.charCodeAt(0) - 65)*tableColumns + Number(x[1]) + 2;
     else
       x = Number(x) + 1;
-  
-    if (saveArray[0][x] === undefined)
-      return '0';
+
     
     let data = store.getState().logger.entries.map((elem)=>Number(elem[x]));
   
@@ -96,7 +94,7 @@ function Parser(store){
     if (store.getState().selfLearning.success)
       return functions[operator](x).toString();
 
-    return '-';
+    return '';
   }
 
   function parseSelfLearning(x){
@@ -108,7 +106,7 @@ function Parser(store){
       SCmin: state.calibration*(1 - state.tolerance),
       SCmax: state.calibration*(1 + state.tolerance),
       SN: state.entries.length,
-      ST: Math.round((state.endTime?(state.endTime - state.startTime):(new Date() - state.startTime))/60000),
+      ST: (state.endTime?(state.endTime - state.startTime):(new Date() - state.startTime))/60000,
     }
 
     return properties[property].toString();
