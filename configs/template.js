@@ -254,8 +254,6 @@ var config ={
     enabled : 'off',
     number : 10,
     tolerance : 25,
-    reset : 'fileReset',
-    resetValue : '00:00',
     startCalibration : 25,
     startTolerance : 50,
   },

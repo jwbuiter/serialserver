@@ -5,107 +5,118 @@ const {
   INPUT_BLOCKING_CHANGED,
   INPUT_FORCED_CHANGED,
   INPUT_FOLLOWING_CHANGED,
+  OUTPUT_RESULT_CHANGED,
+  OUTPUT_FORCED_CHANGED,
+  OUTPUT_EXECUTING_CHANGED,
   HANDLE_ALL,
   HANDLE_INPUT,
   HANDLE_OUTPUT,
   HANDLE_TABLE,
   EXECUTE_START,
   EXECUTE_STOP,
+  SERIAL_RESET,
+  TABLE_RESET,
 } = require('../../actions/types');
 const parser = require('../parser/Parser');
 const constants = require('../../config.static');
 
-class Input {
-  constructor(index, config, store){
-    this.index = index;
-    this.store = store;
-    Object.assign(this, config);
-    this.GPIO = new Gpio(constants.inputPin[index], 'in', 'both');
-    this.debounce = setTimeout(()=> 0 ,1);
+function Input(index, config, store) {
+  const {formula, timeout, follow, invert} = config;
+  const myGPIO = new Gpio(constants.inputPin[index], 'in', 'both');
+  let debounce = setTimeout(()=> 0 ,1);
 
-    this.GPIO.watch((err, val)=>{
-      const free = !this.store.input.forced[this.index];
-      free = free && !this.store.input.following[this.index];
-
-      if (free){
-        setTimeout(()=>{
-          setStateDebounce(this.GPIO.readSync());
-        },10);
-      }
-    });
-
-    this.store.subscribe(()=>{
-      const lastAction = this.store.getState().lastAction;
-      switch (lastAction.type){
-        case INPUT_FOLLOWING_CHANGED:
-        case INPUT_PHYSICAL_CHANGED:
-        case INPUT_FORCED_CHANGED:{
-          if (this.index === lastAction.payload.index){
-            const state = this.store.getState().input.ports[this.index].state;
-            this.handleInput(state)
-          }
-          break;
-        }
-        /*
-        case OUTPUT_STATE_CHANGED:
-          const {index, state} = lastAction.payload;
-          const forced = this.store.input.forced[this.index];
-          if (index === this.follow && !forced){
-
-          }
-          
-          break;
-          */
-      }
-    });
-  }
-
-  handleInput(state){
-    switch(this.formula){
-      case 'exe':
-        const blocked = this.store.getState().input.ports.reduce((acc, cur) => acc || cur.blocking);
-        const stillExecuting = this.store.getState().output.ports.reduce((acc, cur) => acc || cur.executing);
+  function handleInput(state){
+    switch(formula){
+      case 'exe':{
+        const reduxState = store.getState();
+        const blocked = reduxState.input.ports.reduce((acc, cur) => acc || cur.blocking, false);
+        const stillExecuting = reduxState.output.ports.reduce((acc, cur) => acc || cur.executing, false);
 
         if (state && !(blocked) && !(stillExecuting)){
-          this.store.dispatch({type: EXECUTE_START});
-        } else if (!state && executing){
-          this.store.dispatch({type: EXECUTE_STOP});
-          this.store.dispatch({type: SERIAL_RESET});
-          this.store.dispatch({type: TABLE_RESET});
+          console.log('execute')
+          store.dispatch({type: EXECUTE_START});
+          console.log('execute')
+        } else if (!state && stillExecuting){
+          store.dispatch({type: EXECUTE_STOP});
+          store.dispatch({type: SERIAL_RESET});
+          store.dispatch({type: TABLE_RESET});
         }
         break;
-      case 'exebl':
-        this.store.dispatch({
+      }
+      case 'exebl':{
+        store.dispatch({
           type: INPUT_BLOCKING_CHANGED,
           payload: {
-            index: this.index,
+            index,
             blocking: state,
           }
         });
         break;
       }
+    }
   }
 
-  setStateDebounce(state){
-    clearTimeout(this.debounce);
-
-    this.debounce = setTimeout(()=>{
-      this.dispatchState(state);
-      this.store.dispatch({type : HANDLE_TABLE});
-      this.store.dispatch({type : HANDLE_OUTPUT});
-      
-    }, this.timeout);
-  }
-
-  dispatchState(state){
-    this.store.dispatch({
+  function dispatchState(state){
+    store.dispatch({
       type : INPUT_PHYSICAL_CHANGED,
       payload : {
         entry : state,
-        index : this.index,
+        index,
       }
     });
   }
+
+  function setStateDebounce(state){
+    clearTimeout(thisdebounce);
+
+    debounce = setTimeout(()=>{
+      dispatchState(state);
+      store.dispatch({type : HANDLE_TABLE});
+      store.dispatch({type : HANDLE_OUTPUT});
+      
+    }, timeout);
+  }
+
+  myGPIO.watch((err, val)=>{
+    setTimeout(()=>{
+      setStateDebounce(myGPIO.readSync());
+    },10);
+  });
+
+  store.listen((lastAction)=>{
+    const state = store.getState();
+    switch (lastAction.type){
+      case INPUT_FOLLOWING_CHANGED:
+      case INPUT_PHYSICAL_CHANGED:
+      case INPUT_FORCED_CHANGED:{
+        if (index === lastAction.payload.index){
+          const state = store.getState().input.ports[index].state;
+          handleInput(state)
+        }
+        break;
+      }
+      case OUTPUT_RESULT_CHANGED:
+      case OUTPUT_FORCED_CHANGED:
+      case OUTPUT_EXECUTING_CHANGED:{
+        if (follow === lastAction.payload.index){
+          const outputState = state.output.ports[follow].state;
+          const isFollowing = outputState^invert;
+          const followingState = !invert;
+          store.dispatch({
+            type: INPUT_FOLLOWING_CHANGED,
+            payload: {
+              index,
+              isFollowing: isFollowing?true:false,
+              followingState: followingState?true:false,
+            },
+          });
+        }
+        break;
+      }
+    }
+  });
+
+  return {};
 }
 
 module.exports = Input;

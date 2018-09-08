@@ -38,119 +38,23 @@ const results = [
 ];
 
 const configPath = path.join(__dirname, '../..', 'configs');
-const logPath = constants.saveFileLocation;
+const logPath = constants.saveLogLocation;
 const version = constants.version;
 
-class Realtime{
-  constructor(server, config, store){
-    this.store = store;
-    Object.assign(this, config);
-    
-    this.io = socketio.listen(server);
+function Realtime(server, config, store){
+  const io = socketio.listen(server);
 
-    setInterval(() =>{
-      const time = new Date();
-      this.io.emit('time', time.getTime());
-    }, 1000);
-
-    this.store.subscribe(()=>{
-      const state = this.store.getState();
-      const lastAction = state.lastAction;
-      switch (lastAction.type){
-        case INPUT_FOLLOWING_CHANGED:
-        case INPUT_FORCED_CHANGED:
-        case INPUT_PHYSICAL_CHANGED: {
-          const {index} = lastAction.payload;
-          const port = state.input.ports[index];
-
-          this.emitInput(port, index);
-          break;
-        }
-        case OUTPUT_RESULT_CHANGED:
-        case OUTPUT_FORCED_CHANGED:
-        case OUTPUT_EXECUTING_CHANGED: {
-          const {index} = lastAction.payload;
-          const port = state.input.ports[index];
-
-          this.emitOutput(port, index);
-          break;
-        }
-        case SERIAL_ENTRY: {
-          const {index, entry} = lastAction.payload;
-
-          this.io.emit('entry', {index, entry, entryTime: new Date().getTime()});
-          break;
-        }
-        case SERIAL_AVERAGE: {
-          const {index, average} = lastAction.payload;
-
-          this.io.emit('average', {index, average});
-        }
-        case SERIAL_RESET: {
-          this.io.emit('clear');
-        }
-        case TABLE_ENTRY: {
-          const {index, entry} = lastAction.payload;
-          
-          this.io.emit('value', {name: 'table' + index, value: entry});
-        }
-        case ERROR_OCCURRED: {
-          const err = lastAction.payload;
-
-          this.io.emit('error', err.message);
-        }
-        case FTP_SUCCESS: {
-          this.io.emit('uploadLogResponse', 'Successfully uploaded log file');
-        }
-        case FTP_FAILURE: {
-          const err = lastAction.payload;
-
-          this.io.emit('uploadLogResponse', err.message);
-        }
-      }
-    });
-
-    this.io.on('connection', socket => {
-      console.log('a user connected');
-      socket.emit('ip', ip.address());
-      this.emitAllState();
-
-      const commands = {
-        'configExists': this.configExists,
-        'saveCurrentConfig': this.saveCurrentConfig,
-        'saveConfig': this.saveConfig,
-        'loadConfig': this.loadConfig,
-        'loadDefault': this.loadDefault,
-        'deleteConfig': this.deleteConfig,
-        'deleteLog': this.deleteLog,
-        'uploadLog': this.uploadLog,
-        'setDateTime': this.setDateTime,
-        'getLogList': this.getLogList,
-        'getConfigList': this.getConfigList,
-        'forceInput': this.forceInput,
-        'forceOutput': this.forceOutput,
-      }
-
-
-
-      for(let command in commands){
-        commands[command] = commands[command].bind(this);
-        socket.on(command, msg => commands[command](socket, msg));
-      }
-    });
-  }
-
-  emitInput(port, index){
+  function emitInput(port, index){
     let state;
     if (port.isForced){ 
       state = port.forcedState?'forcedOn':'forcedOff';
     } else {
       state = port.state?'on':'off';
     }
-    this.io.emit('state', {name: 'input'+index, state});
+    io.emit('state', {name: 'input'+index, state});
   }
-
-  emitOutput(port, index){
+  
+  function emitOutput(port, index){
     let state;
     if (port.isForced){
       state = port.forcedState?'forcedOn':'forcedOff';
@@ -160,28 +64,42 @@ class Realtime{
       else
         state = port.state?'on':'off';
     }
-
-    this.io.emit('state', {name: 'output'+index, state});
+    io.emit('state', {name: 'output'+index, state});
   }
-
-  emitAllState(){
-    const state = this.store.getState();
-    console.log(state.inputs)
-
+  
+  function emitAllState(){
+    const state = store.getState();
+  
     state.input.ports.forEach((port, index) => {
-      this.emitInput(port, index)
+      emitInput(port, index)
     });
-
+  
     state.output.ports.forEach((port, index) => {
-      this.emitOutput(port, index)
+      emitOutput(port, index)
     });
+
+    state.table.cells.forEach((cell, index) => {
+      io.emit('table', {index, value: cell.entry, manual: cell.manual});
+    })
+
+    state.serial.histories.forEach((history, index) => 
+      history.forEach({entry, time} => {
+        io.emit('entry', {index, entryTime: time, entry});
+      });
+    });
+
+    state.serial.coms.forEach(({entry, time, average}, index) => {
+      io.emit('entry', {index, entryTime: time, entry});
+      io.emit('average', {index, average});
+    });
+    
   }
-
-  saveCurrentConfig(socket, config){
+  
+  function saveCurrentConfig(socket, config){
     const name = path.join(configPath, 'current.js');
-
+  
     fs.copyFileSync(name, path.join(configPath, 'lastgood.js'));
-
+  
     let conf = JSON.stringify(config, null, 2).replace(/"/g, "'")
       .replace(/\\u00[0-9]{2}/g, match => String.fromCharCode(parseInt(match.slice(-2), 16)))
       .replace(/'[\w]+':/g, match => match.slice(1,-2)+' :');
@@ -193,49 +111,49 @@ class Realtime{
     } 
     catch (err) {
     }
-
+  
     fs.writeFileSync(name, conf, (err) => {  
       if (err) throw err;
-
+  
       console.log('Config saved!');
     });
-    this.store.dispatch({type: SHUTDOWN});
+    store.dispatch({type: SHUTDOWN});
   }
-
-  configExists(socket, name){
+  
+  function configExists(socket, name){
     socket.emit('configExistsResult', {result: fs.existsSync(path.join(configPath, name + 'V' + version + '.js')), name});
   }
-
-  saveConfig(socket, msg){
+  
+  function saveConfig(socket, msg){
     const name = path.join(configPath, msg.name +'V'+ version + '.js');
     let conf = JSON.stringify(msg.config, null, 2).replace(/"/g, "'")
       .replace(/\\u00[0-9]{2}/g, match => String.fromCharCode(parseInt(match.slice(-2), 16)))
       .replace(/'[\w]+':/g, match => match.slice(1,-2)+' :');
     conf = 'var config =' + conf + ';\n\nmodule.exports = config;';
-
+  
     try {
       fs.accessSync(name);
       fs.unlinkSync(name);
     } 
     catch (err) {
     }
-
+  
     fs.writeFileSync(name, conf, (err) => {  
       if (err) console.log(err);
-
-      console.log('Config saved!');
+  
+      console.log('Config saved.');
     });
   }
-
-  loadConfig(socket, name){
+  
+  function loadConfig(socket, name){
     socket.emit('config', fs.readFileSync(path.join(configPath, name)).toString().replace('module.exports = config;', '').replace(/^var /,''));
   }
-
-  loadDefault(socket, msg){
+  
+  function loadDefault(socket, msg){
     socket.emit('config', fs.readFileSync(path.join(configPath, 'config.template.js')).toString().replace('module.exports = config;', '').replace(/^var /,''));
   }
-
-  deleteConfig(socket, name){
+  
+  function deleteConfig(socket, name){
     try {
       fs.accessSync(path.join(configPath, name));
       fs.unlinkSync(path.join(configPath, name));
@@ -243,8 +161,8 @@ class Realtime{
     catch (err) {
     }
   }
-
-  deleteLog(socket, name){
+  
+  function deleteLog(socket, name){
     try {
       fs.accessSync(path.join(logPath, name));
       fs.unlinkSync(path.join(logPath, name));
@@ -252,9 +170,9 @@ class Realtime{
     catch (err) {
     }
   }
-
-  uploadLog(socket,{name, index}){
-    this.store.dispatch({
+  
+  function uploadLog(socket,{name, index}){
+    store.dispatch({
       type: LOG_SAVE,
       payload: {
         fileName: name, 
@@ -262,8 +180,8 @@ class Realtime{
       }
     })
   }
-
-  setDateTime(socket, dateTime){
+  
+  function setDateTime(socket, dateTime){
     exec(`timedatectl set-time @${dateTime}`, (err, stdout, stderr) => {
       if (err) {
         console.error(`exec error: ${err}`);
@@ -271,25 +189,26 @@ class Realtime{
       }
     });
   }
-
-  getLogList(socket, msg){
+  
+  function getLogList(socket, msg){
+    console.log({logPath})
     fs.readdir(logPath, (err, files) =>{
       socket.emit('logList', files.filter((element)=>element.endsWith('.csv')).sort().reverse());
     });
   }
-
-  getConfigList(socket, msg){
+  
+  function getConfigList(socket, msg){
     fs.readdir(configPath, (err, files) =>{
       socket.emit('configList', files.filter((element)=>element.endsWith('.js')).sort());
     });
   }
-
-  forceInput(socket, index){
-    const port = this.store.getState().input.ports[index];
-
+  
+  function forceInput(socket, index){
+    const port = store.getState().input.ports[index];
+  
     if (port.isForced){
       if (port.previousForced){
-        this.store.dispatch({
+        store.dispatch({
           type: INPUT_FORCED_CHANGED,
           payload: {
             index,
@@ -299,7 +218,7 @@ class Realtime{
           }
         });
       } else {
-        this.store.dispatch({
+        store.dispatch({
           type: INPUT_FORCED_CHANGED,
           payload: {
             index,
@@ -310,7 +229,7 @@ class Realtime{
         });
       }
     } else {
-      this.store.dispatch({
+      store.dispatch({
         type: INPUT_FORCED_CHANGED,
         payload: {
           index,
@@ -320,17 +239,17 @@ class Realtime{
         }
       });
     }
-    this.emitAllState();
-    this.store.dispatch({type: HANDLE_TABLE});
-    this.store.dispatch({type: HANDLE_OUTPUT});
+    emitAllState();
+    store.dispatch({type: HANDLE_TABLE});
+    store.dispatch({type: HANDLE_OUTPUT});
   }
-
-  forceOutput(socket, index){
-    const port = this.store.getState().output.ports[index];
-
+  
+  function forceOutput(socket, index){
+    const port = store.getState().output.ports[index];
+  
     if (port.isForced){
       if (port.previousForced){
-        this.store.dispatch({
+        store.dispatch({
           type: OUTPUT_FORCED_CHANGED,
           payload: {
             index,
@@ -340,7 +259,7 @@ class Realtime{
           }
         });
       } else {
-        this.store.dispatch({
+        store.dispatch({
           type: OUTPUT_FORCED_CHANGED,
           payload: {
             index,
@@ -351,7 +270,7 @@ class Realtime{
         });
       }
     } else {
-      this.store.dispatch({
+      store.dispatch({
         type: OUTPUT_FORCED_CHANGED,
         payload: {
           index,
@@ -361,10 +280,117 @@ class Realtime{
         }
       });
     }
-    this.emitAllState();
-    this.store.dispatch({type: HANDLE_TABLE});
-    this.store.dispatch({type: HANDLE_OUTPUT});
+    emitAllState();
+    store.dispatch({type: HANDLE_TABLE});
+    store.dispatch({type: HANDLE_OUTPUT});
   }
+
+  function handleManual(socket, msg){
+    store.dispatch({
+      type: TABLE_ENTRY,
+      payload: {
+        index: msg.index,
+        entry: msg.value,
+        manual: true
+      }
+    });
+    store.dispatch({type: HANDLE_TABLE});
+    store.dispatch({type: HANDLE_OUTPUT});
+  }
+
+  setInterval(() =>{
+    io.emit('time', new Date().getTime());
+  }, 1000);
+
+  store.listen((lastAction)=>{
+    const state = store.getState();
+    switch (lastAction.type){
+      case INPUT_FOLLOWING_CHANGED:
+      case INPUT_FORCED_CHANGED:
+      case INPUT_PHYSICAL_CHANGED: {
+        const {index} = lastAction.payload;
+        const port = state.input.ports[index];
+
+        emitInput(port, index);
+        break;
+      }
+      case OUTPUT_RESULT_CHANGED:
+      case OUTPUT_FORCED_CHANGED:
+      case OUTPUT_EXECUTING_CHANGED: {
+        const {index} = lastAction.payload;
+        const port = state.output.ports[index];
+
+        emitOutput(port, index);
+        break;
+      }
+      case SERIAL_ENTRY: {
+        const {index, entry} = lastAction.payload;
+
+        io.emit('entry', {index, entry, entryTime: new Date().getTime()});
+        break;
+      }
+      case SERIAL_AVERAGE: {
+        const {index, average} = lastAction.payload;
+
+        io.emit('average', {index, average});
+        break;
+      }
+      case SERIAL_RESET: {
+        io.emit('clear');
+        break;
+      }
+      case TABLE_ENTRY: {
+        const {index, entry, manual} = lastAction.payload;
+        
+        io.emit('table', {index, value: entry, manual: manual?true:false});
+        break;
+      }
+      case ERROR_OCCURRED: {
+        const err = lastAction.payload;
+        
+        io.emit('error', err.message);
+        break;
+      }
+      case FTP_SUCCESS: {
+        io.emit('uploadLogResponse', 'Successfully uploaded log file');
+        break;
+      }
+      case FTP_FAILURE: {
+        const err = lastAction.payload;
+
+        io.emit('uploadLogResponse', err.message);
+        break;
+      }
+    }
+  });
+
+  io.on('connection', socket => {
+    console.log('a user connected');
+    socket.emit('ip', ip.address());
+    emitAllState();
+
+    const commands = {
+      'configExists': configExists,
+      'settings': saveCurrentConfig,
+      'saveConfig': saveConfig,
+      'loadConfig': loadConfig,
+      'loadDefault': loadDefault,
+      'deleteConfig': deleteConfig,
+      'deleteLog': deleteLog,
+      'uploadLog': uploadLog,
+      'setDateTime': setDateTime,
+      'getLogList': getLogList,
+      'getConfigList': getConfigList,
+      'forceInput': forceInput,
+      'forceOutput': forceOutput,
+      'manual': handleManual,
+    }
+
+      
+    for(let command in commands){
+      socket.on(command, msg => commands[command](socket, msg));
+    }
+  });
 }
 
 module.exports = Realtime;

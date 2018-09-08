@@ -9,20 +9,25 @@ const {
   LOG_ENTRY,
   LOG_RESET,
   EXECUTE_START,
+  SL_SUCCESS,
 } = require('../../actions/types')
 
-class LoggerModule {
-  constructor(config, store){
-    this.store = store;
-    Object.assign(this, config);
+function LoggerModule(config, store) {
+  const {resetValue, resetMode, writeToFile} = config;
+  const time = resetValue.split(':');
+  let fileName;
 
-    this.resetLog()
+  function resetLog(){
+    fileName = dateFormat(new Date(),'yyyy-mm-dd_HH-MM-ss') +'.csv';
+    store.dispatch({type: LOG_RESET});
+  }
 
-    const time = this.resetValue.split(':');
-    switch(this.resetMode){
+  resetLog();
+  
+  switch(resetMode){
     case 'interval':
       setInterval(()=>{
-        this.resetLog();
+        resetLog();
       },(Number(time[0])*60 + Number(time[1]))*60*1000);
       break;
     case 'time':
@@ -30,39 +35,36 @@ class LoggerModule {
         resetLog();
       });
       break;
-    }
+  }
 
-    this.store.subscribe(()=>{
-      let state =  this.store.getState();
-      const lastAction = state.lastAction;
-      switch (lastAction.type){
-        case EXECUTE_START:{
-          let newRow = [dateFormat(new Date(),'yyyy-mm-dd HH:MM:ss')];
-          newRow = newRow.concat(state.serial.entries);
-          newRow = newRow.concat(state.table.entries);
-
-          this.store.dispatch({
-            type: LOG_ENTRY,
-            payload: newRow,
-          })
-
-          state = this.store.getState();
-          const saveArray = [state.logger.legend].concat(state.logger.entries);
-
-          const wb = XLSX.utils.book_new();
-          const ws = XLSX.utils.aoa_to_sheet(saveArray);
-          XLSX.utils.book_append_sheet(wb, ws, 'data');
-          XLSX.writeFile(wb, path.join(constants.saveFileLocation, this.fileName));
-          break;
-        }
+  store.listen((lastAction)=>{
+    let state =  store.getState();
+    
+    switch (lastAction.type){
+      case EXECUTE_START:{
+        let newRow = [dateFormat(new Date(),'yyyy-mm-dd HH:MM:ss')];
+        newRow = newRow.concat(state.serial.entries);
+        newRow = newRow.concat(state.table.entries);
+        
+        store.dispatch({
+          type: LOG_ENTRY,
+          payload: newRow,
+        });
       }
-    });
-  }
+      case SL_SUCCESS:{
+        state = store.getState();
+        const saveArray = [state.logger.legend].concat(state.logger.entries);
 
-  resetLog(){
-    this.fileName = dateFormat(new Date(),'yyyy-mm-dd_HH-MM-ss') +'.csv';
-    this.store.dispatch({type: LOG_RESET});
-  }
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(saveArray);
+        XLSX.utils.book_append_sheet(wb, ws, 'data');
+        XLSX.writeFile(wb, path.join(constants.saveLogLocation, fileName));
+        break;
+      }
+    }
+  });
+
+  return {};
 }
 
 module.exports = LoggerModule;

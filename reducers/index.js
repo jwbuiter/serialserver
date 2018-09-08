@@ -5,6 +5,7 @@ const inputReducer = require('./inputReducer');
 const tableReducer = require('./tableReducer');
 const lastActionReducer = require('./lastActionReducer');
 const loggerReducer = require('./loggerReducer');
+const selfLearningReducer = require('./selfLearningReducer');
 
 module.exports = combineReducers({
   serial: serialReducer,
@@ -13,4 +14,5 @@ module.exports = combineReducers({
   table: tableReducer,
   lastAction: lastActionReducer,
   logger: loggerReducer,
+  selfLearning: selfLearningReducer,
 });

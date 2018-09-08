@@ -3,81 +3,78 @@ const {
 } = require('../../actions/types');
 const {tableColumns} = require('../../config.static');
 
-function assert(condition, message){
-  if (!condition){
-    message = message || "Assertion failed";
-    if (typeof Error !== "undefined") {
-      throw new Error(message);
+function Parser(store){
+
+  function assert(condition, message){
+    if (!condition){
+      message = message || "Assertion failed";
+      if (typeof Error !== "undefined") {
+        throw new Error(message);
+      }
+      throw message; // Fallback
     }
-    throw message; // Fallback
   }
-}
-
-class Parser{
-  constructor(store){
-    this.store = store;
-  }
-
-  parseTable(x){
+  
+  function parseTable(x){
     let row = x.charCodeAt(1) - 65;
     let column = parseInt(x[2]);
     assert((row*tableColumns + column - 1)>=0 && (row*tableColumns + column - 1)<tableContent.length, 'Out of bounds of table contents');
-
-    return 'this.store.getState().table.cells[' + (row*tableColumns + column - 1) + ']';
+  
+    return 'store.getState().table.cells[' + (row*tableColumns + column - 1) + '].entry';
   }
-
-  parseInput(x){
+  
+  function parseInput(x){
     x=parseInt(x[2])-1;
-    assert(x>=0 && x<config.input.length, 'Input index out of bounds');
-
-    return 'this.store.getState().input.state['+x+']';
+    assert(x>=0 && x<store.getState().input.ports.length, 'Input index out of bounds');
+  
+    return 'store.getState().input.ports['+x+'].state';
   }
-
-  parseOutput(x){
+  
+  function parseOutput(x){
     x=parseInt(x[2])-1;
-    assert(x>=0 && x<config.output.length, 'Output index out of bounds');
-
-    return 'this.store.getState().output.state['+x+']';
+    assert(x>=0 && x<store.getState().output.ports.length, 'Output index out of bounds');
+  
+    return 'store.getState().output.ports['+x+'].state';
   }
-
-  parseExcel(x){
+  
+  function parseExcel(x){
     x = x.charCodeAt(1) - 65;
     assert(x>=0 && x<=26, 'Out of bounds of excel table');
-
-    return 'this.store.getState().table.foundRow['+x+']';
+  
+    return 'store.getState().table.foundRow['+x+']';
   }
-
-  parseCom(x){
+  
+  function parseCom(x){
     x=parseInt(x[3]);
-    assert(x>=0 && x<config.serial.length, 'Com port out of bounds');
-
-    if (config.serial[x].factor === 0)
-      return 'latestLogEntry[' + x + ']';
+    assert(x>=0 && x<store.getState().serial.coms.length, 'Com port out of bounds');
+  
+    if (store.getState().serial.coms[x].factor === 0)
+      return 'store.getState().serial.coms[' + x + '].entry';
     else
-      return 'Number(latestLogEntry[' + x + '])';
+      return 'Number(store.getState().serial.coms[' + x + '].entry)';
   }
-
-  parseStatistic(x){
+  
+  function parseStatistic(x){
     if (!saveArray)
       return '0';
     
     let operator = x.slice(1,3);
-
+  
     x = x.slice(3);
-
+  
     if (isNaN(Number(x)))
       x = (x.charCodeAt(0) - 65)*tableColumns + Number(x[1]) + 2;
     else
       x = Number(x) + 1;
-
+  
     if (saveArray[0][x] === undefined)
       return '0';
     
-    let data = this.store.getState().logger.entries.map((elem)=>Number(elem[x]));
-
+    let data = store.getState().logger.entries.map((elem)=>Number(elem[x]));
+  
     if (data.length === 0)
       return '0';
-
+  
     let functions = { 
       tn : (x)=> data.length,
       to : (x)=> data.reduce((acc, cur)=>acc+cur, 0),
@@ -95,35 +92,55 @@ class Parser{
           return acc.push(cur);
       }, []).length,
     }
-    
-    return functions[operator](x).toString();
+
+    if (store.getState().selfLearning.success)
+      return functions[operator](x).toString();
+
+    return '-';
   }
 
-  parse(formula){
-    let result;
-    try {
-      formula = formula
-        .replace(/#[A-G][0-9]/g, this.parseTable)
-        .replace(/#I[0-9]/g, this.parseInput)
-        .replace(/#O[0-9]/g, this.parseOutput)
-        .replace(/\$[A-Z]/g, this.parseExcel)
-        .replace(/com[0-9]/g, this.parseCom)
-        .replace(/\&[a-zA-Z0-9]+/g, this.parseStatistic)
-        .replace(/date/g, (new Date().getTime()/1000/86400 + 25569).toString())
-        .replace('and', '&&')
-        .replace('or', '||');
+  function parseSelfLearning(x){
+    const property = x.slice(1);
+    const state = store.getState().selfLearning;
 
-      result = eval(formula);
+    const properties = {
+      SC: state.calibration,
+      SCmin: state.calibration*(1 - state.tolerance),
+      SCmax: state.calibration*(1 + state.tolerance),
+      SN: state.entries.length,
+      ST: Math.round((state.endTime?(state.endTime - state.startTime):(new Date() - state.startTime))/60000),
     }
-    catch (err) {
-      this.store.dispatch({
-        type: ERROR_OCCURRED, 
-        payload: err
-      });
-    }
-    return (typeof(result)==='undefined')?'':result;
+
+    return properties[property].toString();
   }
 
+  return {
+    parse: (formula) => {
+      let result;
+      try {
+        formula = formula
+          .replace('and', '&&')
+          .replace('or', '||')
+          .replace(/#[A-G][0-9]/g, parseTable)
+          .replace(/#I[0-9]/g, parseInput)
+          .replace(/#O[0-9]/g, parseOutput)
+          .replace(/\$[A-Z]/g, parseExcel)
+          .replace(/com[0-9]/g, parseCom)
+          .replace(/\&[a-zA-Z0-9]+/g, parseStatistic)
+          .replace(/#\w+/g, parseSelfLearning)
+          .replace(/date/g, (new Date().getTime()/1000/86400 + 25569).toString());
+        result = eval(formula);
+      }
+      catch (err) {
+        store.dispatch({
+          type: ERROR_OCCURRED, 
+          payload: err
+        });
+      }
+      
+      return (typeof(result)==='undefined')?'':result;
+    },
+  }
 }
 
 module.exports = Parser;

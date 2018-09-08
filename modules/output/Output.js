@@ -13,70 +13,79 @@ const {
 const Parser = require('../parser/Parser');
 const constants = require('../../config.static');
 
-class Output {
-  constructor(index, config, store){
-    this.index = index;
-    this.store = store;
-    Object.assign(this, config);
+function Output(index, config, store) {
+  const {execute, seconds, formula} = config;
 
-    this.GPIO = new Gpio(constants.outputPin[index], 'out');
-    this.parser = new Parser(store);
+  const myGPIO = new Gpio(constants.outputPin[index], 'out');
+  const myParser = new Parser(store);
 
-    this.store.subscribe(()=>{
-      const lastAction = this.store.getState().lastAction;
-      switch (lastAction.type){
-        case OUTPUT_EXECUTING_CHANGED:
-        case OUTPUT_RESULT_CHANGED:
-        case OUTPUT_FORCED_CHANGED:{
-          if (this.index === lastAction.payload.index)
-            this.GPIO.writeSync(this.store.getState().output.ports[this.index].state);
-          break;
-        }
-        case HANDLE_OUTPUT:{
-          const result = this.parser.parse(this.formula);
-          if (result){
-            this.store.dispatch({
-              type: OUTPUT_RESULT_CHANGED,
-              payload: {index: this.index, result},
-            })
-          }
-          break;
-        }
-        case EXECUTE_START:{
-          if (this.execute){
-            this.store.dispatch({
-              type: OUTPUT_EXECUTING_CHANGED,
-              payload: {
-                execting: true
-              }
-            });
-            if (this.seconds){
-              setTimeout(() => {
-                this.store.dispatch({
-                  type: OUTPUT_EXECUTING_CHANGED,
-                  payload: {
-                    execting: false
-                  }
-                });
-              }, this.seconds*1000);
-            }
-          }
-          break;  
-        }
-        case EXECUTE_STOP:{
-          if (this.execute && !this.seconds){
-            this.store.dispatch({
-              type: OUTPUT_EXECUTING_CHANGED,
-              payload: {
-                execting: false
-              }
-            });
-          }
-          break;
-        }
+  store.listen((lastAction)=>{  
+    switch (lastAction.type){
+      case OUTPUT_EXECUTING_CHANGED:
+      case OUTPUT_RESULT_CHANGED:
+      case OUTPUT_FORCED_CHANGED:{
+        if (index === lastAction.payload.index)
+          myGPIO.writeSync(store.getState().output.ports[index].state);
+        break;
       }
-    });
-  }
+      case HANDLE_OUTPUT:{
+        const result = myParser.parse(formula);
+        if (result){
+          store.dispatch({
+            type: OUTPUT_RESULT_CHANGED,
+            payload: {
+              index, 
+              result,
+            },
+          })
+        }
+        break;
+      }
+      case EXECUTE_START:{
+        if (execute){
+          store.dispatch({
+            type: OUTPUT_EXECUTING_CHANGED,
+            payload: {
+              index,
+              executing: true
+            }
+          });
+          if (seconds){
+            setTimeout(() => {
+              store.dispatch({
+                type: OUTPUT_EXECUTING_CHANGED,
+                payload: {
+                  index,
+                  executing: false
+                }
+              });
+            }, seconds*1000);
+          }
+        }
+        break;  
+      }
+      case EXECUTE_STOP:{
+        if (execute && !seconds){
+          store.dispatch({
+            type: OUTPUT_EXECUTING_CHANGED,
+            payload: {
+              index,
+              executing: false
+            }
+          });
+        }
+        break;
+      }
+    }
+  });
+
+  store.dispatch({
+    type: OUTPUT_RESULT_CHANGED,
+    payload: {
+      index, 
+      result: myParser.parse(formula)
+    },
+  });
 }
 
 module.exports = Output;

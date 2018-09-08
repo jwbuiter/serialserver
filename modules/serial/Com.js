@@ -4,128 +4,126 @@ const {
   SERIAL_ENTRY,
   SERIAL_AVERAGE,
   SERIAL_RESET,
+  HANDLE_OUTPUT,
+  HANDLE_TABLE,
 } = require('../../actions/types.js');
 
-class Com {
-  constructor(index, config, store){
-    this.index = index;
-    this.store = store;
-    Object.assign(this, config);
+function Com(index, config, store) {
+  const {testMode, testMessage, timeout, port, baudRate, bits, stopBits, parity, RTSCTS, XONXOFF, prefix, postfix, digits, factor, average, alwaysPositive, entries, triggerCom} = config;
 
-    this.remainingEntries = Buffer('0');
-    this.averageList = [];
+  let remainingEntries = Buffer('0');
+  let averageList = [];
 
-    if (this.testMode){
-      // if the test mode is enabled, dispatch an entry containing the test message every timeout
-      const dispatchTest = () => {
-        dispatch(this.testEntry);
-      };
-      dispatchTest();
-      setInterval(dispatchTest, this.timeout * 1000);
-    } else {
-      
-      const port = new serialPort(this.port, {
-        baudRate: this.baudRate,
-        dataBits: this.bits,
-        stopBits: this.stopBits,
-        parity: this.parity,
-        rtscts: this.RTSCTS,
-        xon: this.XONXOFF,
-        xoff: this.XONXOFF
-      });
-
-      port.on('readable', () => {
-        // blink the associated led.
-        comGPIO[index].writeSync(1);
-        setTimeout(() => comGPIO[index].writeSync(0), 250);
-
-        // read new entries into buffer
-        this.remainingEntries = Buffer.concat([this.remainingEntries, port.read()]);
-
-        let nextEntry, nextEntryEnd;
-        
-        if (this.remainingEntries.length===0)
-          return;
-
-        if ((this.prefix==='')&&(this.postfix==='')){
-          const newEntry = this.remainingEntries.toString().slice(-this.digits);
-          dispatch(newEntry);
-          return
-        }
-
-        while((nextEntry = thisremainingEntries.indexOf(this.prefix))>=0){
-
-          nextEntryEnd = thisremainingEntries.slice(nextEntry).indexOf(this.postfix);
-
-          if (nextEntryEnd===-1){
-            break;
-          }
-
-          let newEntry = (this.remainingEntries.slice(nextEntry + Buffer(this.prefix).length, (nextEntryEnd===0)?this.remainingEntries.length:(nextEntryEnd+nextEntry))).toString();
-          
-          newEntry = decode(newEntry);
-          
-          // dont remember why this is here
-          if (index == thisig.triggerCom && latestLogEntry[index] != newEntry){
-            this.store.dispatch({
-              type : SERIAL_RESET,
-            });
-          }
-
-          dispatch(newEntry);
-          
-          this.remainingEntries = this.remainingEntries.slice(nextEntry + nextEntryEnd);
-        }  
-      });
-    }
-  }
-
-  dispatch(entry){
-    this.store.dispatch({
+  function dispatch(entry){
+    store.dispatch({
       type : SERIAL_ENTRY,
       payload : {
         entry : entry,
-        index : this.index,
+        index : index,
       }
     });
-    this.store.dispatch({type : HANDLE_TABLE});
-    this.store.dispatch({type : HANDLE_OUTPUT});
+    store.dispatch({type : HANDLE_TABLE});
+    store.dispatch({type : HANDLE_OUTPUT});
   }
-
-  decode(entry){
+  
+  function decode(entry){
     let decodedEntry;
-
-    if (this.factor===0){
+  
+    if (factor===0){
       // Entry is not numeric
-      decodedEntry = entry.slice(-this.digits);
+      decodedEntry = entry.slice(-digits);
     } else {
       // Entry should be numeric if this is true
       entry = entry.replace(/ /g,''); // remove spaces inside number
-      const numericValue = parseFloat(entry)*this.factor;
-      numericValue = this.alwaysPositive?Math.abs(numericValue):numericValue;
-
-      decodedEntry = numericValue.toFixed(this.digits);
-
-      if (this.average){
-        for (let i = this.entries-1; i > 0; i--)
+      let numericValue = parseFloat(entry)*factor;
+      numericValue = alwaysPositive?Math.abs(numericValue):numericValue;
+  
+      decodedEntry = numericValue.toFixed(digits);
+  
+      if (average){
+        for (let i = entries-1; i > 0; i--)
         {
-          if (this.averageList[i - 1]){
-            this.averageList[i] = this.averageList[i - 1];
+          if (averageList[i - 1]){
+            averageList[i] = averageList[i - 1];
           }
         }
-        this.averageList[0] = numericValue;
-        const average = averageList.reduce((acc, cur)=>acc + cur)/this.averageList.length;
-        this.store.dispatch({
+        averageList[0] = numericValue;
+        const average = averageList.reduce((acc, cur)=>acc + cur)/averageList.length;
+        store.dispatch({
           type : SERIAL_ENTRY,
           payload : {
             entry : average,
-            index : this.index,
+            index,
           }
         });
       }
     }
   
     return decodedEntry;
+  }
+
+  if (testMode){
+    // if the test mode is enabled, dispatch an entry containing the test message every timeout
+    const dispatchTest = () => {
+      dispatch(decode(testMessage));
+    };
+    dispatchTest();
+    setInterval(dispatchTest, timeout * 1000);
+  } else {
+    
+    const myPort = new serialPort(port, {
+      baudRate: baudRate,
+      dataBits: bits,
+      stopBits: stopBits,
+      parity: parity,
+      rtscts: RTSCTS,
+      xon: XONXOFF,
+      xoff: XONXOFF
+    });
+
+    myPort.on('readable', () => {
+      // blink the associated led.
+      myGPIO.writeSync(1);
+      setTimeout(() => myGPIO.writeSync(0), 250);
+
+      // read new entries into buffer
+      remainingEntries = Buffer.concat([remainingEntries, myPort.read()]);
+
+      let nextEntry, nextEntryEnd;
+      
+      if (remainingEntries.length===0)
+        return;
+
+      if ((prefix==='')&&(postfix==='')){
+        const newEntry = remainingEntries.toString().slice(-digits);
+        dispatch(newEntry);
+        return
+      }
+
+      while((nextEntry = remainingEntries.indexOf(prefix))>=0){
+
+        nextEntryEnd = remainingEntries.slice(nextEntry).indexOf(postfix);
+
+        if (nextEntryEnd===-1){
+          break;
+        }
+
+        let newEntry = (remainingEntries.slice(nextEntry + Buffer(prefix).length, (nextEntryEnd===0)?remainingEntries.length:(nextEntryEnd+nextEntry))).toString();
+        
+        newEntry = decode(newEntry);
+        
+        // dont remember why this is here
+        if (index == triggerCom && latestLogEntry[index] != newEntry){
+          store.dispatch({
+            type : SERIAL_RESET,
+          });
+        }
+
+        dispatch(newEntry);
+        
+        remainingEntries = remainingEntries.slice(nextEntry + nextEntryEnd);
+      }  
+    });
   }
 }
 

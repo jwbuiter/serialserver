@@ -10,7 +10,7 @@ const {
 const {input} = require('../configs/current');
 
 const initialState = {
-  ports: Array(input.ports.length).fill({
+  ports: Array.from({length: input.ports.length}, u => ({
     state: false,
     physical: false,
     isForced: false,
@@ -19,7 +19,7 @@ const initialState = {
     isFollowing: false,
     followingState: false,
     blocking: false,
-  }),
+  })),
   executing: false,
 };
 
@@ -38,7 +38,7 @@ module.exports = function(state = initialState, action) {
   switch(action.type) {
     case INPUT_PHYSICAL_CHANGED:{
       const {index, physical} = action.payload;
-      const newPorts = Object.assign({},state.ports);
+      const newPorts = Array.from(state.ports);
       newPorts[index].physical = physical;
       newPorts[index].state = calculateState(newPorts[index], index);
       return {
@@ -48,8 +48,7 @@ module.exports = function(state = initialState, action) {
     }
     case INPUT_FORCED_CHANGED:{
       const {index, previousForced, isForced, forcedState} = action.payload;
-      const newPorts = Object.assign({}, state.ports);
-      console.log(index);
+      const newPorts = Array.from(state.ports);
       newPorts[index].isForced = isForced;
       newPorts[index].previousForced = previousForced;
       newPorts[index].forcedState = forcedState;
@@ -61,7 +60,7 @@ module.exports = function(state = initialState, action) {
     }
     case INPUT_FOLLOWING_CHANGED:{
       const {index, isFollowing, followingState} = action.payload;
-      const newPorts = Object.assign({},state.ports);
+      const newPorts = Array.from(state.ports);
       newPorts[index].isFollowing = isFollowing;
       newPorts[index].followingState = followingState;
       newPorts[index].state = calculateState(newPorts[index], index);
@@ -72,7 +71,7 @@ module.exports = function(state = initialState, action) {
     }
     case INPUT_BLOCKING_CHANGED:{
       const {index, blocking} = action.payload;
-      const newPorts = Object.assign({},state.ports);
+      const newPorts = Array.from(state.ports);
       newPorts[index].blocking = blocking;
       return {
         ...state,

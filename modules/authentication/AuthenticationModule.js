@@ -1,9 +1,5 @@
-class AuthenticationModule {
-  constructor(config, store){
-    this.store = store;
-
-    Object.assign(this, config);
-  }
+function AuthenticationModule(config, store) {
+  return {};
 }
 
 module.exports = AuthenticationModule;

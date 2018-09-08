@@ -7,14 +7,14 @@ const {
 const {output} = require('../configs/current');
 
 const initialState = {
-  ports: Array(output.ports.length).fill({
+  ports: Array.from({length: output.ports.length}, u => ({
     state: false,
     result: false,
     isForced: false,
     previousForced: false,
     forcedState: false,
     executing: false,
-  }),
+  })),
 };
 
 function calculateState(port, index){
@@ -34,8 +34,8 @@ module.exports = function(state = initialState, action) {
   switch(action.type) {
     case OUTPUT_RESULT_CHANGED:{
       const {index, result} = action.payload;
-      const newPorts = Object.assign({},state.ports);
-      newPorts[index].result = result;
+      const newPorts = Array.from(state.ports);
+      newPorts[index].result = result?true:false;
       newPorts[index].state = calculateState(newPorts[index], index);
       return {
         ...state,
@@ -44,7 +44,7 @@ module.exports = function(state = initialState, action) {
     }
     case OUTPUT_FORCED_CHANGED:{
       const {index, isForced, previousForced, forcedState} = action.payload;
-      const newPorts = Object.assign({},state.ports);
+      const newPorts = Array.from(state.ports);
       newPorts[index].isForced = isForced;
       newPorts[index].previousForced = previousForced;
       newPorts[index].forcedState = forcedState;
@@ -56,7 +56,7 @@ module.exports = function(state = initialState, action) {
     }
     case OUTPUT_EXECUTING_CHANGED:{
       const {index, executing} = action.payload;
-      const newPorts = Object.assign({},state.ports);
+      const newPorts = Array.from(state.ports);
       newPorts[index].executing = executing;
       newPorts[index].state = calculateState(newPorts[index], index);
       return {

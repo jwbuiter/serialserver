@@ -15,26 +15,26 @@
     <tr>
       <td><h2>Settings com 0</h2></td>
       <td><h2>Settings com 1</h2></td>
-      <td><b>Test Mode</b><input type="checkbox" id="testMode"></td>
+      <td><b>Test Mode</b><input type="checkbox" id="serialtestMode"></td>
     </tr>
     <tr>
-      <td><input type="number" id="baudRate0" min="0" step="1"></td>
-      <td><input type="number" id="baudRate1" min="0" step="1"></td>
+      <td><input type="number" id="serialcoms0baudRate" min="0" step="1"></td>
+      <td><input type="number" id="serialcoms1baudRate" min="0" step="1"></td>
       <td>Baudrate</td>
     </tr>
     <tr>
-      <td><input type="number" id="stopBits0" min="0" step="1"></td>
-      <td><input type="number" id="stopBits1" min="0" step="1"></td>
+      <td><input type="number" id="serialcoms0stopBits" min="0" step="1"></td>
+      <td><input type="number" id="serialcoms1stopBits" min="0" step="1"></td>
       <td>Number of stop bits</td>
     </tr>
     <tr>
-      <td><input type="number" id="bits0" min="0" step="1"></td>
-      <td><input type="number" id="bits1" min="0" step="1"></td>
+      <td><input type="number" id="serialcoms0bits" min="0" step="1"></td>
+      <td><input type="number" id="serialcoms1bits" min="0" step="1"></td>
       <td>Number of Data bits</td>
     </tr>
     <tr>
       <td>
-        <select id ="parity0">
+        <select id ="serialcoms0parity">
           <option value="none">None</option>
           <option value="even">Even</option>
           <option value="odd">Odd</option>
@@ -43,7 +43,7 @@
         </select>
       </td>
       <td>
-        <select id ="parity1">
+        <select id ="serialcoms1parity">
           <option value="none">None</option>
           <option value="even">Even</option>
           <option value="odd">Odd</option>
@@ -54,63 +54,63 @@
       <td>Parity</td>
     </tr>
     <tr>
-      <td><input type="checkbox" id="RTSCTS0"></td>
-      <td><input type="checkbox" id="RTSCTS1"></td>
+      <td><input type="checkbox" id="serialcoms0RTSCTS"></td>
+      <td><input type="checkbox" id="serialcoms1RTSCTS"></td>
       <td>RTSCTS</td>
     </tr>
     <tr>
-      <td><input type="checkbox" id="XONXOFF0"></td>
-      <td><input type="checkbox" id="XONXOFF1"></td>
+      <td><input type="checkbox" id="serialcoms0XONXOFF"></td>
+      <td><input type="checkbox" id="serialcoms1XONXOFF"></td>
       <td>XONXOFF</td>
     </tr>
     <tr>
-      <td><input type="text" id="name0"></td>
-      <td><input type="text" id="name1"></td>
+      <td><input type="text" id="serialcoms0name"></td>
+      <td><input type="text" id="serialcoms1name"></td>
       <td>Name</td>
     </tr>
     <tr>
-      <td><input type="number" id="entries0" min="0" step="1"></td>
-      <td><input type="number" id="entries1" min="0" step="1"></td>
+      <td><input type="number" id="serialcoms0entries" min="0" step="1"></td>
+      <td><input type="number" id="serialcoms1entries" min="0" step="1"></td>
       <td>Number of entries</td>
     </tr>
     <tr>
-      <td><input type="checkbox" id="average0"></td>
-      <td><input type="checkbox" id="average1"></td>
+      <td><input type="checkbox" id="serialcoms0average"></td>
+      <td><input type="checkbox" id="serialcoms1average"></td>
       <td>Take average</td>
     </tr>
     <tr>
-      <td><input type="number" id="factor0"></td>
-      <td><input type="number" id="factor1"></td>
+      <td><input type="number" id="serialcoms0factor"></td>
+      <td><input type="number" id="serialcoms1factor"></td>
       <td>Factor</td>
     </tr>
     <tr>
-      <td><input type="number" id="digits0" min="0" step="1"></td>
-      <td><input type="number" id="digits1" min="0" step="1"></td>
+      <td><input type="number" id="serialcoms0digits" min="0" step="1"></td>
+      <td><input type="number" id="serialcoms1digits" min="0" step="1"></td>
       <td>Digits/rounding</td>
     </tr>
     <tr>
-      <td><input type="checkbox" id="alwaysPositive0"></td>
-      <td><input type="checkbox" id="alwaysPositive1"></td>
+      <td><input type="checkbox" id="serialcoms0alwaysPositive"></td>
+      <td><input type="checkbox" id="serialcoms1alwaysPositive"></td>
       <td>Always positive</td>
     </tr>
     <tr>
-      <td><input type="number" id="timeout0" min="0" step="1"></td>
-      <td><input type="number" id="timeout1" min="0" step="1"></td>
+      <td><input type="number" id="serialcoms0timeout" min="0" step="1"></td>
+      <td><input type="number" id="serialcoms1timeout" min="0" step="1"></td>
       <td>Timeout in seconds</td>
     </tr>
     <tr>
-      <td><input type="checkbox" id="timeoutReset0"></td>
-      <td><input type="checkbox" id="timeoutReset1"></td>
+      <td><input type="checkbox" id="serialcoms0timeoutReset"></td>
+      <td><input type="checkbox" id="serialcoms1timeoutReset"></td>
       <td>Reset after timeout</td>
     </tr>
     <tr>
-      <td><input type="text" id="prefix0"></td>
-      <td><input type="text" id="prefix1"></td>
+      <td><input type="text" id="serialcoms0prefix"></td>
+      <td><input type="text" id="serialcoms1prefix"></td>
       <td>Prefix</td>
     </tr>
     <tr>
-      <td><input type="text" id="postfix0"></td>
-      <td><input type="text" id="postfix1"></td>
+      <td><input type="text" id="serialcoms0postfix"></td>
+      <td><input type="text" id="serialcoms1postfix"></td>
       <td>Postfix</td>
     </tr>
     <tr>
@@ -130,23 +130,59 @@
   <script src="/res/jquery-1.11.1.js"></script>
   <script src="/current.js"></script>
   <script type="text/javascript">
-    for (var i = 0; i < 2; i++)
-    {
-      var conf = config.serial[i];
-      Object.keys(conf).forEach(function(key) 
-      {
-        if (typeof(conf[key]) === "boolean")
-        {
-          $(`#${key}${i}`).prop('checked', conf[key]);
+    function fillInRecursive(prefix, config){
+      for (let property in config){
+        let source = $('#'+prefix+property);
+        switch (typeof(config[property])){
+          case 'object':
+            fillInRecursive(prefix + property, config[property]);
+            break;
+          case 'boolean':
+            source.prop('checked', config[property]);
+            break;
+          case 'number':
+          case 'string':
+            source.val(config[property]);
+            break;
         }
-        else
-        {
-          $(`#${key}${i}`).val(conf[key]);
-        }
-      });
+      }
     }
-    $('#testMode').prop('checked', config.testMode);
-    $('#version').append($('<b>').html('Version:' + config.version));
+
+    function fillIn(){
+      fillInRecursive('', config);
+    }
+
+    function putInConfigRecursive(prefix, config){
+      for (let property in config){
+        let source = $('#'+prefix+property);
+
+        if (!source.length && !(typeof(config[property])==='object')) {
+          continue;
+        }
+
+        switch (typeof(config[property])){
+          case 'object':
+            config[property] = putInConfigRecursive(prefix + property, config[property]);
+            break;
+          case 'boolean':
+            config[property] = source.prop('checked');
+            break;
+          case 'number':
+            config[property] = Number(source.val());
+            break;
+          case 'string':
+            config[property] = source.val();
+            break;
+        }
+      }
+      return config;
+    }
+
+    function putInConfig(){
+      config = putInConfigRecursive('', config);
+    }
+
+    fillIn();
 
     var socket = io();
 
@@ -161,32 +197,9 @@
     }
 
     function setSettings(){
-      if (confirm("Do you really want to save these settings??"))
+      if (confirm("Do you really want to save these settings?"))
       {
-        for (var i = 0; i < 2; i++)
-        {
-          var conf = config.serial[i];
-          Object.keys(conf).forEach(function(key) 
-          {
-            let element = $(`#${key}${i}`);
-            if (element.length!=0)
-            {
-              if (typeof(conf[key]) === "boolean")
-              {
-                conf[key] = element.prop('checked');
-              }
-              else if (!isNaN(parseInt(conf[key])))
-              {
-                conf[key] = Number(element.val());
-              }
-              else
-              {
-                conf[key] = element.val();
-              }
-            }
-          });
-        }
-        config.testMode = $('#testMode').prop('checked');
+        putInConfig();
 
         socket.emit('settings',config);
         setTimeout(function(){ 

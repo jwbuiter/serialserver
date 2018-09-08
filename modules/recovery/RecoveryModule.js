@@ -10,50 +10,11 @@ const  {
 
 const configPath = path.join(__dirname, '../..', 'configs');
 
-class RecoveryModule {
-  constructor(){
-    this.onlinePin =new Gpio(onlinePin, 'out');
+function RecoveryModule() {
+  const onlineGPIO =new Gpio(onlinePin, 'out');
+  const resetGPIO = new Gpio(resetPin, 'in');
 
-    const resetGPIO = new Gpio(resetPin, 'in');
-
-    if (!fs.existsSync(path.join(configPath, 'current.js'))){
-      console.log('No config found, config will be reset to template.')
-      this.reset();
-      this.shutdown();
-    }
-
-    if (!resetGPIO.readSync()){
-      this.reset();
-
-      setInterval(() =>{
-        this.onlineGPIO.writeSync(!this.onlineGPIO.readSync());
-        if (resetGPIO.readSync())
-        this.shutdown();
-      }, 1000);
-    }
-  }
-
-  bindStore(store){
-    this.store = store;
-
-    this.store.subscribe(()=>{
-      const lastAction = this.store.getState().lastAction;
-      switch (lastAction.type){
-        case ERROR_OCCURRED:{
-          setTimeout(()=>{
-            this.reset();
-            this.shutdown();
-          }, 5000);
-          break;
-        }
-        case SHUTDOWN:{
-          this.shutdown();
-        }
-      }
-    });
-  }
-
-  reset(){
+  function reset(){
     console.log('Resetting configuration.');
     if (fs.existsSync(path.join(configPath, 'lastgood.js'))){
       fs.copyFileSync(path.join(configPath, 'lastgood.js'), path.join(configPath, 'current.js'));
@@ -65,10 +26,54 @@ class RecoveryModule {
     }
   }
 
-  shutdown(){
-    this.onlinePin.writeSync(0);
+  function shutdown(){
+    onlineGPIO.writeSync(0);
     console.log('Rebooting...');
     process.exit();
+  }
+
+  let store;
+  function bindStore(newStore){
+    store = newStore;
+  
+    store.listen((lastAction)=>{
+      switch (lastAction.type){
+        case ERROR_OCCURRED:{
+          console.log(lastAction)
+          console.log(lastAction.payload.message);
+          setTimeout(()=>{
+            reset();
+            shutdown();
+          }, 2000);
+          break;
+        }
+        case SHUTDOWN:{
+          shutdown();
+          break;
+        }
+      }
+    });
+  }
+
+  if (!fs.existsSync(path.join(configPath, 'current.js'))){
+    console.log('No config found, config will be reset to template.')
+    reset();
+    shutdown();
+  }
+
+  if (!resetGPIO.readSync()){
+    reset();
+
+    setInterval(() =>{
+      onlineGPIO.writeSync(!onlineGPIO.readSync());
+      if (resetGPIO.readSync())
+        shutdown();
+    }, 1000);
+
+    return false;
+  }
+  return {
+    bindStore
   }
 }
 

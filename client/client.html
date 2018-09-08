@@ -185,7 +185,7 @@
           }
           $(address(0, cursor)).html(conf.name);
           if (conf.average){
-            $(address(4, cursor)).addClass(conf.name.replace(' ', '_') + 'avg')
+            $(address(4, cursor)).addClass('com' + i + 'avg')
             $(address(4, cursor)).addClass('result');
           }
         }
@@ -193,8 +193,8 @@
           $(address(4, cursor)).html( 'Average' );
 
         $(address(1, cursor)).html(j+1);
-        $(address(2, cursor)).addClass(conf.name.replace(' ', '_')+'time'+j);
-        $(address(3, cursor)).addClass(conf.name.replace(' ', '_')+'entry'+j);
+        $(address(2, cursor)).addClass('com'+i+'time'+j);
+        $(address(3, cursor)).addClass('com'+i+'entry'+j);
       }
     }
 
@@ -297,31 +297,24 @@
     }
 
     socket.on('entry', function(msg){
-      for(var i = 0; i<config.serial.comslength; i++)
-        if (msg.name===config.serial.coms[i].name)
-          break;  //store value of i for correct serial entry
+      const {index, entryTime, entry} = msg;
 
-      msg.name = msg.name.replace(' ', '_');
-        
-      var date = new Date()
-      if (msg.entry==previousEntry[i] && date.getTime()<previousTime[i] + config.serial.coms[i].timeout*1000)
-        return;
-
-      previousTime[i]=date.getTime();
-      previousEntry[i]=msg.entry;
-
-      var lastIndex = config.serial.coms[i].entries - 1;
-
-      if ($('.' + msg.name+'time'+lastIndex).html())
+      if ($('.com' + index +'entry0').html())
         shiftEntries(i);
 
-      $('.' + msg.name+'time'+lastIndex).html(printTime(msg.entryTime));
-      $('.' + msg.name+'entry'+lastIndex).html(msg.entry);
+      var lastIndex = config.serial.coms[index].entries - 1;
+
+      $('.com' + index +'time0').html(printTime(entryTime));
+      $('.com' + index +'entry0').html(entry);
       
     });
 
-    socket.on('value', function(msg){
-      $('.'+msg.name).html(msg.value);
+    socket.on('table', function(msg){
+      if (msg.manual){
+        $('#manual'+msg.index).val(msg.value);
+      } else {
+        $('.'+msg.name).html(msg.value);
+      }
     });
 
     socket.on('state', function(msg){
@@ -329,10 +322,8 @@
     })
 
     socket.on('average', function(msg){
-      for(var i = 0; i<config.serial.coms.length; i++)
-        if (msg.name===config.serial.coms[i].name){
-          $('.' + config.serial.coms[i].name+'avg').html(msg.entry);
-        }
+      const {index, average} = msg;
+      $('.com' + index +'avg').html(msg.average);
     });
 
     socket.on('notfound', function(msg){
