@@ -4,7 +4,6 @@ var constants = {
   port : 80,
   saveLogLocation : '/home/pi/Documents',
   exposeUpload : false,
-  selfLearning : false,
   tableColumns : 5,
   resetPin: 3,
   outputPin: [
@@ -38,7 +37,7 @@ var constants = {
     logger: true,
     output: true,
     site: true,
-    selfLearning: true,
+    selfLearning: false,
     serial: true,
     table: true,
   },
