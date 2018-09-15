@@ -14,8 +14,6 @@ function RecoveryModule() {
   const onlineGPIO =new Gpio(onlinePin, 'out');
   const resetGPIO = new Gpio(resetPin, 'in');
 
-  onlineGPIO.writeSync(1);
-
   function reset(){
     console.log('Resetting configuration.');
     if (fs.existsSync(path.join(configPath, 'lastgood.js'))){
@@ -65,13 +63,17 @@ function RecoveryModule() {
 
   if (!resetGPIO.readSync()){
     reset();
+    reset();
+    let gpioState = 1;
 
     setInterval(() =>{
-      onlineGPIO.writeSync(!onlineGPIO.readSync());
+      gpioState = 1 - gpioState;
+      console.log('Blink '+ gpioState)
+      onlineGPIO.writeSync(gpioState);
       if (resetGPIO.readSync())
         shutdown();
     }, 1000);
-
+    
     return false;
   }
 
@@ -79,6 +81,8 @@ function RecoveryModule() {
   process.on ('SIGINT', () => {
     store.dispatch({type: 'SHUTDOWN'});
   });
+  
+  onlineGPIO.writeSync(1);
   
   return {
     bindStore
