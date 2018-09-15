@@ -6,6 +6,7 @@ const {
   SERIAL_RESET,
   HANDLE_OUTPUT,
   HANDLE_TABLE,
+  TABLE_RESET,
 } = require('../../actions/types.js');
 
 function Com(index, config, store) {
@@ -29,6 +30,7 @@ function Com(index, config, store) {
     entries, 
     triggerCom,
     timeoutReset,
+    zeroReset,
   } = config;
 
   let remainingEntries = Buffer('0');
@@ -37,15 +39,20 @@ function Com(index, config, store) {
   let myTimeout = setTimeout(()=> 0 ,1);
 
   function dispatch(entry){
-    store.dispatch({
-      type : SERIAL_ENTRY,
-      payload : {
-        entry : entry,
-        index : index,
-      }
-    });
-    store.dispatch({type : HANDLE_TABLE});
-    store.dispatch({type : HANDLE_OUTPUT});
+    if (zeroReset && Number(entry) == 0){
+      store.dispatch({type: TABLE_RESET});
+      store.dispatch({type: SERIAL_RESET});
+    } else {
+      store.dispatch({
+        type : SERIAL_ENTRY,
+        payload : {
+          entry : entry,
+          index : index,
+        }
+      });
+      store.dispatch({type : HANDLE_TABLE});
+      store.dispatch({type : HANDLE_OUTPUT});
+    }
   }
   
   function decode(entry){

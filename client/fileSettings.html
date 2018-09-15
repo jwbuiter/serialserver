@@ -17,6 +17,9 @@
       #list {width: 50vw;text-align: left; position: absolute; right: 100%; top: 1.5em; z-index: 2; background-color: white; border: 1px solid black; padding: 5px;}
       ul { list-style-type: none;}
       li {margin: 0 0 3px 0;}
+      .selfLearning.inProgress{ background-color: yellow;}
+      .selfLearning.done{ background-color: #3fd35d; }
+      .selfLearning.warning { background-color: #FFC000;}
     </style>
 </head>
 <body>
@@ -66,9 +69,9 @@
     $(address(0, 0)).append($('<b>').html('Trigger'));
     $(address(1, 0)).append($('<b>').html('Use import file'));
     $(address(2, 0)).append($('<b>').html('Wait for second COM'));
-    $(address(3, 0)).append($('<b>').html('Search Column'));
+    $(address(3, 0)).append($('<b>').html('Search column'));
     $(address(4, 0)).append($('<b>').html('Save to log'));
-    $(address(5, 0)).append($('<b>').html('Reset on 0'));  
+    $(address(5, 0)).append($('<b>').html('Reset on zero'));  
 
     $(address(0, 1)).append($('<select id ="tabletrigger">').html('<option value="0">COM 0</option><option value="1">COM 1</option>'));
     $(address(1, 1)).append($('<input type="checkbox" id="tableuseFile">'));
@@ -126,6 +129,23 @@
       $(address(3, 7)).append($('<input type="number" id="selfLearningstartCalibration" min="0" step="1">'));
       $(address(4, 7)).append($('<input type="number" id="selfLearningstartTolerance" min="0" step="1">'));
       $(address(7, 7)).html('#SN #ST').addClass('small');
+
+      {
+        const classes = ['inProgress', 'done', 'warning'];
+        $('#selfLearningstartCalibration').addClass('selfLearning ' + classes[config.selfLearning.success]);
+      }
+
+      switch (config.selfLearning.success){
+        case 0:{
+          break
+        }
+        case 1:{
+          break;
+        }
+        case 2:{
+          break;
+        }
+      }
 
       for (let i = 0; i<8; i++){
         $(address(i, 8)).append($('<hr>'));
@@ -327,6 +347,11 @@
     }
 
     function putInConfig(){
+      // manually set selfLearning success if calibration was changed
+      if (config.selfLearning.startCalibration !== Number($('#selfLearningstartCalibration').val())){
+        config.selfLearning.success = 0;
+      }
+
       config = putInConfigRecursive('', config);
     }
 

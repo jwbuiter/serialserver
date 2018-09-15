@@ -4,6 +4,7 @@ const {
   SL_SUCCESS,
   EXECUTE_START,
   LOG_RESET,
+  CONFIG_UPDATE,
 } = require('../../actions/types');
 
 function SelfLearningModule(config, store) {
@@ -60,6 +61,14 @@ function SelfLearningModule(config, store) {
               comIndex,
             }
           });
+          config.success = success;
+          config.startCalibration = calibration;
+          store.dispatch({
+            type: CONFIG_UPDATE,
+            payload: {
+              selfLearning: config,
+            }
+          })
         }
         break;
       }

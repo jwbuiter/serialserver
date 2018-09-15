@@ -1,6 +1,6 @@
 [Service]
 WorkingDirectory=/srv/serialserver
-ExecStart=/usr/bin/node app.js
+ExecStart=/usr/bin/node server.js
 Restart=always
 StandardOutput=syslog
 StandardError=syslog

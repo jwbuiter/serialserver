@@ -256,9 +256,10 @@ var config ={
     tolerance : 25,
     startCalibration : 25,
     startTolerance : 50,
+    success : 0,
   },
 
-  version : '2.0'
+  version : '2.1'
 };
 
 module.exports = config;

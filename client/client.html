@@ -305,10 +305,13 @@
       if ($('.com' + index +'entry0').html())
         shiftEntries(index);
 
-
-      $('.com' + index +'time0').html(printTime(entryTime));
-      $('.com' + index +'entry0').html(entry);
-      
+      if (!entryTime) {
+        $('.com' + index +'time0').html('');
+        $('.com' + index +'entry0').html('');
+      } else {
+        $('.com' + index +'time0').html(printTime(entryTime));
+        $('.com' + index +'entry0').html(entry);
+      }
     });
 
     socket.on('table', function(msg){
@@ -339,7 +342,7 @@
       alert(msg);
     });
 
-    socket.on('clear', function(){
+    socket.on('cleartable', function(){
       for(var i = 0; i<config.table.cells.length; i++){
         if (!config.table.cells[i].resetOnExe){
           if (config.table.cells[i].formula == '#'){
@@ -355,13 +358,15 @@
           $('.table'+i).html('');
         }
       }
+    });
+
+    socket.on('clearserial', function(){
       for(var i = 0; i<config.serial.coms.length; i++){
-        var lastIndex = config.serial.coms[i].entries - 1;
-        if ($('.' + config.serial.coms[i].name+'time'+lastIndex).html())
+        if ($('.com' + i+'time0').html())
           shiftEntries(i);
         
-        $('.' + config.serial.coms[i].name+'time'+lastIndex).html('');
-        $('.' + config.serial.coms[i].name+'entry'+lastIndex).html('');
+        $('.com' + i+'time0').html('');
+        $('.com' + i+'entry0').html('');
       }
     });
 

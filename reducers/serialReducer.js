@@ -16,14 +16,16 @@ const initialState = {
   })),
 };
 
+
 module.exports = function(state = initialState, action) {
   switch(action.type) {
+    
     case SERIAL_ENTRY:{
       const {index, entry} = action.payload;
       
       const newHistories = Array.from(state.histories);
       if (state.coms[index].entry){
-        newHistories[index].push({
+        newHistories[index].push({ 
           entry: state.coms[index].entry,
           time: state.coms[index].time,
         });
@@ -60,7 +62,11 @@ module.exports = function(state = initialState, action) {
         }
 
         const newComs = Array.from(state.coms);
-        newComs[index] = initialState.coms[index];
+        newComs[index] = {
+          time: null,
+          entry: '',
+          average: '',
+        };
         return {
           ...state,
           coms: newComs,
@@ -78,7 +84,10 @@ module.exports = function(state = initialState, action) {
         });
         return {
           ...state,
-          coms: initialState.coms,
+          coms: Array.from({length: serial.coms.length}, u => ({
+            entry: '',
+            average: '',
+          })),
           histories: newHistories,
         }
       }

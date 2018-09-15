@@ -26,6 +26,7 @@ function Input(index, config, store) {
   let debounce = setTimeout(()=> 0 ,1);
 
   function handleInput(state){
+  
     switch(formula){
       case 'exe':{
         const reduxState = store.getState();
@@ -34,7 +35,7 @@ function Input(index, config, store) {
 
         if (state && !(blocked) && !(stillExecuting)){
           store.dispatch({type: EXECUTE_START});
-        } else if (!state && stillExecuting){
+        } else if (!state && reduxState.input.executing){
           store.dispatch({type: EXECUTE_STOP});
           store.dispatch({type: SERIAL_RESET});
           store.dispatch({type: TABLE_RESET});
@@ -88,7 +89,6 @@ function Input(index, config, store) {
       case INPUT_PHYSICAL_CHANGED:
       case INPUT_FORCED_CHANGED:{
         if (index === lastAction.payload.index){
-          //console.log(state.input.ports[index].state)
           handleInput(state.input.ports[index].state)
         }
         break;

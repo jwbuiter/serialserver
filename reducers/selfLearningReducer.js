@@ -6,16 +6,19 @@ const {
 
 const {selfLearning} = require('../configs/current');
 
-const initialState = {
-  entries: [],
-  calibration: selfLearning.startCalibration,
-  tolerance: selfLearning.tolerance*(1 + selfLearning.startTolerance/100)/100,
-  success: 1,
-  startTime: null,
-  matchedTolerance: 0,
+function initialState(){
+  const {selfLearning} = require('../configs/current');
+  return {
+    entries: [],
+    calibration: selfLearning.startCalibration,
+    tolerance: selfLearning.tolerance*(1 + selfLearning.startTolerance/100)/100,
+    success: 1,
+    startTime: null,
+    matchedTolerance: 0,
+  }
 };
 
-module.exports = function(state = initialState, action) {
+module.exports = function(state = initialState(), action) {
   switch(action.type) {
     case SL_ENTRY:{
       if (state.succes) return state;
@@ -30,7 +33,7 @@ module.exports = function(state = initialState, action) {
     }
     case SL_RESET:{
       return {
-        ...initialState,
+        ...initialState(),
         success: 0,
         startTime: new Date(),
         endTime: undefined,

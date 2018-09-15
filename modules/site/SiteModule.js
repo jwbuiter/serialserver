@@ -140,7 +140,7 @@ function SiteModule(config, store) {
     });
   }
 
-  const server = app.listen(3000, () => console.log('Server listening on port 3000'));
+  const server = app.listen(constants.port, () => console.log('Server listening on port ' + constants.port));
   const realtime = new Realtime(server, {}, store);
 
   return {};

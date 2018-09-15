@@ -72,6 +72,12 @@ function RecoveryModule() {
 
     return false;
   }
+
+  // Catch CTRL+C
+  process.on ('SIGINT', () => {
+    store.dispatch({type: 'SHUTDOWN'});
+  });
+  
   return {
     bindStore
   }

@@ -14,7 +14,7 @@ function Cell(index, config, store) {
     const state = store.getState();
     switch (lastAction.type){
       case HANDLE_TABLE:{
-        const allEntries = state.serial.coms.reduce((acc, cur) => (acc && !(cur == '0')), true);
+        const allEntries = state.serial.coms.reduce((acc, cur) => (acc && !(cur.entry == '0')), true);
         if (waitForOther && !allEntries){
           console.log('other value not yet defined');
           break;

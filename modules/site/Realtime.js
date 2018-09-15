@@ -30,6 +30,8 @@ const {
   EXECUTE_STOP,
   HANDLE_TABLE,
   HANDLE_OUTPUT,
+  CONFIG_UPDATE,
+  CONFIG_SAVE,
   SHUTDOWN,
 } = require('../../actions/types');
 
@@ -101,26 +103,9 @@ function Realtime(server, config, store){
   }
   
   function saveCurrentConfig(socket, config){
-    const name = path.join(configPath, 'current.js');
-  
-    fs.copyFileSync(name, path.join(configPath, 'lastgood.js'));
-  
-    let conf = JSON.stringify(config, null, 2).replace(/"/g, "'")
-      .replace(/\\u00[0-9]{2}/g, match => String.fromCharCode(parseInt(match.slice(-2), 16)))
-      .replace(/'[\w]+':/g, match => match.slice(1,-2)+' :');
-    conf = 'var config =' + conf + ';\n\nmodule.exports = config;';
-    
-    try {
-      fs.accessSync(name);
-      fs.unlinkSync(name);
-    } 
-    catch (err) {
-    }
-  
-    fs.writeFileSync(name, conf, (err) => {  
-      if (err) throw err;
-  
-      console.log('Config saved!');
+    store.dispatch({
+      type: CONFIG_UPDATE,
+      payload: config,
     });
     store.dispatch({type: SHUTDOWN});
   }
@@ -131,22 +116,13 @@ function Realtime(server, config, store){
   
   function saveConfig(socket, msg){
     const name = path.join(configPath, msg.name +'V'+ version + '.js');
-    let conf = JSON.stringify(msg.config, null, 2).replace(/"/g, "'")
-      .replace(/\\u00[0-9]{2}/g, match => String.fromCharCode(parseInt(match.slice(-2), 16)))
-      .replace(/'[\w]+':/g, match => match.slice(1,-2)+' :');
-    conf = 'var config =' + conf + ';\n\nmodule.exports = config;';
-  
-    try {
-      fs.accessSync(name);
-      fs.unlinkSync(name);
-    } 
-    catch (err) {
-    }
-  
-    fs.writeFileSync(name, conf, (err) => {  
-      if (err) console.log(err);
-  
-      console.log('Config saved.');
+
+    store.dispatch({
+      type: CONFIG_SAVE,
+      payload: {
+        name,
+        config: msg.config,
+      },
     });
   }
   
@@ -346,7 +322,7 @@ function Realtime(server, config, store){
 
           io.emit('entry', {index, entry: '', entryTime: new Date().getTime()})
         } else {
-          io.emit('clear');
+          io.emit('clearserial');
         }
         break;
       }
@@ -354,6 +330,10 @@ function Realtime(server, config, store){
         const {index, entry, manual} = lastAction.payload;
         
         io.emit('table', {index, value: entry, manual: manual?true:false});
+        break;
+      }
+      case TABLE_RESET: {
+        io.emit('cleartable');
         break;
       }
       case ERROR_OCCURRED: {
@@ -374,10 +354,12 @@ function Realtime(server, config, store){
       }
       case SL_RESET: {
         io.emit('selfLearning', {success: 0});
+        break;
       }
       case SL_SUCCESS: {
         const {success, matchedTolerance} = lastAction.payload;
         io.emit('selfLearning', {success, matchedTolerance});
+        break;
       }
     }
   });

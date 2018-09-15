@@ -1,15 +1,18 @@
+const {
+  ERROR_OCCURRED,
+} = require('./actions/types');
+
 const usedModules = {
-  recovery: new (require('./modules/recovery/RecoveryModule'))()
+  recovery: require('./modules/recovery/RecoveryModule')()
 };
 
 if (!usedModules.recovery) return;
 
-
 const store = require('./store.js');
 usedModules.recovery.bindStore(store);
-const {
-  ERROR_OCCURRED,
-} = require('./actions/types');
+
+
+const config = require('./modules/config/ConfigModule')(store);
 
 const modules = {
   authentication: require('./modules/authentication/AuthenticationModule'),
@@ -24,7 +27,6 @@ const modules = {
 }
 
 const {enabledModules} = require('./config.static');
-const config = require('./configs/current');
 
 for(const moduleName in modules){
   if (enabledModules[moduleName]){
@@ -33,7 +35,7 @@ for(const moduleName in modules){
     console.log(moduleType)
 
     try{
-      usedModules[moduleName] = new moduleType(moduleConfig, store);
+      usedModules[moduleName] = moduleType(moduleConfig, store);
     } catch(err){
       store.dispatch({
         type: ERROR_OCCURRED,
@@ -42,8 +44,3 @@ for(const moduleName in modules){
     }
   }
 }
-
-// Catch CTRL+C
-process.on ('SIGINT', () => {
-  store.dispatch({type: 'SHUTDOWN'});
-});
