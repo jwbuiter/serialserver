@@ -14,3 +14,11 @@ cp serialserver.service /etc/systemd/system/
 systemctl enable serialserver
 systemctl enable ssh
 systemctl start ssh
+
+if [ -f "config.static.js" ]
+then
+	echo "static config already exists."
+else
+  cp config.static.template.js config.static.js
+	echo "copying static config"
+fi
