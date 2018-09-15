@@ -14,6 +14,8 @@ function RecoveryModule() {
   const onlineGPIO =new Gpio(onlinePin, 'out');
   const resetGPIO = new Gpio(resetPin, 'in');
 
+  onlineGPIO.writeSync(1);
+
   function reset(){
     console.log('Resetting configuration.');
     if (fs.existsSync(path.join(configPath, 'lastgood.js'))){

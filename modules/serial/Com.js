@@ -1,4 +1,5 @@
 const serialPort = require('serialport');
+const Gpio = require('onoff').Gpio;
 
 const {
   SERIAL_ENTRY,
@@ -8,6 +9,7 @@ const {
   HANDLE_TABLE,
   TABLE_RESET,
 } = require('../../actions/types.js');
+const constants = require('../../config.static');
 
 function Com(index, config, store) {
   const {
@@ -32,6 +34,8 @@ function Com(index, config, store) {
     timeoutReset,
     zeroReset,
   } = config;
+
+  const myGPIO = new Gpio(constants.comPin[index], 'out');
 
   let remainingEntries = Buffer('0');
   let averageList = [];
