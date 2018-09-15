@@ -6,3 +6,10 @@ npm install
 cp serialserver.service /etc/systemd/system/
 systemctl daemon-reload
 
+if [ -f "config.static.js" ]
+then
+	echo "static config already exists."
+else
+  cp config.static.template.js config.static.js
+	echo "copying static config"
+fi
