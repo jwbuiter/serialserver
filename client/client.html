@@ -385,7 +385,7 @@
           }
           const {matchedTolerance} = msg;
 
-          text += (round(matchedTolerance*1000)/10) + '% ' + (Math.round(10*(tolerance - matchedTolerance*100))/10);
+          text += (Math.round(matchedTolerance*1000)/10) + '% ' + (Math.round(10*(tolerance - matchedTolerance*100))/10);
         } else {
           color = 'inProgress';
           text = text + tolerance + '%';
