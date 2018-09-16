@@ -1,5 +1,5 @@
 const XLSX = require('xlsx');
-const scheduler = require('node-schedule');
+const schedule = require('node-schedule');
 const dateFormat = require('dateformat');
 const path = require('path');
 
