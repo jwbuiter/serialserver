@@ -219,7 +219,7 @@
     for (let i = 0; i < tableLetters; i++){
       for (let j = 0; j < tableNumbers; j++){
         $(address(0, cursor)).append($('<b>').html('#' + String.fromCharCode(65 + i) + (j + 1)));
-        $(address(1, cursor)).append($('<input type="text" id="nametable' + (i*tableNumbers + j) + '">'));
+        $(address(1, cursor)).append($('<input type="text" id="tablecells' + (i*tableNumbers + j) + 'name">'));
         $(address(2, cursor)).append($('<input class="wide" type="text" id="tablecells' + (i*tableNumbers + j) + 'formula">'));
         $(address(3, cursor)).append($('<input type="checkbox" id="tablecells' + (i*tableNumbers + j) +'numeric">'));
         $(address(4, cursor)).append($('<input type="number" id="tablecells' + (i*tableNumbers + j) + 'digits" min="0" step="1">'));
