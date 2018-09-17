@@ -24,21 +24,21 @@ function Output(index, config, store) {
       case OUTPUT_EXECUTING_CHANGED:
       case OUTPUT_RESULT_CHANGED:
       case OUTPUT_FORCED_CHANGED:{
-        if (index === lastAction.payload.index)
+        if (index === lastAction.payload.index){
           myGPIO.writeSync(store.getState().output.ports[index].state?1:0);
+        }
+          
         break;
       }
       case HANDLE_OUTPUT:{
-        const result = myParser.parse(formula);
-        if (result){
-          store.dispatch({
-            type: OUTPUT_RESULT_CHANGED,
-            payload: {
-              index, 
-              result,
-            },
-          })
-        }
+        const result = myParser.parse(formula)?true:false;
+        store.dispatch({
+          type: OUTPUT_RESULT_CHANGED,
+          payload: {
+            index, 
+            result,
+          },
+        });
         break;
       }
       case EXECUTE_START:{

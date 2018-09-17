@@ -49,6 +49,7 @@ function Cell(index, config, store) {
             payload: index,
           });
         }
+        break;
       }
     }
   });
