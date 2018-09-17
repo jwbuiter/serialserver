@@ -52,6 +52,7 @@ function LoggerModule(config, store) {
         });
       }
       case SL_SUCCESS:{
+        if(!writeToFile) break;
         state = store.getState();
         const saveArray = [state.logger.legend].concat(state.logger.entries);
 
