@@ -77,6 +77,13 @@ function RecoveryModule() {
     return false;
   }
 
+  try{
+    eval('require(path.join(configPath, \'current.js\'))');
+  } catch (err){
+    reset();
+    shutdown();
+  }
+
   // Catch CTRL+C
   process.on ('SIGINT', () => {
     store.dispatch({type: 'SHUTDOWN'});

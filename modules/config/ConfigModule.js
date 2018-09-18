@@ -10,16 +10,7 @@ const {
 const configPath = path.join(__dirname, '../..', 'configs');
 
 function ConfigModule(store) {
-  let config;
-  
-  try{
-    config = require(path.join(configPath, 'current.js'));
-  } catch (err){
-    store.dispatch({
-      type: ERROR_OCCURRED, 
-      payload: err
-    });
-  }
+  let config = require(path.join(configPath, 'current.js'));
 
   function saveConfig(config, name) {
     let conf = JSON.stringify(config, null, 2).replace(/"/g, "'")
