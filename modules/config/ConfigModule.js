@@ -4,12 +4,22 @@ const path = require('path');
 const {
   CONFIG_UPDATE,
   CONFIG_SAVE,
+  ERROR_OCCURRED,
 } = require('../../actions/types');
 
 const configPath = path.join(__dirname, '../..', 'configs');
 
 function ConfigModule(store) {
-  let config = require(path.join(configPath, 'current.js'));
+  let config;
+  
+  try{
+    config = require(path.join(configPath, 'current.js'));
+  } catch (err){
+    store.dispatch({
+      type: ERROR_OCCURRED, 
+      payload: err
+    });
+  }
 
   function saveConfig(config, name) {
     let conf = JSON.stringify(config, null, 2).replace(/"/g, "'")
