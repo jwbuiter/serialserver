@@ -99,13 +99,11 @@ function Input(index, config, store) {
         if (follow === lastAction.payload.index){
           const outputState = state.output.ports[follow].state;
           const isFollowing = outputState^invert;
-          const followingState = !invert;
           store.dispatch({
             type: INPUT_FOLLOWING_CHANGED,
             payload: {
               index,
               isFollowing: isFollowing?true:false,
-              followingState: followingState?true:false,
             },
           });
         }

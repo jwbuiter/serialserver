@@ -17,7 +17,6 @@ const initialState = {
     previousForced: false,
     forcedState: false,
     isFollowing: false,
-    followingState: false,
     blocking: false,
   })),
   executing: false,
@@ -28,7 +27,7 @@ function calculateState(port, index){
     return port.forcedState;
 
   if (port.isFollowing)
-    return port.followingState;
+    return true;
     
   return port.physical;
 }
@@ -59,10 +58,9 @@ module.exports = function(state = initialState, action) {
       }
     }
     case INPUT_FOLLOWING_CHANGED:{
-      const {index, isFollowing, followingState} = action.payload;
+      const {index, isFollowing} = action.payload;
       const newPorts = Array.from(state.ports);
       newPorts[index].isFollowing = isFollowing;
-      newPorts[index].followingState = followingState;
       newPorts[index].state = calculateState(newPorts[index], index);
       return {
         ...state,
