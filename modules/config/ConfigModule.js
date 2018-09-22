@@ -13,6 +13,7 @@ function ConfigModule(store) {
   let config = require(path.join(configPath, 'current.js'));
 
   function saveConfig(config, name) {
+    console.log('Saving config: ' + name);
     let conf = JSON.stringify(config, null, 2).replace(/"/g, "'")
       .replace(/\\u00[0-9]{2}/g, match => String.fromCharCode(parseInt(match.slice(-2), 16)))
       .replace(/'[\w]+':/g, match => match.slice(1,-2)+' :');

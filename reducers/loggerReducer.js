@@ -29,8 +29,9 @@ module.exports = function(state = initialState, action) {
       const {comIndex, calibration, matchedTolerance} = action.payload;
       const newEntries = state.entries.filter(entry => {
         const testValue = Number(entry[comIndex+1]);
-        return ((testValue > calibration* (1 - matchedTolerance)) && (testValue < testValue * (1 + matchedTolerance)))
+        return ((testValue >= calibration* (1 - matchedTolerance)) && (testValue <= testValue * (1 + matchedTolerance)))
       });
+      console.log({oldEntries: state.entries, newEntries});
       return {
         ...state,
         entries: newEntries,

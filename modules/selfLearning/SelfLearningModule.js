@@ -32,11 +32,11 @@ function SelfLearningModule(config, store) {
             if ((compEntry > entry * (1 - tolerance)) && (compEntry < entry * (1 + tolerance)))
               return total + 1;
             return total;
-          }),
+          }, 0),
         }));
 
         const successfullMatches = matches.filter(elem => (elem.matches >= number));
-
+        console.log({matches, successfullMatches})
         if (successfullMatches.length){
           const matchedEntries = entries.filter( entry => 
             successfullMatches.reduce((acc, cur) => {

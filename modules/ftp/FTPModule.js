@@ -50,8 +50,8 @@ function FTPModule(config, store) {
         break;
       }
       case LOG_RESET:{
-        const fileName = lastAction.payload;
         if (automatic){
+          const fileName = lastAction.payload;
           targets.forEach(element => {
             upload(element.addressFolder, element.userPassword, fileName);
           });
