@@ -5,6 +5,7 @@ const {
   INPUT_BLOCKING_CHANGED,
   INPUT_FORCED_CHANGED,
   INPUT_FOLLOWING_CHANGED,
+  INPUT_CALCULATE_STATE,
   OUTPUT_RESULT_CHANGED,
   OUTPUT_FORCED_CHANGED,
   OUTPUT_EXECUTING_CHANGED,
@@ -82,7 +83,8 @@ function Input(index, config, store) {
         if (index === lastAction.payload.index){
           clearTimeout(debounce);
           debounce = setTimeout(()=>{
-            handleInput(state.input.ports[index].state)
+            handleInput(state.input.ports[index].state);
+            store.dispatch({type: INPUT_CALCULATE_STATE, payload: index});
           }, timeout);
         }
         break;

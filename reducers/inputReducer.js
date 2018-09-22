@@ -3,6 +3,7 @@ const {
   INPUT_FORCED_CHANGED,
   INPUT_FOLLOWING_CHANGED,
   INPUT_BLOCKING_CHANGED,
+  INPUT_CALCULATE_STATE,
   EXECUTE_START,
   EXECUTE_STOP,
 } = require('../actions/types');
@@ -22,7 +23,7 @@ const initialState = {
   executing: false,
 };
 
-function calculateState(port, index){
+function calculateState(port){
   if (port.isForced)
     return port.forcedState;
 
@@ -39,7 +40,6 @@ module.exports = function(state = initialState, action) {
       const {index, physical} = action.payload;
       const newPorts = Array.from(state.ports);
       newPorts[index].physical = physical;
-      newPorts[index].state = calculateState(newPorts[index], index);
       return {
         ...state,
         ports: newPorts,
@@ -51,7 +51,6 @@ module.exports = function(state = initialState, action) {
       newPorts[index].isForced = isForced;
       newPorts[index].previousForced = previousForced;
       newPorts[index].forcedState = forcedState;
-      newPorts[index].state = calculateState(newPorts[index], index);
       return {
         ...state,
         ports: newPorts,
@@ -61,7 +60,6 @@ module.exports = function(state = initialState, action) {
       const {index, isFollowing} = action.payload;
       const newPorts = Array.from(state.ports);
       newPorts[index].isFollowing = isFollowing;
-      newPorts[index].state = calculateState(newPorts[index], index);
       return {
         ...state,
         ports: newPorts,
@@ -71,6 +69,15 @@ module.exports = function(state = initialState, action) {
       const {index, blocking} = action.payload;
       const newPorts = Array.from(state.ports);
       newPorts[index].blocking = blocking;
+      return {
+        ...state,
+        ports: newPorts,
+      }
+    }
+    case INPUT_CALCULATE_STATE:{
+      const index = action.payload;
+      const newPorts = Array.from(state.ports);
+      newPorts[index].state = calculateState(newPorts[index], index);
       return {
         ...state,
         ports: newPorts,
