@@ -96,9 +96,10 @@ function Realtime(server, config, store){
       io.emit('average', {index, average});
     });
 
-    const {success, matchedTolerance} = state.selfLearning;
-    io.emit('selfLearning', {success, matchedTolerance});
-
+    if (constants.enabledModules.selfLearning && state.selfLearning.startTime){
+      const {success, matchedTolerance} = state.selfLearning;
+      io.emit('selfLearning', {success, matchedTolerance});
+    }
     
   }
   

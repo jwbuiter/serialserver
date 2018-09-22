@@ -78,8 +78,8 @@ function Parser(store){
     let functions = { 
       tn : (x)=> data.length,
       to : (x)=> data.reduce((acc, cur)=>acc+cur, 0),
-      mi : (x)=> data.reduce((acc, cur)=>Math.min(acc, cur)),
-      ma : (x)=> data.reduce((acc, cur)=>Math.max(acc, cur)),
+      mi : (x)=> Math.min(...data),
+      ma : (x)=> Math.max(...data),
       sp : (x)=> {
         let mean = data.reduce((acc, cur)=>acc+cur, 0) / (data.length || 1);
         let spread = data.reduce((acc, cur)=> acc + (cur - mean)*(cur - mean), 0);
