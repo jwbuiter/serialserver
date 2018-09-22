@@ -32,7 +32,6 @@ function Input(index, config, store) {
         const reduxState = store.getState();
         const blocked = reduxState.input.ports.reduce((acc, cur) => acc || cur.blocking, false);
         const stillExecuting = reduxState.output.ports.reduce((acc, cur) => acc || cur.executing, false);
-
         if (state && !(blocked) && !(stillExecuting)){
           store.dispatch({type: EXECUTE_START});
         } else if (!state && reduxState.input.executing){

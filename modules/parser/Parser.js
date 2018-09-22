@@ -18,7 +18,7 @@ function Parser(store){
   function parseTable(x){
     let row = x.charCodeAt(1) - 65;
     let column = parseInt(x[2]);
-    assert((row*tableColumns + column - 1)>=0 && (row*tableColumns + column - 1)<tableContent.length, 'Out of bounds of table contents');
+    assert((row*tableColumns + column - 1)>=0 && (row*tableColumns + column - 1)<store.getState().table.cells.length, 'Out of bounds of table contents');
   
     return 'store.getState().table.cells[' + (row*tableColumns + column - 1) + '].entry';
   }
@@ -58,7 +58,8 @@ function Parser(store){
     //if (!saveArray)
      // return '0';
     
-    let operator = x.slice(1,3);
+    const operator = x.slice(1,3);
+    const state = store.getState();
   
     x = x.slice(3);
   
@@ -68,11 +69,12 @@ function Parser(store){
       x = Number(x) + 1;
 
     
-    let data = store.getState().logger.entries.map((elem)=>Number(elem[x]));
-  
-    if (data.length === 0)
+    let data = state.logger.entries.map((elem)=>Number(elem[x]));
+
+    if (state.selfLearning.success === 0){
       return '0';
-  
+    }
+
     let functions = { 
       tn : (x)=> data.length,
       to : (x)=> data.reduce((acc, cur)=>acc+cur, 0),
@@ -84,10 +86,12 @@ function Parser(store){
         return Math.sqrt(spread / (data.length || 1));
       },
       un : (x)=> data.reduce((acc, cur)=>{
-        if (acc.includes(cur))
+        if (acc.includes(cur)) {
           return acc;
-        else
-          return acc.push(cur);
+        } else {
+          acc.push(cur);
+          return acc;
+        }
       }, []).length,
     }
 
