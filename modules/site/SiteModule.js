@@ -17,6 +17,7 @@ const logPath = constants.saveLogLocation;
 
 function SiteModule(config, store) {
   function importFile(req, res){
+    console.log(req.files)
     if (!req.files.importFile){
       return res.send('<meta http-equiv="refresh" content="1; url=/" /><title>MBDCcomUnit</title> No files were uploaded.')
     }
@@ -35,9 +36,12 @@ function SiteModule(config, store) {
     });
   }
   
-  function uploadConfig(res, req) {
+  function uploadConfig(req, res) {
+    console.log(req.files)
+  
     if (!req.files.importConfig){
       return res.send('<meta http-equiv="refresh" content="1; url=/filesettings" /><title>MBDCcomUnit</title> No files were uploaded.')
+
     }
   
     let uploadedFile = req.files.importConfig;
@@ -121,7 +125,7 @@ function SiteModule(config, store) {
   }
 
   for(let route in uploadRoutes){
-    app.get(route, fileUpload());
+    app.use(route, fileUpload());
     app.post(route, uploadRoutes[route]);
   }
 

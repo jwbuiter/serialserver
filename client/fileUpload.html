@@ -43,7 +43,7 @@
     }
 
     $(address(1, 6)).append($('<b>').html('File upload'));
-    $(address(2, 6)).append($('<form id="uploadForm" action="upload" method="post" enctype="multipart/form-data">').html('<input class="wide" id="fileLocation" type="file" name="importFile" accept=".xls">'));
+    $(address(2, 6)).append($('<form id="uploadForm" action="importFile" method="post" enctype="multipart/form-data">').html('<input class="wide" id="fileLocation" type="file" name="importFile" accept=".xls">'));
     $(address(2, 8)).append($('<input type="button" style="width: 50%" value="Import .xls" onclick="javascript:goSubmit()">'));
     $(address(2, 8)).append($('<input type="button" style="width: 50%" value="Cancel" onclick="javascript:goDebug()">'));
 

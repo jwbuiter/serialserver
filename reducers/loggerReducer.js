@@ -31,7 +31,6 @@ module.exports = function(state = initialState, action) {
         const testValue = Number(entry[comIndex+1]);
         return ((testValue >= calibration* (1 - matchedTolerance)) && (testValue <= testValue * (1 + matchedTolerance)))
       });
-      console.log({oldEntries: state.entries, newEntries});
       return {
         ...state,
         entries: newEntries,
