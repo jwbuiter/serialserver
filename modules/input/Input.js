@@ -64,20 +64,12 @@ function Input(index, config, store) {
     });
   }
 
-  function setStateDebounce(state){
-    clearTimeout(debounce);
-
-    debounce = setTimeout(()=>{
-      dispatchState(state);
-      store.dispatch({type : HANDLE_TABLE});
-      store.dispatch({type : HANDLE_OUTPUT});
-      
-    }, timeout);
-  }
 
   myGPIO.watch((err, val)=>{
     setTimeout(()=>{
-      setStateDebounce(myGPIO.readSync()?true:false);
+      dispatchState(myGPIO.readSync()?true:false);
+      store.dispatch({type : HANDLE_TABLE});
+      store.dispatch({type : HANDLE_OUTPUT});
     },10);
   });
 
@@ -88,7 +80,10 @@ function Input(index, config, store) {
       case INPUT_PHYSICAL_CHANGED:
       case INPUT_FORCED_CHANGED:{
         if (index === lastAction.payload.index){
-          handleInput(state.input.ports[index].state)
+          clearTimeout(debounce);
+          debounce = setTimeout(()=>{
+            handleInput(state.input.ports[index].state)
+          }, timeout);
         }
         break;
       }
