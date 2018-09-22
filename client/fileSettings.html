@@ -71,14 +71,14 @@
     $(address(2, 0)).append($('<b>').html('Wait for second COM'));
     $(address(3, 0)).append($('<b>').html('Search column'));
     $(address(4, 0)).append($('<b>').html('Save to log'));
-    $(address(5, 0)).append($('<b>').html('Reset on zero'));  
+    $(address(5, 0)).append($('<b>').html('Log ID'));  
 
     $(address(0, 1)).append($('<select id ="tabletrigger">').html('<option value="0">COM 0</option><option value="1">COM 1</option>'));
     $(address(1, 1)).append($('<input type="checkbox" id="tableuseFile">'));
     $(address(2, 1)).append($('<input type="checkbox" id="tablewaitForOther">'));
     $(address(3, 1)).append($('<input type="text" id="tablesearchColumn">'));
     $(address(4, 1)).append($('<input type="checkbox" id="loggerwriteToFile">'));
-    $(address(5, 1)).append($('<select id ="serialresetTrigger">').html('<option value="off">Off</option><option value="on">On</option><option value="com0">COM 0</option><option value="com1">COM 1</option>'));
+    $(address(5, 1)).append($('<input type="text" id="loggerlogID">'));
 
     $(address(6, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
     $(address(7, 0)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
@@ -151,6 +151,9 @@
       }
       cursor+=3;
     }
+    $(address(6, cursor)).append($('<b>').html('Reset on zero'));  
+    $(address(7, cursor)).append($('<select id ="serialresetTrigger">').html('<option value="off">Off</option><option value="on">On</option><option value="com0">COM 0</option><option value="com1">COM 1</option>'));
+      
     cursor++;
 
     $(address(0, cursor)).append($('<b>').html('Table'));
@@ -317,6 +320,7 @@
 
     function fillIn(){
       fillInRecursive('', config);
+      $('#selfLearningstartCalibration').val(Math.round(config.selfLearning.startCalibration*1000)/1000);
     }
 
     function putInConfigRecursive(prefix, config){

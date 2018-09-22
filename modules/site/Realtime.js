@@ -174,7 +174,6 @@ function Realtime(server, config, store){
   }
   
   function getLogList(socket, msg){
-    console.log({logPath})
     fs.readdir(logPath, (err, files) =>{
       socket.emit('logList', files.filter((element)=>element.endsWith('.csv')).sort().reverse());
     });

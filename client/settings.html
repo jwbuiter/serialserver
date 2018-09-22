@@ -150,6 +150,7 @@
 
     function fillIn(){
       fillInRecursive('', config);
+      $('#version').html('<b>Version: ' + config.version + '</b>');
     }
 
     function putInConfigRecursive(prefix, config){

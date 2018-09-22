@@ -13,12 +13,12 @@ const {
 } = require('../../actions/types')
 
 function LoggerModule(config, store) {
-  const {resetValue, resetMode, writeToFile} = config;
+  const {resetValue, resetMode, writeToFile, logID} = config;
   const time = resetValue.split(':');
   let fileName;
 
   function resetLog(){
-    fileName = dateFormat(new Date(),'yyyy-mm-dd_HH-MM-ss') +'.csv';
+    fileName = logID + '_' + dateFormat(new Date(),'yyyy-mm-dd_HH-MM-ss') +'.csv';
     store.dispatch({type: LOG_RESET});
   }
 

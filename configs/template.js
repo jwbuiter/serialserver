@@ -234,6 +234,7 @@ var config ={
     writeToFile : false,
     resetMode : 'off',
     resetValue : '00:00',
+    logID: 'MBDC',
   },
 
   FTP : {
