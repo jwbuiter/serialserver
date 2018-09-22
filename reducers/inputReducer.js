@@ -75,7 +75,7 @@ module.exports = function(state = initialState, action) {
       }
     }
     case INPUT_CALCULATE_STATE:{
-      const index = action.payload;
+      const {index} = action.payload;
       const newPorts = Array.from(state.ports);
       newPorts[index].state = calculateState(newPorts[index], index);
       return {

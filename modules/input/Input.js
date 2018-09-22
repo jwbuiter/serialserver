@@ -83,8 +83,10 @@ function Input(index, config, store) {
         if (index === lastAction.payload.index){
           clearTimeout(debounce);
           debounce = setTimeout(()=>{
-            handleInput(state.input.ports[index].state);
-            store.dispatch({type: INPUT_CALCULATE_STATE, payload: index});
+            store.dispatch({type: INPUT_CALCULATE_STATE, payload: {index}});
+
+            handleInput(store.getState().input.ports[index].state);
+            
           }, timeout);
         }
         break;

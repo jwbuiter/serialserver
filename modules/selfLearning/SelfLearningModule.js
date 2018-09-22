@@ -36,7 +36,6 @@ function SelfLearningModule(config, store) {
         }));
 
         const successfullMatches = matches.filter(elem => (elem.matches >= number));
-        console.log({matches, successfullMatches})
         if (successfullMatches.length){
           const matchedEntries = entries.filter( entry => 
             successfullMatches.reduce((acc, cur) => {

@@ -13,6 +13,7 @@ const {
   INPUT_PHYSICAL_CHANGED,
   INPUT_FORCED_CHANGED,
   INPUT_FOLLOWING_CHANGED,
+  INPUT_CALCULATE_STATE,
   OUTPUT_RESULT_CHANGED,
   OUTPUT_FORCED_CHANGED,
   OUTPUT_EXECUTING_CHANGED,
@@ -289,7 +290,8 @@ function Realtime(server, config, store){
     switch (lastAction.type){
       case INPUT_FOLLOWING_CHANGED:
       case INPUT_FORCED_CHANGED:
-      case INPUT_PHYSICAL_CHANGED: {
+      case INPUT_PHYSICAL_CHANGED:
+      case INPUT_CALCULATE_STATE: {
         const {index} = lastAction.payload;
         const port = state.input.ports[index];
 
