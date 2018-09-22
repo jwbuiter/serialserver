@@ -9,36 +9,37 @@ const {
 } = require('../../actions/types')
 const constants = require('../../config.static');
 
-function upload(addressFolder, userPassword, fileName){
-  const host = addressFolder.split('/')[0];
-  const folder = addressFolder.split('/')[1] || '';
-  const user = userPassword.split(':')[0];
-  const password = userPassword.split(':')[1];
-  const localPath = constants.saveFileLocation;
 
-  let c = new Client();
-  c.on('ready', () => {
-    c.mkdir(folder, true, () => {
-      c.put(path.join(localPath, fileName), path.join(folder, fileName), (err) => {
-        c.end();
-        this.store.dispatch({type: FTP_SUCCESS});
-      });
-    });
-  });
-  c.on('error', (err) => {
-    this.store.dispatch({type: FTP_FAILURE, payload: err});
-  })
-
-  if (!(user && password)){
-    this.store.dispatch({type: FTP_FAILURE, payload: {message: 'No username and password set'}});
-    return;
-  }
-  c.connect({host, user, password});
-}
 
 function FTPModule(config, store) {
-  console.log('FTP')
   const {targets, automatic} = config;
+
+  function upload(addressFolder, userPassword, fileName){
+    const host = addressFolder.split('/')[0];
+    const folder = addressFolder.split('/')[1] || '';
+    const user = userPassword.split(':')[0];
+    const password = userPassword.split(':')[1];
+    const localPath = constants.saveLogLocation;
+  
+    let c = new Client();
+    c.on('ready', () => {
+      c.mkdir(folder, true, () => {
+        c.put(path.join(localPath, fileName), path.join(folder, fileName), (err) => {
+          c.end();
+          store.dispatch({type: FTP_SUCCESS});
+        });
+      });
+    });
+    c.on('error', (err) => {
+      store.dispatch({type: FTP_FAILURE, payload: err});
+    })
+  
+    if (!(user && password)){
+      store.dispatch({type: FTP_FAILURE, payload: {message: 'No username and password set'}});
+      return;
+    }
+    c.connect({host, user, password});
+  }
 
   store.listen((lastAction)=>{
     //console.log(lastAction.type)
@@ -57,7 +58,7 @@ function FTPModule(config, store) {
           });
         }
         break;
-        }
+      }
     }
   });
 

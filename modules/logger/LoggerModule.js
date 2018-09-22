@@ -18,8 +18,9 @@ function LoggerModule(config, store) {
   let fileName;
 
   function resetLog(){
+    if (fileName)
+      store.dispatch({type: LOG_RESET, payload: fileName});
     fileName = logID + '_' + dateFormat(new Date(),'yyyy-mm-dd_HH-MM-ss') +'.csv';
-    store.dispatch({type: LOG_RESET});
   }
 
   resetLog();

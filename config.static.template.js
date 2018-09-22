@@ -32,7 +32,7 @@ var constants = {
   onlinePin : 5,
   enabledModules: {
     authentication: true,
-    ftp: true,
+    FTP: true,
     input: true,
     logger: true,
     output: true,
