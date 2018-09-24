@@ -26,6 +26,7 @@ const {
   SL_SUCCESS,
   TABLE_RESET,
   TABLE_ENTRY,
+  EXCEL_FOUND_ROW,
   ERROR_OCCURRED,
   EXECUTE_START,
   EXECUTE_STOP,
@@ -336,6 +337,10 @@ function Realtime(server, config, store){
       }
       case TABLE_RESET: {
         io.emit('cleartable');
+        break;
+      }
+      case EXCEL_FOUND_ROW: {
+        io.emit('notfound', !lastAction.payload.found);
         break;
       }
       case ERROR_OCCURRED: {
