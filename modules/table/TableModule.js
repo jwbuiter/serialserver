@@ -4,7 +4,7 @@ const XLSX = require('xlsx');
 
 const {
   HANDLE_TABLE,
-  RESET_LAST_ACTION,
+  EXCEL_FOUND_ROW, 
 } = require('../../actions/types');
 const Cell = require('./Cell');
 
