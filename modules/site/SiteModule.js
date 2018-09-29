@@ -71,7 +71,7 @@ function SiteModule(config, store) {
   }
   
   const functionRoutes = {
-    '/com': (req, res) => res.send(titleString + store.getState().input.executing?'1':'0'),
+    '/com': (req, res) => res.send(titleString + (store.getState().input.executing?'1':'0')),
     '/coml': (req, res) => {
       const loggerState = store.getState().logger;
 

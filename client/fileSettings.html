@@ -82,12 +82,11 @@
     $(address(6, 1)).append($('<select id ="serialresetTrigger">').html('<option value="off">Off</option><option value="on">On</option><option value="com0">COM 0</option><option value="com1">COM 1</option>'));
 
     $(address(7, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
-    $(address(7, 1)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
-    $(address(7, 2)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
-    $(address(7, 3)).append($('<input type="button" value="Load config" onclick="javascript:loadConfigList()">'));
-    $(address(7, 4)).append($(''));
+    $(address(7, 1)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
+    $(address(7, 3)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
+    $(address(7, 4)).append($('<input type="button" value="Load config" onclick="javascript:loadConfigList()">'));
 
-    for (let i = 0; i<7; i++){
+    for (let i = 0; i<8; i++){
       $(address(i, 2)).append($('<hr>'));
     }
 
