@@ -1,7 +1,6 @@
 <!doctype html>
 <html>
 <head>
-  <title>MBDCcomUnit</title>
    <style>
       *{font-size: 25px; padding:0; margin: 0; }
       table { text-align: center; border: none; border-collapse: collapse;}
@@ -40,7 +39,7 @@
       var columnWidths = [14, 14, 23, 12, 18, 18, 18, 18];
       $('#content').css('width', columnWidths.reduce(function(acc, val) { return acc + val; }) + 'vw');
     }
-    
+    document.title = constants.name;
     var socket = io();
     var configList;
 
@@ -71,7 +70,8 @@
     $(address(2, 0)).append($('<b>').html('Wait for second COM'));
     $(address(3, 0)).append($('<b>').html('Search column'));
     $(address(4, 0)).append($('<b>').html('Save to log'));
-    $(address(5, 0)).append($('<b>').html('Log ID'));  
+    $(address(5, 0)).append($('<b>').html('Log ID'));
+    $(address(6, 0)).append($('<b>').html('Reset on 0')); 
 
     $(address(0, 1)).append($('<select id ="tabletrigger">').html('<option value="0">COM 0</option><option value="1">COM 1</option>'));
     $(address(1, 1)).append($('<input type="checkbox" id="tableuseFile">'));
@@ -79,13 +79,13 @@
     $(address(3, 1)).append($('<input type="text" id="tablesearchColumn">'));
     $(address(4, 1)).append($('<input type="checkbox" id="loggerwriteToFile">'));
     $(address(5, 1)).append($('<input type="text" id="loggerlogID">'));
+    $(address(6, 1)).append($('<select id ="serialresetTrigger">').html('<option value="off">Off</option><option value="on">On</option><option value="com0">COM 0</option><option value="com1">COM 1</option>'));
 
-    $(address(6, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
-    $(address(7, 0)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
-    $(address(6, 1)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
-    $(address(7, 1)).append($('<input type="button" value="Load config" onclick="javascript:loadConfigList()">'));
-    $(address(7, 2)).append($('<input type="button" value="Load default" onclick="javascript:loadDefault()">'));
-    $(address(7, 3)).append($('<b>').html('Version: '+config.version));
+    $(address(7, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
+    $(address(7, 1)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
+    $(address(7, 2)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
+    $(address(7, 3)).append($('<input type="button" value="Load config" onclick="javascript:loadConfigList()">'));
+    $(address(7, 4)).append($(''));
 
     for (let i = 0; i<7; i++){
       $(address(i, 2)).append($('<hr>'));
@@ -116,18 +116,22 @@
 
       $(address(0, 6)).append($('<b>').html('Self-learning'));
       $(address(1, 6)).append($('<b>').html('Number'));
-      $(address(2, 6)).append($('<b>').html('Tolerance(%)'));
-      $(address(3, 6)).append($('<b>').html('Start #CS'));
-      $(address(4, 6)).append($('<b>').html('Start Tolerance+'));
-      $(address(7, 6)).html('#SC #SCmin #SCmax').addClass('small');
+      $(address(2, 6)).append($('<b>').html('Calibration #SC'));
+      $(address(3, 6)).append($('<b>').html('Tolerance (%)'));
+      $(address(4, 6)).append($('<b>').html('SL +Tolerance (%)'));
+      $(address(5, 6)).append($('<b>').html('Unique log'));
+      $(address(6, 6)).html('#SC #SCmin #SCmax').addClass('small');
+      $(address(7, 6)).html('SL-Calibration').addClass('small');
       
 
       $(address(0, 7)).append($('<select id ="selfLearningenabled">').html('<option value="off">Off</option><option value="com0">Com 0</option><option value="com1">Com 1</option>'));
       $(address(1, 7)).append($('<input type="number" id="selfLearningnumber" min="0" step="1">'));
-      $(address(2, 7)).append($('<input type="number" id="selfLearningtolerance" min="0" step="1">'));
       $(address(3, 7)).append($('<input type="number" id="selfLearningstartCalibration" min="0" step="1">'));
+      $(address(2, 7)).append($('<input type="number" id="selfLearningtolerance" min="0" step="1">'));
       $(address(4, 7)).append($('<input type="number" id="selfLearningstartTolerance" min="0" step="1">'));
-      $(address(7, 7)).html('#SN #ST').addClass('small');
+      $(address(5, 7)).append($('<select id ="loggerunique">').html('<option value="off">Off</option><option value="com0">Com 0</option><option value="com1">Com 1</option>'));
+      $(address(6, 7)).html('#SN #ST').addClass('small');
+      $(address(7, 7)).html('SL-Number SL-Time').addClass('small');
 
       {
         const classes = ['inProgress', 'done', 'warning'];
@@ -151,9 +155,7 @@
       }
       cursor+=3;
     }
-    $(address(6, cursor)).append($('<b>').html('Reset on zero'));  
-    $(address(7, cursor)).append($('<select id ="serialresetTrigger">').html('<option value="off">Off</option><option value="on">On</option><option value="com0">COM 0</option><option value="com1">COM 1</option>'));
-      
+    $(address(7, cursor)).append($('<b>').html('Version: '+config.version));
     cursor++;
 
     $(address(0, cursor)).append($('<b>').html('Table'));
@@ -167,13 +169,12 @@
     
     var commands = [
       'com0',
-      'com1',
       'date',
       '$A',
       '#A1',
       '#O1',
       '#I1',
-      '#',
+      '# / #M',
       'and',
       'or',
       '( )',
@@ -190,13 +191,12 @@
     ];
     var meanings = [
       'value com0',
-      'value com1',
       'date today',
       'value import file column A',
       'value table #A1',
       'value output 1 (0 or 1)',
       'value input 1 (0 or 1)',
-      'manual input',
+      'manual table input / menu',
       'meets both commands',
       'meets 1 of the commands',
       'priority',
@@ -253,8 +253,9 @@
     $(address(3, cursor)).append($('<b>').html('Invert'));
     $(address(4, cursor)).append($('<b>').html('Follow'));
     $(address(5, cursor)).append($('<b>').html('Timeout'));
+    cursor -= 2;
     $(address(6, cursor-1)).append($('<b>').html('Logfile').addClass('small'));
-    $(address(7, cursor-1)).append($('<b>').html('X: 0/1/A1/B5').addClass('small'));
+    $(address(7, cursor-1)).append($('<b>').html('X = 0/1/A1/B5').addClass('small'));
     var commands = [
       '&tn',
       '&toX',
@@ -262,6 +263,8 @@
       '&maX',
       '&spX',
       '&unX',
+      '&xxUX',
+      '&unTU',
     ];
     var meanings = [
       'total number',
@@ -270,14 +273,17 @@
       'maximum',
       'spread',
       'number unique',
+      'unique statistics',
+      'total unique log',
     ];
+    
     for (let i = 0; i < commands.length; i++){
       $(address(6, i + cursor)).html(commands[i]);
       $(address(6, i + cursor)).addClass('small');
       $(address(7, i + cursor)).html(meanings[i]);
       $(address(7, i + cursor)).addClass('small');
     }
-    cursor++;
+    cursor+= 3;
 
     for (let i = 0; i < numInputs; i++){
       $(address(0, cursor)).append($('<b>').html('Input ' + (i + 1)));
@@ -433,8 +439,9 @@
         });
       }
       let lastRow = $('<li>');
-      lastRow.append('<input type="button" style="width:50%" value="Close" onclick="javascript:closeList()">');
-      lastRow.append('<input type="button" style="width:50%" value="Upload" onclick="javascript:uploadConfig()">');
+      lastRow.append('<input type="button" style="width:33%" value="Close" onclick="javascript:closeList()">');
+      lastRow.append('<input type="button" style="width:33%" value="Load default" onclick="javascript:loadDefault()">')
+      lastRow.append('<input type="button" style="width:33%" value="Upload" onclick="javascript:uploadConfig()">');
       lastRow.append($('<form id="uploadForm" action="uploadConfig" method="post" enctype="multipart/form-data">').html('<input id="configLocation" style="display:none" type="file" name="importConfig" accept=".js">').change(function(evt){
         let file = evt.target.files[0];
 

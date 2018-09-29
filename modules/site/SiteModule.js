@@ -14,12 +14,13 @@ const constants = require('../../config.static');
 const app = express();
 const clientPath = '../../client';
 const logPath = constants.saveLogLocation;
+const titleString = '<title>' + constants.name + '</title>';
 
 function SiteModule(config, store) {
   function importFile(req, res){
     console.log(req.files)
     if (!req.files.importFile){
-      return res.send('<meta http-equiv="refresh" content="1; url=/" /><title>MBDCcomUnit</title> No files were uploaded.')
+      return res.send(titleString + '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.')
     }
     
     let uploadedFile = req.files.importFile;
@@ -30,7 +31,7 @@ function SiteModule(config, store) {
       }
   
       console.log(__dirname + '/data/data.xls');
-      res.send('<meta http-equiv="refresh" content="5; url=/" /><title>MBDCcomUnit</title> File uploaded.');
+      res.send(titleString + '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.');
       onlineGPIO.writeSync(0);
       process.exit();
     });
@@ -40,7 +41,7 @@ function SiteModule(config, store) {
     console.log(req.files)
   
     if (!req.files.importConfig){
-      return res.send('<meta http-equiv="refresh" content="1; url=/filesettings" /><title>MBDCcomUnit</title> No files were uploaded.')
+      return res.send(titleString + '<meta http-equiv="refresh" content="1; url=/filesettings" /> No files were uploaded.')
 
     }
   
@@ -51,7 +52,7 @@ function SiteModule(config, store) {
         return res.status(500).send(err);
       }
   
-      res.send('<meta http-equiv="refresh" content="1; url=/filesettings" /><title>MBDCcomUnit</title> Config uploaded.');
+      res.send(titleString + '<meta http-equiv="refresh" content="1; url=/filesettings" /> Config uploaded.');
     });
   }
 
@@ -61,8 +62,31 @@ function SiteModule(config, store) {
     '/current.js': '../configs/current.js',
     '/config.static.js': '../config.static.js'
   }
+
+  function logTable(legend, entries){
+    const legendrow = '<tr>' + legend.reduce((total, cur) => total + '<td><b>' + cur + '</b></td>', '') + '</tr>';
+    const entryrows = entries.map(row => '<tr>' + row.reduce((total, cur) => total + '<td>' + cur + '</td>', '') + '</tr>');
+
+    return '<table>' + legendrow + entryrows.reduce((total, cur) => total + cur) + '<table>';
+  }
   
   const functionRoutes = {
+    '/com': (req, res) => res.send(titleString + store.getState().input.executing?'1':'0'),
+    '/coml': (req, res) => {
+      const loggerState = store.getState().logger;
+
+      res.send(titleString + logTable(loggerState.legend, loggerState.entries.slice(-1)));
+    },
+    '/comlog': (req, res) => {
+      const loggerState = store.getState().logger;
+
+      res.send(titleString + logTable(loggerState.legend, loggerState.entries.slice().reverse()));
+    },
+    '/comlogu': (req, res) => {
+      const loggerState = store.getState().logger;
+      
+      res.send(titleString + logTable(loggerState.legend, loggerState.entries.slice().reverse().filter(entry => true)));
+    },
     '/downloadConfig': (req, res) => res.download(path.join(__dirname, '../..', 'configs', req.query.file)),
     '/downloadLog':(req, res) => {
       
@@ -78,7 +102,7 @@ function SiteModule(config, store) {
       }
     },
     '/shutdown': (req, res) => {
-      res.send('<title>MBDCcomUnit</title>Shutting down now.');
+      res.send(titleString + 'Shutting down now.');
       exec('shutdown now', (err, stdout, stderr) => {
         if (err) {
           console.error(`exec error: ${err}`);
@@ -87,7 +111,7 @@ function SiteModule(config, store) {
       });
     },
     '/restart': (req, res) => {
-      res.send('<meta http-equiv="refresh" content="5; url=/" /><title>MBDCcomUnit</title>Restarting now.')
+      res.send(titleString + '<meta http-equiv="refresh" content="5; url=/" />Restarting now.')
       store.dispatch({type: SHUTDOWN});
       process.exit();
     },
@@ -124,15 +148,10 @@ function SiteModule(config, store) {
     app.get(route, functionRoutes[route]);
   }
 
-  for(let route in uploadRoutes){
-    app.use(route, fileUpload());
-    app.post(route, uploadRoutes[route]);
-  }
-
   for(let i = 0; i < store.getState().serial.coms.length; i++){
     app.get('/com'+i, (req, res) =>{
       const com = store.getState().serial.coms[i];
-      let sendString='<title>MBDCcomUnit</title>';
+      let sendString = titleString;
       console.log(store.getState().serial);
 
       if (com.average === ''){
@@ -142,6 +161,12 @@ function SiteModule(config, store) {
       }
       res.send(sendString);
     });
+
+    for(let route in uploadRoutes){
+      app.use(route, fileUpload());
+      app.post(route, uploadRoutes[route]);
+    }
+  
   }
 
   const server = app.listen(constants.port, () => console.log('Server listening on port ' + constants.port));

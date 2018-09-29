@@ -235,6 +235,7 @@ var config ={
     resetMode : 'off',
     resetValue : '00:00',
     logID: 'MBDC',
+    unique : 'off',
   },
 
   FTP : {

@@ -181,8 +181,16 @@ function Realtime(server, config, store){
   }
   
   function getConfigList(socket, msg){
+    const mayorVersion = version.split('.')[0];
     fs.readdir(configPath, (err, files) =>{
-      socket.emit('configList', files.filter((element)=>element.endsWith('.js')).sort());
+      socket.emit('configList', files
+        .filter((element)=>element.match(/V[0-9]+.[0-9]+.js$/))
+        .filter((element)=>{
+          const elementVersion = element.match(/V[0-9]+./)[0];
+          const elementMayorVersion = elementVersion.slice(1,-1);
+          return (elementMayorVersion === mayorVersion)
+        })
+        .sort());
     });
   }
   
@@ -364,7 +372,7 @@ function Realtime(server, config, store){
         break;
       }
       case SL_SUCCESS: {
-        const {success, matchedTolerance} = lastAction.payload;
+        const {success, matchedTolerance, calibration} = lastAction.payload;
         io.emit('selfLearning', {success, matchedTolerance});
         break;
       }

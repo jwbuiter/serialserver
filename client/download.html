@@ -1,7 +1,6 @@
 <!doctype html>
 <html>
 <head>
-  <title>MBDCcomUnit</title>
    <style>
       *{font-size: 25px; padding:0; margin: 0; }
       div {position: relative; margin: auto; margin-top: 50px; width: 90%;}
@@ -20,6 +19,7 @@
   <script src="/current.js"></script>
   <script type="text/javascript">
     var fileList;
+    document.title = constants.name;
     var socket = io();
 
     function downloadFile(index){

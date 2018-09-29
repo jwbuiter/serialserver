@@ -1,7 +1,6 @@
 <!doctype html>
 <html>
 <head>
-  <title>MBDCcomUnit</title>
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box;}
       body { font-style: Helvetica, Arial; font-size: 0;}
@@ -10,6 +9,25 @@
       td { text-align: center; font-size: 25px; max-width: 25vw;}
       input { text-align: center; font-size: 25px;}
       input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
+      .iconRight{ text-align: right;}
+      .iconRight img { margin-left: 5px;}
+      .modalcontainer{ position: fixed;}
+      .modal{ display:none;}
+      .modal.show {
+        display: block;
+        position: absolute;
+        background-color: #fff;
+        margin: auto;
+        padding: 2em;
+        width: 80vw;
+        height: calc(100vh - 30px);
+        top: 30px;
+        left: 10vw;
+        border: 1px solid black;
+        overflow: auto;
+      }
+      .modal td { font-size: 15px;}
+      .modal table {width: 80vw;}
       .header { background-color: yellow;}
       .result { background-color: #98FB98;}
       .buttons {position: fixed; right: 0; top: 30px; font-size:20px;}
@@ -31,6 +49,11 @@
     </style>
 </head>
 <body>
+  <div class='modalcontainer'>
+    <div id='logModal' class='modal'>
+      
+    </div>
+  </div>
   <table id="content">
   </table>
   <div class = "buttons">
@@ -50,6 +73,7 @@
   <script src="/current.js"></script>
   <script src="/config.static.js"></script>
   <script>
+    document.title = constants.name;
     var socket = io();
     const numColumns = 5;
     var numRows = 0;
@@ -136,6 +160,30 @@
       socket.emit('manual', {index : index, value: $('#manual'+index).val()})
     }
 
+    function toggleLog(){
+      const modal = $('#logModal');
+      if (modal.hasClass('show')){
+        $('#logModal').removeClass('show');
+      } else {
+        $('#logModal').addClass('show');
+        fetch('/comlog')
+          .then(res => res.text())
+          .then(html => $('#logModal').html(html));
+      }
+    }
+
+    function toggleUniqueLog(){
+      const modal = $('#logModal');
+      if (modal.hasClass('show')){
+        $('#logModal').removeClass('show');
+      } else {
+        $('#logModal').addClass('show');
+        fetch('/comlogu')
+          .then(res => res.text())
+          .then(html => $('#logModal').html(html));
+      }
+    }
+
     if (!constants.exposeUpload){
       $('#uploadButton').remove();
     }
@@ -207,6 +255,12 @@
     let rowUsed = false;
     let newRows = Math.ceil(numTable/numColumns);
     let index = 0;
+    console.log('log', address(4, cursor))
+
+    $(address(4, cursor-1)).addClass('iconRight');
+    $(address(4, cursor-1)).append('<img src="/res/LogUnique.png" height="30" width="30" onclick="javascript:toggleUniqueLog()">');
+    $(address(4, cursor-1)).append('<img src="/res/LogNormal.png" height="30" width="30" onclick="javascript:toggleLog()">');
+
     for (let i = 0; i < newRows; i++){
       for (let j = 0; j < numColumns; j++){
         let conf = config.table.cells[index];
@@ -237,8 +291,10 @@
         index++;
       }
 
-      if (rowUsed)
+      if (rowUsed){
         cursor += 2;
+      }
+        
         
       rowUsed = false;
     }
@@ -375,27 +431,33 @@
         console.log(msg)
         const {success} = msg;
         const tolerance = config.selfLearning.tolerance;
-        let color, text = 'SL: ';
+        let color, calibration, matchedTolerance;
 
         if (success){
+          calibration = msg.calibration;
+          matchedTolerance = msg.matchedTolerance;
+          $(address(2, 1)).html((Math.round(matchedTolerance*1000)/10) + '% ');
+          $(address(3, 1)).html((Math.round(10*(tolerance - matchedTolerance*100))/10) + '% ')
+
           if(success>1){
             color = 'warning';
           } else {
             color = 'done';
           }
-          const {matchedTolerance} = msg;
-
-          text += (Math.round(matchedTolerance*1000)/10) + '% ' + (Math.round(10*(tolerance - matchedTolerance*100))/10);
         } else {
+          calibration = config.selfLearning.startCalibration;
+          matchedTolerance = tolerance;
+          $(address(2, 1)).html((Math.round(matchedTolerance*10)/10) + '% ');
+
           color = 'inProgress';
-          text = text + tolerance + '%';
         }
+        const selfLearningIndex = Number(config.selfLearning.enabled.slice(3));
+        $(address(1, 1)).html(calibration.toFixed(config.serial.coms[selfLearningIndex].digits));
 
         for(let i = 1; i < 4; i++){
           $(address(i, 1)).removeClass('inProgress done warning');
           $(address(i, 1)).addClass('selfLearning ' + color);
         }
-        $(address(2, 1)).html(text);
       });
     }
   </script>
