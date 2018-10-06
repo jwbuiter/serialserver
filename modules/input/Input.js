@@ -38,6 +38,8 @@ function Input(index, config, store) {
           store.dispatch({type : HANDLE_OUTPUT});
           store.dispatch({type : LOG_MAKE_ENTRY});
           store.dispatch({type: EXECUTE_START});
+          store.dispatch({type : HANDLE_TABLE});
+          store.dispatch({type : HANDLE_OUTPUT});
         } else if (!state && reduxState.input.executing){
           store.dispatch({type: EXECUTE_STOP});
           store.dispatch({type: SERIAL_RESET});
