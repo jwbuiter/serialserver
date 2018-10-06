@@ -1,13 +1,15 @@
 const {
   LOG_ENTRY,
   LOG_RESET,
+  LOG_UNIQUE_OVERWRITE,
   SL_SUCCESS,
 } = require('../actions/types');
 
 const {table, serial} = require('../configs/current');
+const {name} = require('../config.static');
 
 const initialState = {
-  legend: ['date'].concat(serial.coms.map(element=>element.name)).concat(table.cells.map(element=>element.name)),
+  legend: ['Device', 'LogID', 'date', ...serial.coms.map(element=>element.name), ...table.cells.map(element=>element.name), 'TU'],
   entries: [],
 };
 
@@ -25,10 +27,19 @@ module.exports = function(state = initialState, action) {
     case LOG_RESET:{
       return initialState;
     }
+    case LOG_UNIQUE_OVERWRITE:{
+      const index = action.payload;
+      const newEntries =  Array.from(state.entries);
+      newEntries[index][state.legend.length-1] = 0;
+      return {
+        ...state,
+        entries: newEntries,
+      }
+    }
     case SL_SUCCESS:{
       const {comIndex, calibration, matchedTolerance} = action.payload;
       const newEntries = state.entries.filter(entry => {
-        const testValue = Number(entry[comIndex+1]);
+        const testValue = Number(entry[comIndex+3]);
         return ((testValue >= calibration* (1 - matchedTolerance)) && (testValue <= testValue * (1 + matchedTolerance)))
       });
       return {

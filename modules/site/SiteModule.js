@@ -63,29 +63,28 @@ function SiteModule(config, store) {
     '/config.static.js': '../config.static.js'
   }
 
-  function logTable(legend, entries){
-    const legendrow = '<tr>' + legend.reduce((total, cur) => total + '<td><b>' + cur + '</b></td>', '') + '</tr>';
-    const entryrows = entries.map(row => '<tr>' + row.reduce((total, cur) => total + '<td>' + cur + '</td>', '') + '</tr>');
-
-    return '<table>' + legendrow + entryrows.reduce((total, cur) => total + cur) + '<table>';
-  }
-  
   const functionRoutes = {
     '/com': (req, res) => res.send(titleString + (store.getState().input.executing?'1':'0')),
     '/coml': (req, res) => {
       const loggerState = store.getState().logger;
+      const entries = loggerState.entries.slice(-1);
+      const legend = loggerState.legend;
 
-      res.send(titleString + logTable(loggerState.legend, loggerState.entries.slice(-1)));
+      res.send(JSON.stringify({entries, legend}, null, 2));
     },
     '/comlog': (req, res) => {
       const loggerState = store.getState().logger;
+      const entries = loggerState.entries.slice().reverse();
+      const legend = loggerState.legend;
 
-      res.send(titleString + logTable(loggerState.legend, loggerState.entries.slice().reverse()));
+      res.send(JSON.stringify({entries, legend}, null, 2));
     },
     '/comlogu': (req, res) => {
       const loggerState = store.getState().logger;
+      const entries = loggerState.entries.filter(entry => entry[entry.length-1] !== 0).reverse();
+      const legend = loggerState.legend;
       
-      res.send(titleString + logTable(loggerState.legend, loggerState.entries.slice().reverse().filter(entry => true)));
+      res.send(JSON.stringify({entries, legend}, null, 2));
     },
     '/downloadConfig': (req, res) => res.download(path.join(__dirname, '../..', 'configs', req.query.file)),
     '/downloadLog':(req, res) => {

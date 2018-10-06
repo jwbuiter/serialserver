@@ -7,20 +7,21 @@ const constants = require('../../config.static');
 
 const {
   LOG_ENTRY,
+  LOG_MAKE_ENTRY,
   LOG_RESET,
-  EXECUTE_START,
-  SL_SUCCESS,
+  LOG_UNIQUE_OVERWRITE,
+  LOG_SAVE,
 } = require('../../actions/types')
 
 function LoggerModule(config, store) {
-  const {resetValue, resetMode, writeToFile, logID} = config;
+  const {resetValue, resetMode, writeToFile, logID, unique} = config;
   const time = resetValue.split(':');
   let fileName;
 
   function resetLog(){
     if (fileName)
       store.dispatch({type: LOG_RESET, payload: fileName});
-    fileName = logID + '_' + dateFormat(new Date(),'yyyy-mm-dd_HH-MM-ss') +'.csv';
+    fileName = constants.name + '_' + dateFormat(new Date(),'yyyy-mm-dd_HH-MM-ss') +'.csv';
   }
 
   resetLog();
@@ -42,17 +43,46 @@ function LoggerModule(config, store) {
     let state =  store.getState();
     
     switch (lastAction.type){
-      case EXECUTE_START:{
-        let newRow = [dateFormat(new Date(),'yyyy-mm-dd HH:MM:ss')];
+      case LOG_MAKE_ENTRY:{
+        let newRow = [constants.name, logID, dateFormat(new Date(),'yyyy-mm-dd HH:MM:ss')];
         newRow = newRow.concat(state.serial.coms.map(com=>com.entry));
         newRow = newRow.concat(state.table.cells.map(cell=>cell.entry));
+
+        if(unique === 'off'){
+          newRow = newRow.concat([0]);
+        } else {
+          const uniqueIndex = Number(unique.slice(-1));
+          const comValue = state.serial.coms[uniqueIndex].entry;
+          let uniqueTimes = 1;
+
+          foundOther = state.logger.entries.reduce((found, entry, index) => {
+            if (entry[3 + uniqueIndex] === comValue && entry[entry.length-1] !== 0){
+              uniqueTimes = entry[entry.length-1] + 1;
+              return index;
+            }
+            return found;
+          }, -1)
+
+          if(foundOther !== -1){
+            store.dispatch({
+              type: LOG_UNIQUE_OVERWRITE,
+              payload: foundOther,
+            })
+          }
+          newRow = newRow.concat([uniqueTimes]);
+        }
         
         store.dispatch({
           type: LOG_ENTRY,
           payload: newRow,
         });
+        store.dispatch({
+          type: LOG_SAVE,
+          payload: newRow,
+        });
+        break;
       }
-      case SL_SUCCESS:{
+      case LOG_SAVE:{
         if(!writeToFile) break;
         state = store.getState();
         const saveArray = [state.logger.legend].concat(state.logger.entries);

@@ -13,6 +13,7 @@ const {
   HANDLE_INPUT,
   HANDLE_OUTPUT,
   HANDLE_TABLE,
+  LOG_MAKE_ENTRY,
   EXECUTE_START,
   EXECUTE_STOP,
   SERIAL_RESET,
@@ -27,13 +28,15 @@ function Input(index, config, store) {
   let debounce = setTimeout(()=> 0 ,1);
 
   function handleInput(state){
-  
     switch(formula){
       case 'exe':{
         const reduxState = store.getState();
         const blocked = reduxState.input.ports.reduce((acc, cur) => acc || cur.blocking, false);
         const stillExecuting = reduxState.output.ports.reduce((acc, cur) => acc || cur.executing, false);
         if (state && !(blocked) && !(stillExecuting)){
+          store.dispatch({type : HANDLE_TABLE});
+          store.dispatch({type : HANDLE_OUTPUT});
+          store.dispatch({type : LOG_MAKE_ENTRY});
           store.dispatch({type: EXECUTE_START});
         } else if (!state && reduxState.input.executing){
           store.dispatch({type: EXECUTE_STOP});

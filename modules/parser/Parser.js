@@ -55,37 +55,41 @@ function Parser(store){
   }
   
   function parseStatistic(x){
-    //if (!saveArray)
-     // return '0';
-    
-    const operator = x.slice(1,3);
     const state = store.getState();
-  
-    x = x.slice(3);
-  
-    if (isNaN(Number(x)))
-      x = (x.charCodeAt(0) - 65)*tableColumns + Number(x[1]) + 2;
-    else
-      x = Number(x) + 1;
-
-    
-    let data = state.logger.entries.map((elem)=>Number(elem[x]));
-
     if (state.selfLearning.success === 0){
       return '0';
     }
+    
+    const unique = x.includes('U');
+    const operator = x.slice(1,3);
+
+    x = x.slice(-2);
+  
+    if (x.match(/[A-E][0-9]/))
+      x = (x.charCodeAt(0) - 65)*tableColumns + Number(x[1]) + 4;
+    else
+      x = Number(x[1]) + 3;
+
+    let data;
+    if (unique)
+      data = state.logger.entries
+        .filter(entry=>entry[entry.length-1] !==0 )
+        .map(entry => entry.map(val =>Number(val)));
+    else
+      data = state.logger.entries.map(entry => entry.map(val =>Number(val)));
 
     let functions = { 
       tn : (x)=> data.length,
-      to : (x)=> data.reduce((acc, cur)=>acc+cur, 0),
-      mi : (x)=> Math.min(...data),
-      ma : (x)=> Math.max(...data),
+      to : (x)=> data.map(entry => entry[x]).reduce((acc, cur)=>acc+cur, 0),
+      mi : (x)=> Math.min(...data.map(entry => entry[x])),
+      ma : (x)=> Math.max(...data.map(entry => entry[x])),
       sp : (x)=> {
+        data = data.map(entry => entry[x])
         let mean = data.reduce((acc, cur)=>acc+cur, 0) / (data.length || 1);
         let spread = data.reduce((acc, cur)=> acc + (cur - mean)*(cur - mean), 0);
         return Math.sqrt(spread / (data.length || 1));
       },
-      un : (x)=> data.reduce((acc, cur)=>{
+      un : (x)=> data.map(entry => entry[x]).reduce((acc, cur)=>{
         if (acc.includes(cur)) {
           return acc;
         } else {
@@ -93,12 +97,13 @@ function Parser(store){
           return acc;
         }
       }, []).length,
+      TU : (x)=> {
+        if (data.length === 0) return '0';
+        const lastEntry = data[data.length-1];
+        return lastEntry[lastEntry.length-1];
+      },
     }
-
-    if (store.getState().selfLearning.success)
-      return functions[operator](x).toString();
-
-    return '';
+    return functions[operator](x).toString();
   }
 
   function parseSelfLearning(x){

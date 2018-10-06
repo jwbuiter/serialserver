@@ -2,14 +2,13 @@ const Client = require('ftp');
 const path = require('path');
 
 const {
-  LOG_SAVE,
+  LOG_UPLOAD,
   LOG_RESET,
   FTP_SUCCESS,
   FTP_FAILURE,
-} = require('../../actions/types')
+} = require('../../actions/types');
+
 const constants = require('../../config.static');
-
-
 
 function FTPModule(config, store) {
   const {targets, automatic} = config;
@@ -44,7 +43,7 @@ function FTPModule(config, store) {
   store.listen((lastAction)=>{
     //console.log(lastAction.type)
     switch (lastAction.type){
-      case LOG_SAVE:{
+      case LOG_UPLOAD:{
         const {fileName, ftpIndex}= lastAction.payload;
         const {addressFolder, userPassword} = targets[ftpIndex];
         upload(addressFolder, userPassword, fileName);

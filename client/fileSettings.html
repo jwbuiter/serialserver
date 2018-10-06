@@ -263,7 +263,7 @@
       '&spX',
       '&unX',
       '&xxUX',
-      '&unTU',
+      '&TU',
     ];
     var meanings = [
       'total number',
@@ -273,7 +273,7 @@
       'spread',
       'number unique',
       'unique statistics',
-      'total unique log',
+      'unique number',
     ];
     
     for (let i = 0; i < commands.length; i++){
@@ -390,9 +390,7 @@
       $('#list').remove();
     }
     function loadDefault(){
-      if (confirm("Do you really want to return to the default settings?")){
-        socket.emit('loadDefault');
-      }
+      socket.emit('loadConfig', 'template.js');
     }
     function setSettings(){
       if (confirm("Do you really want to save these settings?")){

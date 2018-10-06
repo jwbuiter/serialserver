@@ -46,6 +46,7 @@ function Com(index, config, store) {
     if (zeroReset && Number(entry) == 0){
       store.dispatch({type: TABLE_RESET});
       store.dispatch({type: SERIAL_RESET});
+      console.log('why')
     } else {
       store.dispatch({
         type : SERIAL_ENTRY,

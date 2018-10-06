@@ -1,72 +1,183 @@
 <!doctype html>
 <html>
+
 <head>
-    <style>
-      * { margin: 0; padding: 0; box-sizing: border-box;}
-      body { font-style: Helvetica, Arial; font-size: 0;}
-      table { width: 100vw; text-align: center; border: none; border-collapse: collapse;}
-      tr { height: 29px; }
-      td { text-align: center; font-size: 25px; max-width: 25vw;}
-      input { text-align: center; font-size: 25px;}
-      input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; }
-      .iconRight{ text-align: right;}
-      .iconRight img { margin-left: 5px;}
-      .modalcontainer{ position: fixed;}
-      .modal{ display:none;}
-      .modal.show {
-        display: block;
-        position: absolute;
-        background-color: #fff;
-        margin: auto;
-        padding: 2em;
-        width: 80vw;
-        height: calc(100vh - 30px);
-        top: 30px;
-        left: 10vw;
-        border: 1px solid black;
-        overflow: auto;
-      }
-      .modal td { font-size: 15px;}
-      .modal table {width: 80vw;}
-      .header { background-color: yellow;}
-      .result { background-color: #98FB98;}
-      .buttons {position: fixed; right: 0; top: 30px; font-size:20px;}
-      .logo {position: fixed; left: 0; top: 30px;}
-      .table{color: black; background-color: cyan;}
-      .table.notfound{ background-color: red; }
-      .output.off{ background-color: #3fd35d; }
-      .output.on{ background-color: red;}
-      .output.execute{ background-color: #FFC000; }
-      .output.forcedOn{ background-color: #CC66FF; }
-      .output.forcedOff{ background-color: #EEBBEE; }
-      .input.off{ background-color: #CCFFCC; }
-      .input.on{ background-color: yellow;}
-      .input.forcedOn{background-color: #CC66FF; }
-      .input.forcedOff{ background-color: #EEBBEE; }
-      .selfLearning.inProgress{ background-color: yellow;}
-      .selfLearning.done{ background-color: #3fd35d; }
-      .selfLearning.warning { background-color: #FFC000;}
-    </style>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-style: Helvetica, Arial;
+      font-size: 0;
+    }
+
+    table {
+      width: 100vw;
+      text-align: center;
+      border: none;
+      border-collapse: collapse;
+    }
+
+    tr {
+      height: 29px;
+    }
+
+    td {
+      text-align: center;
+      font-size: 25px;
+      max-width: 25vw;
+    }
+
+    input {
+      text-align: center;
+      font-size: 25px;
+    }
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+
+    .iconRight {
+      text-align: right;
+    }
+
+    .iconRight img {
+      margin-left: 5px;
+    }
+
+    .modalcontainer {
+      position: fixed;
+    }
+
+    .modal {
+      display: none;
+    }
+
+    .modal.show {
+      display: block;
+      position: absolute;
+      background-color: #fff;
+      margin: auto;
+      padding: 2em;
+      width: 80vw;
+      height: calc(100vh - 60px);
+      top: 30px;
+      left: 10vw;
+      border: 1px solid black;
+      overflow: auto;
+    }
+
+    .modal td {
+      font-size: 15px;
+    }
+
+    .modal table {
+      width: 80vw;
+    }
+
+    .header {
+      background-color: yellow;
+    }
+
+    .result {
+      background-color: #98FB98;
+    }
+
+    .buttons {
+      position: fixed;
+      right: 0;
+      top: 30px;
+      font-size: 20px;
+    }
+
+    .logo {
+      position: fixed;
+      left: 0;
+      top: 30px;
+    }
+
+    .table {
+      color: black;
+      background-color: cyan;
+    }
+
+    .table.notfound {
+      background-color: red;
+    }
+
+    .output.off {
+      background-color: #3fd35d;
+    }
+
+    .output.on {
+      background-color: red;
+    }
+
+    .output.execute {
+      background-color: #FFC000;
+    }
+
+    .output.forcedOn {
+      background-color: #CC66FF;
+    }
+
+    .output.forcedOff {
+      background-color: #EEBBEE;
+    }
+
+    .input.off {
+      background-color: #CCFFCC;
+    }
+
+    .input.on {
+      background-color: yellow;
+    }
+
+    .input.forcedOn {
+      background-color: #CC66FF;
+    }
+
+    .input.forcedOff {
+      background-color: #EEBBEE;
+    }
+
+    .selfLearning.inProgress {
+      background-color: yellow;
+    }
+
+    .selfLearning.done {
+      background-color: #3fd35d;
+    }
+
+    .selfLearning.warning {
+      background-color: #FFC000;
+    }
+  </style>
 </head>
+
 <body>
   <div class='modalcontainer'>
     <div id='logModal' class='modal'>
-      
+
     </div>
   </div>
   <table id="content">
   </table>
-  <div class = "buttons">
-    <img id = "uploadButton" src = "/res/upload.png" height="30" width="30" onclick="javascript:goFileUpload()">
+  <div class="buttons">
+    <img id="uploadButton" src="/res/upload.png" height="30" width="30" onclick="javascript:goFileUpload()">
 
-    <img src = "/res/settings.svg" height="30" width="30" onclick="javascript:goSettings()">
+    <img src="/res/settings.svg" height="30" width="30" onclick="javascript:goSettings()">
 
-    <img src = "/res/restart.ico"  height="30" width="30" onclick="javascript:goRestart()">
-    
-    <img id = "shutDownButton" src = "/res/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
+    <img src="/res/restart.ico" height="30" width="30" onclick="javascript:goRestart()">
+
+    <img id="shutDownButton" src="/res/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
   </div>
-  <div class = "logo">
-    <img id = "logo" src = "/res/mbdc.jpg">
+  <div class="logo">
+    <img id="logo" src="/res/mbdc.jpg">
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/res/jquery-1.11.1.js"></script>
@@ -83,11 +194,11 @@
     const numOutputs = config.output.ports.length;
     const numInputs = config.input.ports.length;
 
-    function address(columnNum, rowNum){
-      while (rowNum>=numRows){
+    function address(columnNum, rowNum) {
+      while (rowNum >= numRows) {
         var currentRow = $('<tr>');
         $('#content').append(currentRow);
-        for (let i = 0; i < numColumns; i++){
+        for (let i = 0; i < numColumns; i++) {
           currentRow.append($('<td>').attr('id', 'c' + i + 'r' + numRows));
         }
         numRows++;
@@ -95,111 +206,133 @@
       return '#c' + columnNum + 'r' + rowNum;
     }
 
-    function shiftEntries(index){
+    function shiftEntries(index) {
       var numEntries = config.serial.coms[index].entries
 
-      for(var i = numEntries; i>0; i--){
-        $('.com' + index +'time'+i).html($('.com' + index +'time'+(i - 1)).html());
-        $('.com' + index +'entry'+i).html($('.com' + index +'entry'+(i - 1)).html());
+      for (var i = numEntries; i > 0; i--) {
+        $('.com' + index + 'time' + i).html($('.com' + index + 'time' + (i - 1)).html());
+        $('.com' + index + 'entry' + i).html($('.com' + index + 'entry' + (i - 1)).html());
       }
     }
 
-    function goSettings(){
-      if (confirm("Do you want to go to the settings?")){
-        window.location.href = '/settings'; //relative to domain
+    function goSettings() {
+      if (confirm("Do you want to go to the settings?")) {
+        window.location.href = '/settings';
       }
     }
 
-    function goShutdown(){
-      if (confirm("Do you really want to shut down?")){
-        window.location.href = '/shutdown'; //relative to domain
+    function goShutdown() {
+      if (confirm("Do you really want to shut down?")) {
+        window.location.href = '/shutdown';
       }
     }
 
-    function goRestart(){
-      if (confirm("Do you really want to restart?")){
-        window.location.href = '/restart'; //relative to domain
+    function goRestart() {
+      if (confirm("Do you really want to restart?")) {
+        window.location.href = '/restart';
       }
     }
 
-    function goFileUpload(){
-      if (confirm("Do you really want to upload a file?")){
-        window.location.href = '/fileupload'; //relative to domain
+    function goFileUpload() {
+      if (confirm("Do you really want to upload a file?")) {
+        window.location.href = '/fileupload';
       }
     }
 
-    function clickOutput(index){
+    function clickOutput(index) {
       socket.emit('forceOutput', index);
     }
 
-    function clickInput(index){
+    function clickInput(index) {
       socket.emit('forceInput', index);
     }
 
-    function printDate(time){
+    function printDate(time) {
       var date = new Date(time);
-      return date.getDate() + '-' + (date.getMonth()+1) + '-' + (date.getYear()+1900);
+      return date.getDate() + '-' + (date.getMonth() + 1) + '-' + (date.getYear() + 1900);
     }
 
-    function printTime(time){
+    function printTime(time) {
       var date = new Date(time);
       return date.getHours() + ':' + ("0" + date.getMinutes()).slice(-2) + ':' + ("0" + date.getSeconds()).slice(-2);
     }
 
-    function manualIncrement(index){
-      $('#manual'+index).val(Number($('#manual'+index).val())+1);
+    function manualIncrement(index) {
+      $('#manual' + index).val(Number($('#manual' + index).val()) + 1);
       manualChange(index);
     }
 
-    function manualDecrement(index){
-      $('#manual'+index).val(Number($('#manual'+index).val())-1);
+    function manualDecrement(index) {
+      $('#manual' + index).val(Number($('#manual' + index).val()) - 1);
       manualChange(index);
     }
 
-    function manualChange(index){
-      socket.emit('manual', {index : index, value: $('#manual'+index).val()})
+    function manualChange(index) {
+      socket.emit('manual', { index: index, value: $('#manual' + index).val() })
     }
 
-    function toggleLog(){
+    function logTable(legend, entries) {
+      console.log({ legend, entries })
+      legend = legend.slice(2);
+      entries = entries.map(entry => entry.slice(2));
+      const legendrow = '<tr>' + legend.reduce((total, cur) => total + '<td><b>' + cur + '</b></td>', '') + '</tr>';
+      const entryrows = entries.map(row => '<tr>' + row.reduce((total, cur) => total + '<td>' + cur + '</td>', '') + '</tr>');
+
+      return '<table>' + legendrow + entryrows.reduce((total, cur) => total + cur, '') + '<table>';
+    }
+
+    let logUpdate;
+
+    function toggleLog() {
       const modal = $('#logModal');
-      if (modal.hasClass('show')){
+      if (modal.hasClass('show')) {
+        logInterval = undefined;
         $('#logModal').removeClass('show');
+        $('#logModal').html('');
       } else {
         $('#logModal').addClass('show');
-        fetch('/comlog')
-          .then(res => res.text())
-          .then(html => $('#logModal').html(html));
+        logUpdate = () => fetch('/comlog')
+          .then(res => res.json())
+          .then(data => $('#logModal').html(logTable(data.legend, data.entries)));
+
+        logUpdate()
       }
     }
 
-    function toggleUniqueLog(){
+    function toggleUniqueLog() {
       const modal = $('#logModal');
-      if (modal.hasClass('show')){
+      if (modal.hasClass('show')) {
+        logInterval = undefined;
         $('#logModal').removeClass('show');
+        $('#logModal').html('');
       } else {
         $('#logModal').addClass('show');
-        fetch('/comlogu')
-          .then(res => res.text())
-          .then(html => $('#logModal').html(html));
+        logUpdate = () => fetch('/comlogu')
+          .then(res => res.json())
+          .then(data => $('#logModal').html(logTable(data.legend, data.entries)));
+
+        logUpdate()
       }
     }
 
-    if (!constants.exposeUpload){
+    socket.on('executeStart', () => { if (logUpdate) logUpdate() });
+
+    if (!constants.exposeUpload) {
       $('#uploadButton').remove();
     }
-    if (config.serial.testMode){
+    if (config.serial.testMode) {
       $('#shutDownButton').remove();
     }
 
-    for (let i = 0; i < numColumns; i++){
+    for (let i = 0; i < numColumns; i++) {
       $(address(i, 0)).addClass('header');
     }
 
-    $(address(0, 0)).html(constants.name); 
-    socket.on('ip', function(msg){
+    $(address(0, 0)).html(constants.name);
+    socket.on('ip', function (msg) {
       $(address(1, 0)).html(msg);
     });
-    socket.on('time', function(msg){
+    socket.on('time', function (msg) {
       $(address(2, 0)).html(printTime(msg));
       $(address(3, 0)).html(printDate(msg));
     });
@@ -209,252 +342,247 @@
     let cursor = 0;
 
     let logoSizeSet = false;
-    for (var i = 0; i<config.serial.coms.length; i++){
+    for (var i = 0; i < config.serial.coms.length; i++) {
       let conf = config.serial.coms[i];
-      if (conf.average){
+      if (conf.average) {
         conf.entries = 1;
-        config.serial.coms[i].entries=1;
+        config.serial.coms[i].entries = 1;
       }
-      
-      if (conf.name==='')
+
+      if (conf.name === '')
         continue;
 
-      if (!logoSizeSet)
-      {
+      if (!logoSizeSet) {
         logoSizeSet = true;
-        $('#logo').height(Math.min(140, conf.entries*30)*0.95);
+        $('#logo').height(Math.min(140, conf.entries * 30) * 0.95);
       }
 
-      cursor ++;
+      cursor++;
 
-      for (var j = 0; j<conf.entries; j++){
+      for (var j = 0; j < conf.entries; j++) {
         const entryCursor = cursor + conf.entries - j;
-        if((j===0)){
-          for (let i = 0; i < numColumns-1; i++){
+        if ((j === 0)) {
+          for (let i = 0; i < numColumns - 1; i++) {
             $(address(i, entryCursor)).addClass('result');
           }
           $(address(0, entryCursor)).html(conf.name);
-          if (conf.average){
+          if (conf.average) {
             $(address(4, entryCursor)).addClass('com' + i + 'avg')
             $(address(4, entryCursor)).addClass('result');
           }
         }
-        if (j===1 && conf.average)
-          $(address(4, entryCursor)).html( 'Average' );
+        if (j === 1 && conf.average)
+          $(address(4, entryCursor)).html('Average');
 
-        $(address(1, entryCursor)).html(j+1);
-        $(address(2, entryCursor)).addClass('com'+i+'time'+j);
-        $(address(3, entryCursor)).addClass('com'+i+'entry'+j);
+        $(address(1, entryCursor)).html(j + 1);
+        $(address(2, entryCursor)).addClass('com' + i + 'time' + j);
+        $(address(3, entryCursor)).addClass('com' + i + 'entry' + j);
       }
       cursor += conf.entries;
     }
 
     cursor += 2;
-    
+
     let tableUsed = false;
     let rowUsed = false;
-    let newRows = Math.ceil(numTable/numColumns);
+    let newRows = Math.ceil(numTable / numColumns);
     let index = 0;
     console.log('log', address(4, cursor))
 
-    $(address(4, cursor-1)).addClass('iconRight');
-    $(address(4, cursor-1)).append('<img src="/res/LogUnique.png" height="30" width="30" onclick="javascript:toggleUniqueLog()">');
-    $(address(4, cursor-1)).append('<img src="/res/LogNormal.png" height="30" width="30" onclick="javascript:toggleLog()">');
+    $(address(4, cursor - 1)).addClass('iconRight');
+    if (config.logger.writeToFile && config.logger.unique !== 'off')
+      $(address(4, cursor - 1)).append('<img src="/res/LogUnique.png" height="30" width="30" onclick="javascript:toggleUniqueLog()">');
+    if (config.logger.writeToFile)
+      $(address(4, cursor - 1)).append('<img src="/res/LogNormal.png" height="30" width="30" onclick="javascript:toggleLog()">');
 
-    for (let i = 0; i < newRows; i++){
-      for (let j = 0; j < numColumns; j++){
+    for (let i = 0; i < newRows; i++) {
+      for (let j = 0; j < numColumns; j++) {
         let conf = config.table.cells[index];
-        
-        if (conf.formula)
-        {
+
+        if (conf.formula) {
           rowUsed = true;
           tableUsed = true;
-          
-          $(address(j, cursor )).html(conf.name || (String.fromCharCode(65 + index % numColumns) + (index % numColumns + 1)));
-          $(address(j, cursor )).addClass('table');
-          if (conf.formula == '#'){
-            if (conf.numeric){
-              $(address(j, cursor + 1)).html('<input style="height:33px; width:33px" value="-" onclick="javascript:manualDecrement('+index+')" type="button">');
-              $(address(j, cursor + 1)).append('<input style="width:'+ conf.digits +'vw" onkeyup="javascript:manualChange('+index+')" type="number" min="0" step="1" id="manual' + index + '">');
-              $(address(j, cursor + 1)).append('<input style="height:33px; width:33px" value="+" onclick="javascript:manualIncrement('+index+')" type="button">');
+
+          $(address(j, cursor)).html(conf.name || (String.fromCharCode(65 + index % numColumns) + (index % numColumns + 1)));
+          $(address(j, cursor)).addClass('table');
+          if (conf.formula == '#') {
+            if (conf.numeric) {
+              $(address(j, cursor + 1)).html('<input style="height:33px; width:33px" value="-" onclick="javascript:manualDecrement(' + index + ')" type="button">');
+              $(address(j, cursor + 1)).append('<input style="width:' + conf.digits + 'vw" onkeyup="javascript:manualChange(' + index + ')" type="number" min="0" step="1" id="manual' + index + '">');
+              $(address(j, cursor + 1)).append('<input style="height:33px; width:33px" value="+" onclick="javascript:manualIncrement(' + index + ')" type="button">');
             }
-            else{
-              $(address(j, cursor + 1)).html('<input style="width:'+ (conf.digits*2) +'vw" onkeyup="javascript:manualChange('+index+')" type="text" id="manual' + index + '">');
+            else {
+              $(address(j, cursor + 1)).html('<input style="width:' + (conf.digits * 2) + 'vw" onkeyup="javascript:manualChange(' + index + ')" type="text" id="manual' + index + '">');
             }
           }
-          else{
+          else {
             $(address(j, cursor + 1)).html('-');
           }
-          $(address(j, cursor + 1)).addClass('table'+index);
+          $(address(j, cursor + 1)).addClass('table' + index);
           $(address(j, cursor + 1)).addClass('table');
         }
         index++;
       }
 
-      if (rowUsed){
+      if (rowUsed) {
         cursor += 2;
       }
-        
-        
+
+
       rowUsed = false;
     }
-    
-    if (tableUsed){
-      cursor ++;
+
+    if (tableUsed) {
+      cursor++;
     }
-    
-    newRows = Math.ceil(numOutputs/numColumns);
-    index=0;
-    for (let i = 0; i < newRows; i++){
-      for (let j = 0; j < numColumns; j++){
+
+    newRows = Math.ceil(numOutputs / numColumns);
+    index = 0;
+    for (let i = 0; i < newRows; i++) {
+      for (let j = 0; j < numColumns; j++) {
         let conf = config.output.ports[index];
 
-        if (conf.formula){
+        if (conf.formula) {
           rowUsed = true;
-          
+
           let argument = index;
-          $(address(j, cursor)).html(conf.name );
-          $(address(j, cursor)).addClass('output'+index);
+          $(address(j, cursor)).html(conf.name);
+          $(address(j, cursor)).addClass('output' + index);
           $(address(j, cursor)).addClass('output off');
-          $(address(j, cursor)).click(function (){ clickOutput(argument)});
+          $(address(j, cursor)).click(function () { clickOutput(argument) });
         }
         index++;
       }
       if (rowUsed)
         cursor += 2;
-        
+
       rowUsed = false;
     }
 
-    newRows = Math.ceil(numInputs/numColumns);
+    newRows = Math.ceil(numInputs / numColumns);
     index = 0;
-    for (let i = 0; i < newRows; i++){
-      for (let j = 0; j< numColumns; j++){
-        let conf = config.input.ports[i*numColumns + j];
+    for (let i = 0; i < newRows; i++) {
+      for (let j = 0; j < numColumns; j++) {
+        let conf = config.input.ports[i * numColumns + j];
 
-        if (conf.name){
+        if (conf.name) {
           rowUsed = true;
-      
+
           let argument = index;
-          $(address(j, cursor )).html(conf.name );
-          $(address(j, cursor )).addClass('input'+index);
-          $(address(j, cursor )).addClass('input off');
-          $(address(j, cursor )).click(function (){ clickInput(argument)});
+          $(address(j, cursor)).html(conf.name);
+          $(address(j, cursor)).addClass('input' + index);
+          $(address(j, cursor)).addClass('input off');
+          $(address(j, cursor)).click(function () { clickInput(argument) });
         }
         index++;
       }
       if (rowUsed)
         cursor += 2;
-        
+
       rowUsed = false;
     }
     var previousEntry = [];
     var previousTime = [];
-    for(var i = 0; i<config.serial.coms.length; i++){
+    for (var i = 0; i < config.serial.coms.length; i++) {
       previousEntry[i] = '';
       previousTime[i] = 0;
     }
 
-    socket.on('entry', function(msg){
-      const {index, entryTime, entry} = msg;
+    socket.on('entry', function (msg) {
+      const { index, entryTime, entry } = msg;
 
-      if ($('.com' + index +'entry0').html())
+      if ($('.com' + index + 'entry0').html())
         shiftEntries(index);
 
       if (!entryTime) {
-        $('.com' + index +'time0').html('');
-        $('.com' + index +'entry0').html('');
+        $('.com' + index + 'time0').html('');
+        $('.com' + index + 'entry0').html('');
       } else {
-        $('.com' + index +'time0').html(printTime(entryTime));
-        $('.com' + index +'entry0').html(entry);
+        $('.com' + index + 'time0').html(printTime(entryTime));
+        $('.com' + index + 'entry0').html(entry);
       }
     });
 
-    socket.on('table', function(msg){
-      if (msg.manual){
-        $('#manual'+msg.index).val(msg.value);
+    socket.on('table', function (msg) {
+      if (msg.manual) {
+        $('#manual' + msg.index).val(msg.value);
       } else {
-        $('.table'+msg.index).html(msg.value);
+        $('.table' + msg.index).html(msg.value);
       }
     });
 
-    socket.on('state', function(msg){
-      $('.'+msg.name).removeClass('on off forcedOn forcedOff execute').addClass(msg.state);
+    socket.on('state', function (msg) {
+      $('.' + msg.name).removeClass('on off forcedOn forcedOff execute').addClass(msg.state);
     })
 
-    socket.on('average', function(msg){
-      const {index, average} = msg;
-      $('.com' + index +'avg').html(msg.average);
+    socket.on('average', function (msg) {
+      const { index, average } = msg;
+      $('.com' + index + 'avg').html(msg.average);
     });
 
-    socket.on('notfound', function(msg){
+    socket.on('notfound', function (msg) {
       $('.table').removeClass('notfound');
-      if (msg){
+      if (msg) {
         $('.table').addClass('notfound');
       }
     });
 
-    socket.on('error', function(msg){
+    socket.on('error', function (msg) {
       alert(msg);
     });
 
-    socket.on('cleartable', function(){
-      for(var i = 0; i<config.table.cells.length; i++){
-        if (!config.table.cells[i].resetOnExe){
-          if (config.table.cells[i].formula == '#'){
+    socket.on('cleartable', function () {
+      for (var i = 0; i < config.table.cells.length; i++) {
+        if (!config.table.cells[i].resetOnExe) {
+          if (config.table.cells[i].formula == '#') {
             manualChange(i);
           }
           continue;
         }
-        
-        if (config.table.cells[i].formula == '#'){
-          $('#manual'+i).val('');
+
+        if (config.table.cells[i].formula == '#') {
+          $('#manual' + i).val('');
         }
-        else{
-          $('.table'+i).html('');
+        else {
+          $('.table' + i).html('');
         }
       }
     });
 
-    socket.on('clearserial', function(){
-      for(var i = 0; i<config.serial.coms.length; i++){
-        if ($('.com' + i+'time0').html())
+    socket.on('clearserial', function () {
+      for (var i = 0; i < config.serial.coms.length; i++) {
+        if ($('.com' + i + 'time0').html())
           shiftEntries(i);
-        
-        $('.com' + i+'time0').html('');
-        $('.com' + i+'entry0').html('');
+
+        $('.com' + i + 'time0').html('');
+        $('.com' + i + 'entry0').html('');
       }
     });
 
-    if (config.selfLearning.enabled !== 'off'){
+    if (config.selfLearning.enabled !== 'off') {
       socket.on('selfLearning', (msg) => {
         console.log(msg)
-        const {success} = msg;
-        const tolerance = config.selfLearning.tolerance;
-        let color, calibration, matchedTolerance;
+        const { calibration, tolerance, success, matchedTolerance } = msg;
+        let color;
 
-        if (success){
-          calibration = msg.calibration;
-          matchedTolerance = msg.matchedTolerance;
-          $(address(2, 1)).html((Math.round(matchedTolerance*1000)/10) + '% ');
-          $(address(3, 1)).html((Math.round(10*(tolerance - matchedTolerance*100))/10) + '% ')
+        if (success) {
+          $(address(2, 1)).html((Math.round(tolerance * 1000) / 10) + '% ');
+          $(address(3, 1)).html((Math.round(1000 * (tolerance - matchedTolerance)) / 10) + '% ')
 
-          if(success>1){
+          if (success > 1) {
             color = 'warning';
           } else {
             color = 'done';
           }
         } else {
-          calibration = config.selfLearning.startCalibration;
-          matchedTolerance = tolerance;
-          $(address(2, 1)).html((Math.round(matchedTolerance*10)/10) + '% ');
+          $(address(2, 1)).html((Math.round(tolerance * 1000) / 10) + '% ');
 
           color = 'inProgress';
         }
         const selfLearningIndex = Number(config.selfLearning.enabled.slice(3));
         $(address(1, 1)).html(calibration.toFixed(config.serial.coms[selfLearningIndex].digits));
 
-        for(let i = 1; i < 4; i++){
+        for (let i = 1; i < 4; i++) {
           $(address(i, 1)).removeClass('inProgress done warning');
           $(address(i, 1)).addClass('selfLearning ' + color);
         }
@@ -462,4 +590,5 @@
     }
   </script>
 </body>
+
 </html>

@@ -19,7 +19,7 @@ const {
   OUTPUT_EXECUTING_CHANGED,
   LOG_ENTRY,
   LOG_RESET,
-  LOG_SAVE,
+  LOG_UPLOAD,
   FTP_SUCCESS,
   FTP_FAILURE,
   SL_RESET,
@@ -99,8 +99,8 @@ function Realtime(server, config, store){
     });
 
     if (constants.enabledModules.selfLearning && state.selfLearning){
-      const {success, matchedTolerance} = state.selfLearning;
-      io.emit('selfLearning', {success, matchedTolerance});
+      const {calibration, tolerance, success, matchedTolerance} = state.selfLearning;
+      io.emit('selfLearning', {calibration, tolerance, success, matchedTolerance});
     }
     
   }
@@ -157,7 +157,7 @@ function Realtime(server, config, store){
   
   function uploadLog(socket,{name, index}){
     store.dispatch({
-      type: LOG_SAVE,
+      type: LOG_UPLOAD,
       payload: {
         fileName: name, 
         ftpIndex: index,
@@ -372,8 +372,12 @@ function Realtime(server, config, store){
         break;
       }
       case SL_SUCCESS: {
-        const {success, matchedTolerance, calibration} = lastAction.payload;
-        io.emit('selfLearning', {success, matchedTolerance});
+        const {calibration, tolerance, success, matchedTolerance} = store.getState().selfLearning;;
+        io.emit('selfLearning', {calibration, tolerance, success, matchedTolerance});
+        break;
+      }
+      case EXECUTE_START: {
+        io.emit('executeStart'); 
         break;
       }
     }
