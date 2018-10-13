@@ -94,6 +94,13 @@
       font-size: 20px;
     }
 
+    .logButtons {
+      position: fixed;
+      margin-top: -15px;
+      text-align: right;
+      right: 0;
+    }
+
     .logo {
       position: fixed;
       left: 0;
@@ -272,7 +279,6 @@
     }
 
     function logTable(legend, entries) {
-      console.log({ legend, entries })
       legend = legend.slice(2);
       entries = entries.map(entry => entry.slice(2));
       const legendrow = '<tr>' + legend.reduce((total, cur) => total + '<td><b>' + cur + '</b></td>', '') + '</tr>';
@@ -387,13 +393,15 @@
     let rowUsed = false;
     let newRows = Math.ceil(numTable / numColumns);
     let index = 0;
-    console.log('log', address(4, cursor))
 
-    $(address(4, cursor - 1)).addClass('iconRight');
+    const logButtons = $('<div class="logButtons">');
+
     if (config.logger.writeToFile && config.logger.unique !== 'off')
-      $(address(4, cursor - 1)).append('<img src="/res/LogUnique.png" height="30" width="30" onclick="javascript:toggleUniqueLog()">');
+      logButtons.append('<img src="/res/LogUnique.png" height="30" width="30" onclick="javascript:toggleUniqueLog()">');
     if (config.logger.writeToFile)
-      $(address(4, cursor - 1)).append('<img src="/res/LogNormal.png" height="30" width="30" onclick="javascript:toggleLog()">');
+      logButtons.append('<img src="/res/LogNormal.png" height="30" width="30" onclick="javascript:toggleLog()">');
+
+    $(address(4, cursor - 1)).append(logButtons);
 
     for (let i = 0; i < newRows; i++) {
       for (let j = 0; j < numColumns; j++) {

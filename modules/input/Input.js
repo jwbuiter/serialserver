@@ -76,23 +76,32 @@ function Input(index, config, store) {
       dispatchState(myGPIO.readSync()?true:false);
       store.dispatch({type : HANDLE_TABLE});
       store.dispatch({type : HANDLE_OUTPUT});
+      console.log(store.getState().input.ports[index])
     },10);
   });
 
   store.listen((lastAction)=>{
     const state = store.getState();
     switch (lastAction.type){
-      case INPUT_FOLLOWING_CHANGED:
-      case INPUT_PHYSICAL_CHANGED:
       case INPUT_FORCED_CHANGED:{
+        store.dispatch({type: INPUT_CALCULATE_STATE, payload: {index}});
+        handleInput(store.getState().input.ports[index].state);
+        break;
+      }
+      case INPUT_FOLLOWING_CHANGED:
+      case INPUT_PHYSICAL_CHANGED:{
         if (index === lastAction.payload.index){
-          clearTimeout(debounce);
-          debounce = setTimeout(()=>{
-            store.dispatch({type: INPUT_CALCULATE_STATE, payload: {index}});
+          if (timeout){
+            clearTimeout(debounce);
 
+            debounce = setTimeout(()=>{
+              store.dispatch({type: INPUT_CALCULATE_STATE, payload: {index}});
+              handleInput(store.getState().input.ports[index].state);
+            }, timeout);
+          } else {
+            store.dispatch({type: INPUT_CALCULATE_STATE, payload: {index}});
             handleInput(store.getState().input.ports[index].state);
-            
-          }, timeout);
+          }
         }
         break;
       }
