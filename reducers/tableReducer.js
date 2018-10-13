@@ -10,7 +10,7 @@ const {table} = require('../configs/current');
 const initialState = {
   cells: table.cells.map(cell =>({
     entry: '',
-    manual: cell.formula === '#',
+    manual: cell.formula === '#' || cell.formula.startsWith('#M'),
   })),
   foundRow: Array(26).fill(''),
 };

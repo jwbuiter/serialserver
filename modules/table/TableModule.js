@@ -44,8 +44,11 @@ function TableModule(config, store) {
     switch (lastAction.type){
       case HANDLE_TABLE:{
         if (useFile && excelSheet){
+          const searchEntry = state.serial.coms[trigger].entry;
+          if (!searchEntry) break;
+
           const foundRow = excelSheet.find((row) =>{
-            return (row[searchColumn] === state.serial.coms[trigger].entry);
+            return (row[searchColumn] === searchEntry);
           });
           if (foundRow) {
             store.dispatch({

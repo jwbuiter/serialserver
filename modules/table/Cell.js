@@ -10,6 +10,8 @@ function Cell(index, config, store) {
   const {formula, digits, numeric, resetOnExe, waitForOther} = config;
   const myParser = Parser(store);
 
+  let content = '';
+
   store.listen((lastAction)=>{
     const state = store.getState();
     switch (lastAction.type){
@@ -19,10 +21,9 @@ function Cell(index, config, store) {
           console.log('other value not yet defined');
           break;
         }
-        if (formula == '#') {
+        if (formula == '#' || formula.startsWith('#M')) {
           break;
         }
-          
 
         let entry = myParser.parse(formula);
         if (numeric){

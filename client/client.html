@@ -31,10 +31,12 @@
       max-width: 25vw;
     }
 
-    input {
+    input,
+    select {
       text-align: center;
       font-size: 25px;
     }
+
 
     input::-webkit-outer-spin-button,
     input::-webkit-inner-spin-button {
@@ -422,6 +424,22 @@
             else {
               $(address(j, cursor + 1)).html('<input style="width:' + (conf.digits * 2) + 'vw" onkeyup="javascript:manualChange(' + index + ')" type="text" id="manual' + index + '">');
             }
+          }
+          else if (conf.formula.startsWith('#M')) {
+            const menuOptions = conf.formula.split(',').slice(1).map(option => {
+              option = option.slice(1, -1).split(':');
+
+              return '<option>' + option[1] + '</option>'
+
+            }).join('');
+            //if (conf.numeric) {
+            //$(address(j, cursor + 1)).html('<input style="height:33px; width:33px" value="-" onclick="javascript:manualDecrement(' + index + ')" type="button">');
+            //$(address(j, cursor + 1)).append('<input style="width:' + conf.digits + 'vw" onkeyup="javascript:manualChange(' + index + ')" type="number" min="0" step="1" id="manual' + index + '">');
+            //$(address(j, cursor + 1)).append('<input style="height:33px; width:33px" value="+" onclick="javascript:manualIncrement(' + index + ')" type="button">');
+            //}
+            //else {
+            $(address(j, cursor + 1)).html('<select style="width:' + (conf.digits * 2) + 'vw" onchange="javascript:manualChange(' + index + ')" id="manual' + index + '">' + menuOptions + '</select>');
+            //}
           }
           else {
             $(address(j, cursor + 1)).html('-');
