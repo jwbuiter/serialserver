@@ -100,7 +100,7 @@ function Parser(store){
       TU : (x)=> {
         if (data.length === 0) return '0';
         const lastEntry = data[data.length-1];
-        return lastEntry[lastEntry.length-1] + 1;
+        return lastEntry[lastEntry.length-1];
       },
     }
     return functions[operator](x).toString();
