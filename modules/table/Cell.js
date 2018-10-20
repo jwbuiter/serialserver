@@ -1,4 +1,5 @@
 const {
+  STATE_CHANGED,
   HANDLE_TABLE,
   TABLE_ENTRY,
   TABLE_RESET,
@@ -15,6 +16,7 @@ function Cell(index, config, store) {
   store.listen((lastAction)=>{
     const state = store.getState();
     switch (lastAction.type){
+      case STATE_CHANGED:
       case HANDLE_TABLE:{
         const allEntries = state.serial.coms.reduce((acc, cur) => (acc && !(cur.entry == '0')), true);
         if (waitForOther && !allEntries){
