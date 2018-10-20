@@ -6,6 +6,7 @@ const path = require('path');
 const constants = require('../../config.static');
 
 const {
+  STATE_CHANGED,
   LOG_ENTRY,
   LOG_MAKE_ENTRY,
   LOG_RESET,
