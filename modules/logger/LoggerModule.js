@@ -44,6 +44,7 @@ function LoggerModule(config, store) {
     
     switch (lastAction.type){
       case LOG_MAKE_ENTRY:{
+        store.dispatch({type: STATE_CHANGED});
         let newRow = [constants.name, logID, dateFormat(new Date(),'yyyy-mm-dd HH:MM:ss')];
         newRow = newRow.concat(state.serial.coms.map(com=>com.entry));
         newRow = newRow.concat(state.table.cells.map(cell=>cell.entry));
