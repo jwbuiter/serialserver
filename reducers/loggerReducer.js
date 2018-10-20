@@ -40,7 +40,7 @@ module.exports = function(state = initialState, action) {
       const {comIndex, calibration, tolerance} = action.payload;
       const newEntries = state.entries.filter(entry => {
         const testValue = Number(entry[comIndex+3]);
-        return ((testValue >= calibration* (1 - tolerance)) && (testValue <= testValue * (1 + tolerance)))
+        return ((testValue >= calibration* (1 - tolerance)) && (testValue <= calibration * (1 + tolerance)))
       });
       return {
         ...state,
