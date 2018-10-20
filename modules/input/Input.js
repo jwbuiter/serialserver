@@ -108,7 +108,7 @@ function Input(index, config, store) {
       case OUTPUT_FORCED_CHANGED:
       case OUTPUT_EXECUTING_CHANGED:{
         if (follow === lastAction.payload.index){
-          const outputState = state.output.ports[follow].state;
+          const outputState = store.getState().output.ports[follow].state;
           const isFollowing = outputState^invert;
           store.dispatch({
             type: INPUT_FOLLOWING_CHANGED,

@@ -130,8 +130,8 @@
 
       $(address(0, 7)).append($('<select id ="selfLearningenabled">').html('<option value="off">Off</option><option value="com0">Com 0</option><option value="com1">Com 1</option>'));
       $(address(1, 7)).append($('<input type="number" id="selfLearningnumber" min="0" step="1">'));
-      $(address(3, 7)).append($('<input type="number" id="selfLearningstartCalibration" min="0" step="1">'));
-      $(address(2, 7)).append($('<input type="number" id="selfLearningtolerance" min="0" step="1">'));
+      $(address(2, 7)).append($('<input type="number" id="selfLearningstartCalibration" min="0" step="1">'));
+      $(address(3, 7)).append($('<input type="number" id="selfLearningtolerance" min="0" step="1">'));
       $(address(4, 7)).append($('<input type="number" id="selfLearningstartTolerance" min="0" step="1">'));
       $(address(5, 7)).append($('<select id ="loggerunique">').html('<option value="off">Off</option><option value="com0">Com 0</option><option value="com1">Com 1</option>'));
       $(address(6, 7)).html('#SN #ST').addClass('small');
@@ -331,6 +331,8 @@
     function fillIn() {
       fillInRecursive('', config);
       $('#selfLearningstartCalibration').val(Math.round(config.selfLearning.startCalibration * 1000) / 1000);
+
+      $("[id^=tablecells][id$=formula]").each((index, element) => tableCheckMenu({ target: element }))
     }
 
     function putInConfigRecursive(prefix, config) {
@@ -433,7 +435,6 @@
     }
 
     function tableCheckMenu(event) {
-      console.log('test')
       const element = event.target;
       if (element.value.startsWith('#M')) {
         element.style = "width: 88%";
@@ -457,6 +458,11 @@
     }
 
     function showMenu(element) {
+      if (openedMenu) {
+        openedMenu = null;
+        $('#menu').remove();
+        return;
+      }
       openedMenu = element;
       const entries = element.value.split(',').slice(1);
       $('#menu').remove();
@@ -477,7 +483,9 @@
     function addMenuEntry() {
       saveMenu();
       openedMenu.value += ',{:}';
-      showMenu(openedMenu);
+      const oldMenu = openedMenu;
+      openedMenu = null;
+      showMenu(oldMenu);
     }
 
     function saveMenu() {
@@ -504,7 +512,9 @@
       const menuEntries = openedMenu.value.split(',');
       menuEntries.splice(index + 1, 1);
       openedMenu.value = menuEntries.join(',');
-      showMenu(openedMenu);
+      const oldMenu = openedMenu;
+      openedMenu = null;
+      showMenu(oldMenu);
     }
 
     socket.on('configList', function (list) {

@@ -267,12 +267,36 @@
     }
 
     function manualIncrement(index) {
-      $('#manual' + index).val(Number($('#manual' + index).val()) + 1);
+      let newVal;
+      if (config.table.cells[index].formula === '#') {
+        newVal = Number($('#manual' + index).val()) + 1
+      } else {
+        const selectedOption = $('#manual' + index + ' option:selected');
+        if (selectedOption.length) {
+          newVal = selectedOption.next().val();
+        } else {
+          newVal = $('#manual' + index).children().first().val();
+        }
+      }
+
+      $('#manual' + index).val(newVal);
       manualChange(index);
     }
 
     function manualDecrement(index) {
-      $('#manual' + index).val(Number($('#manual' + index).val()) - 1);
+      let newVal;
+      if (config.table.cells[index].formula === '#') {
+        newVal = Number($('#manual' + index).val()) - 1
+      } else {
+        const selectedOption = $('#manual' + index + ' option:selected');
+        if (selectedOption.length) {
+          newVal = selectedOption.prev().val();
+        } else {
+          newVal = $('#manual' + index).children().last().val();
+        }
+      }
+
+      $('#manual' + index).val(newVal);
       manualChange(index);
     }
 
@@ -415,31 +439,27 @@
 
           $(address(j, cursor)).html(conf.name || (String.fromCharCode(65 + index % numColumns) + (index % numColumns + 1)));
           $(address(j, cursor)).addClass('table');
-          if (conf.formula == '#') {
+          if (conf.formula == '#' || conf.formula.startsWith('#M')) {
+            let manual;
+            if (conf.formula == '#') {
+              manual = '<input style="width:' + conf.digits + 'vw" onkeyup="javascript:manualChange(' + index + ')" type="number" min="0" step="1" id="manual' + index + '">';
+            } else {
+              const menuOptions = conf.formula.split(',').slice(1).map(option => {
+                option = option.slice(1, -1).split(':');
+
+                return `<option value="${option[0]}" >${option[1]} </option>`
+              }).join('');
+              manual = '<select style="width:' + (conf.digits * 2) + 'vw" onchange="javascript:manualChange(' + index + ')" id="manual' + index + '">' + menuOptions + '</select>';
+            }
+
             if (conf.numeric) {
-              $(address(j, cursor + 1)).html('<input style="height:33px; width:33px" value="-" onclick="javascript:manualDecrement(' + index + ')" type="button">');
-              $(address(j, cursor + 1)).append('<input style="width:' + conf.digits + 'vw" onkeyup="javascript:manualChange(' + index + ')" type="number" min="0" step="1" id="manual' + index + '">');
+              $(address(j, cursor + 1)).append('<input style="height:33px; width:33px" value="-" onclick="javascript:manualDecrement(' + index + ')" type="button">');
+              $(address(j, cursor + 1)).append(manual);
               $(address(j, cursor + 1)).append('<input style="height:33px; width:33px" value="+" onclick="javascript:manualIncrement(' + index + ')" type="button">');
             }
             else {
-              $(address(j, cursor + 1)).html('<input style="width:' + (conf.digits * 2) + 'vw" onkeyup="javascript:manualChange(' + index + ')" type="text" id="manual' + index + '">');
+              $(address(j, cursor + 1)).html(manual);
             }
-          }
-          else if (conf.formula.startsWith('#M')) {
-            const menuOptions = conf.formula.split(',').slice(1).map(option => {
-              option = option.slice(1, -1).split(':');
-
-              return '<option>' + option[1] + '</option>'
-
-            }).join('');
-            //if (conf.numeric) {
-            //$(address(j, cursor + 1)).html('<input style="height:33px; width:33px" value="-" onclick="javascript:manualDecrement(' + index + ')" type="button">');
-            //$(address(j, cursor + 1)).append('<input style="width:' + conf.digits + 'vw" onkeyup="javascript:manualChange(' + index + ')" type="number" min="0" step="1" id="manual' + index + '">');
-            //$(address(j, cursor + 1)).append('<input style="height:33px; width:33px" value="+" onclick="javascript:manualIncrement(' + index + ')" type="button">');
-            //}
-            //else {
-            $(address(j, cursor + 1)).html('<select style="width:' + (conf.digits * 2) + 'vw" onchange="javascript:manualChange(' + index + ')" id="manual' + index + '">' + menuOptions + '</select>');
-            //}
           }
           else {
             $(address(j, cursor + 1)).html('-');
@@ -559,14 +579,15 @@
 
     socket.on('cleartable', function () {
       for (var i = 0; i < config.table.cells.length; i++) {
-        if (!config.table.cells[i].resetOnExe) {
-          if (config.table.cells[i].formula == '#') {
+        const cell = config.table.cells[i];
+        if (!cell.resetOnExe) {
+          if (cell.formula == '#' || cell.formula.startsWith('#M')) {
             manualChange(i);
           }
           continue;
         }
 
-        if (config.table.cells[i].formula == '#') {
+        if (cell.formula == '#' || cell.formula.startsWith('#M')) {
           $('#manual' + i).val('');
         }
         else {
