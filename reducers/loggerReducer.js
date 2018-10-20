@@ -37,10 +37,10 @@ module.exports = function(state = initialState, action) {
       }
     }
     case SL_SUCCESS:{
-      const {comIndex, calibration, matchedTolerance} = action.payload;
+      const {comIndex, calibration, tolerance} = action.payload;
       const newEntries = state.entries.filter(entry => {
         const testValue = Number(entry[comIndex+3]);
-        return ((testValue >= calibration* (1 - matchedTolerance)) && (testValue <= testValue * (1 + matchedTolerance)))
+        return ((testValue >= calibration* (1 - tolerance)) && (testValue <= testValue * (1 + tolerance)))
       });
       return {
         ...state,

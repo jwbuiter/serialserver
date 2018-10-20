@@ -59,6 +59,7 @@ function SelfLearningModule(config, store) {
               calibration,
               matchedTolerance,
               comIndex,
+              tolerance,
             }
           });
           store.dispatch({type: LOG_SAVE });
