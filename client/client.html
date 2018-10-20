@@ -66,7 +66,11 @@
       margin: auto;
       padding: 2em;
       width: 80vw;
+
+      /* Fallback for browsers that do not support Custom Properties */
       height: calc(100vh - 60px);
+
+      height: calc(var(--vh, 1vh) * 100 - 60px);
       top: 30px;
       left: 10vw;
       border: 1px solid black;
@@ -193,6 +197,11 @@
   <script src="/current.js"></script>
   <script src="/config.static.js"></script>
   <script>
+    // Hack to get proper vh unit on tablet
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+    // end hack
+
     document.title = constants.name;
     var socket = io();
     const numColumns = 5;
