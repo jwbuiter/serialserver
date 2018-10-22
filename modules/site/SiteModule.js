@@ -3,7 +3,7 @@ const fileUpload = require('express-fileupload');
 const zip = require('express-zip');
 const path = require('path');
 const { exec } = require('child_process');
-
+const dateFormat = require('dateformat');
 
 const {
   SHUTDOWN,
@@ -91,7 +91,7 @@ function SiteModule(config, store) {
       
       if (req.query.multiFile){
         const fileList = req.query.multiFile.split(',').map((element) => ({path: path.join(logPath, element), name: element}));
-        res.zip(fileList, timeString().split('.')[0] + '.zip');
+        res.zip(fileList, dateFormat(new Date(),'yyyy-mm-dd_HH-MM-ss') + '.zip');
       }
       else if (req.query.file){
         res.download(path.join(logPath, req.query.file));
