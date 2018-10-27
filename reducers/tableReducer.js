@@ -29,7 +29,7 @@ module.exports = function(state = initialState, action) {
     case TABLE_RESET_CELL:{
       const index = action.payload;
       const newCells = Array.from(state.cells);
-      newCells[index] = initialState.cells[index];
+      newCells[index] = {...initialState.cells[index]};
       return {
         ...state,
         cells: newCells,

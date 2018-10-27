@@ -83,7 +83,7 @@
     }
 
     .modal table {
-      width: 80vw;
+      width: 78vw;
     }
 
     .header {
@@ -200,7 +200,7 @@
   <script>
     // Hack to get proper vh unit on tablet
     let vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
+    document.documentElement.style.setProperty('--vh', vh + 'px');
     // end hack
 
     document.title = constants.name;
@@ -282,10 +282,11 @@
         newVal = Number($('#manual' + index).val()) + 1
       } else {
         const selectedOption = $('#manual' + index + ' option:selected');
-        if (selectedOption.length) {
+        if (selectedOption.next().length) {
           newVal = selectedOption.next().val();
-        } else {
-          newVal = $('#manual' + index).children().first().val();
+        }
+        else {
+          newVal = selectedOption.parent().children().first().val();
         }
       }
 
@@ -299,10 +300,11 @@
         newVal = Number($('#manual' + index).val()) - 1
       } else {
         const selectedOption = $('#manual' + index + ' option:selected');
-        if (selectedOption.length) {
+        if (selectedOption.prev().length) {
           newVal = selectedOption.prev().val();
-        } else {
-          newVal = $('#manual' + index).children().last().val();
+        }
+        else {
+          newVal = selectedOption.parent().children().last().val();
         }
       }
 
@@ -457,8 +459,10 @@
               const menuOptions = conf.formula.split(',').slice(1).map(option => {
                 option = option.slice(1, -1).split(':');
 
-                return `<option value="${option[0]}" >${option[1]} </option>`
-              }).join('');
+                return '<option value="' + option[0] + '" >' + option[1] + '</option>'
+              })
+                .concat(['<option selected value=""></option>'])
+                .join('');
               manual = '<select style="width:' + (conf.digits * 2) + 'vw" onchange="javascript:manualChange(' + index + ')" id="manual' + index + '">' + menuOptions + '</select>';
             }
 
