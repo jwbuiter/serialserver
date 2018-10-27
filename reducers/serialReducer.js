@@ -29,6 +29,9 @@ module.exports = function(state = initialState, action) {
           entry: state.coms[index].entry,
           time: state.coms[index].time,
         });
+
+        const historyLength = serial.coms[index].entries;
+        newHistories[index] = newHistories[index].slice(-historyLength);
       }
       
       const newComs = Array.from(state.coms);
@@ -59,6 +62,9 @@ module.exports = function(state = initialState, action) {
             entry: state.coms[index].entry,
             time: state.coms[index].time,
           });
+
+          const historyLength = serial.coms[index].entries;
+          newHistories[index] = newHistories[index].slice(-historyLength);
         }
 
         const newComs = Array.from(state.coms);
@@ -79,6 +85,9 @@ module.exports = function(state = initialState, action) {
               entry: state.coms[index].entry,
               time: state.coms[index].time,
             });
+
+            const historyLength = serial.coms[index].entries;
+            history = history.slice(-historyLength);
           }
           return history;
         });
