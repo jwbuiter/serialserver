@@ -97,26 +97,33 @@ function Com(index, config, store) {
 
   if (testMode){
     // if the test mode is enabled, dispatch an entry containing the test message every timeout
+    let dispatchTest;
+    let nextTime = (new Date).getTime();
+
     if (timeoutReset){
       const dispatchNothing = () => {
         dispatch(decode('0'));
       }
-      const dispatchTest = () => {
+
+      dispatchTest = () => {
         dispatch(decode(testMessage));
         setTimeout(dispatchNothing, timeout * 1000);
+
+        nextTime += 2 * timeout * 1000;
+        const currentTime = (new Date).getTime();
+        setTimeout(dispatchTest, nextTime - currentTime);
       }
-
-      dispatchTest();
-      setInterval(dispatchTest, 2 * timeout * 1000);
-
     } else {
-      const dispatchTest = () => {
+      dispatchTest = () => {
         dispatch(decode(testMessage));
-      }
 
-      dispatchTest();
-      setInterval(()=> dispatchTest, timeout * 1000);
+        nextTime += timeout * 1000;
+        const currentTime = (new Date).getTime();
+        setTimeout(dispatchTest, nextTime - currentTime);
+      }
     }
+
+    dispatchTest();
   } else {
     
     const myPort = new serialPort(port, {

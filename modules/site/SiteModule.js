@@ -81,7 +81,7 @@ function SiteModule(config, store) {
     },
     '/comlogu': (req, res) => {
       const loggerState = store.getState().logger;
-      const entries = loggerState.entries.filter(entry => entry[entry.length-1] !== 0).reverse();
+      const entries = loggerState.entries.filter(entry => entry[entry.length-1] !== '').reverse();
       const legend = loggerState.legend;
       
       res.send(JSON.stringify({entries, legend}, null, 2));
