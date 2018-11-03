@@ -5,6 +5,7 @@ var config ={
     coms : [
       {
         port : '/dev/ttyUSB0',
+        reader : false,
         baudRate : 9600,
         stopBits : 1,
         bits : 8,
@@ -25,6 +26,7 @@ var config ={
       },
       {
         port : '/dev/ttyUSB1',
+        reader : false,
         baudRate : 9600,
         stopBits : 1,
         bits : 8,

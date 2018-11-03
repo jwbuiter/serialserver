@@ -1,144 +1,155 @@
 <!doctype html>
 <html>
+
 <head>
-   <style>
-      table {text-align: center; border: none; border-collapse: collapse;}
+  <style>
+    table {text-align: center; border: none; border-collapse: collapse;}
       tr { height: 40px; }
       td { text-align: center; font-size: 18px; border-style: bold; width: 200px; }
       input {text-align: center;}
     </style>
 </head>
+
 <body>
-<div style="display: block; width: 600px; margin:0 auto;">
-  <table>
-    <tr>
-      <td><h2>Settings com 0</h2></td>
-      <td><h2>Settings com 1</h2></td>
-      <td><b>Test Mode</b><input type="checkbox" id="serialtestMode"></td>
-    </tr>
-    <tr>
+  <div style="display: block; width: 600px; margin:0 auto;">
+    <table>
+      <tr>
+        <td>
+          <h2>Settings com 0</h2>
+        </td>
+        <td>
+          <h2>Settings com 1</h2>
+        </td>
+        <td><b>Test Mode</b><input type="checkbox" id="serialtestMode"></td>
+      </tr>
+      <tr>
         <td><input type="text" id="serialcoms0testMessage"></td>
         <td><input type="text" id="serialcoms1testMessage"></td>
         <td>Test value</td>
       </tr>
-    <tr>
-      <td><input type="number" id="serialcoms0baudRate" min="0" step="1"></td>
-      <td><input type="number" id="serialcoms1baudRate" min="0" step="1"></td>
-      <td>Baudrate</td>
-    </tr>
-    <tr>
-      <td><input type="number" id="serialcoms0stopBits" min="0" step="1"></td>
-      <td><input type="number" id="serialcoms1stopBits" min="0" step="1"></td>
-      <td>Number of stop bits</td>
-    </tr>
-    <tr>
-      <td><input type="number" id="serialcoms0bits" min="0" step="1"></td>
-      <td><input type="number" id="serialcoms1bits" min="0" step="1"></td>
-      <td>Number of Data bits</td>
-    </tr>
-    <tr>
-      <td>
-        <select id ="serialcoms0parity">
-          <option value="none">None</option>
-          <option value="even">Even</option>
-          <option value="odd">Odd</option>
-          <option value="mark">Mark</option>
-          <option value="space">Space</option>
-        </select>
-      </td>
-      <td>
-        <select id ="serialcoms1parity">
-          <option value="none">None</option>
-          <option value="even">Even</option>
-          <option value="odd">Odd</option>
-          <option value="mark">Mark</option>
-          <option value="space">Space</option>
-        </select>
-      </td>
-      <td>Parity</td>
-    </tr>
-    <tr>
-      <td><input type="checkbox" id="serialcoms0RTSCTS"></td>
-      <td><input type="checkbox" id="serialcoms1RTSCTS"></td>
-      <td>RTSCTS</td>
-    </tr>
-    <tr>
-      <td><input type="checkbox" id="serialcoms0XONXOFF"></td>
-      <td><input type="checkbox" id="serialcoms1XONXOFF"></td>
-      <td>XONXOFF</td>
-    </tr>
-    <tr>
-      <td><input type="text" id="serialcoms0name"></td>
-      <td><input type="text" id="serialcoms1name"></td>
-      <td>Name</td>
-    </tr>
-    <tr>
-      <td><input type="number" id="serialcoms0entries" min="0" step="1"></td>
-      <td><input type="number" id="serialcoms1entries" min="0" step="1"></td>
-      <td>Number of entries</td>
-    </tr>
-    <tr>
-      <td><input type="checkbox" id="serialcoms0average"></td>
-      <td><input type="checkbox" id="serialcoms1average"></td>
-      <td>Take average</td>
-    </tr>
-    <tr>
-      <td><input type="number" id="serialcoms0factor"></td>
-      <td><input type="number" id="serialcoms1factor"></td>
-      <td>Factor</td>
-    </tr>
-    <tr>
-      <td><input type="number" id="serialcoms0digits" min="0" step="1"></td>
-      <td><input type="number" id="serialcoms1digits" min="0" step="1"></td>
-      <td>Digits/rounding</td>
-    </tr>
-    <tr>
-      <td><input type="checkbox" id="serialcoms0alwaysPositive"></td>
-      <td><input type="checkbox" id="serialcoms1alwaysPositive"></td>
-      <td>Always positive</td>
-    </tr>
-    <tr>
-      <td><input type="number" id="serialcoms0timeout" min="0" step="1"></td>
-      <td><input type="number" id="serialcoms1timeout" min="0" step="1"></td>
-      <td>Timeout in seconds</td>
-    </tr>
-    <tr>
-      <td><input type="checkbox" id="serialcoms0timeoutReset"></td>
-      <td><input type="checkbox" id="serialcoms1timeoutReset"></td>
-      <td>Reset after timeout</td>
-    </tr>
-    <tr>
-      <td><input type="text" id="serialcoms0prefix"></td>
-      <td><input type="text" id="serialcoms1prefix"></td>
-      <td>Prefix</td>
-    </tr>
-    <tr>
-      <td><input type="text" id="serialcoms0postfix"></td>
-      <td><input type="text" id="serialcoms1postfix"></td>
-      <td>Postfix</td>
-    </tr>
-    <tr>
-      <td><input type="date" id="date"></td>
-      <td><input type="time" id="time"></td>
-      <td><input type="button" value="Change date and time" onclick="javascript:setDate()"></td>
-    </tr>
-    <tr>
-      <td><input type="button" value="Save settings and restart" onclick="javascript:setSettings()"></td>
-      <td><input type="button" value="Cancel" onclick="javascript:goDebug()"></td>
-      <td id="version"></td>
-    </tr>
-  </table>
-</div>
+      <tr>
+        <td><input type="checkbox" id="serialcoms0reader"></td>
+        <td><input type="checkbox" id="serialcoms1reader"></td>
+        <td>MBDC Reader & #</td>
+      </tr>
+      <tr>
+        <td><input type="number" id="serialcoms0baudRate" min="0" step="1"></td>
+        <td><input type="number" id="serialcoms1baudRate" min="0" step="1"></td>
+        <td>Baudrate/Port</td>
+      </tr>
+      <tr>
+        <td><input type="number" id="serialcoms0stopBits" min="0" step="1"></td>
+        <td><input type="number" id="serialcoms1stopBits" min="0" step="1"></td>
+        <td>Number of stop bits</td>
+      </tr>
+      <tr>
+        <td><input type="number" id="serialcoms0bits" min="0" step="1"></td>
+        <td><input type="number" id="serialcoms1bits" min="0" step="1"></td>
+        <td>Number of Data bits</td>
+      </tr>
+      <tr>
+        <td>
+          <select id="serialcoms0parity">
+            <option value="none">None</option>
+            <option value="even">Even</option>
+            <option value="odd">Odd</option>
+            <option value="mark">Mark</option>
+            <option value="space">Space</option>
+          </select>
+        </td>
+        <td>
+          <select id="serialcoms1parity">
+            <option value="none">None</option>
+            <option value="even">Even</option>
+            <option value="odd">Odd</option>
+            <option value="mark">Mark</option>
+            <option value="space">Space</option>
+          </select>
+        </td>
+        <td>Parity</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" id="serialcoms0RTSCTS"></td>
+        <td><input type="checkbox" id="serialcoms1RTSCTS"></td>
+        <td>RTS/CTS</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" id="serialcoms0XONXOFF"></td>
+        <td><input type="checkbox" id="serialcoms1XONXOFF"></td>
+        <td>XON/XOFF</td>
+      </tr>
+      <tr>
+        <td><input type="text" id="serialcoms0name"></td>
+        <td><input type="text" id="serialcoms1name"></td>
+        <td>Name</td>
+      </tr>
+      <tr>
+        <td><input type="number" id="serialcoms0entries" min="0" step="1"></td>
+        <td><input type="number" id="serialcoms1entries" min="0" step="1"></td>
+        <td>Number of entries</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" id="serialcoms0average"></td>
+        <td><input type="checkbox" id="serialcoms1average"></td>
+        <td>Take average</td>
+      </tr>
+      <tr>
+        <td><input type="number" id="serialcoms0factor"></td>
+        <td><input type="number" id="serialcoms1factor"></td>
+        <td>Factor</td>
+      </tr>
+      <tr>
+        <td><input type="number" id="serialcoms0digits" min="0" step="1"></td>
+        <td><input type="number" id="serialcoms1digits" min="0" step="1"></td>
+        <td>Digits/rounding</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" id="serialcoms0alwaysPositive"></td>
+        <td><input type="checkbox" id="serialcoms1alwaysPositive"></td>
+        <td>Always positive</td>
+      </tr>
+      <tr>
+        <td><input type="checkbox" id="serialcoms0timeoutReset"></td>
+        <td><input type="checkbox" id="serialcoms1timeoutReset"></td>
+        <td>Reset after timeout</td>
+      </tr>
+      <tr>
+        <td><input type="number" id="serialcoms0timeout" min="0" step="1"></td>
+        <td><input type="number" id="serialcoms1timeout" min="0" step="1"></td>
+        <td>Timeout in seconds</td>
+      </tr>
+      <tr>
+        <td><input type="text" id="serialcoms0prefix"></td>
+        <td><input type="text" id="serialcoms1prefix"></td>
+        <td>Prefix</td>
+      </tr>
+      <tr>
+        <td><input type="text" id="serialcoms0postfix"></td>
+        <td><input type="text" id="serialcoms1postfix"></td>
+        <td>Postfix</td>
+      </tr>
+      <tr>
+        <td><input type="date" id="date"></td>
+        <td><input type="time" id="time"></td>
+        <td><input type="button" value="Change date and time" onclick="javascript:setDate()"></td>
+      </tr>
+      <tr>
+        <td><input type="button" value="Save settings and restart" onclick="javascript:setSettings()"></td>
+        <td><input type="button" value="Cancel" onclick="javascript:goDebug()"></td>
+        <td id="version"></td>
+      </tr>
+    </table>
+  </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/res/jquery-1.11.1.js"></script>
   <script src="/current.js"></script>
   <script src="/config.static.js"></script>
   <script type="text/javascript">
-    function fillInRecursive(prefix, config){
-      for (let property in config){
-        let source = $('#'+prefix+property);
-        switch (typeof(config[property])){
+    function fillInRecursive(prefix, config) {
+      for (let property in config) {
+        let source = $('#' + prefix + property);
+        switch (typeof (config[property])) {
           case 'object':
             fillInRecursive(prefix + property, config[property]);
             break;
@@ -153,20 +164,20 @@
       }
     }
 
-    function fillIn(){
+    function fillIn() {
       fillInRecursive('', config);
       $('#version').html('<b>Version: ' + config.version + '</b>');
     }
 
-    function putInConfigRecursive(prefix, config){
-      for (let property in config){
-        let source = $('#'+prefix+property);
+    function putInConfigRecursive(prefix, config) {
+      for (let property in config) {
+        let source = $('#' + prefix + property);
 
-        if (!source.length && !(typeof(config[property])==='object')) {
+        if (!source.length && !(typeof (config[property]) === 'object')) {
           continue;
         }
 
-        switch (typeof(config[property])){
+        switch (typeof (config[property])) {
           case 'object':
             config[property] = putInConfigRecursive(prefix + property, config[property]);
             break;
@@ -184,7 +195,7 @@
       return config;
     }
 
-    function putInConfig(){
+    function putInConfig() {
       config = putInConfigRecursive('', config);
     }
 
@@ -192,23 +203,22 @@
     document.title = constants.name;
     var socket = io();
 
-    function setDate(){
+    function setDate() {
       let dateTimeString = $('#date').val() + ' ' + $('#time').val()
       let dateTime = Date.parse(dateTimeString);
-      socket.emit('setDateTime', dateTime/1000);
+      socket.emit('setDateTime', dateTime / 1000);
     }
 
-    function goDebug(){
+    function goDebug() {
       window.location.href = '/';
     }
 
-    function setSettings(){
-      if (confirm("Do you really want to save these settings?"))
-      {
+    function setSettings() {
+      if (confirm("Do you really want to save these settings?")) {
         putInConfig();
 
-        socket.emit('settings',config);
-        setTimeout(function(){ 
+        socket.emit('settings', config);
+        setTimeout(function () {
           window.location.href = '/';
         }, 5000);
       }
@@ -216,4 +226,5 @@
 
   </script>
 </body>
+
 </html>
