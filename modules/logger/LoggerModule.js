@@ -51,7 +51,7 @@ function LoggerModule(config, store) {
         newRow = newRow.concat(state.table.cells.map(cell=>cell.entry));
 
         if(unique === 'off'){
-          newRow = newRow.concat([0]);
+          newRow = newRow.concat(['']);
         } else {
           const uniqueIndex = Number(unique.slice(-1));
           const comValue = state.serial.coms[uniqueIndex].entry;

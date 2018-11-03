@@ -30,7 +30,7 @@ module.exports = function(state = initialState, action) {
     case LOG_UNIQUE_OVERWRITE:{
       const index = action.payload;
       const newEntries =  Array.from(state.entries);
-      newEntries[index][state.legend.length-1] = 0;
+      newEntries[index][state.legend.length-1] = '';
       return {
         ...state,
         entries: newEntries,

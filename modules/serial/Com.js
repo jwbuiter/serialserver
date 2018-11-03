@@ -46,7 +46,6 @@ function Com(index, config, store) {
     if (zeroReset && Number(entry) == 0){
       store.dispatch({type: TABLE_RESET});
       store.dispatch({type: SERIAL_RESET});
-      console.log('why')
     } else {
       store.dispatch({
         type : SERIAL_ENTRY,
@@ -98,24 +97,25 @@ function Com(index, config, store) {
 
   if (testMode){
     // if the test mode is enabled, dispatch an entry containing the test message every timeout
-    const dispatchTest = () => {
-      dispatch(decode(testMessage));
-    }
-    const dispatchNothing = () => {
-      dispatch(decode('0'));
-    }
-
-    dispatchTest();
-
     if (timeoutReset){
-      setTimeout(() => {
-        dispatchNothing();
-        setInterval(dispatchNothing, 2 * timeout * 1000);
-      }, timeout *1000);
+      const dispatchNothing = () => {
+        dispatch(decode('0'));
+      }
+      const dispatchTest = () => {
+        dispatch(decode(testMessage));
+        setTimeout(dispatchNothing, timeout * 1000);
+      }
+
+      dispatchTest();
       setInterval(dispatchTest, 2 * timeout * 1000);
 
     } else {
-      setInterval(dispatchTest, timeout * 1000);
+      const dispatchTest = () => {
+        dispatch(decode(testMessage));
+      }
+
+      dispatchTest();
+      setInterval(()=> dispatchTest, timeout * 1000);
     }
   } else {
     

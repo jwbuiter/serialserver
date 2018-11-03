@@ -20,7 +20,6 @@ function Cell(index, config, store) {
       case HANDLE_TABLE:{
         const allEntries = state.serial.coms.reduce((acc, cur) => (acc && !(cur.entry == '0')), true);
         if (waitForOther && !allEntries){
-          console.log('other value not yet defined');
           break;
         }
         if (formula == '#' || formula.startsWith('#M')) {
