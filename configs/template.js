@@ -16,7 +16,7 @@ var config ={
         average : false,
         timeout : 60,
         timeoutReset : false,
-        digits : 3,
+        digits : 1,
         entries : 5,
         factor : 1,
         alwaysPositive : true,

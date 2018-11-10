@@ -24,9 +24,10 @@ const parser = require('../parser/Parser');
 const constants = require('../../config.static');
 
 function Input(index, config, store) {
-  const {formula, timeout, follow, invert} = config;
+  const {formula, timeout, follow, invert, manualTimeout} = config;
   const myGPIO = new Gpio(constants.inputPin[index], 'in', 'both');
   let debounce = setTimeout(()=> 0 ,1);
+  let force = setTimeout(()=> 0 ,1);
   let state = false;
 
   function handleInput(state){
@@ -79,6 +80,20 @@ function Input(index, config, store) {
     switch (lastAction.type){
       case INPUT_FORCED_CHANGED:{
         store.dispatch({type: INPUT_CALCULATE_STATE, payload: {index}});
+        if (manualTimeout){
+          clearTimeout(force);
+          force = setTimeout(() => {
+            store.dispatch({
+              type: INPUT_FORCED_CHANGED, 
+              payload: {
+                index,
+                isForced: false,
+                previousForced: true,
+                forcedState: false,
+              }
+            });
+          }, manualTimeout*1000);
+        }
         break;
       }
       case INPUT_FOLLOWING_CHANGED:
