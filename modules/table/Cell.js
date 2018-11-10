@@ -18,7 +18,7 @@ function Cell(index, config, store) {
     switch (lastAction.type){
       case STATE_CHANGED:
       case HANDLE_TABLE:{
-        const allEntries = state.serial.coms.reduce((acc, cur) => (acc && !(cur.entry == '0')), true);
+        const allEntries = state.serial.coms.reduce((acc, cur) => (acc && !(cur.entry === '0' || cur.entry==='')), true);
         if (waitForOther && !allEntries){
           break;
         }
