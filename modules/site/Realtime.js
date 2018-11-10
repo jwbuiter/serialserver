@@ -72,7 +72,7 @@ function Realtime(server, config, store){
     io.emit('state', {name: 'output'+index, state});
   }
   
-  function emitAllState(){
+  function emitAllState(socket){
     const state = store.getState();
   
     state.input.ports.forEach((port, index) => {
@@ -84,7 +84,7 @@ function Realtime(server, config, store){
     });
 
     state.table.cells.forEach((cell, index) => {
-      io.emit('table', {index, value: cell.entry, manual: cell.manual});
+      socket.emit('table', {index, value: cell.entry, manual: cell.manual});
     })
 
     // state.serial.histories.forEach((history, index) => {
@@ -94,13 +94,13 @@ function Realtime(server, config, store){
     // });
 
     state.serial.coms.forEach(({entry, time, average}, index) => {
-      io.emit('entry', {index, entryTime: time, entry});
-      io.emit('average', {index, average});
+      socket.emit('entry', {index, entryTime: time, entry});
+      socket.emit('average', {index, average});
     });
 
     if (constants.enabledModules.selfLearning && state.selfLearning){
       const {calibration, tolerance, success, matchedTolerance} = state.selfLearning;
-      io.emit('selfLearning', {calibration, tolerance, success, matchedTolerance});
+      socket.emit('selfLearning', {calibration, tolerance, success, matchedTolerance});
     }
     
   }
@@ -386,7 +386,7 @@ function Realtime(server, config, store){
   io.on('connection', socket => {
     console.log('a user connected');
     socket.emit('ip', ip.address());
-    emitAllState();
+    emitAllState(socket);
 
     const commands = {
       'configExists': configExists,
