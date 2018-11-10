@@ -22,10 +22,7 @@ function calculateState(port, index){
     return port.forcedState;
 
   if (output.ports[index].execute)
-    if (port.executing)
-      return port.result;
-    else
-      return false;
+    return (port.executing)
   
   return port.result;
 }

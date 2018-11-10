@@ -50,7 +50,7 @@ function Output(index, config, store) {
         break;
       }
       case EXECUTE_START:{
-        if (execute){
+        if (execute && store.getState().output.ports[index].result){
           store.dispatch({
             type: OUTPUT_EXECUTING_CHANGED,
             payload: {
