@@ -230,7 +230,6 @@ function Realtime(server, config, store){
         }
       });
     }
-    emitAllState();
     store.dispatch({type: HANDLE_TABLE});
     store.dispatch({type: HANDLE_OUTPUT});
   }
@@ -271,7 +270,6 @@ function Realtime(server, config, store){
         }
       });
     }
-    emitAllState();
     store.dispatch({type: HANDLE_TABLE});
     store.dispatch({type: HANDLE_OUTPUT});
   }
