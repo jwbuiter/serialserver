@@ -257,33 +257,22 @@
     $(address(3, cursor)).append($('<b>').html('Invert'));
     $(address(4, cursor)).append($('<b>').html('Follow'));
     $(address(5, cursor)).append($('<b>').html('Timeout (ms)'));
+    $(address(6, cursor)).append($('<b>').html('Man timeout (s)'));
     cursor -= 2;
-    $(address(6, cursor - 1)).append($('<b>').html('Logfile').addClass('small'));
-    $(address(7, cursor - 1)).append($('<b>').html('X = 0/1/A1/B5').addClass('small'));
-    var commands = [
-      '&tn',
-      '&toX',
-      '&miX',
-      '&maX',
-      '&spX',
-      '&unX',
-      '&xxUX',
-      '&TU',
-    ];
+    //$(address(6, cursor - 1)).append($('<b>').html('Logfile').addClass('small'));
+    $(address(7, cursor - 1)).append($('<b>').html('Logfile : X = 0/1/A1/B5').addClass('small'));
     var meanings = [
-      'total number',
-      'total',
-      'minimum',
-      'maximum',
-      'spread',
-      'number unique',
-      'unique statistics',
-      'unique number',
+      '&tn : total number',
+      '&toX : total',
+      '&miX : minimum',
+      '&maX : maximum',
+      '&spX : spread',
+      '&unX : number unique',
+      '&xxUX : unique statistics',
+      '&TU : unique number',
     ];
 
     for (let i = 0; i < commands.length; i++) {
-      $(address(6, i + cursor)).html(commands[i]);
-      $(address(6, i + cursor)).addClass('small');
       $(address(7, i + cursor)).html(meanings[i]);
       $(address(7, i + cursor)).addClass('small');
     }
@@ -305,6 +294,8 @@
       }
       $(address(4, cursor)).append(followSelect);
       $(address(5, cursor)).append($('<input type="number" id="inputports' + i + 'timeout" min="0" step="1">'));
+
+      $(address(6, cursor)).append($('<input type="number" id="inputports' + i + 'manualTimeout" min="0" step="1">'));
 
       cursor++;
       address(3, cursor);

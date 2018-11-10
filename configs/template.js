@@ -199,35 +199,40 @@ var config ={
         formula : '',
         follow : -1,
         timeout : 20,
-        invert : false
+        invert : false,
+        manualTimeout : 0
       },
       {
         name : '',
         formula : '',
         follow : -1,
         timeout : 20,
-        invert : false
+        invert : false,
+        manualTimeout : 0
       },
       {
         name : '',
         formula : '',
         follow : -1,
         timeout : 20,
-        invert : false
+        invert : false,
+        manualTimeout : 0
       },
       {
         name : '',
         formula : '',
         follow : -1,
         timeout : 20,
-        invert : false
+        invert : false,
+        manualTimeout : 0
       },
       {
         name : '',
         formula : '',
         follow : -1,
         timeout : 20,
-        invert : false
+        invert : false,
+        manualTimeout : 0
       },
     ],
   },
