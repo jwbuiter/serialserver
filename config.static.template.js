@@ -5,9 +5,8 @@ var constants = {
   saveLogLocation : '/home/pi/Documents',
   exposeUpload : false,
   tableColumns : 5,
-  resetPin: 3,
+  resetPin: 7,
   outputPin: [
-    4,
     17,
     18,
     27,
@@ -17,6 +16,7 @@ var constants = {
     10,
     9,
     25,
+    11,
   ],
   inputPin: [
     19,
