@@ -87,11 +87,11 @@ function Realtime(server, config, store){
       io.emit('table', {index, value: cell.entry, manual: cell.manual});
     })
 
-    state.serial.histories.forEach((history, index) => {
-      history.forEach(({entry, time}) => {
-        io.emit('entry', {index, entryTime: time, entry});
-      });
-    });
+    // state.serial.histories.forEach((history, index) => {
+    //   history.forEach(({entry, time}) => {
+    //     io.emit('entry', {index, entryTime: time, entry});
+    //   });
+    // });
 
     state.serial.coms.forEach(({entry, time, average}, index) => {
       io.emit('entry', {index, entryTime: time, entry});
