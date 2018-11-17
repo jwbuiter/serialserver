@@ -57,6 +57,7 @@ function Realtime(server, config, store){
       state = port.state?'on':'off';
     }
     io.emit('state', {name: 'input'+index, state});
+    io.emit('input', {index, ...port});
   }
   
   function emitOutput(port, index){
@@ -70,6 +71,7 @@ function Realtime(server, config, store){
         state = port.state?'on':'off';
     }
     io.emit('state', {name: 'output'+index, state});
+    io.emit('output', {index, ...port});
   }
   
   function emitAllState(socket){

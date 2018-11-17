@@ -66,6 +66,16 @@ function SiteModule(config, store) {
   }
 
   const functionRoutes = {
+    '/static': (req, res) => {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      res.send(constants);
+    },
+    '/config': (req, res) => {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      res.send(require(path.join(__dirname, '../..', 'configs', 'current.js')));
+    },
     '/com': (req, res) => res.send(titleString + (store.getState().input.executing?'1':'0')),
     '/coml': (req, res) => {
       const loggerState = store.getState().logger;

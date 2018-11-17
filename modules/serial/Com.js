@@ -128,10 +128,12 @@ function Com(index, config, store) {
     dispatchTest();
   } else if (reader){
     http.createServer(function (req, res) {
+      console.log('reader')
       if (req.url === '/favicon.ico'){
         res.end();
         return;
       }
+      console.log('reader')
       const entry = decodeURI(req.url.slice(1));
       dispatch(entry);
       res.end();
