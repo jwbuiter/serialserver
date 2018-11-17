@@ -239,7 +239,7 @@
     $(address(1, cursor)).append($('<b>').html('Name'));
     $(address(2, cursor)).append($('<b>').html('Formula'));
     $(address(3, cursor)).append($('<b>').html('Execute'));
-    $(address(4, cursor)).append($('<b>').html('Seconds'));
+    $(address(4, cursor)).append($('<b>').html('Timeout (s)'));
     cursor++;
 
     for (let i = 0; i < numOutputs; i++) {
@@ -269,12 +269,13 @@
       '&spX : spread',
       '&unX : number unique',
       '&xxUX : unique statistics',
-      '&TU : unique number',
+      '&TU : total unique',
     ];
 
-    for (let i = 0; i < commands.length; i++) {
+    for (let i = 0; i < meanings.length; i++) {
       $(address(7, i + cursor)).html(meanings[i]);
       $(address(7, i + cursor)).addClass('small');
+      console.log(i + cursor)
     }
     cursor += 3;
 

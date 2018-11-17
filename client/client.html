@@ -100,10 +100,12 @@
     }
 
     .buttons {
+      color: red;
+
       position: fixed;
       right: 0;
       top: 30px;
-      font-size: 20px;
+      font-size: 30px;
     }
 
     .logButtons {
@@ -196,7 +198,7 @@
     <img id="shutDownButton" src="/res/shutdown.ico" height="30" width="30" onclick="javascript:goShutdown()">
   </div>
   <div class="logo">
-    <img id="logo" src="/res/mbdc.jpg">
+    <img id="logo" src="/res/defaultLogo.jpg">
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/res/jquery-1.11.1.js"></script>
@@ -369,9 +371,14 @@
     if (!constants.exposeUpload) {
       $('#uploadButton').remove();
     }
-    if (config.serial.testMode) {
+    if (!constants.exposeUpload) {
       $('#shutDownButton').remove();
     }
+    if (config.serial.testMode) {
+      $('.buttons').prepend('TEST')
+
+    }
+
 
     for (let i = 0; i < numColumns; i++) {
       $(address(i, 0)).addClass('header');
@@ -393,41 +400,54 @@
     let logoSizeSet = false;
     for (var i = 0; i < config.serial.coms.length; i++) {
       let conf = config.serial.coms[i];
-      if (conf.average) {
-        conf.entries = 1;
-        config.serial.coms[i].entries = 1;
-      }
-
       if (conf.name === '')
         continue;
+
+
+      cursor++;
+
+      if (conf.average) {
+        $(address(0, cursor + 1)).addClass('result');
+        $(address(0, cursor + 1)).html(conf.name);
+
+        $(address(1, cursor + 1)).addClass('result');
+        $(address(1, cursor + 1)).html('Average last ' + conf.entries);
+
+        $(address(2, cursor + 1)).addClass('result');
+        $(address(2, cursor + 1)).addClass('com' + i + 'time' + j);
+
+        $(address(3, cursor + 1)).addClass('result');
+        $(address(3, cursor + 1)).addClass('com' + i + 'avg');
+
+        conf.entries = 1;
+        config.serial.coms[i].entries = 1;
+      } else {
+        for (var j = 0; j < conf.entries; j++) {
+          const entryCursor = cursor + conf.entries - j;
+          if ((j === 0)) {
+            for (let i = 0; i < numColumns - 1; i++) {
+              $(address(i, entryCursor)).addClass('result');
+            }
+            $(address(0, entryCursor)).html(conf.name);
+          }
+
+          $(address(1, entryCursor)).html(j + 1);
+          $(address(2, entryCursor)).addClass('com' + i + 'time' + j);
+          $(address(3, entryCursor)).addClass('com' + i + 'entry' + j);
+        }
+      }
+
+      cursor += conf.entries;
 
       if (!logoSizeSet) {
         logoSizeSet = true;
         $('#logo').height(Math.min(140, conf.entries * 30) * 0.95);
-      }
-
-      cursor++;
-
-      for (var j = 0; j < conf.entries; j++) {
-        const entryCursor = cursor + conf.entries - j;
-        if ((j === 0)) {
-          for (let i = 0; i < numColumns - 1; i++) {
-            $(address(i, entryCursor)).addClass('result');
+        fetch('/logo').then((res) => {
+          if (res.ok) {
+            $('#logo').attr("src", "/logo");
           }
-          $(address(0, entryCursor)).html(conf.name);
-          if (conf.average) {
-            $(address(4, entryCursor)).addClass('com' + i + 'avg')
-            $(address(4, entryCursor)).addClass('result');
-          }
-        }
-        if (j === 1 && conf.average)
-          $(address(4, entryCursor)).html('Average');
-
-        $(address(1, entryCursor)).html(j + 1);
-        $(address(2, entryCursor)).addClass('com' + i + 'time' + j);
-        $(address(3, entryCursor)).addClass('com' + i + 'entry' + j);
+        })
       }
-      cursor += conf.entries;
     }
 
     cursor += 2;

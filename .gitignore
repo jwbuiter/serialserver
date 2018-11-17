@@ -4,6 +4,7 @@ config.static.js
 seriallog*.txt
 data/*
 configs/*
+logo/*
 !data/.gitkeep
 !configs/template.js
-
+!logo/.gitkeep

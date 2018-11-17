@@ -2,6 +2,7 @@ const express = require('express');
 const fileUpload = require('express-fileupload');
 const zip = require('express-zip');
 const path = require('path');
+const fs = require('fs');
 const { exec } = require('child_process');
 const dateFormat = require('dateformat');
 
@@ -13,6 +14,7 @@ const constants = require('../../config.static');
 
 const app = express();
 const clientPath = '../../client';
+const logoPath = '../../logo';
 const logPath = constants.saveLogLocation;
 const titleString = '<title>' + constants.name + '</title>';
 
@@ -128,6 +130,16 @@ function SiteModule(config, store) {
         res.send('This module is not enabled.')
       }
     },
+    '/logo': (req, res) => {
+      const logo = path.join(__dirname, logoPath, 'logo.jpg');
+      if (fs.existsSync(logo))
+        res.sendFile(logo);
+      else {
+        res.status(404);
+        res.send('No logo');
+      }
+        
+    }
   }
   
   const uploadRoutes = {

@@ -1,4 +1,5 @@
 const serialPort = require('serialport');
+const http = require('http');
 const Gpio = require('onoff').Gpio;
 
 const {
@@ -15,7 +16,8 @@ function Com(index, config, store) {
   const {
     testMode, 
     testMessage, 
-    timeout, 
+    timeout,
+    reader, 
     port, 
     baudRate, 
     bits, 
@@ -124,8 +126,17 @@ function Com(index, config, store) {
     }
 
     dispatchTest();
+  } else if (reader){
+    http.createServer(function (req, res) {
+      if (req.url === '/favicon.ico'){
+        res.end();
+        return;
+      }
+      const entry = decodeURI(req.url.slice(1));
+      dispatch(entry);
+      res.end();
+    }).listen(baudRate);
   } else {
-    
     const myPort = new serialPort(port, {
       baudRate: baudRate,
       dataBits: bits,
