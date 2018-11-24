@@ -167,8 +167,8 @@ function Realtime(server, config, store){
     })
   }
   
-  function setDateTime(socket, dateTime){
-    exec(`timedatectl set-time @${dateTime}`, (err, stdout, stderr) => {
+  function setDateTime(socket, dateTimeString){
+    exec(`hwclock --set --date="${dateTimeString}"`, (err, stdout, stderr) => {
       if (err) {
         console.error(`exec error: ${err}`);
         return;
@@ -324,7 +324,7 @@ function Realtime(server, config, store){
       case SERIAL_AVERAGE: {
         const {index, average} = lastAction.payload;
 
-        io.emit('average', {index, average});
+        io.emit('average', {index, average, entryTime: new Date().getTime()});
         break;
       }
       case SERIAL_RESET: {

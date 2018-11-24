@@ -34,8 +34,7 @@ function SiteModule(config, store) {
   
       console.log(__dirname + '/data/data.xls');
       res.send(titleString + '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.');
-      onlineGPIO.writeSync(0);
-      process.exit();
+      store.dispatch({type:SHUTDOWN});
     });
   }
   

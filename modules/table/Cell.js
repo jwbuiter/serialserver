@@ -42,6 +42,10 @@ function Cell(index, config, store) {
             entry,
           }
         });
+        if(entry!==content){
+          content=entry;
+          store.dispatch({type: STATE_CHANGED})
+        }
         break;
       }
       case TABLE_RESET:{
@@ -50,6 +54,7 @@ function Cell(index, config, store) {
             type: TABLE_RESET_CELL,
             payload: index,
           });
+          content='';
         }
         break;
       }

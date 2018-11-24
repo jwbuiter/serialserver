@@ -101,6 +101,7 @@
 
     .buttons {
       color: red;
+      font-weight: bolder;
 
       position: fixed;
       right: 0;
@@ -411,10 +412,10 @@
         $(address(0, cursor + 1)).html(conf.name);
 
         $(address(1, cursor + 1)).addClass('result');
-        $(address(1, cursor + 1)).html('Average last ' + conf.entries);
+        $(address(1, cursor + 1)).html('Average ' + conf.entries);
 
         $(address(2, cursor + 1)).addClass('result');
-        $(address(2, cursor + 1)).addClass('com' + i + 'time' + j);
+        $(address(2, cursor + 1)).addClass('com' + i + 'avgtime');
 
         $(address(3, cursor + 1)).addClass('result');
         $(address(3, cursor + 1)).addClass('com' + i + 'avg');
@@ -601,8 +602,10 @@
     })
 
     socket.on('average', function (msg) {
-      const { index, average } = msg;
-      $('.com' + index + 'avg').html(msg.average);
+      const { index, average, entryTime } = msg;
+
+      $('.com' + index + 'avg').html(average);
+      $('.com' + index + 'avgtime').html(printTime(entryTime));
     });
 
     socket.on('notfound', function (msg) {

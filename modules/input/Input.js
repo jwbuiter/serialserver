@@ -43,6 +43,7 @@ function Input(index, config, store) {
           store.dispatch({type: EXECUTE_STOP});
           store.dispatch({type: SERIAL_RESET});
           store.dispatch({type: TABLE_RESET});
+          store.dispatch({type: HANDLE_OUTPUT});
         }
         break;
       }

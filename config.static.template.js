@@ -2,7 +2,7 @@ var constants = {
   name : 'MBDCcom01',
   QS : '000 000 000',
   port : 80,
-  newInterfacePort: 8080,
+  newInterfacePort: 8061,
   saveLogLocation : '/home/pi/Documents',
   exposeUpload : false,
   exposeShutdown : true, 

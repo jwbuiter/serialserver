@@ -144,7 +144,6 @@ function Parser(store){
           payload: err
         });
       }
-
       return (typeof(result)==='undefined')?'':result;
     },
   }

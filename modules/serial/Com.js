@@ -56,6 +56,7 @@ function Com(index, config, store) {
           index : index,
         }
       });
+
       store.dispatch({type : HANDLE_TABLE});
       store.dispatch({type : HANDLE_OUTPUT});
     }
@@ -76,18 +77,14 @@ function Com(index, config, store) {
       decodedEntry = numericValue.toFixed(digits);
   
       if (average){
-        for (let i = entries-1; i > 0; i--)
-        {
-          if (averageList[i - 1]){
-            averageList[i] = averageList[i - 1];
-          }
-        }
-        averageList[0] = numericValue;
-        const average = averageList.reduce((acc, cur)=>acc + cur)/averageList.length;
+        averageList.push(numericValue);
+        averageList = averageList.slice(-entries);
+
+        const average = (averageList.reduce((acc, cur)=>acc + cur)/averageList.length).toFixed(digits);
         store.dispatch({
-          type : SERIAL_ENTRY,
+          type : SERIAL_AVERAGE,
           payload : {
-            entry : average,
+            average,
             index,
           }
         });
@@ -128,13 +125,11 @@ function Com(index, config, store) {
     dispatchTest();
   } else if (reader){
     http.createServer(function (req, res) {
-      console.log('reader')
       if (req.url === '/favicon.ico'){
         res.end();
         return;
       }
-      console.log('reader')
-      const entry = decodeURI(req.url.slice(1));
+      const entry = decode(decodeURI(req.url.slice(1)));
       dispatch(entry);
       res.end();
     }).listen(baudRate);
