@@ -168,6 +168,7 @@ function Realtime(server, config, store){
   }
   
   function setDateTime(socket, dateTimeString){
+    console.log(`hwclock --set --date="${dateTimeString}"`);
     exec(`hwclock --set --date="${dateTimeString}"`, (err, stdout, stderr) => {
       if (err) {
         console.error(`exec error: ${err}`);
