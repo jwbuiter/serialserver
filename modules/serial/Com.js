@@ -43,11 +43,14 @@ function Com(index, config, store) {
   let averageList = [];
 
   let myTimeout = setTimeout(()=> 0 ,1);
+  let zeroResetTimeout = null;
 
   function dispatch(entry){
-    if (zeroReset && Number(entry) == 0){
+    if (zeroReset && Number(entry) == 0 && !zeroResetTimeout){
       store.dispatch({type: TABLE_RESET});
       store.dispatch({type: SERIAL_RESET});
+
+      zeroResetTimeout = setTimeout(()=>{zeroResetTimeout=null}, timeout * 1000);
     } else {
       store.dispatch({
         type : SERIAL_ENTRY,
@@ -56,7 +59,7 @@ function Com(index, config, store) {
           index : index,
         }
       });
-
+      zeroResetTimeout=null;
       store.dispatch({type : HANDLE_TABLE});
       store.dispatch({type : HANDLE_OUTPUT});
     }
