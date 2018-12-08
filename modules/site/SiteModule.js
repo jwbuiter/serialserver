@@ -13,6 +13,7 @@ const Realtime = require('./Realtime');
 const constants = require('../../config.static');
 
 const app = express();
+const app2 = express();
 const clientPath = '../../client';
 const logoPath = '../../logo';
 const logPath = constants.saveLogLocation;
@@ -189,8 +190,12 @@ function SiteModule(config, store) {
   
   }
 
+  app2.use('/', express.static('client2/build'));
+
   const server = app.listen(constants.port, () => console.log('Server listening on port ' + constants.port));
+  const serverAlt = app2.listen(constants.newInterfacePort, () => console.log('New interface listening on port ' + constants.newInterfacePort));
   const realtime = new Realtime(server, {}, store);
+
 
   return {};
 }
