@@ -56,9 +56,6 @@ function Parser(store){
   
   function parseStatistic(x){
     const state = store.getState();
-    if (state.selfLearning.success === 0){
-      return '0';
-    }
     
     const unique = x.includes('U');
     const operator = x.slice(1,3);

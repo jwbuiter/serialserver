@@ -50,6 +50,7 @@ function TableModule(config, store) {
           const foundRow = excelSheet.find((row) =>{
             return (row[searchColumn] === searchEntry);
           });
+          
           if (foundRow) {
             store.dispatch({
               type: EXCEL_FOUND_ROW, 
