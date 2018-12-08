@@ -71,7 +71,7 @@ function Parser(store){
     let data;
     if (unique)
       data = state.logger.entries
-        .filter(entry=>entry[entry.length-1] !==0 )
+        .filter(entry=>entry[entry.length-1] !== '' )
         .map(entry => entry.map(val =>Number(val)));
     else
       data = state.logger.entries.map(entry => entry.map(val =>Number(val)));
