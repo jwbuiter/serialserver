@@ -322,7 +322,8 @@
 
     function fillIn() {
       fillInRecursive('', config);
-      $('#selfLearningstartCalibration').val(Math.round(config.selfLearning.startCalibration * 1000) / 1000);
+      const selfLearningCom = Number(config.selfLearning.enabled[3]) || 0;
+      $('#selfLearningstartCalibration').val(config.selfLearning.startCalibration.toFixed(config.serial.coms[selfLearningCom].digits));
 
       $("[id^=tablecells][id$=formula]").each((index, element) => tableCheckMenu({ target: element }))
     }
