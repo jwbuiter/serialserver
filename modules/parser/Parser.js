@@ -2,6 +2,7 @@ const {
   ERROR_OCCURRED
 } = require('../../actions/types');
 const {tableColumns} = require('../../config.static');
+const config = require('../../configs/current');
 
 function Parser(store){
 
@@ -47,8 +48,8 @@ function Parser(store){
   function parseCom(x){
     x=parseInt(x[3]);
     assert(x>=0 && x<store.getState().serial.coms.length, 'Com port out of bounds');
-  
-    if (store.getState().serial.coms[x].factor === 0)
+
+    if (config.serial.coms[x].factor === 0)
       return 'store.getState().serial.coms[' + x + '].entry';
     else
       return 'Number(store.getState().serial.coms[' + x + '].entry)';

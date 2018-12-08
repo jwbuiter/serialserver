@@ -49,6 +49,8 @@ function Com(index, config, store) {
     if (zeroReset && Number(entry) == 0 && !zeroResetTimeout){
       store.dispatch({type: TABLE_RESET});
       store.dispatch({type: SERIAL_RESET});
+      store.dispatch({type: HANDLE_OUTPUT});
+      store.dispatch({type: HANDLE_TABLE});
 
       zeroResetTimeout = setTimeout(()=>{zeroResetTimeout=null}, timeout * 1000);
     } else {
