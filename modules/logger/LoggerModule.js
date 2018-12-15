@@ -59,7 +59,7 @@ function LoggerModule(config, store) {
 
           foundOther = state.logger.entries.reduce((found, entry, index) => {
             if (entry[3 + uniqueIndex] === comValue && entry[entry.length-1] !== 0){
-              uniqueTimes = entry[entry.length-1] + 1;
+              uniqueTimes = Number(entry[entry.length-1]) + 1;
               return index;
             }
             return found;
