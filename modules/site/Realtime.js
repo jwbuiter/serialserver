@@ -24,7 +24,7 @@ const {
   FTP_FAILURE,
   SL_RESET,
   SL_SUCCESS,
-  TABLE_RESET,
+  TABLE_RESET_CELL,
   TABLE_ENTRY,
   EXCEL_FOUND_ROW,
   ERROR_OCCURRED,
@@ -344,8 +344,10 @@ function Realtime(server, config, store){
         io.emit('table', {index, value: entry, manual: manual?true:false});
         break;
       }
-      case TABLE_RESET: {
-        io.emit('cleartable');
+      case TABLE_RESET_CELL: {
+        const index = lastAction.payload;
+        
+        io.emit('table', {index, value: ''});
         break;
       }
       case EXCEL_FOUND_ROW: {
@@ -368,12 +370,9 @@ function Realtime(server, config, store){
         io.emit('uploadLogResponse', err.message);
         break;
       }
-      case SL_RESET: {
-        io.emit('selfLearning', {success: 0});
-        break;
-      }
+      case SL_RESET:
       case SL_SUCCESS: {
-        const {calibration, tolerance, success, matchedTolerance} = store.getState().selfLearning;;
+        const {calibration, tolerance, success, matchedTolerance} = state.selfLearning;;
         io.emit('selfLearning', {calibration, tolerance, success, matchedTolerance});
         break;
       }

@@ -1,6 +1,7 @@
 const {
   STATE_CHANGED,
   HANDLE_TABLE,
+  LOG_RESET,
   TABLE_ENTRY,
   TABLE_RESET,
   TABLE_RESET_CELL,
@@ -12,6 +13,14 @@ function Cell(index, config, store) {
   const myParser = Parser(store);
 
   let content = '';
+
+  function resetCell(){
+    store.dispatch({
+      type: TABLE_RESET_CELL,
+      payload: index,
+    });
+    content='';
+  }
 
   store.listen((lastAction)=>{
     const state = store.getState();
@@ -48,13 +57,13 @@ function Cell(index, config, store) {
         }
         break;
       }
+      case LOG_RESET:{
+        resetCell();
+        break;
+      }
       case TABLE_RESET:{
         if (resetOnExe){
-          store.dispatch({
-            type: TABLE_RESET_CELL,
-            payload: index,
-          });
-          content='';
+          resetCell();
         }
         break;
       }

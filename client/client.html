@@ -656,15 +656,16 @@
 
         if (success) {
           $(address(2, 1)).html((Math.round(tolerance * 1000) / 10) + '% ');
-          $(address(3, 1)).html((Math.round(1000 * (tolerance - matchedTolerance)) / 10) + '% ')
+          $(address(3, 1)).html((Math.round(1000 * (tolerance - matchedTolerance)) / 10) + '% ');
 
-          if (success > 1) {
+          if ((tolerance - matchedTolerance) < 0) {
             color = 'warning';
           } else {
             color = 'done';
           }
         } else {
           $(address(2, 1)).html((Math.round(tolerance * 1000) / 10) + '% ');
+          $(address(3, 1)).html('');
 
           color = 'inProgress';
         }
