@@ -6,6 +6,8 @@ data/*
 configs/*
 logo/*
 client2/*
+selfLearning/*
 !data/.gitkeep
 !configs/template.js
 !logo/.gitkeep
+!selfLearning/.gitkeep

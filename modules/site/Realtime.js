@@ -22,7 +22,8 @@ const {
   LOG_UPLOAD,
   FTP_SUCCESS,
   FTP_FAILURE,
-  SL_RESET,
+  SL_RESET_INDIVIDUAL,
+  SL_RESET_GLOBAL,
   SL_SUCCESS,
   TABLE_RESET_CELL,
   TABLE_ENTRY,
@@ -73,6 +74,22 @@ function Realtime(server, config, store){
     io.emit('state', {name: 'output'+index, state});
     io.emit('output', {index, ...port});
   }
+
+  function emitSelfLearning(){
+    const state = store.getState();
+
+    switch (state.selfLearning.type){
+      case 'individual':{
+        break;
+      }
+      case 'global':{
+        const {calibration, tolerance, success} = state.selfLearning;
+        const {matchedTolerance} = state.selfLearning.global;
+        io.emit('selfLearning', {calibration, tolerance, success, matchedTolerance});
+        break;
+      }
+    }
+  }
   
   function emitAllState(socket){
     const state = store.getState();
@@ -100,9 +117,8 @@ function Realtime(server, config, store){
       socket.emit('average', {index, average});
     });
 
-    if (constants.enabledModules.selfLearning && state.selfLearning){
-      const {calibration, tolerance, success, matchedTolerance} = state.selfLearning;
-      socket.emit('selfLearning', {calibration, tolerance, success, matchedTolerance});
+    if (constants.enabledModules.selfLearning){
+      emitSelfLearning();
     }
     
   }
@@ -370,10 +386,10 @@ function Realtime(server, config, store){
         io.emit('uploadLogResponse', err.message);
         break;
       }
-      case SL_RESET:
+      case SL_RESET_INDIVIDUAL:
+      case SL_RESET_GLOBAL:
       case SL_SUCCESS: {
-        const {calibration, tolerance, success, matchedTolerance} = state.selfLearning;;
-        io.emit('selfLearning', {calibration, tolerance, success, matchedTolerance});
+        emitSelfLearning();
         break;
       }
       case EXECUTE_START: {

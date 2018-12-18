@@ -2,6 +2,8 @@ const {
   SL_ENTRY,
   SL_SUCCESS,
   EXECUTE_START,
+  SL_RESET_GLOBAL,
+  LOG_RESET,
   LOG_SAVE,
   CONFIG_UPDATE,
 } = require('../../actions/types');
@@ -17,8 +19,14 @@ function selfLearningGlobal(config, store){
 
   store.listen(lastAction =>{
     switch (lastAction.type){
+      case LOG_RESET:{
+        store.dispatch({type: SL_RESET_GLOBAL});
+        break;
+      }
       case SL_ENTRY:{
-        const entries = store.getState().selfLearning.entries;
+        if (store.getState().selfLearning.success) break;
+
+        const entries = store.getState().selfLearning.global.entries;
         if (entries.length<number) break;
 
         const matches = entries.map( entry => ({
@@ -68,23 +76,9 @@ function selfLearningGlobal(config, store){
         }
         break;
       }
-      case EXECUTE_START:{
-        if (store.getState().selfLearning.success) break;
-
-        const newEntry = Number(store.getState().serial.coms[comIndex].entry);
-        if (isNaN(newEntry) || !isFinite(newEntry)){
-          console.log('Received self learning entry which is not a number, ignoring');
-          break;
-        }
-
-        store.dispatch({
-          type: SL_ENTRY,
-          payload: newEntry,
-        });
-      }
     }
   });
-
+  store.dispatch({type: SL_RESET_GLOBAL});
 }
 
 module.exports = selfLearningGlobal;

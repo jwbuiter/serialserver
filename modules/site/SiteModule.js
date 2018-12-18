@@ -71,6 +71,9 @@ function SiteModule(config, store) {
       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
       res.send(constants);
     },
+    '/slstate': (req, res) => {
+      res.send(JSON.stringify(store.getState().selfLearning, null,2))
+    },
     '/config': (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");

@@ -327,10 +327,17 @@
     function logTable(legend, entries) {
       legend = legend.slice(2);
       entries = entries.map(entry => entry.slice(2));
-      const legendrow = '<tr>' + legend.reduce((total, cur) => total + '<td><b>' + cur + '</b></td>', '') + '</tr>';
-      const entryrows = entries.map(row => '<tr>' + row.reduce((total, cur) => total + '<td>' + cur + '</td>', '') + '</tr>');
+      const legendRow = '<tr>' + legend.reduce((total, cur) => total + '<td><b>' + cur + '</b></td>', '') + '</tr>';
+      const entryRows = entries.map(row => '<tr>' + row.reduce((total, cur) => total + '<td>' + cur + '</td>', '') + '</tr>');
 
-      return '<table>' + legendrow + entryrows.reduce((total, cur) => total + cur, '') + '<table>';
+      return '<table>' + legendRow + entryRows.reduce((total, cur) => total + cur, '') + '</table>';
+    }
+
+    function individualData(data){
+      const legend = ['Cal', 'Key', 'Tol', '<input size="3" type="text">', '<button>Del</button>']
+      const legendRow = '<tr>' + legend.reduce((total, cur) => total + '<td><b>' + cur + '</b></td>', '') + '</tr>';
+      //const entryrows = data.individual.individualEntries.map(row => '<tr>' + row.reduce((total, cur) => total + '<td>' + cur + '</td>', '') + '</tr>');
+      return '<table>' +legendRow + '</table>';
     }
 
     let logUpdate;
@@ -362,6 +369,22 @@
         logUpdate = () => fetch('/comlogu')
           .then(res => res.json())
           .then(data => $('#logModal').html(logTable(data.legend, data.entries)));
+
+        logUpdate()
+      }
+    }
+
+    function toggleIndividualSL(){
+      const modal = $('#logModal');
+      if (modal.hasClass('show')) {
+        logInterval = undefined;
+        $('#logModal').removeClass('show');
+        $('#logModal').html('');
+      } else {
+        $('#logModal').addClass('show');
+        logUpdate = () => fetch('/slstate')
+          .then(res => res.json())
+          .then(data => $('#logModal').html(individualData(data)));
 
         logUpdate()
       }
@@ -464,6 +487,8 @@
       logButtons.append('<img src="/res/LogUnique.png" height="30" width="30" onclick="javascript:toggleUniqueLog()">');
     if (config.logger.writeToFile)
       logButtons.append('<img src="/res/LogNormal.png" height="30" width="30" onclick="javascript:toggleLog()">');
+    if (config.selfLearning.enabled.endsWith('ind'))
+      logButtons.append('<img src="/res/selfLearning.png" height="30" width="30" onclick="javascript:toggleIndividualSL()">');
 
     $(address(4, cursor - 1)).append(logButtons);
 

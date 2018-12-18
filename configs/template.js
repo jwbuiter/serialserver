@@ -265,6 +265,8 @@ var config ={
     tolerance : 25,
     startCalibration : 25,
     startTolerance : 50,
+    individualTolerance : 5,
+    individualToleranceIncrement : 1,
     success : 0,
   },
 

@@ -112,10 +112,9 @@ function Parser(store){
       SC: state.calibration,
       SCmin: state.calibration*(1 - state.tolerance),
       SCmax: state.calibration*(1 + state.tolerance),
-      SN: state.entries.length,
+      SN: state.global.entries.length,
       ST: (state.endTime?(state.endTime - state.startTime):(new Date() - state.startTime))/60000,
     }
-
     return properties[property].toString();
   }
 
