@@ -333,11 +333,11 @@
       return '<table>' + legendRow + entryRows.reduce((total, cur) => total + cur, '') + '</table>';
     }
 
-    function individualData(data){
+    function individualData(data) {
       const legend = ['Cal', 'Key', 'Tol', '<input size="3" type="text">', '<button>Del</button>']
       const legendRow = '<tr>' + legend.reduce((total, cur) => total + '<td><b>' + cur + '</b></td>', '') + '</tr>';
       //const entryrows = data.individual.individualEntries.map(row => '<tr>' + row.reduce((total, cur) => total + '<td>' + cur + '</td>', '') + '</tr>');
-      return '<table>' +legendRow + '</table>';
+      return '<table>' + legendRow + '</table>';
     }
 
     let logUpdate;
@@ -374,7 +374,7 @@
       }
     }
 
-    function toggleIndividualSL(){
+    function toggleIndividualSL() {
       const modal = $('#logModal');
       if (modal.hasClass('show')) {
         logInterval = undefined;
@@ -694,7 +694,7 @@
 
           color = 'inProgress';
         }
-        const selfLearningIndex = Number(config.selfLearning.enabled.slice(3));
+        const selfLearningIndex = Number(config.selfLearning.enabled[3]);
         $(address(1, 1)).html(calibration.toFixed(config.serial.coms[selfLearningIndex].digits));
 
         for (let i = 1; i < 4; i++) {

@@ -108,12 +108,23 @@ function Parser(store){
     const property = x.slice(1);
     const state = store.getState().selfLearning;
 
+    const tolerance = state.learning?1:state.tolerance;
+
     const properties = {
       SC: state.calibration,
-      SCmin: state.calibration*(1 - state.tolerance),
-      SCmax: state.calibration*(1 + state.tolerance),
+      SCmin: state.calibration*(1 - tolerance),
+      SCmax: state.calibration*(1 + tolerance),
       SN: state.global.entries.length,
       ST: (state.endTime?(state.endTime - state.startTime):(new Date() - state.startTime))/60000,
+      SIN: Object.entries(state.individual.individualEntries).length,
+      SIT: Object.entries(state.individual.individualEntries).reduce((acc, cur) => acc + cur.calibration, 0),
+      SSN: Object.entries(state.individual.generalEntries).length,
+      SST: Object.entries(state.individual.generalEntries).reduce((acc, cur) => acc + cur[0], 0),
+      SI0: Object.entries(state.individual.individualEntries).filter(entry=>entry.increments===0).length,
+      SI1: Object.entries(state.individual.individualEntries).filter(entry=>entry.increments===1).length,
+      SI2: Object.entries(state.individual.individualEntries).filter(entry=>entry.increments===2).length,
+      SI3: Object.entries(state.individual.individualEntries).filter(entry=>entry.increments===3).length,
+      SI4: Object.entries(state.individual.individualEntries).filter(entry=>entry.increments===4).length,
     }
     return properties[property].toString();
   }

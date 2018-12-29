@@ -284,7 +284,7 @@
       $(address(1, cursor)).append($('<input type="text" id="inputports' + i + 'name">'));
 
       let commandSelect = $('<select selected=" " class="wide" id="inputports' + i + 'formula">');
-      commandSelect.append('<option value=""></option><option value="exe">Execute</option><option value="exebl">Execute block</option>');
+      commandSelect.append('<option value=""></option><option value="exe">Execute</option><option value="exebl">Execute block</option></option><option value="teach">SL Teach</option></option><option value="restart">Restart</option></option><option value="shutdown">Shut down</option>');
       $(address(2, cursor)).append(commandSelect);
       $(address(3, cursor)).append($('<input type="checkbox" id="inputports' + i + 'invert">'));
 

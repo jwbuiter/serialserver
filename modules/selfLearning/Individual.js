@@ -88,7 +88,6 @@ function selfLearningIndividual(config, store){
 
         {
           const individualSL = store.getState().selfLearning.individual;
-          console.log(individualSL);
 
           const individualData = {
             generalEntries: individualSL.generalEntries,

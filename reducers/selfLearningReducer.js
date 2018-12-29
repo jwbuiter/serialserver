@@ -8,7 +8,7 @@ const {
   SL_INDIVIDUAL_DOWNGRADE,
   SL_INDIVIDUAL_LOAD,
   SL_INDIVIDUAL_INCREMENT,
-  SL_INDIVIDUAL_TEACH,
+  SL_TEACH,
 } = require('../actions/types');
 
 const {selfLearning} = require('../configs/current');
@@ -38,7 +38,6 @@ function initialStateIndividual(){
   return {
     generalEntries: {},
     individualEntries: {},
-    teaching: false,
   }
 }
 
@@ -76,7 +75,7 @@ function individualReducer(state, action){
       const newIndividualEntries =  Object.assign({}, state.individualEntries);
 
       if (key in state.individualEntries){
-        newIndividualEntries[key] = {calibration: entry, tolerance: selfLearning.individualTolerance, hasUpdated: true, increments: 0};
+        newIndividualEntries[key] = {calibration: entry, tolerance: selfLearning.individualTolerance, numUpdates: newIndividualEntries[key].numUpdates + 1, increments: 0};
       } else if (key in state.generalEntries) {
         newGeneralEntries[key] = Array.from(newGeneralEntries[key]).concat(entry);
       } else {
@@ -96,7 +95,7 @@ function individualReducer(state, action){
       const newIndividualEntries =  Object.assign({}, state.individualEntries);
 
       delete newGeneralEntries[key];
-      newIndividualEntries[key]={calibration, tolerance: selfLearning.individualTolerance, hasUpdated: true, increments: 0};
+      newIndividualEntries[key]={calibration, tolerance: selfLearning.individualTolerance, numUpdates: 1, increments: 0};
       return {
         ...state,
         individualEntries: newIndividualEntries,
@@ -126,8 +125,8 @@ function individualReducer(state, action){
       const newIndividualEntries = {};
       for (let key in state.individualEntries){
         const entry = state.individualEntries[key];
-        if (entry.hasUpdated)
-          newIndividualEntries[key] = {...entry, hasUpdated: false}
+        if (entry.numUpdates)
+          newIndividualEntries[key] = {...entry, numUpdates: 0}
         else
           newIndividualEntries[key] =  {...entry, tolerance: entry.tolerance+selfLearning.individualToleranceIncrement, increments: entry.increments+1}
       }
@@ -135,13 +134,6 @@ function individualReducer(state, action){
       return {
         ...state,
         individualEntries: newIndividualEntries
-      }
-    }
-    case SL_INDIVIDUAL_TEACH:{
-      const teaching = action.payload;
-      return {
-        ...state,
-        teaching
       }
     }
     default:
@@ -157,6 +149,13 @@ module.exports = function(state = initialState(), action) {
   }
 
   switch(action.type) {
+    case SL_TEACH:{
+      const teaching = action.payload;
+      return {
+        ...state,
+        teaching
+      }
+    }
     case SL_RESET_GLOBAL:{
       return {
         ...initialState(),

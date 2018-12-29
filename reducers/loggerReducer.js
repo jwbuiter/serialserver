@@ -5,7 +5,7 @@ const {
   SL_SUCCESS,
 } = require('../actions/types');
 
-const {table, serial} = require('../configs/current');
+const {table, serial, logger} = require('../configs/current');
 const {name} = require('../config.static');
 
 const initialState = {
@@ -38,10 +38,31 @@ module.exports = function(state = initialState, action) {
     }
     case SL_SUCCESS:{
       const {comIndex, calibration, tolerance} = action.payload;
-      const newEntries = state.entries.filter(entry => {
+      const newEntries = state.entries.filter((entry, index, array) => {
         const testValue = Number(entry[comIndex+3]);
-        return ((testValue >= calibration* (1 - tolerance)) && (testValue <= calibration * (1 + tolerance)))
+
+        if ((testValue >= calibration* (1 - tolerance)) && (testValue <= calibration * (1 + tolerance))){
+          return true
+        } else if (logger.unique!=='off' && entry[entry.length-1]) {
+          const uniqueIndex = Number(logger.unique[3]) + 3;
+          const uniqueValue = entry[uniqueIndex];
+
+          for (let i = 0; i < array.length; i++){
+            const subTestValue = Number(array[i][comIndex+3]);
+            if (array[i][uniqueIndex]===uniqueValue && 
+              (testValue >= calibration * (1 - tolerance)) && 
+              (testValue <= calibration * (1 + tolerance)) &&
+              !array[i][entry.length-1]){
+                array[i][entry.length-1]=entry[entry.length-1];
+              }
+          }
+
+          return false;
+        } else {
+          return false
+        }
       });
+      
       return {
         ...state,
         entries: newEntries,

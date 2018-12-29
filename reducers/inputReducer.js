@@ -20,7 +20,7 @@ const initialState = {
     isFollowing: false,
     blocking: false,
   })),
-  executing: false,
+  executing: false
 };
 
 function calculateState(port){

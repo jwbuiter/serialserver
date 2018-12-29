@@ -10,13 +10,10 @@ const {
   SERIAL_ENTRY,
   SERIAL_AVERAGE,
   SERIAL_RESET,
-  INPUT_PHYSICAL_CHANGED,
   INPUT_FORCED_CHANGED,
-  INPUT_FOLLOWING_CHANGED,
-  INPUT_CALCULATE_STATE,
-  OUTPUT_RESULT_CHANGED,
+  INPUT_EMIT,
   OUTPUT_FORCED_CHANGED,
-  OUTPUT_EXECUTING_CHANGED,
+  OUTPUT_EMIT,
   LOG_ENTRY,
   LOG_RESET,
   LOG_UPLOAD,
@@ -27,6 +24,7 @@ const {
   SL_SUCCESS,
   TABLE_RESET_CELL,
   TABLE_ENTRY,
+  TABLE_EMIT,
   EXCEL_FOUND_ROW,
   ERROR_OCCURRED,
   EXECUTE_START,
@@ -35,7 +33,7 @@ const {
   HANDLE_OUTPUT,
   CONFIG_UPDATE,
   CONFIG_SAVE,
-  SHUTDOWN,
+  RESTART,
 } = require('../../actions/types');
 
 const results = [
@@ -80,12 +78,15 @@ function Realtime(server, config, store){
 
     switch (state.selfLearning.type){
       case 'individual':{
+        const {calibration, tolerance, success} = state.selfLearning;
+        const {generalEntries, individualEntries} = state.selfLearning.individual;
+        io.emit('selfLearning', {individual: true, calibration, tolerance, success, generalEntries, individualEntries});
         break;
       }
       case 'global':{
         const {calibration, tolerance, success} = state.selfLearning;
         const {matchedTolerance} = state.selfLearning.global;
-        io.emit('selfLearning', {calibration, tolerance, success, matchedTolerance});
+        io.emit('selfLearning', {individual: false, calibration, tolerance, success, matchedTolerance});
         break;
       }
     }
@@ -128,7 +129,7 @@ function Realtime(server, config, store){
       type: CONFIG_UPDATE,
       payload: config,
     });
-    store.dispatch({type: SHUTDOWN});
+    store.dispatch({type: RESTART});
   }
   
   function configExists(socket, name){
@@ -302,6 +303,11 @@ function Realtime(server, config, store){
         manual: true
       }
     });
+    store.dispatch({type: TABLE_EMIT, payload: {
+      index: msg.index,
+      entry: msg.value,
+      manual: true
+    }});
     store.dispatch({type: HANDLE_TABLE});
     store.dispatch({type: HANDLE_OUTPUT});
   }
@@ -313,20 +319,15 @@ function Realtime(server, config, store){
   store.listen((lastAction)=>{
     const state = store.getState();
     switch (lastAction.type){
-      case INPUT_FOLLOWING_CHANGED:
-      case INPUT_FORCED_CHANGED:
-      case INPUT_PHYSICAL_CHANGED:
-      case INPUT_CALCULATE_STATE: {
-        const {index} = lastAction.payload;
+      case INPUT_EMIT: {
+        const index = lastAction.payload;
         const port = state.input.ports[index];
 
         emitInput(port, index);
         break;
       }
-      case OUTPUT_RESULT_CHANGED:
-      case OUTPUT_FORCED_CHANGED:
-      case OUTPUT_EXECUTING_CHANGED: {
-        const {index} = lastAction.payload;
+      case OUTPUT_EMIT: {
+        const index = lastAction.payload;
         const port = state.output.ports[index];
 
         emitOutput(port, index);
@@ -354,16 +355,10 @@ function Realtime(server, config, store){
         }
         break;
       }
-      case TABLE_ENTRY: {
+      case TABLE_EMIT: {
         const {index, entry, manual} = lastAction.payload;
         
         io.emit('table', {index, value: entry, manual: manual?true:false});
-        break;
-      }
-      case TABLE_RESET_CELL: {
-        const index = lastAction.payload;
-        
-        io.emit('table', {index, value: ''});
         break;
       }
       case EXCEL_FOUND_ROW: {

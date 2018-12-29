@@ -4,6 +4,7 @@ const {
   OUTPUT_RESULT_CHANGED,
   OUTPUT_FORCED_CHANGED,
   OUTPUT_EXECUTING_CHANGED,
+  OUTPUT_EMIT,
   STATE_CHANGED,
   HANDLE_INPUT,
   HANDLE_OUTPUT,
@@ -20,7 +21,7 @@ function Output(index, config, store) {
   const myGPIO = new Gpio(constants.outputPin[index], 'out');
   const myParser = new Parser(store);
 
-  let state = false;
+  let stateJSON = '';
 
   store.listen((lastAction)=>{  
     switch (lastAction.type){
@@ -29,10 +30,12 @@ function Output(index, config, store) {
       case OUTPUT_FORCED_CHANGED:{
         if (index === lastAction.payload.index){
           const newState = store.getState().output.ports[index].state;
-          if (newState !== state){
-            myGPIO.writeSync(newState?1:0);
-            state = newState;
+          const newStateJSON = JSON.stringify()
+          if (newStateJSON !== stateJSON){
+            myGPIO.writeSync(newState.state?1:0);
+            stateJSON = newStateJSON;
             store.dispatch({type: STATE_CHANGED});
+            store.dispatch({type: OUTPUT_EMIT, payload: index})
           }
         }
         break;

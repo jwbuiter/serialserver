@@ -1,4 +1,5 @@
 const Gpio = require('onoff').Gpio;
+const { exec } = require('child_process');
 
 const {
   INPUT_PHYSICAL_CHANGED,
@@ -6,6 +7,7 @@ const {
   INPUT_FORCED_CHANGED,
   INPUT_FOLLOWING_CHANGED,
   INPUT_CALCULATE_STATE,
+  INPUT_EMIT,
   OUTPUT_RESULT_CHANGED,
   OUTPUT_FORCED_CHANGED,
   OUTPUT_EXECUTING_CHANGED,
@@ -19,6 +21,8 @@ const {
   EXECUTE_STOP,
   SERIAL_RESET,
   TABLE_RESET,
+  SL_TEACH,
+  RESTART,
 } = require('../../actions/types');
 const parser = require('../parser/Parser');
 const constants = require('../../config.static');
@@ -28,6 +32,9 @@ function Input(index, config, store) {
   const myGPIO = new Gpio(constants.inputPin[index], 'in', 'both');
   let debounce = setTimeout(()=> 0 ,1);
   let force = setTimeout(()=> 0 ,1);
+  let shutdown = setTimeout(()=> 0 ,1);
+  let restart = setTimeout(()=> 0 ,1);
+  let stateJSON = '';
   let state = false;
 
   function handleInput(state){
@@ -55,6 +62,38 @@ function Input(index, config, store) {
             blocking: state,
           }
         });
+        break;
+      }
+      case 'teach':{
+        store.dispatch({
+          type: SL_TEACH,
+          payload: state
+        })
+        break;
+      }
+      case 'restart':{
+        if (state){
+          restart = setTimeout(() => {
+            store.dispatch({type: RESTART});
+          }, manualTimeout*1000);
+        } else {
+          clearTimeout(restart);
+        }
+        break;
+      }
+      case 'shutdown':{
+        if (state){
+          shutdown = setTimeout(() => {
+            exec('shutdown now', (err, stdout, stderr) => {
+              if (err) {
+                console.error(`exec error: ${err}`);
+                return;
+              }
+            });
+          }, manualTimeout*1000);
+        } else {
+          clearTimeout(shutdown);
+        }
         break;
       }
     }
@@ -112,11 +151,17 @@ function Input(index, config, store) {
         break;
       }
       case INPUT_CALCULATE_STATE:{
-        const newState = store.getState().input.ports[index].state;
-        if (state !== newState){
-          state = newState;
+        const newState = store.getState().input.ports[index];
+        const newStateJSON = JSON.stringify(newState);
+        
+        if (state !== newState.state){
+          state = newState.state;
           store.dispatch({type: STATE_CHANGED});
-          handleInput(newState);
+          handleInput(newState.state);
+        }
+        if (stateJSON !== newStateJSON){
+          stateJSON = newStateJSON;
+          store.dispatch({type: INPUT_EMIT, payload: index});
         }
         break;
       }

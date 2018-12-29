@@ -7,7 +7,7 @@ const { exec } = require('child_process');
 const dateFormat = require('dateformat');
 
 const {
-  SHUTDOWN,
+  RESTART,
 } = require('../../actions/types');
 const Realtime = require('./Realtime');
 const constants = require('../../config.static');
@@ -35,7 +35,7 @@ function SiteModule(config, store) {
   
       console.log(__dirname + '/data/data.xls');
       res.send(titleString + '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.');
-      store.dispatch({type:SHUTDOWN});
+      store.dispatch({type:RESTART});
     });
   }
   
@@ -88,6 +88,8 @@ function SiteModule(config, store) {
       res.send(JSON.stringify({entries, legend}, null, 2));
     },
     '/comlog': (req, res) => {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
       const loggerState = store.getState().logger;
       const entries = loggerState.entries.slice().reverse();
       const legend = loggerState.legend;
@@ -95,6 +97,8 @@ function SiteModule(config, store) {
       res.send(JSON.stringify({entries, legend}, null, 2));
     },
     '/comlogu': (req, res) => {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
       const loggerState = store.getState().logger;
       const entries = loggerState.entries.filter(entry => entry[entry.length-1] !== '').reverse();
       const legend = loggerState.legend;
@@ -116,6 +120,8 @@ function SiteModule(config, store) {
       }
     },
     '/shutdown': (req, res) => {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
       res.send(titleString + 'Shutting down now.');
       exec('shutdown now', (err, stdout, stderr) => {
         if (err) {
@@ -125,8 +131,10 @@ function SiteModule(config, store) {
       });
     },
     '/restart': (req, res) => {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
       res.send(titleString + '<meta http-equiv="refresh" content="5; url=/" />Restarting now.')
-      store.dispatch({type: SHUTDOWN});
+      store.dispatch({type: RESTART});
       process.exit();
     },
     '/fileupload': (req, res) => {
@@ -144,6 +152,9 @@ function SiteModule(config, store) {
       }
     },
     '/logo': (req, res) => {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
       const logo = path.join(__dirname, logoPath, 'logo.jpg');
       if (fs.existsSync(logo))
         res.sendFile(logo);

@@ -5,21 +5,24 @@ const {
   TABLE_ENTRY,
   TABLE_RESET,
   TABLE_RESET_CELL,
+  TABLE_EMIT
 } = require('../../actions/types');
 const Parser = require('../parser/Parser');
 
 function Cell(index, config, store) {
   const {formula, digits, numeric, resetOnExe, waitForOther} = config;
+  const manual = (formula == '#' || formula.startsWith('#M'));
   const myParser = Parser(store);
 
   let content = '';
 
   function resetCell(){
+    content='';
     store.dispatch({
       type: TABLE_RESET_CELL,
       payload: index,
     });
-    content='';
+    store.dispatch({type: TABLE_EMIT, payload: {index, entry: '', manual}});
   }
 
   store.listen((lastAction)=>{
@@ -31,7 +34,7 @@ function Cell(index, config, store) {
         if (waitForOther && !allEntries){
           break;
         }
-        if (formula == '#' || formula.startsWith('#M')) {
+        if (manual) {
           break;
         }
 
@@ -54,6 +57,7 @@ function Cell(index, config, store) {
         if(entry!==content){
           content=entry;
           store.dispatch({type: STATE_CHANGED})
+          store.dispatch({type: TABLE_EMIT, payload: {index, entry, manual}});
         }
         break;
       }

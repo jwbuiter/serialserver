@@ -5,7 +5,7 @@ const path = require('path');
 const {resetPin, onlinePin} = require('../../config.static');
 const  {
   ERROR_OCCURRED,
-  SHUTDOWN,
+  RESTART,
 } = require('../../actions/types');
 
 const configPath = path.join(__dirname, '../..', 'configs');
@@ -26,7 +26,7 @@ function RecoveryModule() {
     }
   }
 
-  function shutdown(){
+  function restart(){
     onlineGPIO.writeSync(0);
     console.log('Rebooting...');
     process.exit();
@@ -43,12 +43,12 @@ function RecoveryModule() {
           console.log(lastAction.payload.message);
           setTimeout(()=>{
             reset();
-            shutdown();
+            restart();
           }, 2000);
           break;
         }
-        case SHUTDOWN:{
-          shutdown();
+        case RESTART:{
+          restart();
           break;
         }
       }
@@ -58,7 +58,7 @@ function RecoveryModule() {
   if (!fs.existsSync(path.join(configPath, 'current.js'))){
     console.log('No config found, config will be reset to template.')
     reset();
-    shutdown();
+    restart();
   }
 
   if (!resetGPIO.readSync()){
@@ -71,7 +71,7 @@ function RecoveryModule() {
       console.log('Blink '+ gpioState)
       onlineGPIO.writeSync(gpioState);
       if (resetGPIO.readSync())
-        shutdown();
+        restart();
     }, 1000);
     
     return false;
@@ -81,12 +81,12 @@ function RecoveryModule() {
     eval('require(path.join(configPath, \'current.js\'))');
   } catch (err){
     reset();
-    shutdown();
+    restart();
   }
 
   // Catch CTRL+C
   process.on ('SIGINT', () => {
-    store.dispatch({type: 'SHUTDOWN'});
+    store.dispatch({type: RESTART});
   });
   
   onlineGPIO.writeSync(1);
