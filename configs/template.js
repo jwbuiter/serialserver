@@ -41,8 +41,8 @@ var config ={
         entries : 5,
         factor : 0,
         alwaysPositive : false,
-        prefix : '#',
-        postfix : '05',
+        prefix : '#',
+        postfix : '',
         testMessage : '6543210987654321'
       }
     ],
@@ -267,6 +267,7 @@ var config ={
     startTolerance : 50,
     individualTolerance : 5,
     individualToleranceIncrement : 1,
+    individualToleranceLimit: 10,
     success : 0,
   },
 

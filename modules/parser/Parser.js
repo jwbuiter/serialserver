@@ -117,6 +117,7 @@ function Parser(store){
       SN: state.global.entries.length,
       ST: (state.endTime?(state.endTime - state.startTime):(new Date() - state.startTime))/60000,
       SIN: Object.entries(state.individual.individualEntries).length,
+      SIC: Object.entries(state.individual.individualEntries).reduce((acc, cur) => acc + cur.increments, 0),
       SIT: Object.entries(state.individual.individualEntries).reduce((acc, cur) => acc + cur.calibration, 0),
       SSN: Object.entries(state.individual.generalEntries).length,
       SST: Object.entries(state.individual.generalEntries).reduce((acc, cur) => acc + cur[0], 0),

@@ -22,6 +22,7 @@ function Output(index, config, store) {
   const myParser = new Parser(store);
 
   let stateJSON = '';
+  let state = false;
 
   store.listen((lastAction)=>{  
     switch (lastAction.type){
@@ -29,12 +30,15 @@ function Output(index, config, store) {
       case OUTPUT_RESULT_CHANGED:
       case OUTPUT_FORCED_CHANGED:{
         if (index === lastAction.payload.index){
-          const newState = store.getState().output.ports[index].state;
-          const newStateJSON = JSON.stringify()
-          if (newStateJSON !== stateJSON){
+          const newState = store.getState().output.ports[index];
+          const newStateJSON = JSON.stringify(newState);
+          if (state !== newState.state) {
+            state = newState.state;
             myGPIO.writeSync(newState.state?1:0);
-            stateJSON = newStateJSON;
             store.dispatch({type: STATE_CHANGED});
+          }
+          if (newStateJSON !== stateJSON){
+            stateJSON = newStateJSON;
             store.dispatch({type: OUTPUT_EMIT, payload: index})
           }
         }

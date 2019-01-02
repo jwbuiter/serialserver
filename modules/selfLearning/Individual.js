@@ -20,6 +20,7 @@ function selfLearningIndividual(config, store){
   const tolerance = config.tolerance/100;
   const individualTolerance = config.individualTolerance/100;
   const individualToleranceIncrement = config.individualToleranceIncrement/100;
+  const individualToleranceLimit = config.individualToleranceLimit/100;
 
   const comIndex = Number(enabled[3]);
   console.log('Individual SL enabled on com'+comIndex);
@@ -115,7 +116,7 @@ function selfLearningIndividual(config, store){
       }
       case SL_INDIVIDUAL_INCREMENT:{
         Object.entries(individualSL.individualEntries).forEach(entry => {
-          if (entry.tolerance >= 2*individualTolerance){
+          if (entry.tolerance >= toleranceLimit){
             store.dispatch({type: SL_INDIVIDUAL_DOWNGRADE, payload: entry.key})
           }
         });

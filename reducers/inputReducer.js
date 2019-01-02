@@ -34,7 +34,6 @@ function calculateState(port){
 }
 
 module.exports = function(state = initialState, action) {
-  
   switch(action.type) {
     case INPUT_PHYSICAL_CHANGED:{
       const {index, physical} = action.payload;
