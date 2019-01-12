@@ -171,6 +171,7 @@ function SiteModule(config, store) {
   }
 
   app.use('/', express.static('client2/build'));
+  app.use('/res', express.static('client/res'))
 
   for(let route in staticRoutes){
     app.get(route, (req, res) => {
