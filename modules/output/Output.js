@@ -47,6 +47,7 @@ function Output(index, config, store) {
       case STATE_CHANGED:
       case HANDLE_OUTPUT:{
         const result = myParser.parse(formula)?true:false;
+        
         store.dispatch({
           type: OUTPUT_RESULT_CHANGED,
           payload: {

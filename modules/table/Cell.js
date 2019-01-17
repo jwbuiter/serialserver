@@ -10,8 +10,8 @@ const {
 const Parser = require('../parser/Parser');
 
 function Cell(index, config, store) {
-  const {formula, digits, numeric, resetOnExe, waitForOther} = config;
-  const manual = (formula == '#' || formula.startsWith('#M'));
+  const {formula, digits, numeric, resetOnExe, waitForOther, type} = config;
+  const manual = (type === 'manual' || type==="menu");
   const myParser = Parser(store);
 
   let content = '';

@@ -54,7 +54,7 @@ function Parser(store){
     else
       return 'Number(store.getState().serial.coms[' + x + '].entry)';
   }
-  
+
   function parseStatistic(x){
     const state = store.getState();
     
@@ -76,15 +76,15 @@ function Parser(store){
     else
       data = state.logger.entries.map(entry => entry.map(val =>Number(val)));
 
-    let functions = { 
+    const statisticFunctions = { 
       tn : (x)=> data.length,
       to : (x)=> data.map(entry => entry[x]).reduce((acc, cur)=>acc+cur, 0),
       mi : (x)=> Math.min(...data.map(entry => entry[x])),
       ma : (x)=> Math.max(...data.map(entry => entry[x])),
       sp : (x)=> {
         data = data.map(entry => entry[x])
-        let mean = data.reduce((acc, cur)=>acc+cur, 0) / (data.length || 1);
-        let spread = data.reduce((acc, cur)=> acc + (cur - mean)*(cur - mean), 0);
+        const mean = data.reduce((acc, cur)=>acc+cur, 0) / (data.length || 1);
+        const spread = data.reduce((acc, cur)=> acc + (cur - mean)*(cur - mean), 0);
         return Math.sqrt(spread / (data.length || 1));
       },
       un : (x)=> data.map(entry => entry[x]).reduce((acc, cur)=>{
@@ -101,7 +101,34 @@ function Parser(store){
         return lastEntry[lastEntry.length-1];
       },
     }
-    return functions[operator](x).toString();
+
+    return statisticFunctions[operator](x).toString();
+  }
+
+  const selfLearningFunctions = {
+    SC: (state) => state.calibration,
+    SCmin: (state,tolerance) => state.calibration*(1 - tolerance),
+    SCmax: (state,tolerance) => state.calibration*(1 + tolerance),
+    SN: (state) => state.global.entries.length,
+    ST: (state) => (state.endTime?(state.endTime - state.startTime):(new Date() - state.startTime))/60000,
+    SIN: (state) => Object.values(state.individual.individualEntries).length,
+    SIC: (state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => acc + cur.increments, 0),
+    SIT: (state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => acc + cur.calibration, 0),
+    SImin: (state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => Math.min(acc, cur.calibration), 0),
+    SImax:(state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => Math.min(acc, cur.calibration), 0),
+    SIsp:(state) => {
+      const data = Object.values(state.individual.individualEntries).map(entry => entry.calibration)
+      const mean = data.reduce((acc, cur)=>acc+cur, 0) / (data.length || 1);
+      const spread = data.reduce((acc, cur)=> acc + (cur - mean)*(cur - mean), 0);
+      return Math.sqrt(spread / (data.length || 1));
+    },
+    SSN: (state) => Object.values(state.individual.generalEntries).length,
+    SST: (state) => Object.values(state.individual.generalEntries).reduce((acc, cur) => acc + cur[0], 0),
+    SI0: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===0).length,
+    SI1: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===1).length,
+    SI2: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===2).length,
+    SI3: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===3).length,
+    SI4: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===4).length,
   }
 
   function parseSelfLearning(x){
@@ -110,24 +137,7 @@ function Parser(store){
 
     const tolerance = state.learning?1:state.tolerance;
 
-    const properties = {
-      SC: state.calibration,
-      SCmin: state.calibration*(1 - tolerance),
-      SCmax: state.calibration*(1 + tolerance),
-      SN: state.global.entries.length,
-      ST: (state.endTime?(state.endTime - state.startTime):(new Date() - state.startTime))/60000,
-      SIN: Object.entries(state.individual.individualEntries).length,
-      SIC: Object.entries(state.individual.individualEntries).reduce((acc, cur) => acc + cur.increments, 0),
-      SIT: Object.entries(state.individual.individualEntries).reduce((acc, cur) => acc + cur.calibration, 0),
-      SSN: Object.entries(state.individual.generalEntries).length,
-      SST: Object.entries(state.individual.generalEntries).reduce((acc, cur) => acc + cur[0], 0),
-      SI0: Object.entries(state.individual.individualEntries).filter(entry=>entry.increments===0).length,
-      SI1: Object.entries(state.individual.individualEntries).filter(entry=>entry.increments===1).length,
-      SI2: Object.entries(state.individual.individualEntries).filter(entry=>entry.increments===2).length,
-      SI3: Object.entries(state.individual.individualEntries).filter(entry=>entry.increments===3).length,
-      SI4: Object.entries(state.individual.individualEntries).filter(entry=>entry.increments===4).length,
-    }
-    return properties[property].toString();
+    return selfLearningFunctions[property](state, tolerance).toString();
   }
 
   return {

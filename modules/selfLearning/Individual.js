@@ -69,9 +69,11 @@ function selfLearningIndividual(config, store){
               });
             }
           }
-        } else if (Object.keys(individualSL.individualEntries).length >= number ){
+        } 
+        
+        if (Object.keys(individualSL.individualEntries).length >= number ){
 
-          const values = Object.entries(individualSL.individualEntries).map(entry=> entry.value);
+          const values = Object.values(individualSL.individualEntries).map(entry=> entry.calibration);
 
           const min = Math.min(...values);
           const max = Math.max(...values);
@@ -115,7 +117,7 @@ function selfLearningIndividual(config, store){
         break;
       }
       case SL_INDIVIDUAL_INCREMENT:{
-        Object.entries(individualSL.individualEntries).forEach(entry => {
+        Object.values(individualSL.individualEntries).forEach(entry => {
           if (entry.tolerance >= toleranceLimit){
             store.dispatch({type: SL_INDIVIDUAL_DOWNGRADE, payload: entry.key})
           }
