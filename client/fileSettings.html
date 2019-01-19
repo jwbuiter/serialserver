@@ -32,9 +32,14 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/res/jquery-1.11.1.js"></script>
-  <script src="/current.js"></script>
   <script src="/config.static.js"></script>
   <script type="text/javascript">
+    let config;
+    $.getJSON('/current.json', function (data) {
+      config = data;
+      makeForm();
+      fillIn();
+    });
     if (screen.width > 1000) {
       var columnWidths = [12, 12, 28, 12, 12, 12, 12, 12];
     }
@@ -70,236 +75,239 @@
       return '#c' + columnNum + 'r' + rowNum;
     }
 
-    $(address(0, 0)).append($('<b>').html('Trigger'));
-    $(address(1, 0)).append($('<b>').html('Use import file'));
-    $(address(2, 0)).append($('<b>').html('Wait for second COM'));
-    $(address(3, 0)).append($('<b>').html('Search column'));
-    $(address(4, 0)).append($('<b>').html('Save to log'));
-    $(address(5, 0)).append($('<b>').html('Log ID'));
-    $(address(6, 0)).append($('<b>').html('Reset on 0'));
+    function makeForm() {
+      $(address(0, 0)).append($('<b>').html('Trigger'));
+      $(address(1, 0)).append($('<b>').html('Use import file'));
+      $(address(2, 0)).append($('<b>').html('Wait for second COM'));
+      $(address(3, 0)).append($('<b>').html('Search column'));
+      $(address(4, 0)).append($('<b>').html('Save to log'));
+      $(address(5, 0)).append($('<b>').html('Log ID'));
+      $(address(6, 0)).append($('<b>').html('Reset on 0'));
 
-    $(address(0, 1)).append($('<select id ="tabletrigger">').html('<option value="0">COM 0</option><option value="1">COM 1</option>'));
-    $(address(1, 1)).append($('<input type="checkbox" id="tableuseFile">'));
-    $(address(2, 1)).append($('<input type="checkbox" id="tablewaitForOther">'));
-    $(address(3, 1)).append($('<input type="text" id="tablesearchColumn">'));
-    $(address(4, 1)).append($('<input type="checkbox" id="loggerwriteToFile">'));
-    $(address(5, 1)).append($('<input type="text" id="loggerlogID">'));
-    $(address(6, 1)).append($('<select id ="serialresetTrigger">').html('<option value="off">Off</option><option value="on">On</option><option value="com0">COM 0</option><option value="com1">COM 1</option>'));
+      $(address(0, 1)).append($('<select id ="tabletrigger">').html('<option value="0">COM 0</option><option value="1">COM 1</option>'));
+      $(address(1, 1)).append($('<input type="checkbox" id="tableuseFile">'));
+      $(address(2, 1)).append($('<input type="checkbox" id="tablewaitForOther">'));
+      $(address(3, 1)).append($('<input type="text" id="tablesearchColumn">'));
+      $(address(4, 1)).append($('<input type="checkbox" id="loggerwriteToFile">'));
+      $(address(5, 1)).append($('<input type="text" id="loggerlogID">'));
+      $(address(6, 1)).append($('<select id ="serialresetTrigger">').html('<option value="off">Off</option><option value="on">On</option><option value="com0">COM 0</option><option value="com1">COM 1</option>'));
 
-    $(address(7, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
-    $(address(7, 1)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
-    $(address(7, 3)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
-    $(address(7, 4)).append($('<input type="button" value="Load config" onclick="javascript:loadConfigList()">'));
-
-    for (let i = 0; i < 8; i++) {
-      $(address(i, 2)).append($('<hr>'));
-    }
-
-    $(address(0, 3)).append($('<b>').html('Log reset'));
-    $(address(1, 3)).append($('<b>').html('Time'));
-    $(address(2, 3)).append($('<b>').html('Automatic FTP'));
-    $(address(3, 3)).append($('<b>').html('1-Adr / Folder'));
-    $(address(4, 3)).append($('<b>').html('1-User : Passw'));
-    $(address(5, 3)).append($('<b>').html('2-Adr / Folder'));
-    $(address(6, 3)).append($('<b>').html('2-User : Passw'));
-
-    $(address(0, 4)).append($('<select id ="loggerresetMode">').html('<option value="off">Off</option><option value="interval">Interval</option><option value="time">Time of day</option>'));
-    $(address(1, 4)).append($('<input type="time" id="loggerresetValue">'));
-    $(address(2, 4)).append($('<input type="checkbox" id="FTPautomatic">'));
-    $(address(3, 4)).append($('<input type="text" style="font-size: 19px" id="FTPtargets0addressFolder">'));
-    $(address(4, 4)).append($('<input type="text" style="font-size: 19px" id="FTPtargets0userPassword">'));
-    $(address(5, 4)).append($('<input type="text" style="font-size: 19px" id="FTPtargets1addressFolder">'));
-    $(address(6, 4)).append($('<input type="text" style="font-size: 19px" id="FTPtargets1userPassword">'));
-
-    for (let i = 0; i < 8; i++) {
-      $(address(i, 5)).append($('<hr>'));
-    }
-
-    var cursor = 6;
-    if (constants.enabledModules.selfLearning) {
-
-      $(address(0, 6)).append($('<b>').html('Self-learning'));
-      $(address(1, 6)).append($('<b>').html('Number'));
-      $(address(2, 6)).append($('<b>').html('Calibration #SC'));
-      $(address(3, 6)).append($('<b>').html('Tolerance (%)'));
-      $(address(4, 6)).append($('<b>').html('SL +Tolerance (%)'));
-      $(address(5, 6)).append($('<b>').html('Unique log'));
-      $(address(6, 6)).html('#SC #SCmin #SCmax').addClass('small');
-      $(address(7, 6)).html('SL-Calibration').addClass('small');
-
-
-      $(address(0, 7)).append($('<select id ="selfLearningenabled">').html('<option value="off">Off</option><option value="com0">Com 0</option><option value="com1">Com 1</option><option value="com0ind">Com 0 Individual</option><option value="com1ind">Com 1 Individual</option>'));
-      $(address(1, 7)).append($('<input type="number" id="selfLearningnumber" min="0" step="1">'));
-      $(address(2, 7)).append($('<input type="number" id="selfLearningstartCalibration" min="0" step="1">'));
-      $(address(3, 7)).append($('<input type="number" id="selfLearningtolerance" min="0" step="1">'));
-      $(address(4, 7)).append($('<input type="number" id="selfLearningstartTolerance" min="0" step="1">'));
-      $(address(5, 7)).append($('<select id ="loggerunique">').html('<option value="off">Off</option><option value="com0">Com 0</option><option value="com1">Com 1</option>'));
-      $(address(6, 7)).html('#SN #ST').addClass('small');
-      $(address(7, 7)).html('SL-Number SL-Time').addClass('small');
-
-      {
-        const classes = ['inProgress', 'done', 'warning'];
-        $('#selfLearningstartCalibration').addClass('selfLearning ' + classes[config.selfLearning.success]);
-      }
-
-      switch (config.selfLearning.success) {
-        case 0: {
-          break
-        }
-        case 1: {
-          break;
-        }
-        case 2: {
-          break;
-        }
-      }
+      $(address(7, 0)).append($('<input type="button" value="Save" onclick="javascript:setSettings()">'));
+      $(address(7, 1)).append($('<input type="button" value="Cancel" onclick="javascript:goDebug()">'));
+      $(address(7, 3)).append($('<input type="button" value="Save config" onclick="javascript:saveConfig()">'));
+      $(address(7, 4)).append($('<input type="button" value="Load config" onclick="javascript:loadConfigList()">'));
 
       for (let i = 0; i < 8; i++) {
-        $(address(i, 8)).append($('<hr>'));
+        $(address(i, 2)).append($('<hr>'));
       }
-      cursor += 3;
-    }
-    $(address(7, cursor)).append($('<b>').html('Version: ' + config.version));
-    cursor++;
 
-    $(address(0, cursor)).append($('<b>').html('Table'));
-    $(address(1, cursor)).append($('<b>').html('Name'));
-    $(address(2, cursor)).append($('<b>').html('Formula'));
-    $(address(3, cursor)).append($('<b>').html('Numeric'));
-    $(address(4, cursor)).append($('<b>').html('Digits/round.'));
-    $(address(5, cursor)).append($('<b>').html('Reset on exe'));
-    $(address(6, cursor)).append($('<b>').html('Command').addClass('small'));
-    $(address(7, cursor)).append($('<b>').html('Value').addClass('small'));
+      $(address(0, 3)).append($('<b>').html('Log reset'));
+      $(address(1, 3)).append($('<b>').html('Time'));
+      $(address(2, 3)).append($('<b>').html('Automatic FTP'));
+      $(address(3, 3)).append($('<b>').html('1-Adr / Folder'));
+      $(address(4, 3)).append($('<b>').html('1-User : Passw'));
+      $(address(5, 3)).append($('<b>').html('2-Adr / Folder'));
+      $(address(6, 3)).append($('<b>').html('2-User : Passw'));
 
-    var commands = [
-      'com0',
-      'date',
-      '$A',
-      '#A1',
-      '#O1',
-      '#I1',
-      '# / #M',
-      'and',
-      'or',
-      '( )',
-      '==',
-      '!=',
-      '>',
-      '>=',
-      '<',
-      '<=',
-      '+',
-      '-',
-      '*',
-      '/',
-    ];
-    var meanings = [
-      'value com0',
-      'date today',
-      'value import file column A',
-      'value table #A1',
-      'value output 1 (0 or 1)',
-      'value input 1 (0 or 1)',
-      'manual table input / menu',
-      'meets both commands',
-      'meets 1 of the commands',
-      'priority',
-      'equal to',
-      'not equal to',
-      'greater than',
-      'greater or equal to',
-      'less than',
-      'less or equal to',
-      'add',
-      'substract',
-      'multiply',
-      'divide',
-    ];
-    cursor++;
-    for (let i = 0; i < commands.length; i++) {
-      $(address(6, i + cursor)).html(commands[i]);
-      $(address(6, i + cursor)).addClass('small');
-      $(address(7, i + cursor)).html(meanings[i]);
-      $(address(7, i + cursor)).addClass('small');
-    }
+      $(address(0, 4)).append($('<select id ="loggerresetMode">').html('<option value="off">Off</option><option value="interval">Interval</option><option value="time">Time of day</option>'));
+      $(address(1, 4)).append($('<input type="time" id="loggerresetValue">'));
+      $(address(2, 4)).append($('<input type="checkbox" id="FTPautomatic">'));
+      $(address(3, 4)).append($('<input type="text" style="font-size: 19px" id="FTPtargets0addressFolder">'));
+      $(address(4, 4)).append($('<input type="text" style="font-size: 19px" id="FTPtargets0userPassword">'));
+      $(address(5, 4)).append($('<input type="text" style="font-size: 19px" id="FTPtargets1addressFolder">'));
+      $(address(6, 4)).append($('<input type="text" style="font-size: 19px" id="FTPtargets1userPassword">'));
 
-    for (let i = 0; i < tableLetters; i++) {
-      for (let j = 0; j < tableNumbers; j++) {
-        $(address(0, cursor)).append($('<b>').html('#' + String.fromCharCode(65 + i) + (j + 1)));
-        $(address(1, cursor)).append($('<input type="text" id="tablecells' + (i * tableNumbers + j) + 'name">'));
-        $(address(2, cursor)).append($('<input class="wide" type="text" id="tablecells' + (i * tableNumbers + j) + 'formula">')).change(tableCheckMenu);
-        $(address(3, cursor)).append($('<input type="checkbox" id="tablecells' + (i * tableNumbers + j) + 'numeric">'));
-        $(address(4, cursor)).append($('<input type="number" id="tablecells' + (i * tableNumbers + j) + 'digits" min="0" step="1">'));
-        $(address(5, cursor)).append($('<input type="checkbox" id="tablecells' + (i * tableNumbers + j) + 'resetOnExe">'));
+      for (let i = 0; i < 8; i++) {
+        $(address(i, 5)).append($('<hr>'));
+      }
+
+      var cursor = 6;
+      if (constants.enabledModules.selfLearning) {
+
+        $(address(0, 6)).append($('<b>').html('Self-learning'));
+        $(address(1, 6)).append($('<b>').html('Number'));
+        $(address(2, 6)).append($('<b>').html('Calibration #SC'));
+        $(address(3, 6)).append($('<b>').html('Tolerance (%)'));
+        $(address(4, 6)).append($('<b>').html('SL +Tolerance (%)'));
+        $(address(5, 6)).append($('<b>').html('Unique log'));
+        $(address(6, 6)).html('#SC #SCmin #SCmax').addClass('small');
+        $(address(7, 6)).html('SL-Calibration').addClass('small');
+
+
+        $(address(0, 7)).append($('<select id ="selfLearningenabled">').html('<option value="off">Off</option><option value="com0">Com 0</option><option value="com1">Com 1</option><option value="com0ind">Com 0 Individual</option><option value="com1ind">Com 1 Individual</option>'));
+        $(address(1, 7)).append($('<input type="number" id="selfLearningnumber" min="0" step="1">'));
+        $(address(2, 7)).append($('<input type="number" id="selfLearningstartCalibration" min="0" step="1">'));
+        $(address(3, 7)).append($('<input type="number" id="selfLearningtolerance" min="0" step="1">'));
+        $(address(4, 7)).append($('<input type="number" id="selfLearningstartTolerance" min="0" step="1">'));
+        $(address(5, 7)).append($('<select id ="loggerunique">').html('<option value="off">Off</option><option value="com0">Com 0</option><option value="com1">Com 1</option>'));
+        $(address(6, 7)).html('#SN #ST').addClass('small');
+        $(address(7, 7)).html('SL-Number SL-Time').addClass('small');
+
+        {
+          const classes = ['inProgress', 'done', 'warning'];
+          $('#selfLearningstartCalibration').addClass('selfLearning ' + classes[config.selfLearning.success]);
+        }
+
+        switch (config.selfLearning.success) {
+          case 0: {
+            break
+          }
+          case 1: {
+            break;
+          }
+          case 2: {
+            break;
+          }
+        }
+
+        for (let i = 0; i < 8; i++) {
+          $(address(i, 8)).append($('<hr>'));
+        }
+        cursor += 3;
+      }
+      $(address(7, cursor)).append($('<b>').html('Version: ' + config.version));
+      cursor++;
+
+      $(address(0, cursor)).append($('<b>').html('Table'));
+      $(address(1, cursor)).append($('<b>').html('Name'));
+      $(address(2, cursor)).append($('<b>').html('Formula'));
+      $(address(3, cursor)).append($('<b>').html('Numeric'));
+      $(address(4, cursor)).append($('<b>').html('Digits/round.'));
+      $(address(5, cursor)).append($('<b>').html('Reset on exe'));
+      $(address(6, cursor)).append($('<b>').html('Command').addClass('small'));
+      $(address(7, cursor)).append($('<b>').html('Value').addClass('small'));
+
+      var commands = [
+        'com0',
+        'date',
+        '$A',
+        '#A1',
+        '#O1',
+        '#I1',
+        '# / #M',
+        'and',
+        'or',
+        '( )',
+        '==',
+        '!=',
+        '>',
+        '>=',
+        '<',
+        '<=',
+        '+',
+        '-',
+        '*',
+        '/',
+      ];
+      var meanings = [
+        'value com0',
+        'date today',
+        'value import file column A',
+        'value table #A1',
+        'value output 1 (0 or 1)',
+        'value input 1 (0 or 1)',
+        'manual table input / menu',
+        'meets both commands',
+        'meets 1 of the commands',
+        'priority',
+        'equal to',
+        'not equal to',
+        'greater than',
+        'greater or equal to',
+        'less than',
+        'less or equal to',
+        'add',
+        'substract',
+        'multiply',
+        'divide',
+      ];
+      cursor++;
+      for (let i = 0; i < commands.length; i++) {
+        $(address(6, i + cursor)).html(commands[i]);
+        $(address(6, i + cursor)).addClass('small');
+        $(address(7, i + cursor)).html(meanings[i]);
+        $(address(7, i + cursor)).addClass('small');
+      }
+
+      for (let i = 0; i < tableLetters; i++) {
+        for (let j = 0; j < tableNumbers; j++) {
+          $(address(0, cursor)).append($('<b>').html('#' + String.fromCharCode(65 + i) + (j + 1)));
+          $(address(1, cursor)).append($('<input type="text" id="tablecells' + (i * tableNumbers + j) + 'name">'));
+          $(address(2, cursor)).append($('<input class="wide" type="text" id="tablecells' + (i * tableNumbers + j) + 'formula">')).change(tableCheckMenu);
+          $(address(3, cursor)).append($('<input type="checkbox" id="tablecells' + (i * tableNumbers + j) + 'numeric">'));
+          $(address(4, cursor)).append($('<input type="number" id="tablecells' + (i * tableNumbers + j) + 'digits" min="0" step="1">'));
+          $(address(5, cursor)).append($('<input type="checkbox" id="tablecells' + (i * tableNumbers + j) + 'resetOnExe">'));
+          cursor++;
+        }
+      }
+      cursor++;
+
+      $(address(1, cursor)).append($('<b>').html('Name'));
+      $(address(2, cursor)).append($('<b>').html('Formula'));
+      $(address(3, cursor)).append($('<b>').html('Execute'));
+      $(address(4, cursor)).append($('<b>').html('Timeout (s)'));
+      cursor++;
+
+      for (let i = 0; i < numOutputs; i++) {
+        $(address(0, cursor)).append($('<b>').html('Output ' + (i + 1)));
+        $(address(1, cursor)).append($('<input type="text" id="outputports' + i + 'name">'));
+        $(address(2, cursor)).append($('<input class="wide" type="text" id="outputports' + i + 'formula">'));
+        $(address(3, cursor)).append($('<input type="checkbox" id="outputports' + i + 'execute">'));
+        $(address(4, cursor)).append($('<input type="number" id="outputports' + i + 'seconds" min="0" step="1">'));
         cursor++;
       }
-    }
-    cursor++;
-
-    $(address(1, cursor)).append($('<b>').html('Name'));
-    $(address(2, cursor)).append($('<b>').html('Formula'));
-    $(address(3, cursor)).append($('<b>').html('Execute'));
-    $(address(4, cursor)).append($('<b>').html('Timeout (s)'));
-    cursor++;
-
-    for (let i = 0; i < numOutputs; i++) {
-      $(address(0, cursor)).append($('<b>').html('Output ' + (i + 1)));
-      $(address(1, cursor)).append($('<input type="text" id="outputports' + i + 'name">'));
-      $(address(2, cursor)).append($('<input class="wide" type="text" id="outputports' + i + 'formula">'));
-      $(address(3, cursor)).append($('<input type="checkbox" id="outputports' + i + 'execute">'));
-      $(address(4, cursor)).append($('<input type="number" id="outputports' + i + 'seconds" min="0" step="1">'));
       cursor++;
-    }
-    cursor++;
 
-    $(address(1, cursor)).append($('<b>').html('Name'));
-    $(address(2, cursor)).append($('<b>').html('Command'));
-    $(address(3, cursor)).append($('<b>').html('Invert'));
-    $(address(4, cursor)).append($('<b>').html('Follow'));
-    $(address(5, cursor)).append($('<b>').html('Timeout (ms)'));
-    $(address(6, cursor)).append($('<b>').html('Man timeout (s)'));
-    cursor -= 2;
-    //$(address(6, cursor - 1)).append($('<b>').html('Logfile').addClass('small'));
-    $(address(7, cursor - 1)).append($('<b>').html('Logfile : X = 0/1/A1/B5').addClass('small'));
-    var meanings = [
-      '&tn : total number',
-      '&toX : total',
-      '&miX : minimum',
-      '&maX : maximum',
-      '&spX : spread',
-      '&unX : number unique',
-      '&xxUX : unique statistics',
-      '&TU : total unique',
-    ];
+      $(address(1, cursor)).append($('<b>').html('Name'));
+      $(address(2, cursor)).append($('<b>').html('Command'));
+      $(address(3, cursor)).append($('<b>').html('Invert'));
+      $(address(4, cursor)).append($('<b>').html('Follow'));
+      $(address(5, cursor)).append($('<b>').html('Timeout (ms)'));
+      $(address(6, cursor)).append($('<b>').html('Man timeout (s)'));
+      cursor -= 2;
+      //$(address(6, cursor - 1)).append($('<b>').html('Logfile').addClass('small'));
+      $(address(7, cursor - 1)).append($('<b>').html('Logfile : X = 0/1/A1/B5').addClass('small'));
+      var meanings = [
+        '&tn : total number',
+        '&toX : total',
+        '&miX : minimum',
+        '&maX : maximum',
+        '&spX : spread',
+        '&unX : number unique',
+        '&xxUX : unique statistics',
+        '&TU : total unique',
+      ];
 
-    for (let i = 0; i < meanings.length; i++) {
-      $(address(7, i + cursor)).html(meanings[i]);
-      $(address(7, i + cursor)).addClass('small');
-      console.log(i + cursor)
-    }
-    cursor += 3;
-
-    for (let i = 0; i < numInputs; i++) {
-      $(address(0, cursor)).append($('<b>').html('Input ' + (i + 1)));
-      $(address(1, cursor)).append($('<input type="text" id="inputports' + i + 'name">'));
-
-      let commandSelect = $('<select selected=" " class="wide" id="inputports' + i + 'formula">');
-      commandSelect.append('<option value=""></option><option value="exe">Execute</option><option value="exebl">Execute block</option></option><option value="teach">SL Teach</option></option><option value="restart">Restart</option></option><option value="shutdown">Shut down</option>');
-      $(address(2, cursor)).append(commandSelect);
-      $(address(3, cursor)).append($('<input type="checkbox" id="inputports' + i + 'invert">'));
-
-      let followSelect = $('<select selected="-1" id="inputports' + i + 'follow">');
-      followSelect.append('<option value="-1">None</option>');
-      for (let j = 0; j < numOutputs; j++) {
-        followSelect.append('<option value="' + j + '"">Output ' + (j + 1) + '</option>');
+      for (let i = 0; i < meanings.length; i++) {
+        $(address(7, i + cursor)).html(meanings[i]);
+        $(address(7, i + cursor)).addClass('small');
+        console.log(i + cursor)
       }
-      $(address(4, cursor)).append(followSelect);
-      $(address(5, cursor)).append($('<input type="number" id="inputports' + i + 'timeout" min="0" step="1">'));
+      cursor += 3;
 
-      $(address(6, cursor)).append($('<input type="number" id="inputports' + i + 'manualTimeout" min="0" step="1">'));
+      for (let i = 0; i < numInputs; i++) {
+        $(address(0, cursor)).append($('<b>').html('Input ' + (i + 1)));
+        $(address(1, cursor)).append($('<input type="text" id="inputports' + i + 'name">'));
 
-      cursor++;
-      address(3, cursor);
+        let commandSelect = $('<select selected=" " class="wide" id="inputports' + i + 'formula">');
+        commandSelect.append('<option value=""></option><option value="exe">Execute</option><option value="exebl">Execute block</option></option><option value="teach">SL Teach</option></option><option value="restart">Restart</option></option><option value="shutdown">Shut down</option>');
+        $(address(2, cursor)).append(commandSelect);
+        $(address(3, cursor)).append($('<input type="checkbox" id="inputports' + i + 'invert">'));
+
+        let followSelect = $('<select selected="-1" id="inputports' + i + 'follow">');
+        followSelect.append('<option value="-1">None</option>');
+        for (let j = 0; j < numOutputs; j++) {
+          followSelect.append('<option value="' + j + '"">Output ' + (j + 1) + '</option>');
+        }
+        $(address(4, cursor)).append(followSelect);
+        $(address(5, cursor)).append($('<input type="number" id="inputports' + i + 'timeout" min="0" step="1">'));
+
+        $(address(6, cursor)).append($('<input type="number" id="inputports' + i + 'manualTimeout" min="0" step="1">'));
+
+        cursor++;
+        address(3, cursor);
+      }
+
     }
 
     function fillInRecursive(prefix, config) {
