@@ -130,6 +130,10 @@ function Com(index, config, store) {
     dispatchTest();
   } else if (reader){
     http.createServer(function (req, res) {
+
+      myGPIO.writeSync(1);
+      setTimeout(() => myGPIO.writeSync(0), 500);
+
       if (req.url === '/favicon.ico'){
         res.end();
         return;

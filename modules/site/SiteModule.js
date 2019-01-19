@@ -60,7 +60,7 @@ function SiteModule(config, store) {
   const staticRoutes = {
     '/': 'client.html',
     '/settings': 'settings.html',
-    '/current.js': '../configs/current.js',
+    '/current.json': '../configs/current.json',
     '/config.static.js': '../config.static.js'
   }
 
@@ -76,7 +76,7 @@ function SiteModule(config, store) {
     '/config': (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-      res.send(require(path.join(__dirname, '../..', 'configs', 'current.js')));
+      res.send(require(path.join(__dirname, '../..', 'configs', 'current.json')));
     },
     '/com': (req, res) => res.send(titleString + (store.getState().input.executing?'1':'0')),
     '/coml': (req, res) => {

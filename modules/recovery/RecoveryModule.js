@@ -16,13 +16,13 @@ function RecoveryModule() {
 
   function reset(){
     console.log('Resetting configuration.');
-    if (fs.existsSync(path.join(configPath, 'lastgood.js'))){
-      fs.copyFileSync(path.join(configPath, 'lastgood.js'), path.join(configPath, 'current.js'));
-      fs.unlinkSync(path.join(configPath, 'lastgood.js'))
+    if (fs.existsSync(path.join(configPath, 'lastgood.json'))){
+      fs.copyFileSync(path.join(configPath, 'lastgood.json'), path.join(configPath, 'current.json'));
+      fs.unlinkSync(path.join(configPath, 'lastgood.json'))
     }
     else
     {
-      fs.copyFileSync(path.join(configPath, 'template.js'), path.join(configPath, 'current.js'));
+      fs.copyFileSync(path.join(configPath, 'template.json'), path.join(configPath, 'current.json'));
     }
   }
 
@@ -55,7 +55,7 @@ function RecoveryModule() {
     });
   }
 
-  if (!fs.existsSync(path.join(configPath, 'current.js'))){
+  if (!fs.existsSync(path.join(configPath, 'current.json'))){
     console.log('No config found, config will be reset to template.')
     reset();
     restart();
@@ -78,8 +78,9 @@ function RecoveryModule() {
   }
 
   try{
-    eval('require(path.join(configPath, \'current.js\'))');
+    eval('require(path.join(configPath, \'current.json\'))');
   } catch (err){
+    console.log(err)
     reset();
     restart();
   }

@@ -8,6 +8,6 @@ logo/*
 client2/*
 selfLearning/*
 !data/.gitkeep
-!configs/template.js
+!configs/template.json
 !logo/.gitkeep
 !selfLearning/.gitkeep

@@ -25,14 +25,14 @@ function Parser(store){
   }
   
   function parseInput(x){
-    x=parseInt(x[2])-1;
+    x=parseInt(x.slice(2))-1;
     assert(x>=0 && x<store.getState().input.ports.length, 'Input index out of bounds');
   
     return 'store.getState().input.ports['+x+'].state';
   }
   
   function parseOutput(x){
-    x=parseInt(x[2])-1;
+    x=parseInt(x.slice(2))-1;
     assert(x>=0 && x<store.getState().output.ports.length, 'Output index out of bounds');
   
     return 'store.getState().output.ports['+x+'].state';
@@ -148,8 +148,8 @@ function Parser(store){
           .replace('and', '&&')
           .replace('or', '||')
           .replace(/#[A-G][0-9]/g, parseTable)
-          .replace(/#I[0-9]/g, parseInput)
-          .replace(/#O[0-9]/g, parseOutput)
+          .replace(/#I[0-9]+/g, parseInput)
+          .replace(/#O[0-9]+/g, parseOutput)
           .replace(/\$[A-Z]/g, parseExcel)
           .replace(/com[0-9]/g, parseCom)
           .replace(/\&[a-zA-Z0-9]+/g, parseStatistic)

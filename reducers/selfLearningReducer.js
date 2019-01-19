@@ -20,6 +20,7 @@ function initialState(){
     individual: initialStateIndividual(),
     calibration: selfLearning.startCalibration,
     tolerance: selfLearning.tolerance/100,
+    comIndex: Number(selfLearning.enabled[3]),
     type: 'none',
     success: 1,
     teaching: false,

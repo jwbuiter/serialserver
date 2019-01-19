@@ -1,8 +1,9 @@
 <!doctype html>
 <html>
+
 <head>
-   <style>
-      *{font-size: 25px; padding:0; margin: 0;}
+  <style>
+    *{font-size: 25px; padding:0; margin: 0;}
       table { text-align: center; border: none; border-collapse: collapse;}
       tr { height: 29px; }
       td { text-align: center;  border-style: bold; height: 29px;}
@@ -10,6 +11,7 @@
       select { width: 100%; }
     </style>
 </head>
+
 <body>
   <div>
     <table id="content">
@@ -18,7 +20,6 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/res/jquery-1.11.1.js"></script>
-  <script src="/current.js"></script>
   <script src="/config.static.js"></script>
   <script type="text/javascript">
     document.title = constants.name;
@@ -26,16 +27,16 @@
     const numColumns = 4;
     const numRows = 11;
 
-    function address(rowNum, columnNum){
+    function address(rowNum, columnNum) {
       return '#c' + columnNum + 'r' + rowNum;
     }
 
-    for (let i = 0; i < numRows; i++){
+    for (let i = 0; i < numRows; i++) {
       var currentRow = $('<tr>');
       $('#content').append(currentRow);
-      for (let j = 0; j < numColumns; j++){
+      for (let j = 0; j < numColumns; j++) {
         newCell = $('<td>').attr('id', address(j, i).slice(1));
-        
+
         newCell.css('max-width', columnWidths[j] + 'vw');
         newCell.css('width', columnWidths[j] + 'vw');
 
@@ -54,29 +55,30 @@
 
     var socket = io();
 
-    function setDate(){
+    function setDate() {
       let dateTimeString = $('#date').val() + ' ' + $('#time').val()
       let dateTime = Date.parse(dateTimeString);
-      socket.emit('setDateTime', dateTime/1000);
+      socket.emit('setDateTime', dateTime / 1000);
     }
 
-    function goSubmit(){
+    function goSubmit() {
       $('#uploadForm').submit();
     }
 
-    function goDebug(){
+    function goDebug() {
       window.location.href = '/';
     }
 
-    function goFileSettings(){
-      if (confirm("Do you want to go to the file settings?")){
+    function goFileSettings() {
+      if (confirm("Do you want to go to the file settings?")) {
         window.location.href = '/filesettings';
       }
     }
 
-    function goDownload(){
+    function goDownload() {
       window.location.href = '/downloadLog';
     }
   </script>
 </body>
+
 </html>

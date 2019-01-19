@@ -1,96 +1,105 @@
 <!doctype html>
 <html>
+
 <head>
-   <style>
-      *{font-size: 25px; padding:0; margin: 0; }
+  <style>
+    *{font-size: 25px; padding:0; margin: 0; }
       div {position: relative; margin: auto; margin-top: 50px; width: 90%;}
       ul { list-style-type: none; overflow: hidden;}
       input[type="button"] {float: right; font-size: 20px; width: 15%;}
     </style>
 </head>
+
 <body>
-  <div >
+  <div>
     <ul id="content">
     </ul>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/res/jquery-1.11.1.js"></script>
-  <script src="/current.js"></script>
   <script src="/config.static.js"></script>
   <script type="text/javascript">
     var fileList;
     document.title = constants.name;
     var socket = io();
 
-    function downloadFile(index){
-      window.location.href = '/downloadLog?file='+fileList[index];
+    let config;
+    $.getJSON('/current.json', function (data) {
+      config = data;
+
+      socket.on('logList', function (list) {
+        fileList = list;
+
+        $('#content').contents().remove();
+        if (list.length == 0) {
+          $('#content').append($('<li>').append('No files found'));
+        }
+        else {
+          list.forEach((element, index) => {
+            let emptyButton = '<input type="button">';
+            let newItem = $('<li>').append('<span>' + element + '</span>')
+              .append(config.FTP.targets[1].addressFolder ? '<input type="button" value="FTP 2" onclick="javascript:uploadFile(' + index + ', 1)">' : emptyButton)
+              .append(config.FTP.targets[0].addressFolder ? '<input type="button" value="FTP 1" onclick="javascript:uploadFile(' + index + ', 0)">' : emptyButton)
+              .append('<input type="button" value="Download" onclick="javascript:downloadFile(' + index + ')">')
+              .append('<input type="button" value="Delete" onclick="javascript:deleteFile(' + index + ')">');
+            $('#content').append(newItem);
+          });
+        }
+
+        let newItem = $('<li>')
+          .append('<input type="button" value="Cancel" onclick="javascript:goDebug()">')
+          .append('<input type="button" value="Downl. all" style="margin-right:15%" onclick="javascript:downloadAll()">')
+          .append('<input type="button" value="Delete all" onclick="javascript:deleteAll()">');
+        $('#content').append(newItem);
+
+      });
+
+    });
+
+    function downloadFile(index) {
+      window.location.href = '/downloadLog?file=' + fileList[index];
     }
 
-    function deleteFile(index){
-      if (confirm("Do you really want to delete "+fileList[index]+"?")){
+    function deleteFile(index) {
+      if (confirm("Do you really want to delete " + fileList[index] + "?")) {
         socket.emit('deleteLog', fileList[index]);
         socket.emit('getLogList');
       }
     }
 
-    function uploadFile(index, FTPIndex){
-      if (confirm("Do you really want to upload "+fileList[index]+"?")){
-        socket.emit('uploadLog', {name:fileList[index], index: FTPIndex});
+    function uploadFile(index, FTPIndex) {
+      if (confirm("Do you really want to upload " + fileList[index] + "?")) {
+        socket.emit('uploadLog', { name: fileList[index], index: FTPIndex });
       }
-    } 
+    }
 
-    function deleteAll(){
-      if (confirm("Do you really want to delete all logs?")){
-        for(let i=0; i<fileList.length; i++){
-          socket.emit('deleteLog', fileList[i]); 
+    function deleteAll() {
+      if (confirm("Do you really want to delete all logs?")) {
+        for (let i = 0; i < fileList.length; i++) {
+          socket.emit('deleteLog', fileList[i]);
         }
-      socket.emit('getLogList');
+        socket.emit('getLogList');
       }
     }
 
-    function downloadAll(){
-      if (confirm("Do you really want to download all logs?")){
-        window.location.href = '/downloadLog?multiFile='+fileList; 
+    function downloadAll() {
+      if (confirm("Do you really want to download all logs?")) {
+        window.location.href = '/downloadLog?multiFile=' + fileList;
       }
     }
 
-    function goDebug(){
+    function goDebug() {
       window.location.href = '/';
     }
 
     socket.emit('getLogList');
 
-    socket.on('logList', function(list){
-      fileList = list;
 
-      $('#content').contents().remove();
-      if (list.length==0){
-        $('#content').append($('<li>').append('No files found'));
-      }
-      else{
-        list.forEach((element, index) => {
-          let emptyButton = '<input type="button">';
-          let newItem = $('<li>').append('<span>'+element+'</span>')
-            .append(config.FTP.targets[1].addressFolder?'<input type="button" value="FTP 2" onclick="javascript:uploadFile('+index+', 1)">':emptyButton)
-            .append(config.FTP.targets[0].addressFolder?'<input type="button" value="FTP 1" onclick="javascript:uploadFile('+index+', 0)">':emptyButton)
-            .append('<input type="button" value="Download" onclick="javascript:downloadFile('+index+')">')
-            .append('<input type="button" value="Delete" onclick="javascript:deleteFile('+index+')">');
-          $('#content').append(newItem);
-        });
-      }
-
-      let newItem = $('<li>')
-        .append('<input type="button" value="Cancel" onclick="javascript:goDebug()">')
-        .append('<input type="button" value="Downl. all" style="margin-right:15%" onclick="javascript:downloadAll()">')
-        .append('<input type="button" value="Delete all" onclick="javascript:deleteAll()">');
-      $('#content').append(newItem);
-      
-    });
-
-    socket.on('uploadLogResponse', (response)=>{
+    socket.on('uploadLogResponse', (response) => {
       alert(response);
     });
   </script>
 </body>
+
 </html>

@@ -10,14 +10,11 @@ const {
 const configPath = path.join(__dirname, '../..', 'configs');
 
 function ConfigModule(store) {
-  let config = require(path.join(configPath, 'current.js'));
+  let config = require(path.join(configPath, 'current.json'));
 
   function saveConfig(config, name) {
     console.log('Saving config: ' + name);
-    let conf = JSON.stringify(config, null, 2).replace(/"/g, "'")
-      .replace(/\\u00[0-9]{2}/g, match => String.fromCharCode(parseInt(match.slice(-2), 16)))
-      .replace(/'[\w]+':/g, match => match.slice(1,-2)+' :');
-    conf = 'var config =' + conf + ';\n\nmodule.exports = config;';
+    let conf = JSON.stringify(config, null, 2);
     
     try {
       fs.accessSync(name);
@@ -39,9 +36,9 @@ function ConfigModule(store) {
         config = Object.assign(config, lastAction.payload);
         console.log(config)
 
-        const name = path.join(configPath, 'current.js');
+        const name = path.join(configPath, 'current.json');
 
-        fs.copyFileSync(name, path.join(configPath, 'lastgood.js'));
+        fs.copyFileSync(name, path.join(configPath, 'lastgood.json'));
         saveConfig(config, name);
         break;
       }

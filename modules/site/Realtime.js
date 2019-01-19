@@ -78,15 +78,15 @@ function Realtime(server, config, store){
 
     switch (state.selfLearning.type){
       case 'individual':{
-        const {calibration, tolerance, success} = state.selfLearning;
+        const {calibration, tolerance, success, comIndex} = state.selfLearning;
         const {generalEntries, individualEntries} = state.selfLearning.individual;
-        io.emit('selfLearning', {individual: true, calibration, tolerance, success, generalEntries, individualEntries});
+        io.emit('selfLearning', {individual: true, calibration, tolerance, success, comIndex, generalEntries, individualEntries});
         break;
       }
       case 'global':{
-        const {calibration, tolerance, success} = state.selfLearning;
+        const {calibration, tolerance, success, comIndex} = state.selfLearning;
         const {matchedTolerance} = state.selfLearning.global;
-        io.emit('selfLearning', {individual: false, calibration, tolerance, success, matchedTolerance});
+        io.emit('selfLearning', {individual: false, calibration, tolerance, success, comIndex, matchedTolerance});
         break;
       }
     }
@@ -133,11 +133,11 @@ function Realtime(server, config, store){
   }
   
   function configExists(socket, name){
-    socket.emit('configExistsResult', {result: fs.existsSync(path.join(configPath, name + 'V' + version + '.js')), name});
+    socket.emit('configExistsResult', {result: fs.existsSync(path.join(configPath, name + 'V' + version + '.json')), name});
   }
   
   function saveConfig(socket, msg){
-    const name = path.join(configPath, msg.name +'V'+ version + '.js');
+    const name = path.join(configPath, msg.name +'V'+ version + '.json');
 
     store.dispatch({
       type: CONFIG_SAVE,
@@ -148,12 +148,9 @@ function Realtime(server, config, store){
     });
   }
   
-  function loadConfig(socket, name){
-    socket.emit('config', fs.readFileSync(path.join(configPath, name)).toString().replace('module.exports = config;', '').replace(/^var /,''));
-  }
-  
-  function loadDefault(socket, msg){
-    socket.emit('config', fs.readFileSync(path.join(configPath, 'config.template.js')).toString().replace('module.exports = config;', '').replace(/^var /,''));
+  function loadConfig(socket, name, callback){
+    const config = fs.readFileSync(path.join(configPath, name)).toString();
+    callback(config.match(/{.*}/s)[0]);
   }
   
   function deleteConfig(socket, name){
@@ -204,7 +201,7 @@ function Realtime(server, config, store){
     const mayorVersion = version.split('.')[0];
     fs.readdir(configPath, (err, files) =>{
       socket.emit('configList', files
-        .filter((element)=>element.match(/V[0-9]+.[0-9]+.js$/))
+        .filter((element)=>element.match(/V[0-9]+.[0-9]+.json$/))
         .filter((element)=>{
           const elementVersion = element.match(/V[0-9]+./)[0];
           const elementMayorVersion = elementVersion.slice(1,-1);
@@ -404,7 +401,6 @@ function Realtime(server, config, store){
       'settings': saveCurrentConfig,
       'saveConfig': saveConfig,
       'loadConfig': loadConfig,
-      'loadDefault': loadDefault,
       'deleteConfig': deleteConfig,
       'deleteLog': deleteLog,
       'uploadLog': uploadLog,
@@ -418,7 +414,7 @@ function Realtime(server, config, store){
 
       
     for(let command in commands){
-      socket.on(command, msg => commands[command](socket, msg));
+      socket.on(command, (msg, callback) => commands[command](socket, msg, callback));
     }
   });
 }
