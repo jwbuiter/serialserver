@@ -393,7 +393,7 @@
     }
 
     function loadConfig(index) {
-      socket.emit('loadConfig', configList[index]);
+      socket.emit('loadConfig', configList[index], (json) => { config = JSON.parse(json); fillIn(); });
     }
 
     function loadConfigList() {
