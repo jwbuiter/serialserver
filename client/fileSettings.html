@@ -397,7 +397,48 @@
     }
 
     function loadConfigList() {
-      socket.emit('getConfigList');
+      socket.emit('getConfigList', null, (list) => {
+        $('#list').remove();
+        $(address(6, 1)).append($('<div id="list">').append('<ul>'));
+
+        configList = list;
+
+        if (list.length == 0) {
+          $('ul').append($('<li>').append('No configs found'));
+        }
+        else {
+          list.forEach((element, index) => {
+            let newItem = $('<li>').append('<span>' + element + '</span>')
+              .append('<input type="button" class="config" value="Download" onclick="javascript:downloadConfig(' + index + ')">')
+              .append('<input type="button" class="config" value="Load" onclick="javascript:loadConfig(' + index + ')">')
+              .append('<input type="button" class="config" value="Delete" onclick="javascript:deleteConfig(' + index + ')">');
+            $('ul').append(newItem);
+          });
+        }
+        let lastRow = $('<li>');
+        lastRow.append('<input type="button" style="width:33%" value="Close" onclick="javascript:closeList()">');
+        lastRow.append('<input type="button" style="width:33%" value="Load default" onclick="javascript:loadDefault()">')
+        lastRow.append('<input type="button" style="width:33%" value="Upload" onclick="javascript:uploadConfig()">');
+        lastRow.append($('<form id="uploadForm" action="uploadConfig" method="post" enctype="multipart/form-data">').html('<input id="configLocation" style="display:none" type="file" name="importConfig" accept=".js">').change(function (evt) {
+          let file = evt.target.files[0];
+
+          let mayorVersion = file.name.match(/V[0-9\.]+\.js$/);
+          if (!mayorVersion) {
+            alert('Config does not have a valid name');
+            return;
+          }
+          mayorVersion = mayorVersion[0].slice(1, -3).split('.')[0];
+          let currentMayorVersion = config.version.split('.')[0];
+          if (mayorVersion !== currentMayorVersion) {
+            alert('Version of new config does not match the current one');
+            return;
+          }
+
+          $('#uploadForm').submit();
+        }));
+
+        $('ul').append(lastRow);
+      });
     }
 
     function closeList() {
@@ -517,49 +558,6 @@
       openedMenu = null;
       showMenu(oldMenu);
     }
-
-    socket.on('configList', function (list) {
-      $('#list').remove();
-      $(address(6, 1)).append($('<div id="list">').append('<ul>'));
-
-      configList = list;
-
-      if (list.length == 0) {
-        $('ul').append($('<li>').append('No configs found'));
-      }
-      else {
-        list.forEach((element, index) => {
-          let newItem = $('<li>').append('<span>' + element + '</span>')
-            .append('<input type="button" class="config" value="Download" onclick="javascript:downloadConfig(' + index + ')">')
-            .append('<input type="button" class="config" value="Load" onclick="javascript:loadConfig(' + index + ')">')
-            .append('<input type="button" class="config" value="Delete" onclick="javascript:deleteConfig(' + index + ')">');
-          $('ul').append(newItem);
-        });
-      }
-      let lastRow = $('<li>');
-      lastRow.append('<input type="button" style="width:33%" value="Close" onclick="javascript:closeList()">');
-      lastRow.append('<input type="button" style="width:33%" value="Load default" onclick="javascript:loadDefault()">')
-      lastRow.append('<input type="button" style="width:33%" value="Upload" onclick="javascript:uploadConfig()">');
-      lastRow.append($('<form id="uploadForm" action="uploadConfig" method="post" enctype="multipart/form-data">').html('<input id="configLocation" style="display:none" type="file" name="importConfig" accept=".js">').change(function (evt) {
-        let file = evt.target.files[0];
-
-        let mayorVersion = file.name.match(/V[0-9\.]+\.js$/);
-        if (!mayorVersion) {
-          alert('Config does not have a valid name');
-          return;
-        }
-        mayorVersion = mayorVersion[0].slice(1, -3).split('.')[0];
-        let currentMayorVersion = config.version.split('.')[0];
-        if (mayorVersion !== currentMayorVersion) {
-          alert('Version of new config does not match the current one');
-          return;
-        }
-
-        $('#uploadForm').submit();
-      }));
-
-      $('ul').append(lastRow);
-    });
 
     socket.on('config', function (newConfig) {
       eval(newConfig);

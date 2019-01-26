@@ -114,7 +114,7 @@ function Realtime(server, config, store){
     // });
 
     state.serial.coms.forEach(({entry, time, average}, index) => {
-      socket.emit('entry', {index, entryTime: time, entry});
+      socket.emit('entry', {index, entryTime: time.getTime(), entry});
       socket.emit('average', {index, average});
     });
 
@@ -132,8 +132,8 @@ function Realtime(server, config, store){
     store.dispatch({type: RESTART});
   }
   
-  function configExists(socket, name){
-    socket.emit('configExistsResult', {result: fs.existsSync(path.join(configPath, name + 'V' + version + '.json')), name});
+  function configExists(socket, name, callback){
+    callback({result: fs.existsSync(path.join(configPath, name + 'V' + version + '.json')), name});
   }
   
   function saveConfig(socket, msg){
@@ -197,10 +197,10 @@ function Realtime(server, config, store){
     });
   }
   
-  function getConfigList(socket, msg){
+  function getConfigList(socket, msg, callback){
     const mayorVersion = version.split('.')[0];
     fs.readdir(configPath, (err, files) =>{
-      socket.emit('configList', files
+      callback(files
         .filter((element)=>element.match(/V[0-9]+.[0-9]+.json$/))
         .filter((element)=>{
           const elementVersion = element.match(/V[0-9]+./)[0];

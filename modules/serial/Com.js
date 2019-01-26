@@ -9,6 +9,7 @@ const {
   HANDLE_OUTPUT,
   HANDLE_TABLE,
   TABLE_RESET,
+  ERROR_OCCURRED
 } = require('../../actions/types.js');
 const constants = require('../../config.static');
 
@@ -129,8 +130,7 @@ function Com(index, config, store) {
 
     dispatchTest();
   } else if (reader){
-    http.createServer(function (req, res) {
-
+    const server = http.createServer(function (req, res) {
       myGPIO.writeSync(1);
       setTimeout(() => myGPIO.writeSync(0), 500);
 
@@ -141,7 +141,17 @@ function Com(index, config, store) {
       const entry = decode(decodeURI(req.url.slice(1)));
       dispatch(entry);
       res.end();
-    }).listen(baudRate);
+    });
+    server.on('error', (err, socket) => {
+      store.dispatch({
+        type: ERROR_OCCURRED, 
+        payload: err
+      });
+    });
+    
+    server.listen(baudRate);
+    
+
   } else {
     const myPort = new serialPort(port, {
       baudRate: baudRate,
