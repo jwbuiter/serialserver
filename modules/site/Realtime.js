@@ -114,6 +114,8 @@ function Realtime(server, config, store){
     // });
 
     state.serial.coms.forEach(({entry, time, average}, index) => {
+      if (!time) return;
+      
       socket.emit('entry', {index, entryTime: time.getTime(), entry});
       socket.emit('average', {index, average});
     });
