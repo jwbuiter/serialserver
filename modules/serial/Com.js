@@ -15,11 +15,11 @@ const constants = require('../../config.static');
 
 function Com(index, config, store) {
   const {
-    testMode, 
+    mode, 
     testMessage, 
     timeout,
-    reader, 
     port, 
+    readerPort,
     baudRate, 
     bits, 
     stopBits, 
@@ -100,124 +100,129 @@ function Com(index, config, store) {
     return decodedEntry;
   }
 
-  if (testMode){
-    // if the test mode is enabled, dispatch an entry containing the test message every timeout
-    let dispatchTest;
-    let nextTime = (new Date).getTime();
+  switch (mode){
+    case 'test': {
+      // if the test mode is enabled, dispatch an entry containing the test message every timeout
+      let dispatchTest;
+      let nextTime = (new Date).getTime();
 
-    if (timeoutReset){
-      const dispatchNothing = () => {
-        dispatch(decode('0'));
+      if (timeoutReset){
+        const dispatchNothing = () => {
+          dispatch(decode('0'));
+        }
+
+        dispatchTest = () => {
+          dispatch(decode(testMessage));
+          setTimeout(dispatchNothing, timeout * 1000);
+
+          nextTime += 2 * timeout * 1000;
+          const currentTime = (new Date).getTime();
+          setTimeout(dispatchTest, nextTime - currentTime);
+        }
+      } else {
+        dispatchTest = () => {
+          dispatch(decode(testMessage));
+
+          nextTime += timeout * 1000;
+          const currentTime = (new Date).getTime();
+          setTimeout(dispatchTest, nextTime - currentTime);
+        }
       }
-
-      dispatchTest = () => {
-        dispatch(decode(testMessage));
-        setTimeout(dispatchNothing, timeout * 1000);
-
-        nextTime += 2 * timeout * 1000;
-        const currentTime = (new Date).getTime();
-        setTimeout(dispatchTest, nextTime - currentTime);
-      }
-    } else {
-      dispatchTest = () => {
-        dispatch(decode(testMessage));
-
-        nextTime += timeout * 1000;
-        const currentTime = (new Date).getTime();
-        setTimeout(dispatchTest, nextTime - currentTime);
-      }
+      dispatchTest();
+      break;
     }
-
-    dispatchTest();
-  } else if (reader){
-    const server = http.createServer(function (req, res) {
-      myGPIO.writeSync(1);
-      setTimeout(() => myGPIO.writeSync(0), 500);
-
-      if (req.url === '/favicon.ico'){
+    case 'reader': {
+      const server = http.createServer(function (req, res) {
+        myGPIO.writeSync(1);
+        setTimeout(() => myGPIO.writeSync(0), 500);
+  
+        if (req.url === '/favicon.ico'){
+          res.end();
+          return;
+        }
+        const entry = decode(decodeURI(req.url.slice(1)));
+        dispatch(entry);
         res.end();
-        return;
-      }
-      const entry = decode(decodeURI(req.url.slice(1)));
-      dispatch(entry);
-      res.end();
-    });
-    server.on('error', (err, socket) => {
-      store.dispatch({
-        type: ERROR_OCCURRED, 
-        payload: err
       });
-    });
-    
-    server.listen(baudRate);
-    
-
-  } else {
-    const myPort = new serialPort(port, {
-      baudRate: baudRate,
-      dataBits: bits,
-      stopBits: stopBits,
-      parity: parity,
-      rtscts: RTSCTS,
-      xon: XONXOFF,
-      xoff: XONXOFF
-    });
-
-    myPort.on('readable', () => {
-      // blink the associated led.
-      myGPIO.writeSync(1);
-      setTimeout(() => myGPIO.writeSync(0), 250);
-
-      // read new entries into buffer
-      remainingEntries = Buffer.concat([remainingEntries, myPort.read()]);
-
-      let nextEntry, nextEntryEnd;
+      server.on('error', (err, socket) => {
+        store.dispatch({
+          type: ERROR_OCCURRED, 
+          payload: err
+        });
+      });
       
-      if (remainingEntries.length===0)
-        return;
+      server.listen(readerPort);
+      break;
+    }
+    default: {
 
-      if ((prefix==='')&&(postfix==='')){
-        const newEntry = remainingEntries.toString().slice(-digits);
-        dispatch(newEntry);
-        return
-      }
-
-      while((nextEntry = remainingEntries.indexOf(prefix))>=0){
-
-        nextEntryEnd = remainingEntries.slice(nextEntry).indexOf(postfix);
-
-        if (nextEntryEnd===-1){
-          break;
-        }
-
-        let newEntry = (remainingEntries.slice(nextEntry + Buffer(prefix).length, (nextEntryEnd===0)?remainingEntries.length:(nextEntryEnd+nextEntry))).toString();
+      const myPort = new serialPort(port, {
+        baudRate: baudRate,
+        dataBits: bits,
+        stopBits: stopBits,
+        parity: parity,
+        rtscts: RTSCTS,
+        xon: XONXOFF,
+        xoff: XONXOFF
+      });
+  
+      myPort.on('readable', () => {
+        // blink the associated led.
+        myGPIO.writeSync(1);
+        setTimeout(() => myGPIO.writeSync(0), 250);
+  
+        // read new entries into buffer
+        remainingEntries = Buffer.concat([remainingEntries, myPort.read()]);
+  
+        let nextEntry, nextEntryEnd;
         
-        newEntry = decode(newEntry);
-        
-        // dont remember why this is here
-        if (index == triggerCom && latestLogEntry[index] != newEntry){
-          store.dispatch({
-            type : SERIAL_RESET,
-          });
-          console.log('clear')
-        }
-
-        if(newEntry !== store.getState().serial.coms[index].entry){
+        if (remainingEntries.length===0)
+          return;
+  
+        if ((prefix==='')&&(postfix==='')){
+          const newEntry = remainingEntries.toString().slice(-digits);
           dispatch(newEntry);
-          if (timeoutReset){
-            clearTimeout(myTimeout);
-            myTimeout = setTimeout(() => {
-              store.dispatch({
-                type : SERIAL_RESET,
-                payload: index,
-              });
-            }, timeout*1000);
-          }
+          return
         }
-
-        remainingEntries = remainingEntries.slice(nextEntry + nextEntryEnd);
-      }  
-    });
+  
+        while((nextEntry = remainingEntries.indexOf(prefix))>=0){
+  
+          nextEntryEnd = remainingEntries.slice(nextEntry).indexOf(postfix);
+  
+          if (nextEntryEnd===-1){
+            break;
+          }
+  
+          let newEntry = (remainingEntries.slice(nextEntry + Buffer(prefix).length, (nextEntryEnd===0)?remainingEntries.length:(nextEntryEnd+nextEntry))).toString();
+          
+          newEntry = decode(newEntry);
+          
+          // dont remember why this is here
+          if (index == triggerCom && latestLogEntry[index] != newEntry){
+            store.dispatch({
+              type : SERIAL_RESET,
+            });
+            console.log('clear')
+          }
+  
+          if(newEntry !== store.getState().serial.coms[index].entry){
+            dispatch(newEntry);
+            if (timeoutReset){
+              clearTimeout(myTimeout);
+              myTimeout = setTimeout(() => {
+                store.dispatch({
+                  type : SERIAL_RESET,
+                  payload: index,
+                });
+              }, timeout*1000);
+            }
+          }
+  
+          remainingEntries = remainingEntries.slice(nextEntry + nextEntryEnd);
+        }  
+      });
+      break;
+    }
   }
 }
 

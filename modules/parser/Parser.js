@@ -106,9 +106,9 @@ function Parser(store){
   }
 
   const selfLearningFunctions = {
-    SC: (state) => state.calibration,
-    SCmin: (state,tolerance) => state.calibration*(1 - tolerance),
-    SCmax: (state,tolerance) => state.calibration*(1 + tolerance),
+    SC: (state, tolerance, calibration) => calibration,
+    SCmin: (state, tolerance, calibration) => calibration*(1 - tolerance),
+    SCmax: (state, tolerance, calibration) => calibration*(1 + tolerance),
     SN: (state) => state.global.entries.length,
     ST: (state) => (state.endTime?(state.endTime - state.startTime):(new Date() - state.startTime))/60000,
     SIN: (state) => Object.values(state.individual.individualEntries).length,
@@ -135,9 +135,28 @@ function Parser(store){
     const property = x.slice(1);
     const state = store.getState().selfLearning;
 
-    const tolerance = state.learning?1:state.tolerance;
+    let tolerance, calibration;
 
-    return selfLearningFunctions[property](state, tolerance).toString();
+    if (state.type==='individual'){
+      const key = store.getState().serial.coms[1-state.comIndex].entry;
+
+      if (key in state.individual.individualEntries){
+        tolerance = state.individual.individualEntries[key].tolerance/100; 
+        calibration = state.individual.individualEntries[key].calibration;
+      } else {
+        tolerance = state.tolerance;
+        calibration = state.calibration;
+      }
+    } else {
+      tolerance = state.tolerance;
+      calibration = state.calibration;
+    }
+
+    if (state.learning){
+      tolerance = 1;
+    }
+    
+    return selfLearningFunctions[property](state, tolerance, calibration).toString();
   }
 
   return {

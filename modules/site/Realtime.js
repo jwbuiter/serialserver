@@ -21,7 +21,10 @@ const {
   FTP_FAILURE,
   SL_RESET_INDIVIDUAL,
   SL_RESET_GLOBAL,
+  SL_INDIVIDUAL_DELETE_GENERAL,
+  SL_INDIVIDUAL_DELETE_INDIVIDUAL,
   SL_SUCCESS,
+  SL_ENTRY,
   TABLE_RESET_CELL,
   TABLE_ENTRY,
   TABLE_EMIT,
@@ -311,6 +314,14 @@ function Realtime(server, config, store){
     store.dispatch({type: HANDLE_OUTPUT});
   }
 
+  function deleteGeneralSL(socket, key){
+    store.dispatch({type: SL_INDIVIDUAL_DELETE_GENERAL, payload: key});
+  }
+
+  function deleteIndividualSL(socket, key){
+    store.dispatch({type: SL_INDIVIDUAL_DELETE_INDIVIDUAL, payload: key});
+  }
+
   setInterval(() =>{
     io.emit('time', new Date().getTime());
   }, 1000);
@@ -382,6 +393,9 @@ function Realtime(server, config, store){
       }
       case SL_RESET_INDIVIDUAL:
       case SL_RESET_GLOBAL:
+      case SL_INDIVIDUAL_DELETE_GENERAL:
+      case SL_INDIVIDUAL_DELETE_INDIVIDUAL:
+      case SL_ENTRY:
       case SL_SUCCESS: {
         emitSelfLearning();
         break;
@@ -412,8 +426,9 @@ function Realtime(server, config, store){
       'forceInput': forceInput,
       'forceOutput': forceOutput,
       'manual': handleManual,
+      'deleteGeneralSL': deleteGeneralSL,
+      'deleteIndividualSL': deleteIndividualSL,
     }
-
       
     for(let command in commands){
       socket.on(command, (msg, callback) => commands[command](socket, msg, callback));

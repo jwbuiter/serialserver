@@ -17,12 +17,33 @@ function Cell(index, config, store) {
   let content = '';
 
   function resetCell(){
-    content='';
-    store.dispatch({
-      type: TABLE_RESET_CELL,
-      payload: index,
-    });
-    store.dispatch({type: TABLE_EMIT, payload: {index, entry: '', manual}});
+    if (type ===  'menu'){
+      const menuOptions = (formula.match(/{[0-9.]*:[\w ]*}/g) || []).map(
+        str => {
+          const parts = str.split(":");
+          const valueString = parts[0].slice(1);
+          const descriptionString = parts[1].slice(0, -1);
+
+          return {
+            value: valueString ? Number(parts[0].slice(1)) : "",
+            description: descriptionString
+          };
+        }
+      );
+      content = menuOptions[0].value;
+      store.dispatch({
+        type: TABLE_ENTRY, 
+        payload: {index, entry: content}
+      });
+    } else {
+      content='';
+      store.dispatch({
+        type: TABLE_RESET_CELL,
+        payload: index,
+      });
+    }
+    
+    store.dispatch({type: TABLE_EMIT, payload: {index, entry: content, manual}});
   }
 
   store.listen((lastAction)=>{
@@ -73,6 +94,8 @@ function Cell(index, config, store) {
       }
     }
   });
+
+  resetCell();
 
   return {};
 }

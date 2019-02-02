@@ -8,6 +8,8 @@ const {
   SL_INDIVIDUAL_DOWNGRADE,
   SL_INDIVIDUAL_INCREMENT,
   SL_INDIVIDUAL_LOAD,
+  SL_INDIVIDUAL_DELETE_GENERAL,
+  SL_INDIVIDUAL_DELETE_INDIVIDUAL,
   EXECUTE_START,
   LOG_RESET,
   LOG_SAVE,
@@ -88,32 +90,22 @@ function selfLearningIndividual(config, store){
             }
           });
         }
+      }
+      case  SL_INDIVIDUAL_DELETE_GENERAL:
+      case SL_INDIVIDUAL_DELETE_INDIVIDUAL:{
+        const individualSL = store.getState().selfLearning.individual;
 
-        {
-          const individualSL = store.getState().selfLearning.individual;
-
-          const individualData = {
-            generalEntries: individualSL.generalEntries,
-            individualEntries: individualSL.individualEntries
-          }
-
-          fs.writeFile(__dirname+'/../../selfLearning/individualData.json', JSON.stringify(individualData), 'utf8', (err)=>{
-            if (err){
-              console.log(err);
-            }
-          });
+        const individualData = {
+          generalEntries: individualSL.generalEntries,
+          individualEntries: individualSL.individualEntries
         }
-        /*
-          store.dispatch({type: LOG_SAVE });
-          config.success = success;
-          config.startCalibration = calibration;
-          store.dispatch({
-            type: CONFIG_UPDATE,
-            payload: {
-              selfLearning: config,
-            }
-          })
-        }*/
+
+        fs.writeFile(__dirname+'/../../selfLearning/individualData.json', JSON.stringify(individualData), 'utf8', (err)=>{
+          if (err){
+            console.log(err);
+          }
+        });
+        
         break;
       }
       case SL_INDIVIDUAL_INCREMENT:{

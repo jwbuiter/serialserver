@@ -15,8 +15,8 @@ const {
 } = require('../../actions/types')
 
 function LoggerModule(config, store) {
-  const {resetValue, resetMode, writeToFile, logID, unique} = config;
-  const time = resetValue.split(':');
+  const {resetTime, resetInterval, resetMode, writeToFile, logID, unique} = config;
+
   let fileName;
 
   function resetLog(){
@@ -28,16 +28,19 @@ function LoggerModule(config, store) {
   resetLog();
   
   switch(resetMode){
-    case 'interval':
+    case 'interval':{
       setInterval(()=>{
         resetLog();
-      },(Number(time[0])*60 + Number(time[1]))*60*1000);
+      }, resetInterval*60*1000);
       break;
-    case 'time':
+    }
+    case 'time':{
+      const time = resetValue.split(':');
       schedule.scheduleJob(time[1]+' '+time[0]+' * * *', ()=>{
         resetLog();
       });
       break;
+    }
   }
 
   store.listen((lastAction)=>{

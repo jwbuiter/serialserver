@@ -8,6 +8,8 @@ const {
   SL_INDIVIDUAL_DOWNGRADE,
   SL_INDIVIDUAL_LOAD,
   SL_INDIVIDUAL_INCREMENT,
+  SL_INDIVIDUAL_DELETE_GENERAL,
+  SL_INDIVIDUAL_DELETE_INDIVIDUAL,
   SL_TEACH,
 } = require('../actions/types');
 
@@ -78,7 +80,7 @@ function individualReducer(state, action){
       if (key in state.individualEntries){
         newIndividualEntries[key] = {calibration: entry, tolerance: selfLearning.individualTolerance, numUpdates: newIndividualEntries[key].numUpdates + 1, increments: 0};
       } else if (key in state.generalEntries) {
-        newGeneralEntries[key] = Array.from(newGeneralEntries[key]).concat(entry);
+        newGeneralEntries[key] = [entry].concat(Array.from(newGeneralEntries[key]));
       } else {
         newGeneralEntries[key] = [entry];
       }
@@ -116,6 +118,11 @@ function individualReducer(state, action){
     }
     case SL_INDIVIDUAL_LOAD:{
       const {individualEntries, generalEntries} = action.payload;
+
+      for (let entry in individualEntries){
+        individualEntries[entry].numUpdates=0;
+      }
+
       return {
         ...state,
         individualEntries,
@@ -135,6 +142,42 @@ function individualReducer(state, action){
       return {
         ...state,
         individualEntries: newIndividualEntries
+      }
+    }
+    case SL_INDIVIDUAL_DELETE_GENERAL: {
+      if (action.payload){
+        const key = action.payload;
+      
+        const newGeneralEntries =  Object.assign({}, state.generalEntries);
+        delete newGeneralEntries[key];
+
+        return {
+          ...state,
+          generalEntries: newGeneralEntries
+        }
+      } else {
+        return {
+          ...state,
+          generalEntries: {}
+        }
+      }
+    }
+    case SL_INDIVIDUAL_DELETE_INDIVIDUAL: {
+      if (action.payload){
+        const key = action.payload;
+      
+        const newIndividualEntries =  Object.assign({}, state.individualEntries);
+        delete newIndividualEntries[key];
+
+        return {
+          ...state,
+          individualEntries: newIndividualEntries
+        }
+      } else {
+        return {
+          ...state,
+          individualEntries: {}
+        }
       }
     }
     default:

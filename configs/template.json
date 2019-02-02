@@ -4,9 +4,10 @@
     "resetTrigger": "off",
     "coms": [
       {
+        "mode": "serial",
         "port": "/dev/ttyUSB0",
-        "reader": false,
         "baudRate": 9600,
+        "readerPort": 9600,
         "stopBits": 1,
         "bits": 8,
         "parity": "none",
@@ -25,9 +26,10 @@
         "testMessage": "123.123"
       },
       {
+        "mode": "serial",
         "port": "/dev/ttyUSB1",
-        "reader": false,
         "baudRate": 9600,
+        "readerPort": 9601,
         "stopBits": 1,
         "bits": 8,
         "parity": "none",
@@ -246,7 +248,8 @@
   "logger": {
     "writeToFile": false,
     "resetMode": "off",
-    "resetValue": "00:00",
+    "resetTime": "00:00",
+    "resetInterval": 0,
     "logID": "MBDC",
     "unique": "off"
   },
