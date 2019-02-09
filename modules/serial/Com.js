@@ -46,6 +46,19 @@ function Com(index, config, store) {
   let myTimeout = setTimeout(()=> 0 ,1);
   let zeroResetTimeout = null;
 
+
+  function addResetTimeout(){
+    if (timeoutReset){
+      clearTimeout(myTimeout);
+      myTimeout = setTimeout(() => {
+        store.dispatch({
+          type : SERIAL_RESET,
+          payload: index,
+        });
+      }, timeout*1000);
+    }
+  }
+
   function dispatch(entry){
     if (zeroReset && Number(entry) == 0 && !zeroResetTimeout){
       store.dispatch({type: TABLE_RESET});
@@ -141,7 +154,10 @@ function Com(index, config, store) {
           return;
         }
         const entry = decode(decodeURI(req.url.slice(1)));
+
         dispatch(entry);
+        addResetTimeout();
+
         res.end();
       });
       server.on('error', (err, socket) => {
@@ -207,15 +223,7 @@ function Com(index, config, store) {
   
           if(newEntry !== store.getState().serial.coms[index].entry){
             dispatch(newEntry);
-            if (timeoutReset){
-              clearTimeout(myTimeout);
-              myTimeout = setTimeout(() => {
-                store.dispatch({
-                  type : SERIAL_RESET,
-                  payload: index,
-                });
-              }, timeout*1000);
-            }
+            addResetTimeout();
           }
   
           remainingEntries = remainingEntries.slice(nextEntry + nextEntryEnd);

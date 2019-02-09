@@ -20,9 +20,10 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/res/jquery-1.11.1.js"></script>
-  <script src="/config.static.js"></script>
   <script type="text/javascript">
-    document.title = constants.name;
+    $.getJSON('/config.static.json', function (data) {
+      document.title = data.name;
+    });
     var columnWidths = [10, 20, 60, 10]
     const numColumns = 4;
     const numRows = 11;

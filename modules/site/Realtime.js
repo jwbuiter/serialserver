@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const ip = require('ip');
 
-const constants = require('../../config.static.js');
+const constants = require('../../config.static.json');
 
 const {
   SERIAL_ENTRY,

@@ -17,10 +17,10 @@ systemctl enable serialserver
 systemctl enable ssh
 systemctl start ssh
 
-if [ -f "config.static.js" ]
+if [ -f "config.static.json" ]
 then
 	echo "static config already exists."
 else
-  cp config.static.template.js config.static.js
+  cp config.static.template.json config.static.json
 	echo "copying static config"
 fi

@@ -61,7 +61,7 @@ function SiteModule(config, store) {
     '/': 'client.html',
     '/settings': 'settings.html',
     '/current.json': '../configs/current.json',
-    '/config.static.js': '../config.static.js'
+    '/config.static.json': '../config.static.json'
   }
 
   const functionRoutes = {

@@ -114,9 +114,9 @@ function Parser(store){
     SIN: (state) => Object.values(state.individual.individualEntries).length,
     SIC: (state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => acc + cur.increments, 0),
     SIT: (state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => acc + cur.calibration, 0),
-    SImin: (state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => Math.min(acc, cur.calibration), 0),
-    SImax:(state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => Math.min(acc, cur.calibration), 0),
-    SIsp:(state) => {
+    SImi: (state) => Math.min(...Object.values(state.individual.individualEntries).map(entry => entry.calibration)),
+    SIma: (state) => Math.max(...Object.values(state.individual.individualEntries).map(entry => entry.calibration)),
+    SIsp: (state) => {
       const data = Object.values(state.individual.individualEntries).map(entry => entry.calibration)
       const mean = data.reduce((acc, cur)=>acc+cur, 0) / (data.length || 1);
       const spread = data.reduce((acc, cur)=> acc + (cur - mean)*(cur - mean), 0);

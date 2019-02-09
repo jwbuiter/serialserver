@@ -32,14 +32,19 @@
 
   <script src="/socket.io/socket.io.js"></script>
   <script src="/res/jquery-1.11.1.js"></script>
-  <script src="/config.static.js"></script>
   <script type="text/javascript">
-    let config;
+    let config, constants;
+
     $.getJSON('/current.json', function (data) {
       config = data;
-      makeForm();
-      fillIn();
+      $.getJSON('/config.static.json', function (data) {
+        constants = data;
+        document.title = constants.name;
+        makeForm();
+        fillIn();
+      });
     });
+
     if (screen.width > 1000) {
       var columnWidths = [12, 12, 28, 12, 12, 12, 12, 12];
     }
@@ -47,7 +52,7 @@
       var columnWidths = [14, 14, 23, 12, 18, 18, 18, 18];
       $('#content').css('width', columnWidths.reduce(function (acc, val) { return acc + val; }) + 'vw');
     }
-    document.title = constants.name;
+
     var socket = io();
     var configList;
 

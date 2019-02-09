@@ -10,7 +10,7 @@ const {
 const Parser = require('../parser/Parser');
 
 function Cell(index, config, store) {
-  const {formula, digits, numeric, resetOnExe, waitForOther, type} = config;
+  const {formula, digits, numeric, resetOnExe, waitForOther, type, menuOptions} = config;
   const manual = (type === 'manual' || type==="menu");
   const myParser = Parser(store);
 
@@ -18,19 +18,7 @@ function Cell(index, config, store) {
 
   function resetCell(){
     if (type ===  'menu'){
-      const menuOptions = (formula.match(/{[0-9.]*:[\w ]*}/g) || []).map(
-        str => {
-          const parts = str.split(":");
-          const valueString = parts[0].slice(1);
-          const descriptionString = parts[1].slice(0, -1);
-
-          return {
-            value: valueString ? Number(parts[0].slice(1)) : "",
-            description: descriptionString
-          };
-        }
-      );
-      content = menuOptions[0].value;
+      content = menuOptions[0].key;
       store.dispatch({
         type: TABLE_ENTRY, 
         payload: {index, entry: content}

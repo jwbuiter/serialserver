@@ -28,8 +28,7 @@ function selfLearningIndividual(config, store){
   console.log('Individual SL enabled on com'+comIndex);
 
   store.listen(lastAction =>{
-    const state = store.getState();
-    const individualSL = state.selfLearning.individual;
+    let individualSL = store.getState().selfLearning.individual;
 
     switch (lastAction.type){
       case LOG_RESET:{
@@ -47,7 +46,7 @@ function selfLearningIndividual(config, store){
             const matches = entries.map( entry => ({
               value: entry,
               matches: entries.reduce((total, compEntry) => {
-                if ((compEntry > entry * (1 - tolerance)) && (compEntry < entry * (1 + tolerance)))
+                if ((compEntry > entry * (1 - individualTolerance)) && (compEntry < entry * (1 + individualTolerance)))
                   return total + 1;
                 return total;
               }, 0),
@@ -57,7 +56,7 @@ function selfLearningIndividual(config, store){
             if (successfullMatches.length){
               const matchedEntries = entries.filter( entry => 
                 successfullMatches.reduce((acc, cur) => {
-                  if ((entry > cur.value * (1 - tolerance)) && (entry < cur.value * (1 + tolerance)))
+                  if ((entry > cur.value * (1 - individualTolerance)) && (entry < cur.value * (1 + individualTolerance)))
                     return true;
                   return acc;
                 }, false)
@@ -71,8 +70,10 @@ function selfLearningIndividual(config, store){
               });
             }
           }
-        } 
-        
+        }
+         
+        individualSL = store.getState().selfLearning.individual;
+
         if (Object.keys(individualSL.individualEntries).length >= number ){
 
           const values = Object.values(individualSL.individualEntries).map(entry=> entry.calibration);
@@ -91,7 +92,7 @@ function selfLearningIndividual(config, store){
           });
         }
       }
-      case  SL_INDIVIDUAL_DELETE_GENERAL:
+      case SL_INDIVIDUAL_DELETE_GENERAL:
       case SL_INDIVIDUAL_DELETE_INDIVIDUAL:{
         const individualSL = store.getState().selfLearning.individual;
 

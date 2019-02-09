@@ -43,8 +43,8 @@
         "entries": 5,
         "factor": 0,
         "alwaysPositive": false,
-        "prefix": "#\\u0011",
-        "postfix": "\\u0010\\u0003",
+        "prefix": "#\u0011",
+        "postfix": "\u0010\u0003",
         "testMessage": "6543210987654321"
       }
     ]
@@ -257,22 +257,26 @@
     "automatic": false,
     "targets": [
       {
-        "addressFolder": "ftp.mbdc.nl",
-        "userPassword": "com:Com1234"
+        "address": "ftp.mbdc.nl",
+        "folder": "",
+        "username": "com",
+        "Password": "Com1234"
       },
       {
-        "addressFolder": "",
-        "userPassword": ""
+        "address": "",
+        "folder": "",
+        "username": "",
+        "Password": ""
       }
     ]
   },
   "selfLearning": {
     "enabled": "off",
     "number": 10,
-    "tolerance": 25,
+    "tolerance": 20,
     "startCalibration": 25,
     "startTolerance": 50,
-    "individualTolerance": 5,
+    "individualTolerance": 6,
     "individualToleranceIncrement": 1,
     "individualToleranceLimit": 10,
     "success": 0
