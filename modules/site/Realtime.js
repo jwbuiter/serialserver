@@ -196,9 +196,9 @@ function Realtime(server, config, store){
     });
   }
   
-  function getLogList(socket, msg){
+  function getLogList(socket, msg, callback){
     fs.readdir(logPath, (err, files) =>{
-      socket.emit('logList', files.filter((element)=>element.endsWith('.csv')).sort().reverse());
+      callback(files.filter((element)=>element.endsWith('.csv')).sort().reverse());
     });
   }
   

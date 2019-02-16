@@ -111,7 +111,7 @@ function selfLearningIndividual(config, store){
       }
       case SL_INDIVIDUAL_INCREMENT:{
         Object.values(individualSL.individualEntries).forEach(entry => {
-          if (entry.tolerance >= toleranceLimit){
+          if (entry.tolerance >= individualToleranceLimit){
             store.dispatch({type: SL_INDIVIDUAL_DOWNGRADE, payload: entry.key})
           }
         });
