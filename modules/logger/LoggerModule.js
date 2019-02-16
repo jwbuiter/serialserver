@@ -35,7 +35,7 @@ function LoggerModule(config, store) {
       break;
     }
     case 'time':{
-      const time = resetValue.split(':');
+      const time = resetTime.split(':');
       schedule.scheduleJob(time[1]+' '+time[0]+' * * *', ()=>{
         resetLog();
       });
