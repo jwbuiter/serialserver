@@ -63,10 +63,11 @@ function Cell(index, config, store) {
             entry,
           }
         });
+
         if(entry!==content){
           content=entry;
-          store.dispatch({type: STATE_CHANGED})
           store.dispatch({type: TABLE_EMIT, payload: {index, entry, manual}});
+          store.dispatch({type: STATE_CHANGED})
         }
         break;
       }
