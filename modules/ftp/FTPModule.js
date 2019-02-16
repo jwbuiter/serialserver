@@ -33,11 +33,10 @@ function FTPModule(config, store) {
       store.dispatch({type: FTP_FAILURE, payload: {message: 'No username and password set'}});
       return;
     }
-    c.connect({address, username, password});
+    c.connect({host: address, user: username, password});
   }
 
   store.listen((lastAction)=>{
-    //console.log(lastAction.type)
     switch (lastAction.type){
       case LOG_UPLOAD:{
         const {fileName, ftpIndex}= lastAction.payload;
