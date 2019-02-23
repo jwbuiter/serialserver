@@ -129,6 +129,11 @@ function Parser(store){
     SI2: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===2).length,
     SI3: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===3).length,
     SI4: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===4).length,
+    SI5: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===5).length,
+    SI6: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===6).length,
+    SI7: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===7).length,
+    SI8: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===8).length,
+    SI9: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===9).length,
   }
 
   function parseSelfLearning(x){
