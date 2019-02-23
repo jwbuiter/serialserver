@@ -42,7 +42,7 @@ function SiteModule(config, store) {
     console.log(req.files)
   
     if (!req.files.importConfig){
-      return res.send(titleString + '<meta http-equiv="refresh" content="1; url=/filesettings" /> No files were uploaded.')
+      return res.send(titleString + '<meta http-equiv="refresh" content="1; url=/" /> No files were uploaded.')
 
     }
   
@@ -53,13 +53,12 @@ function SiteModule(config, store) {
         return res.status(500).send(err);
       }
   
-      res.send(titleString + '<meta http-equiv="refresh" content="1; url=/filesettings" /> Config uploaded.');
+      res.send(titleString + '<meta http-equiv="refresh" content="1; url=/" /> Config uploaded.');
     });
   }
 
   const staticRoutes = {
     '/': 'client.html',
-    '/settings': 'settings.html',
     '/current.json': '../configs/current.json',
     '/config.static.json': '../config.static.json'
   }
@@ -135,20 +134,6 @@ function SiteModule(config, store) {
       res.send(titleString + '<meta http-equiv="refresh" content="5; url=/" />Restarting now.')
       store.dispatch({type: RESTART});
       process.exit();
-    },
-    '/fileupload': (req, res) => {
-      if (constants.exposeUpload){
-        res.sendFile(path.join(__dirname, clientPath, 'fileUpload.html'));
-      } else {
-        res.send('This module is not enabled.')
-      }
-    },
-    '/filesettings': (req, res) => {
-      if (constants.exposeUpload){
-        res.sendFile(path.join(__dirname, clientPath, 'fileSettings.html'));
-      } else {
-        res.send('This module is not enabled.')
-      }
     },
     '/logo': (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
