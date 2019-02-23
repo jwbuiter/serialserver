@@ -138,7 +138,11 @@ function Realtime(server, config, store){
   }
   
   function configExists(socket, name, callback){
-    callback({result: fs.existsSync(path.join(configPath, name + 'V' + version + '.json')), name});
+    console.log(name)
+    if (!name.endsWith('.json'))
+      name = name + 'V' + version + '.json';
+    
+    callback({result: fs.existsSync(path.join(configPath, name)), name});
   }
   
   function saveConfig(socket, msg){
@@ -176,12 +180,13 @@ function Realtime(server, config, store){
     }
   }
   
-  function uploadLog(socket,{name, index}){
+  function uploadLog(socket,{name, index}, callback){
     store.dispatch({
       type: LOG_UPLOAD,
       payload: {
         fileName: name, 
         ftpIndex: index,
+        callback
       }
     })
   }
@@ -379,16 +384,6 @@ function Realtime(server, config, store){
         const err = lastAction.payload;
         
         io.emit('error', err.message);
-        break;
-      }
-      case FTP_SUCCESS: {
-        io.emit('uploadLogResponse', 'Successfully uploaded log file');
-        break;
-      }
-      case FTP_FAILURE: {
-        const err = lastAction.payload;
-
-        io.emit('uploadLogResponse', err.message);
         break;
       }
       case SL_RESET_INDIVIDUAL:

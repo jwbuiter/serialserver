@@ -3,9 +3,7 @@ const path = require('path');
 
 const {
   LOG_UPLOAD,
-  LOG_RESET,
-  FTP_SUCCESS,
-  FTP_FAILURE,
+  LOG_RESET
 } = require('../../actions/types');
 
 const constants = require('../../config.static');
@@ -13,7 +11,10 @@ const constants = require('../../config.static');
 function FTPModule(config, store) {
   const {targets, automatic} = config;
 
-  function upload(address, folder, username, password, fileName){
+  function upload(address, folder, username, password, fileName, callback){
+    if (!callback)
+      callback=()=>{};
+
     const localPath = constants.saveLogLocation;
   
     let c = new Client();
@@ -21,16 +22,16 @@ function FTPModule(config, store) {
       c.mkdir(folder, true, () => {
         c.put(path.join(localPath, fileName), path.join(folder, fileName), (err) => {
           c.end();
-          store.dispatch({type: FTP_SUCCESS});
+          callback('Successfully uploaded ' + fileName);
         });
       });
     });
     c.on('error', (err) => {
-      store.dispatch({type: FTP_FAILURE, payload: err});
+      callback(err)
     })
   
     if (!(username && password)){
-      store.dispatch({type: FTP_FAILURE, payload: {message: 'No username and password set'}});
+      callback('No username and password set');
       return;
     }
     c.connect({host: address, user: username, password});
@@ -39,9 +40,9 @@ function FTPModule(config, store) {
   store.listen((lastAction)=>{
     switch (lastAction.type){
       case LOG_UPLOAD:{
-        const {fileName, ftpIndex}= lastAction.payload;
+        const {fileName, ftpIndex, callback }= lastAction.payload;
         const {address, folder, username, password} = targets[ftpIndex];
-        upload(address, folder, username, password, fileName);
+        upload(address, folder, username, password, fileName, callback);
         break;
       }
       case LOG_RESET:{
