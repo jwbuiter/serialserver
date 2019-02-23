@@ -18,14 +18,28 @@ const {
 
 
 function selfLearningIndividual(config, store){
-  const {enabled, number} = config;
+  const {enabled, number, startCalibration, individualToleranceAbs, individualCorrectionLimit} = config;
   const tolerance = config.tolerance/100;
   const individualTolerance = config.individualTolerance/100;
-  const individualToleranceIncrement = config.individualToleranceIncrement/100;
-  const individualToleranceLimit = config.individualToleranceLimit/100;
+  const individualCorrectionIncrement = config.individualCorrectionIncrement/100;
 
   const comIndex = Number(enabled[3]);
   console.log('Individual SL enabled on com'+comIndex);
+
+  function saveIndividualSelfLearning(){
+    const individualSL = store.getState().selfLearning.individual;
+
+    const individualData = {
+      generalEntries: individualSL.generalEntries,
+      individualEntries: individualSL.individualEntries
+    }
+
+    fs.writeFile(__dirname+'/../../selfLearning/individualData.json', JSON.stringify(individualData), 'utf8', (err)=>{
+      if (err){
+        console.log(err);
+      }
+    });
+  }
 
   store.listen(lastAction =>{
     let individualSL = store.getState().selfLearning.individual;
@@ -46,7 +60,9 @@ function selfLearningIndividual(config, store){
             const matches = entries.map( entry => ({
               value: entry,
               matches: entries.reduce((total, compEntry) => {
-                if ((compEntry > entry * (1 - individualTolerance)) && (compEntry < entry * (1 + individualTolerance)))
+                const entryTolerance = entry * individualTolerance + individualToleranceAbs;
+
+                if ((compEntry > entry - entryTolerance) && (compEntry < entry + entryTolerance))
                   return total + 1;
                 return total;
               }, 0),
@@ -91,27 +107,31 @@ function selfLearningIndividual(config, store){
             }
           });
         }
+        saveIndividualSelfLearning();
+        break;
       }
-      case SL_INDIVIDUAL_DELETE_GENERAL:
-      case SL_INDIVIDUAL_DELETE_INDIVIDUAL:{
-        const individualSL = store.getState().selfLearning.individual;
-
-        const individualData = {
-          generalEntries: individualSL.generalEntries,
-          individualEntries: individualSL.individualEntries
+      case SL_INDIVIDUAL_DELETE_INDIVIDUAL : {
+        if (Object.entries(store.getState().selfLearning.individual.individualEntries).length < number){
+          store.dispatch({
+            type: SL_SUCCESS,
+            payload: {
+              success: 0,
+              calibration: startCalibration,
+              comIndex,
+              tolerance,
+            }
+          });
         }
-
-        fs.writeFile(__dirname+'/../../selfLearning/individualData.json', JSON.stringify(individualData), 'utf8', (err)=>{
-          if (err){
-            console.log(err);
-          }
-        });
-        
+        saveIndividualSelfLearning();
+        break;
+      }
+      case SL_INDIVIDUAL_DELETE_GENERAL:{
+        saveIndividualSelfLearning();
         break;
       }
       case SL_INDIVIDUAL_INCREMENT:{
         Object.values(individualSL.individualEntries).forEach(entry => {
-          if (entry.tolerance >= individualToleranceLimit){
+          if (entry.increments >= individualCorrectionLimit){
             store.dispatch({type: SL_INDIVIDUAL_DOWNGRADE, payload: entry.key})
           }
         });

@@ -68,12 +68,14 @@ function Input(index, config, store) {
         store.dispatch({
           type: SL_TEACH,
           payload: state
-        })
+        });
+        store.dispatch({type: STATE_CHANGED});
         break;
       }
       case 'restart':{
         if (state){
           restart = setTimeout(() => {
+            store.dispatch({type: SERIAL_RESET});
             store.dispatch({type: RESTART});
           }, manualTimeout*1000);
         } else {
@@ -84,6 +86,7 @@ function Input(index, config, store) {
       case 'shutdown':{
         if (state){
           shutdown = setTimeout(() => {
+            store.dispatch({type: SERIAL_RESET});
             exec('shutdown now', (err, stdout, stderr) => {
               if (err) {
                 console.error(`exec error: ${err}`);

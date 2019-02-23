@@ -146,8 +146,8 @@ function Parser(store){
       const key = store.getState().serial.coms[1-state.comIndex].entry;
 
       if (key in state.individual.individualEntries){
-        tolerance = state.individual.individualEntries[key].tolerance/100; 
         calibration = state.individual.individualEntries[key].calibration;
+        tolerance = state.individual.individualEntries[key].tolerance/calibration;
       } else {
         tolerance = state.tolerance;
         calibration = state.calibration;
@@ -157,7 +157,7 @@ function Parser(store){
       calibration = state.calibration;
     }
 
-    if (state.learning){
+    if (state.teaching){
       tolerance = 1;
     }
     

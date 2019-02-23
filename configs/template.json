@@ -276,9 +276,10 @@
     "tolerance": 20,
     "startCalibration": 25,
     "startTolerance": 50,
-    "individualTolerance": 6,
-    "individualToleranceIncrement": 1,
-    "individualToleranceLimit": 10,
+    "individualTolerance": 4,
+    "individualToleranceAbs": 1.5,
+    "individualCorrectionIncrement": 22,
+    "individualCorrectionLimit": 5,
     "success": 0
   },
   "version": "3.0"
