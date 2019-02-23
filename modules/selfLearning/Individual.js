@@ -54,8 +54,13 @@ function selfLearningIndividual(config, store){
       
         if (key in individualSL.generalEntries){
           const entries = individualSL.generalEntries[key];
-        
-          if (entries.length >= 3){
+
+          if (store.getState().selfLearning.teaching){
+            store.dispatch({
+              type: SL_INDIVIDUAL_UPGRADE,
+              payload: { key, calibration: entries[0]}
+            });
+          } else if (entries.length >= 3){
 
             const matches = entries.map( entry => ({
               value: entry,
@@ -138,13 +143,21 @@ function selfLearningIndividual(config, store){
 
         break;
       }
+      case SL_RESET_INDIVIDUAL:{
+        saveIndividualSelfLearning();
+        break;
+      }
     }
   });
   store.dispatch({type: SL_RESET_INDIVIDUAL});
 
   if (fs.existsSync(__dirname+'/../../selfLearning/individualData.json')){
-    const individualData = require('../../selfLearning/individualData');
-    store.dispatch({type: SL_INDIVIDUAL_LOAD, payload: individualData});
+    try {
+      const individualData = require('../../selfLearning/individualData');
+      store.dispatch({type: SL_INDIVIDUAL_LOAD, payload: individualData});
+    } catch (err){
+
+    }
   }
 }
 

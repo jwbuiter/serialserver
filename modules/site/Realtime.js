@@ -327,6 +327,11 @@ function Realtime(server, config, store){
     store.dispatch({type: SL_INDIVIDUAL_DELETE_INDIVIDUAL, payload: key});
   }
 
+  function resetIndividualSL(socket, key){
+    console.log('test')
+    store.dispatch({type: SL_RESET_INDIVIDUAL});
+  }
+
   setInterval(() =>{
     io.emit('time', new Date().getTime());
   }, 1000);
@@ -423,6 +428,7 @@ function Realtime(server, config, store){
       'manual': handleManual,
       'deleteGeneralSL': deleteGeneralSL,
       'deleteIndividualSL': deleteIndividualSL,
+      'resetIndividualSL': resetIndividualSL
     }
       
     for(let command in commands){
