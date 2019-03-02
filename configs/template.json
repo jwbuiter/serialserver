@@ -61,7 +61,9 @@
         "numeric": true,
         "digits": 0,
         "resetOnExe": true,
-        "type": "normal"
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": []
       },
       {
         "name": "",
@@ -69,7 +71,9 @@
         "numeric": true,
         "digits": 0,
         "resetOnExe": true,
-        "type": "normal"
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": []
       },
       {
         "name": "",
@@ -77,7 +81,9 @@
         "numeric": true,
         "digits": 0,
         "resetOnExe": true,
-        "type": "normal"
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": []
       },
       {
         "name": "",
@@ -85,7 +91,9 @@
         "numeric": true,
         "digits": 0,
         "resetOnExe": true,
-        "type": "normal"
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": []
       },
       {
         "name": "",
@@ -93,7 +101,9 @@
         "numeric": true,
         "digits": 0,
         "resetOnExe": true,
-        "type": "normal"
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": []
       },
       {
         "name": "",
@@ -101,7 +111,9 @@
         "numeric": true,
         "digits": 0,
         "resetOnExe": true,
-        "type": "normal"
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": []
       },
       {
         "name": "",
@@ -109,7 +121,9 @@
         "numeric": true,
         "digits": 0,
         "resetOnExe": true,
-        "type": "normal"
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": []
       },
       {
         "name": "",
@@ -117,7 +131,9 @@
         "numeric": true,
         "digits": 0,
         "resetOnExe": true,
-        "type": "normal"
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": []
       },
       {
         "name": "",
@@ -125,7 +141,9 @@
         "numeric": true,
         "digits": 0,
         "resetOnExe": true,
-        "type": "normal"
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": []
       },
       {
         "name": "",
@@ -133,7 +151,9 @@
         "numeric": true,
         "digits": 0,
         "resetOnExe": true,
-        "type": "normal"
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": []
       }
     ]
   },
@@ -280,6 +300,8 @@
     "individualToleranceAbs": 1.5,
     "individualCorrectionIncrement": 22,
     "individualCorrectionLimit": 5,
+    "tableExtraColumnTitle": "",
+    "tableExtraColumn": 0,
     "success": 0
   },
   "version": "3.0"

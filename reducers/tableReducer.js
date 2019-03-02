@@ -1,5 +1,6 @@
 const {
   TABLE_ENTRY,
+  TABLE_COLOR,
   TABLE_RESET,
   TABLE_RESET_CELL,
   EXCEL_FOUND_ROW,
@@ -10,6 +11,7 @@ const {table} = require('../configs/current');
 const initialState = {
   cells: table.cells.map(cell =>({
     entry: '',
+    color: '',
     manual: cell.formula === '#' || cell.formula.startsWith('#M'),
   })),
   foundRow: Array(26).fill(''),
@@ -24,6 +26,15 @@ module.exports = function(state = initialState, action) {
       return {
         ...state,
         cells: newCells,
+      }
+    }
+    case TABLE_COLOR:{
+      const {index, color} = action.payload;
+      const newCells = JSON.parse(JSON.stringify(state.cells));
+      newCells[index].color = color;
+      return {
+        ...state,
+        cells: newCells
       }
     }
     case TABLE_RESET_CELL:{

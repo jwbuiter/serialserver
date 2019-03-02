@@ -5,16 +5,18 @@ const {
   TABLE_ENTRY,
   TABLE_RESET,
   TABLE_RESET_CELL,
-  TABLE_EMIT
+  TABLE_EMIT,
+  TABLE_COLOR
 } = require('../../actions/types');
 const Parser = require('../parser/Parser');
 
 function Cell(index, config, store) {
-  const {formula, digits, numeric, resetOnExe, waitForOther, type, menuOptions} = config;
+  const {formula, digits, numeric, resetOnExe, waitForOther, type, menuOptions, colorConditions} = config;
   const manual = (type === 'manual' || type==="menu");
   const myParser = Parser(store);
 
   let content = '';
+  let color = '';
 
   function resetCell(){
     if (type ===  'menu'){
@@ -54,6 +56,19 @@ function Cell(index, config, store) {
           entry = entry?1:0;
         }else {
           entry = String(entry).slice(-digits);
+        }
+
+        for (let option of colorConditions){
+          if (myParser.parse(option.value)){
+            store.dispatch({
+              type: TABLE_COLOR,
+              payload: {
+                index,
+                color: option.key
+              }
+            })
+            break;
+          }
         }
 
         store.dispatch({

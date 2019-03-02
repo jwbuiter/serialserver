@@ -28,6 +28,7 @@ const {
   TABLE_RESET_CELL,
   TABLE_ENTRY,
   TABLE_EMIT,
+  TABLE_COLOR,
   EXCEL_FOUND_ROW,
   ERROR_OCCURRED,
   EXECUTE_START,
@@ -108,6 +109,7 @@ function Realtime(server, config, store){
 
     state.table.cells.forEach((cell, index) => {
       socket.emit('table', {index, value: cell.entry, manual: cell.manual});
+      socket.emit('tableColor', {index, color: cell.color});
     })
 
     // state.serial.histories.forEach((history, index) => {
@@ -379,6 +381,10 @@ function Realtime(server, config, store){
         const {index, entry, manual} = lastAction.payload;
         
         io.emit('table', {index, value: entry, manual: manual?true:false});
+        break;
+      }
+      case TABLE_COLOR: {
+        io.emit('tableColor', lastAction.payload);
         break;
       }
       case EXCEL_FOUND_ROW: {

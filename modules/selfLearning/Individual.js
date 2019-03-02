@@ -12,6 +12,7 @@ const {
   SL_INDIVIDUAL_LOAD,
   SL_INDIVIDUAL_DELETE_GENERAL,
   SL_INDIVIDUAL_DELETE_INDIVIDUAL,
+  SL_INDIVIDUAL_EXTRA,
   EXECUTE_START,
   LOG_RESET,
   LOG_SAVE,
@@ -20,7 +21,7 @@ const {
 
 
 function selfLearningIndividual(config, store){
-  const {enabled, number, startCalibration, individualToleranceAbs, individualCorrectionLimit} = config;
+  const {enabled, number, startCalibration, individualToleranceAbs, individualCorrectionLimit, tableExtraColumn} = config;
   const tolerance = config.tolerance/100;
   const individualTolerance = config.individualTolerance/100;
   const individualCorrectionIncrement = config.individualCorrectionIncrement/100;
@@ -173,6 +174,7 @@ function selfLearningIndividual(config, store){
     try {
       const individualData = require('../../selfLearning/individualData');
       store.dispatch({type: SL_INDIVIDUAL_LOAD, payload: individualData});
+      checkSuccess();
     } catch (err){
       console.log(err)
     }
