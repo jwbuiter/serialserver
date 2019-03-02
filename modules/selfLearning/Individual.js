@@ -29,7 +29,7 @@ function selfLearningIndividual(config, store){
   console.log('Individual SL enabled on com'+comIndex);
 
   function saveIndividualSelfLearning(){
-    store.emit({type: STATE_CHANGED})
+    store.dispatch({type: STATE_CHANGED})
     const individualSL = store.getState().selfLearning.individual;
 
     const individualData = {
