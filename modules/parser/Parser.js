@@ -158,6 +158,7 @@ function Parser(store){
     }
 
     if (state.teaching){
+      calibration = state.calibration;
       switch (property){
         case 'SCmax':{
           tolerance = 1;
