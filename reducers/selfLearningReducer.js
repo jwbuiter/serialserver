@@ -1,6 +1,7 @@
 const {
   SL_RESET_GLOBAL,
   SL_RESET_INDIVIDUAL,
+  SL_START_INDIVIDUAL,
   SL_ENTRY,
   SL_SUCCESS,
   SL_SET_TOLERANCE,
@@ -220,6 +221,15 @@ module.exports = function(state = initialState(), action) {
     case SL_RESET_INDIVIDUAL:{
       return {
         ...initialState(),
+        type: 'individual',
+        success: 0,
+        startTime: new Date(),
+        endTime: undefined,
+      }
+    }
+    case SL_START_INDIVIDUAL:{
+      return {
+        ...state,
         type: 'individual',
         success: 0,
         startTime: new Date(),

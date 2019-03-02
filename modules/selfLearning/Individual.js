@@ -2,6 +2,7 @@ const fs = require('fs');
 
 const {
   SL_RESET_INDIVIDUAL,
+  SL_START_INDIVIDUAL,
   SL_SUCCESS,
   SL_ENTRY,
   SL_INDIVIDUAL_UPGRADE,
@@ -149,16 +150,17 @@ function selfLearningIndividual(config, store){
       }
     }
   });
-  store.dispatch({type: SL_RESET_INDIVIDUAL});
 
   if (fs.existsSync(__dirname+'/../../selfLearning/individualData.json')){
     try {
       const individualData = require('../../selfLearning/individualData');
       store.dispatch({type: SL_INDIVIDUAL_LOAD, payload: individualData});
     } catch (err){
-
+      console.log(err)
     }
   }
+
+  store.dispatch({type: SL_START_INDIVIDUAL});
 }
 
 module.exports = selfLearningIndividual;
