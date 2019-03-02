@@ -158,7 +158,16 @@ function Parser(store){
     }
 
     if (state.teaching){
-      tolerance = 1;
+      switch (property){
+        case 'SCmax':{
+          tolerance = 1;
+          break;
+        }
+        case 'SCmin': {
+          tolerance = 0.5;
+          break;
+        }
+      }
     }
     
     return selfLearningFunctions[property](state, tolerance, calibration).toString();
