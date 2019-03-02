@@ -1,6 +1,7 @@
 const fs = require('fs');
 
 const {
+  STATE_CHANGED,
   SL_RESET_INDIVIDUAL,
   SL_START_INDIVIDUAL,
   SL_SUCCESS,
@@ -28,6 +29,7 @@ function selfLearningIndividual(config, store){
   console.log('Individual SL enabled on com'+comIndex);
 
   function saveIndividualSelfLearning(){
+    store.emit({type: STATE_CHANGED})
     const individualSL = store.getState().selfLearning.individual;
 
     const individualData = {

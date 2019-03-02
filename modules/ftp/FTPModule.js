@@ -46,7 +46,6 @@ function FTPModule(config, store) {
         break;
       }
       case LOG_RESET:{
-        console.log('upload')
         if (automatic){
           const fileName = lastAction.payload;
           targets.forEach(element => {
