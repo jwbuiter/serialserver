@@ -138,11 +138,11 @@ function individualReducer(state, action){
       for (let key in state.individualEntries){
         const entry = state.individualEntries[key];
         if (entry.numUpdates){
-          const tolerance = entrycalibration*selfLearning.individualTolerance/100 + selfLearning.individualToleranceAbs;
+          const tolerance = entry.calibration*selfLearning.individualTolerance/100 + selfLearning.individualToleranceAbs;
           newIndividualEntries[key] = {...entry, numUpdates: 0}
         }
         else{
-          const tolerance = (entrycalibration*selfLearning.individualTolerance/100 + selfLearning.individualToleranceAbs)*Math.pow(1+selfLearning.individualCorrectionIncrement/100, entry.increments + 1);
+          const tolerance = (entry.calibration*selfLearning.individualTolerance/100 + selfLearning.individualToleranceAbs)*Math.pow(1+selfLearning.individualCorrectionIncrement/100, entry.increments + 1);
           newIndividualEntries[key] =  {...entry, increments: entry.increments+1};
         }
       }

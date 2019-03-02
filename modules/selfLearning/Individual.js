@@ -129,6 +129,7 @@ function selfLearningIndividual(config, store){
           });
         }
         saveIndividualSelfLearning();
+        store.
         break;
       }
       case SL_INDIVIDUAL_DELETE_GENERAL:{
