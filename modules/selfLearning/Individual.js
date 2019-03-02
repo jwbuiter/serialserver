@@ -44,6 +44,38 @@ function selfLearningIndividual(config, store){
     });
   }
 
+  function checkSuccess(){
+    individualSL = store.getState().selfLearning.individual;
+
+    if (Object.keys(individualSL.individualEntries).length >= number ){
+
+      const values = Object.values(individualSL.individualEntries).map(entry=> entry.calibration);
+
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+
+      const calibration = (max+min)/2;
+      
+      store.dispatch({
+        type: SL_SUCCESS,
+        payload: {
+          success: 1,
+          calibration,
+          comIndex,
+          tolerance,
+        }
+      });
+
+      config.startCalibration = calibration;
+      store.dispatch({
+        type: CONFIG_UPDATE,
+        payload: {
+          selfLearning: config,
+        }
+      });
+    }
+  }
+
   store.listen(lastAction =>{
     let individualSL = store.getState().selfLearning.individual;
 
@@ -96,25 +128,7 @@ function selfLearningIndividual(config, store){
           }
         }
          
-        individualSL = store.getState().selfLearning.individual;
-
-        if (Object.keys(individualSL.individualEntries).length >= number ){
-
-          const values = Object.values(individualSL.individualEntries).map(entry=> entry.calibration);
-
-          const min = Math.min(...values);
-          const max = Math.max(...values);
-
-          store.dispatch({
-            type: SL_SUCCESS,
-            payload: {
-              success: 1,
-              calibration: (max+min)/2,
-              comIndex,
-              tolerance,
-            }
-          });
-        }
+        checkSuccess();
         saveIndividualSelfLearning();
         break;
       }
@@ -129,9 +143,10 @@ function selfLearningIndividual(config, store){
               tolerance,
             }
           });
+        } else {
+           checkSuccess();
         }
         saveIndividualSelfLearning();
-        store.
         break;
       }
       case SL_INDIVIDUAL_DELETE_GENERAL:{
