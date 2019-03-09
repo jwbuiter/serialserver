@@ -11,6 +11,7 @@ const {
   SL_INDIVIDUAL_INCREMENT,
   SL_INDIVIDUAL_DELETE_GENERAL,
   SL_INDIVIDUAL_DELETE_INDIVIDUAL,
+  SL_INDIVIDUAL_EXTRA,
   SL_TEACH,
 } = require('../actions/types');
 
@@ -73,18 +74,18 @@ function globalReducer(state, action){
 function individualReducer(state, action){
   switch(action.type) {
     case SL_ENTRY:{
-      const {entry, key} = action.payload;
+      const {entry, key, extra} = action.payload;
 
       const newGeneralEntries =  Object.assign({}, state.generalEntries);
       const newIndividualEntries =  Object.assign({}, state.individualEntries);
 
       if (key in state.individualEntries){
         const tolerance = entry*selfLearning.individualTolerance/100 + selfLearning.individualToleranceAbs;
-        newIndividualEntries[key] = {calibration: entry, tolerance, numUpdates: newIndividualEntries[key].numUpdates + 1, increments: 0};
+        newIndividualEntries[key] = {calibration: entry, extra, tolerance, numUpdates: newIndividualEntries[key].numUpdates + 1, increments: 0};
       } else if (key in state.generalEntries) {
-        newGeneralEntries[key] = [entry].concat(Array.from(newGeneralEntries[key]));
+        newGeneralEntries[key] = {entries: [entry].concat(Array.from(newGeneralEntries[key].entries)), extra} ;
       } else {
-        newGeneralEntries[key] = [entry];
+        newGeneralEntries[key] = {entries: [entry], extra};
       }
 
       return {
@@ -102,7 +103,7 @@ function individualReducer(state, action){
       delete newGeneralEntries[key];
 
       const tolerance = calibration*selfLearning.individualTolerance/100 + selfLearning.individualToleranceAbs;
-      newIndividualEntries[key]={calibration, tolerance, numUpdates: 1, increments: 0};
+      newIndividualEntries[key]={calibration, extra: state.generalEntries[key].extra ,tolerance, numUpdates: 1, increments: 0};
       return {
         ...state,
         individualEntries: newIndividualEntries,
@@ -187,6 +188,9 @@ function individualReducer(state, action){
           individualEntries: {}
         }
       }
+    }
+    case SL_INDIVIDUAL_EXTRA:{
+      return {...state}
     }
     default:
       return state;

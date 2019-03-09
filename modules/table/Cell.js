@@ -11,7 +11,7 @@ const {
 const Parser = require('../parser/Parser');
 
 function Cell(index, config, store) {
-  const {formula, digits, numeric, resetOnExe, waitForOther, type, menuOptions, colorConditions} = config;
+  const {formula, digits, numeric, resetOnExe, waitForOther, type, menuOptions, colorConditions, readerPort} = config;
   const manual = (type === 'manual' || type==="menu");
   const myParser = Parser(store);
 
@@ -58,19 +58,26 @@ function Cell(index, config, store) {
           entry = String(entry).slice(-digits);
         }
 
+        let newColor = '';
+
         for (let option of colorConditions){
           if (myParser.parse(option.value)){
-            store.dispatch({
-              type: TABLE_COLOR,
-              payload: {
-                index,
-                color: option.key
-              }
-            })
+            newColor = option.key;
             break;
           }
         }
 
+        if (newColor !== color){
+          color = newColor;
+          store.dispatch({
+            type: TABLE_COLOR,
+            payload: {
+              index,
+              color,
+            }
+          })
+        }
+        
         store.dispatch({
           type: TABLE_ENTRY,
           payload:{

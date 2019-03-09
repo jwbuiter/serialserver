@@ -32,8 +32,6 @@ function Input(index, config, store) {
   const myGPIO = new Gpio(constants.inputPin[index], 'in', 'both');
   let debounce = setTimeout(()=> 0 ,1);
   let force = setTimeout(()=> 0 ,1);
-  let shutdown = setTimeout(()=> 0 ,1);
-  let restart = setTimeout(()=> 0 ,1);
   let stateJSON = '';
   let state = false;
 
@@ -73,30 +71,18 @@ function Input(index, config, store) {
         break;
       }
       case 'restart':{
-        if (state){
-          restart = setTimeout(() => {
-            store.dispatch({type: SERIAL_RESET});
-            store.dispatch({type: RESTART});
-          }, manualTimeout*1000);
-        } else {
-          clearTimeout(restart);
-        }
+        store.dispatch({type: SERIAL_RESET});
+        store.dispatch({type: RESTART});
         break;
       }
       case 'shutdown':{
-        if (state){
-          shutdown = setTimeout(() => {
-            store.dispatch({type: SERIAL_RESET});
-            exec('shutdown now', (err, stdout, stderr) => {
-              if (err) {
-                console.error(`exec error: ${err}`);
-                return;
-              }
-            });
-          }, manualTimeout*1000);
-        } else {
-          clearTimeout(shutdown);
-        }
+        store.dispatch({type: SERIAL_RESET});
+        exec('shutdown now', (err, stdout, stderr) => {
+          if (err) {
+            console.error(`exec error: ${err}`);
+            return;
+          }
+        });
         break;
       }
     }

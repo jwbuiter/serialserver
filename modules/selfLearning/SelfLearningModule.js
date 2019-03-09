@@ -12,12 +12,13 @@ const Individual = require('./Individual');
 
 function SelfLearningModule(config, store) {
   const {enabled} = config;
-  const comIndex = Number(enabled[3]);
-
   if (enabled === 'off')
     return {};
 
-  if (enabled.endsWith('ind')){
+  const comIndex = Number(enabled[3]);
+  const individual = enabled.endsWith('ind');
+
+  if (individual){
     Individual(config,store);
   } else {
     Global(config,store);
@@ -34,10 +35,25 @@ function SelfLearningModule(config, store) {
           break;
         }
 
-        store.dispatch({
-          type: SL_ENTRY, 
-          payload: {entry: newEntry, key: state.serial.coms[1-comIndex].entry},
-        });
+        if (individual){
+          const key = state.serial.coms[1-comIndex].entry;
+
+          let extra = '';
+
+          if (config.tableExtraColumn !== -1){
+            extra = state.table.foundRow[config.tableExtraColumn];
+          }
+
+          store.dispatch({
+            type: SL_ENTRY, 
+            payload: {entry: newEntry, key, extra},
+          });
+        } else {
+          store.dispatch({
+            type: SL_ENTRY, 
+            payload: {entry: newEntry},
+          });
+        }
       }
     }
   });

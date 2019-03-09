@@ -122,8 +122,8 @@ function Parser(store){
       const spread = data.reduce((acc, cur)=> acc + (cur - mean)*(cur - mean), 0);
       return Math.sqrt(spread / (data.length || 1));
     },
-    SSN: (state) => Object.values(state.individual.generalEntries).length,
-    SST: (state) => Object.values(state.individual.generalEntries).reduce((acc, cur) => acc + cur[0], 0),
+    SLN: (state) => Object.values(state.individual.generalEntries).length,
+    SST: (state) => Object.values(state.individual.generalEntries).reduce((acc, cur) => acc + cur.entries[0], 0),
     SI0: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===0).length,
     SI1: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===1).length,
     SI2: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===2).length,

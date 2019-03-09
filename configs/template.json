@@ -20,7 +20,7 @@
         "digits": 1,
         "entries": 5,
         "factor": 1,
-        "alwaysPositive": true,
+        "alwaysPositive": false,
         "prefix": "ST,GS",
         "postfix": "kg",
         "testMessage": "123.123"
@@ -63,7 +63,8 @@
         "resetOnExe": true,
         "type": "normal",
         "menuOptions": [],
-        "colorConditions": []
+        "colorConditions": [],
+        "readerPort": 0
       },
       {
         "name": "",
@@ -73,7 +74,8 @@
         "resetOnExe": true,
         "type": "normal",
         "menuOptions": [],
-        "colorConditions": []
+        "colorConditions": [],
+        "readerPort": 0
       },
       {
         "name": "",
@@ -83,7 +85,8 @@
         "resetOnExe": true,
         "type": "normal",
         "menuOptions": [],
-        "colorConditions": []
+        "colorConditions": [],
+        "readerPort": 0
       },
       {
         "name": "",
@@ -93,7 +96,8 @@
         "resetOnExe": true,
         "type": "normal",
         "menuOptions": [],
-        "colorConditions": []
+        "colorConditions": [],
+        "readerPort": 0
       },
       {
         "name": "",
@@ -103,7 +107,8 @@
         "resetOnExe": true,
         "type": "normal",
         "menuOptions": [],
-        "colorConditions": []
+        "colorConditions": [],
+        "readerPort": 0
       },
       {
         "name": "",
@@ -113,7 +118,8 @@
         "resetOnExe": true,
         "type": "normal",
         "menuOptions": [],
-        "colorConditions": []
+        "colorConditions": [],
+        "readerPort": 0
       },
       {
         "name": "",
@@ -123,7 +129,8 @@
         "resetOnExe": true,
         "type": "normal",
         "menuOptions": [],
-        "colorConditions": []
+        "colorConditions": [],
+        "readerPort": 0
       },
       {
         "name": "",
@@ -133,7 +140,8 @@
         "resetOnExe": true,
         "type": "normal",
         "menuOptions": [],
-        "colorConditions": []
+        "colorConditions": [],
+        "readerPort": 0
       },
       {
         "name": "",
@@ -143,7 +151,8 @@
         "resetOnExe": true,
         "type": "normal",
         "menuOptions": [],
-        "colorConditions": []
+        "colorConditions": [],
+        "readerPort": 0
       },
       {
         "name": "",
@@ -153,7 +162,8 @@
         "resetOnExe": true,
         "type": "normal",
         "menuOptions": [],
-        "colorConditions": []
+        "colorConditions": [],
+        "readerPort": 0
       }
     ]
   },
@@ -163,61 +173,71 @@
         "name": "",
         "formula": "",
         "execute": false,
-        "seconds": 0
+        "seconds": 0,
+        "manualConfirmation": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
-        "seconds": 0
+        "seconds": 0,
+        "manualConfirmation": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
-        "seconds": 0
+        "seconds": 0,
+        "manualConfirmation": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
-        "seconds": 0
+        "seconds": 0,
+        "manualConfirmation": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
-        "seconds": 0
+        "seconds": 0,
+        "manualConfirmation": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
-        "seconds": 0
+        "seconds": 0,
+        "manualConfirmation": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
-        "seconds": 0
+        "seconds": 0,
+        "manualConfirmation": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
-        "seconds": 0
+        "seconds": 0,
+        "manualConfirmation": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
-        "seconds": 0
+        "seconds": 0,
+        "manualConfirmation": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
-        "seconds": 0
+        "seconds": 0,
+        "manualConfirmation": false
       }
     ]
   },
@@ -229,7 +249,10 @@
         "follow": -1,
         "timeout": 20,
         "invert": false,
-        "manualTimeout": 0
+        "manualTimeout": 0,
+        "manualConfirmation": false,
+        "commandCom": "",
+        "commandValue": ""
       },
       {
         "name": "",
@@ -237,7 +260,10 @@
         "follow": -1,
         "timeout": 20,
         "invert": false,
-        "manualTimeout": 0
+        "manualTimeout": 0,
+        "manualConfirmation": false,
+        "commandCom": "",
+        "commandValue": ""
       },
       {
         "name": "",
@@ -245,7 +271,10 @@
         "follow": -1,
         "timeout": 20,
         "invert": false,
-        "manualTimeout": 0
+        "manualTimeout": 0,
+        "manualConfirmation": false,
+        "commandCom": "",
+        "commandValue": ""
       },
       {
         "name": "",
@@ -253,7 +282,10 @@
         "follow": -1,
         "timeout": 20,
         "invert": false,
-        "manualTimeout": 0
+        "manualTimeout": 0,
+        "manualConfirmation": false,
+        "commandCom": "",
+        "commandValue": ""
       },
       {
         "name": "",
@@ -261,7 +293,10 @@
         "follow": -1,
         "timeout": 20,
         "invert": false,
-        "manualTimeout": 0
+        "manualTimeout": 0,
+        "manualConfirmation": false,
+        "commandCom": "",
+        "commandValue": ""
       }
     ]
   },
@@ -301,7 +336,7 @@
     "individualCorrectionIncrement": 22,
     "individualCorrectionLimit": 5,
     "tableExtraColumnTitle": "",
-    "tableExtraColumn": 0,
+    "tableExtraColumn": -1,
     "success": 0
   },
   "version": "3.0"

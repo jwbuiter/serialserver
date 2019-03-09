@@ -12,7 +12,6 @@ const {
   SL_INDIVIDUAL_LOAD,
   SL_INDIVIDUAL_DELETE_GENERAL,
   SL_INDIVIDUAL_DELETE_INDIVIDUAL,
-  SL_INDIVIDUAL_EXTRA,
   EXECUTE_START,
   LOG_RESET,
   LOG_SAVE,
@@ -21,7 +20,7 @@ const {
 
 
 function selfLearningIndividual(config, store){
-  const {enabled, number, startCalibration, individualToleranceAbs, individualCorrectionLimit, tableExtraColumn} = config;
+  const {enabled, number, startCalibration, individualToleranceAbs, individualCorrectionLimit} = config;
   const tolerance = config.tolerance/100;
   const individualTolerance = config.individualTolerance/100;
   const individualCorrectionIncrement = config.individualCorrectionIncrement/100;
@@ -89,7 +88,7 @@ function selfLearningIndividual(config, store){
         const {key} = lastAction.payload;
       
         if (key in individualSL.generalEntries){
-          const entries = individualSL.generalEntries[key];
+          const {entries} = individualSL.generalEntries[key];
 
           if (store.getState().selfLearning.teaching){
             store.dispatch({
