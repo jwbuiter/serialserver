@@ -6,6 +6,7 @@ const {
   SERIAL_ENTRY,
   SERIAL_AVERAGE,
   SERIAL_RESET,
+  SERIAL_COMMAND,
   HANDLE_OUTPUT,
   HANDLE_TABLE,
   TABLE_RESET,
@@ -180,6 +181,20 @@ function Com(index, config, store) {
         rtscts: RTSCTS,
         xon: XONXOFF,
         xoff: XONXOFF
+      });
+
+      store.listen(action =>{
+        switch (action.type){
+          case SERIAL_COMMAND:{
+            const {command} = action.payload;
+            const commandIndex = action.payload.index
+            
+            if (index === commandIndex){
+              console.log('Command:', {index, command})
+              myPort.write(command);
+            }
+          }
+        }
       });
   
       myPort.on('readable', () => {

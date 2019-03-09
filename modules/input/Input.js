@@ -2,6 +2,7 @@ const Gpio = require('onoff').Gpio;
 const { exec } = require('child_process');
 
 const {
+  SERIAL_COMMAND,
   INPUT_PHYSICAL_CHANGED,
   INPUT_BLOCKING_CHANGED,
   INPUT_FORCED_CHANGED,
@@ -28,7 +29,7 @@ const parser = require('../parser/Parser');
 const constants = require('../../config.static');
 
 function Input(index, config, store) {
-  const {formula, timeout, follow, invert, manualTimeout} = config;
+  const {formula, timeout, follow, invert, manualTimeout, commandCom, commandValue} = config;
   const myGPIO = new Gpio(constants.inputPin[index], 'in', 'both');
   let debounce = setTimeout(()=> 0 ,1);
   let force = setTimeout(()=> 0 ,1);
@@ -71,18 +72,29 @@ function Input(index, config, store) {
         break;
       }
       case 'restart':{
-        store.dispatch({type: SERIAL_RESET});
-        store.dispatch({type: RESTART});
+        if (state){
+          store.dispatch({type: SERIAL_RESET});
+          store.dispatch({type: RESTART});
+        }
         break;
       }
       case 'shutdown':{
-        store.dispatch({type: SERIAL_RESET});
-        exec('shutdown now', (err, stdout, stderr) => {
-          if (err) {
-            console.error(`exec error: ${err}`);
-            return;
-          }
-        });
+        if (state){
+          store.dispatch({type: SERIAL_RESET});
+          exec('shutdown now', (err, stdout, stderr) => {
+            if (err) {
+              console.error(`exec error: ${err}`);
+              return;
+            }
+          });
+        }
+        break;
+      }
+      case 'command':{
+        if (state){
+          const index = Number(commandCom.slice(3))
+          store.dispatch({type: SERIAL_COMMAND, payload:{index, command: commandValue }})
+        }
         break;
       }
     }

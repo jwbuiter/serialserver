@@ -113,9 +113,6 @@ function SiteModule(config, store) {
       else if (req.query.file){
         res.download(path.join(logPath, req.query.file));
       }
-      else{
-        res.sendFile(path.join(__dirname, clientPath, 'download.html'));
-      }
     },
     '/shutdown': (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
@@ -156,7 +153,6 @@ function SiteModule(config, store) {
   }
 
   app.use('/', express.static('client2/build'));
-  app.use('/res', express.static('client/res'))
 
   for(let route in staticRoutes){
     app.get(route, (req, res) => {
