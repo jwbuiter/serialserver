@@ -10,6 +10,7 @@ const {name} = require('../config.static');
 
 const initialState = {
   legend: ['Device', 'LogID', 'date', ...serial.coms.map(element=>element.name), ...table.cells.map(element=>element.name), 'TU'],
+  accessors: ['name', 'id', 'date', ...serial.coms.map((_,i)=>`coms[${i}]`), ...table.cells.map((_,i)=>`cells[${i}]`), 'TU'],
   entries: [],
 };
 
@@ -30,7 +31,7 @@ module.exports = function(state = initialState, action) {
     case LOG_UNIQUE_OVERWRITE:{
       const index = action.payload;
       const newEntries =  Array.from(state.entries);
-      newEntries[index][state.legend.length-1] = '';
+      newEntries[index].TU = '';
       return {
         ...state,
         entries: newEntries,
@@ -38,22 +39,22 @@ module.exports = function(state = initialState, action) {
     }
     case SL_SUCCESS:{
       const {comIndex, calibration, tolerance} = action.payload;
-      const newEntries = state.entries.filter((entry, index, array) => {
-        const testValue = Number(entry[comIndex+3]);
+      const newEntries = state.entries.filter((entry, index, entries) => {
+        const testValue = Number(entry.coms[comIndex]);
 
         if ((testValue >= calibration* (1 - tolerance)) && (testValue <= calibration * (1 + tolerance))){
           return true
-        } else if (logger.unique!=='off' && entry[entry.length-1]) {
-          const uniqueIndex = Number(logger.unique[3]) + 3;
-          const uniqueValue = entry[uniqueIndex];
+        } else if (logger.unique!=='off' && entry.TU) {
+          const uniqueIndex = Number(logger.unique[3]);
+          const uniqueValue = entry.coms[uniqueIndex];
 
-          for (let i = 0; i < array.length; i++){
-            const subTestValue = Number(array[i][comIndex+3]);
-            if (array[i][uniqueIndex]===uniqueValue && 
+          for (let i = 0; i < entries.length; i++){
+            const subTestValue = Number(entries[i].coms[comIndex]);
+            if (entries[i].coms[uniqueIndex]===uniqueValue && 
               (testValue >= calibration * (1 - tolerance)) && 
               (testValue <= calibration * (1 + tolerance)) &&
-              !array[i][entry.length-1]){
-                array[i][entry.length-1]=entry[entry.length-1];
+              !entries[i].TU){
+                entries[i].TU = entry.TU;
               }
           }
 

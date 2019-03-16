@@ -44,25 +44,30 @@ function LoggerModule(config, store) {
   }
 
   store.listen((lastAction)=>{
-    let state =  store.getState();
+    
     
     switch (lastAction.type){
       case LOG_MAKE_ENTRY:{
+        const state =  store.getState();
         store.dispatch({type: STATE_CHANGED});
-        let newRow = [constants.name, logID, dateFormat(new Date(),'yyyy-mm-dd HH:MM:ss')];
-        newRow = newRow.concat(state.serial.coms.map(com=>com.entry));
-        newRow = newRow.concat(state.table.cells.map(cell=>cell.entry));
 
-        if(unique === 'off'){
-          newRow = newRow.concat(['']);
-        } else {
+        const newRow = {
+          name: constants.name, 
+          id: logID, 
+          date: dateFormat(new Date(),'yyyy-mm-dd HH:MM:ss'), 
+          coms: state.serial.coms.map(com=>com.numeric?Number(com.entry):com.entry), 
+          cells: state.table.cells.map(cell=>cell.numeric?Number(cell.entry):cell.entry),
+          TU: ''
+        };
+
+        if(unique !== 'off'){
           const uniqueIndex = Number(unique.slice(-1));
           const comValue = state.serial.coms[uniqueIndex].entry;
           let uniqueTimes = 1;
 
           foundOther = state.logger.entries.reduce((found, entry, index) => {
-            if (entry[3 + uniqueIndex] === comValue && entry[entry.length-1] !== 0){
-              uniqueTimes = Number(entry[entry.length-1]) + 1;
+            if (entry.coms[uniqueIndex] === comValue && entry.TU !== ''){
+              uniqueTimes = entry.TU + 1;
               return index;
             }
             return found;
@@ -74,13 +79,15 @@ function LoggerModule(config, store) {
               payload: foundOther,
             })
           }
-          newRow = newRow.concat([uniqueTimes]);
+
+          newRow.TU = uniqueTimes;
         }
         
         store.dispatch({
           type: LOG_ENTRY,
           payload: newRow,
         });
+
         store.dispatch({
           type: LOG_SAVE,
           payload: newRow,
@@ -89,8 +96,15 @@ function LoggerModule(config, store) {
       }
       case LOG_SAVE:{
         if(!writeToFile) break;
-        state = store.getState();
-        const saveArray = [state.logger.legend].concat(state.logger.entries);
+        const state = store.getState();
+        const saveArray = [state.logger.legend].concat(state.logger.entries.map(entry=>([
+          entry.name, 
+          entry.name, 
+          entry.date, 
+          ...entry.coms, 
+          ...entry.cells, 
+          entry.TU
+        ])));
 
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.aoa_to_sheet(saveArray);

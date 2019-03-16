@@ -13,6 +13,7 @@ const initialState = {
     entry: '',
     color: '',
     manual: cell.formula === '#' || cell.formula.startsWith('#M'),
+    numeric: cell.numeric
   })),
   foundRow: Array(26).fill(''),
 };

@@ -63,31 +63,30 @@ function Parser(store){
 
     x = x.slice(-2);
   
-    if (x.match(/[A-E][0-9]/))
-      x = (x.charCodeAt(0) - 65)*tableColumns + Number(x[1]) + 4;
-    else
-      x = Number(x[1]) + 3;
+    let table;
+    if (x.match(/[A-E][0-9]/)){
+      table = true;
+      x = (x.charCodeAt(0) - 65)*tableColumns + Number(x[1]) - 1;
+    } else{
+      table = false;
+      x = Number(x[1]);
+    }
 
-    let data;
-    if (unique)
-      data = state.logger.entries
-        .filter(entry=>entry[entry.length-1] !== '' )
-        .map(entry => entry.map(val =>Number(val)));
-    else
-      data = state.logger.entries.map(entry => entry.map(val =>Number(val)));
+    const data = state.logger.entries
+      .filter(entry=> !unique || entry.TU !== '' )
+      .map(entry => table?entry.cells[x]:entry.coms[x]);
 
     const statisticFunctions = { 
       tn : (x)=> data.length,
-      to : (x)=> data.map(entry => entry[x]).reduce((acc, cur)=>acc+cur, 0),
-      mi : (x)=> Math.min(...data.map(entry => entry[x])),
-      ma : (x)=> Math.max(...data.map(entry => entry[x])),
+      to : (x)=> data.reduce((acc, cur)=>acc+cur, 0),
+      mi : (x)=> Math.min(...data),
+      ma : (x)=> Math.max(...data),
       sp : (x)=> {
-        data = data.map(entry => entry[x])
         const mean = data.reduce((acc, cur)=>acc+cur, 0) / (data.length || 1);
         const spread = data.reduce((acc, cur)=> acc + (cur - mean)*(cur - mean), 0);
         return Math.sqrt(spread / (data.length || 1));
       },
-      un : (x)=> data.map(entry => entry[x]).reduce((acc, cur)=>{
+      un : (x)=> data.reduce((acc, cur)=>{
         if (acc.includes(cur)) {
           return acc;
         } else {
@@ -97,8 +96,8 @@ function Parser(store){
       }, []).length,
       TU : (x)=> {
         if (data.length === 0) return '0';
-        const lastEntry = data[data.length-1];
-        return lastEntry[lastEntry.length-1];
+
+        return state.logger.entries[state.logger.entries.length-1].TU;
       },
     }
 

@@ -8,11 +8,12 @@ const {
 const {serial} = require('../configs/current');
 
 const initialState = {
-  histories: Array.from({length: serial.coms.length}, u => ([])),
-  coms: Array.from({length: serial.coms.length}, u => ({
+  histories: Array.from({length: serial.coms.length}, () => ([])),
+  coms: Array.from({length: serial.coms.length}, (_, i) => ({
     time: null,
     entry: '',
     average: '',
+    numeric: serial.coms[i].factor!==0
   })),
 };
 
@@ -22,7 +23,7 @@ module.exports = function(state = initialState, action) {
     
     case SERIAL_ENTRY:{
       const {index, entry} = action.payload;
-      
+
       const newHistories = Array.from(state.histories);
       if (state.coms[index].entry){
         newHistories[index].push({ 
@@ -33,10 +34,14 @@ module.exports = function(state = initialState, action) {
         const historyLength = serial.coms[index].entries;
         newHistories[index] = newHistories[index].slice(-historyLength);
       }
-      
+
       const newComs = Array.from(state.coms);
-      newComs[index].entry = entry;
-      newComs[index].time = new Date();
+      newComs[index] = {
+        ...newComs[index], 
+        entry, 
+        time: new Date()
+      };
+
       return {
         ...state,
         coms: newComs,
@@ -46,7 +51,9 @@ module.exports = function(state = initialState, action) {
     case SERIAL_AVERAGE:{
       const {index, average} = action.payload;
       const newComs = Array.from(state.coms);
-      newComs[index].average = average;
+    
+      newComs[index] = {...newComs[index], average};
+
       return {
         ...state,
         coms: newComs,
@@ -68,11 +75,8 @@ module.exports = function(state = initialState, action) {
         }
 
         const newComs = Array.from(state.coms);
-        newComs[index] = {
-          time: null,
-          entry: '',
-          average: '',
-        };
+        newComs[index] = initialState.coms[index];
+
         return {
           ...state,
           coms: newComs,
@@ -91,12 +95,10 @@ module.exports = function(state = initialState, action) {
           }
           return history;
         });
+
         return {
           ...state,
-          coms: Array.from({length: serial.coms.length}, u => ({
-            entry: '',
-            average: '',
-          })),
+          coms: initialState.coms,
           histories: newHistories,
         }
       }

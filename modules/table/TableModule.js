@@ -54,6 +54,7 @@ function TableModule(config, store) {
           });
           
           if (foundRow) {
+            console.log('found')
             store.dispatch({
               type: EXCEL_FOUND_ROW, 
               payload: {
@@ -62,6 +63,7 @@ function TableModule(config, store) {
               }
             });
           } else {
+            console.log('not found')
             store.dispatch({
               type: EXCEL_FOUND_ROW, 
               payload: {
