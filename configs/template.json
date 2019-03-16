@@ -333,7 +333,7 @@
     "startTolerance": 50,
     "individualTolerance": 4,
     "individualToleranceAbs": 1.5,
-    "individualCorrectionIncrement": 22,
+    "individualCorrectionIncrement": 25,
     "individualCorrectionLimit": 5,
     "tableExtraColumnTitle": "",
     "tableExtraColumn": -1,

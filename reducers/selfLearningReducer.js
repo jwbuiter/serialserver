@@ -138,7 +138,7 @@ function individualReducer(state, action){
           newIndividualEntries[key] = {...entry, numUpdates: 0}
         }
         else{
-          const tolerance = (entry.calibration*selfLearning.individualTolerance/100 + selfLearning.individualToleranceAbs)*Math.pow(1+selfLearning.individualCorrectionIncrement/100, entry.increments + 1);
+          const tolerance = (entry.calibration*selfLearning.individualTolerance/100 + selfLearning.individualToleranceAbs)*(1+(entry.increments + 1)*selfLearning.individualCorrectionIncrement/100);
           newIndividualEntries[key] =  {...entry, tolerance, increments: entry.increments+1};
         }
       }
