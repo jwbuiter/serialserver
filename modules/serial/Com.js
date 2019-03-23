@@ -126,7 +126,12 @@ function Com(index, config, store) {
         }
 
         dispatchTest = () => {
-          dispatch(decode(testMessage));
+          if (testMessage === 'random'){
+            dispatch(decode(50 + Math.random()*100 + ''))
+          } else {
+            dispatch(decode(testMessage));
+          } 
+          
           setTimeout(dispatchNothing, timeout * 1000);
 
           nextTime += 2 * timeout * 1000;

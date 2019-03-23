@@ -17,6 +17,7 @@ const {
   LOG_ENTRY,
   LOG_RESET,
   LOG_UPLOAD,
+  LOG_BACKUP,
   FTP_SUCCESS,
   FTP_FAILURE,
   SL_RESET_INDIVIDUAL,
@@ -128,26 +129,31 @@ function Realtime(server, config, store){
     if (constants.enabledModules.selfLearning){
       emitSelfLearning();
     }
-    
   }
   
-  function saveCurrentConfig(socket, config){
-    store.dispatch({
-      type: CONFIG_UPDATE,
-      payload: config,
-    });
-    store.dispatch({type: RESTART});
+  function saveCurrentConfig(config, confirm){
+    checkConfigConsistency(config, consistent => {
+      store.dispatch({
+        type: CONFIG_UPDATE,
+        payload: config,
+      });
+  
+      if (consistent){
+        store.dispatch({type: LOG_BACKUP});
+      } else {
+        store.dispatch({type: RESTART});
+      }
+    })  
   }
   
-  function configExists(socket, name, callback){
-    console.log(name)
+  function configExists(name, callback){
     if (!name.endsWith('.json'))
       name = name + 'V' + version + '.json';
     
     callback({result: fs.existsSync(path.join(configPath, name)), name});
   }
   
-  function saveConfig(socket, msg){
+  function saveConfig(msg){
     const name = path.join(configPath, msg.name +'V'+ version + '.json');
 
     store.dispatch({
@@ -159,12 +165,12 @@ function Realtime(server, config, store){
     });
   }
   
-  function loadConfig(socket, name, callback){
+  function loadConfig(name, callback){
     const config = fs.readFileSync(path.join(configPath, name)).toString();
     callback(config.match(/{.*}/s)[0]);
   }
   
-  function deleteConfig(socket, name){
+  function deleteConfig(name){
     try {
       fs.accessSync(path.join(configPath, name));
       fs.unlinkSync(path.join(configPath, name));
@@ -173,7 +179,7 @@ function Realtime(server, config, store){
     }
   }
   
-  function deleteLog(socket, name){
+  function deleteLog(name){
     try {
       fs.accessSync(path.join(logPath, name));
       fs.unlinkSync(path.join(logPath, name));
@@ -182,7 +188,7 @@ function Realtime(server, config, store){
     }
   }
   
-  function uploadLog(socket,{name, index}, callback){
+  function uploadLog({name, index}, callback){
     store.dispatch({
       type: LOG_UPLOAD,
       payload: {
@@ -193,7 +199,7 @@ function Realtime(server, config, store){
     })
   }
   
-  function setDateTime(socket, dateTimeString){
+  function setDateTime(dateTimeString){
     console.log(`hwclock --set --date="${dateTimeString}"`);
     exec(`hwclock --set --date="${dateTimeString}"`, (err, stdout, stderr) => {
       if (err) {
@@ -203,13 +209,13 @@ function Realtime(server, config, store){
     });
   }
   
-  function getLogList(socket, msg, callback){
+  function getLogList(msg, callback){
     fs.readdir(logPath, (err, files) =>{
       callback(files.filter((element)=>element.endsWith('.csv')).sort().reverse());
     });
   }
   
-  function getConfigList(socket, msg, callback){
+  function getConfigList(msg, callback){
     const mayorVersion = version.split('.')[0];
     fs.readdir(configPath, (err, files) =>{
       callback(files
@@ -223,7 +229,7 @@ function Realtime(server, config, store){
     });
   }
   
-  function forceInput(socket, index){
+  function forceInput(index){
     const port = store.getState().input.ports[index];
   
     if (port.isForced){
@@ -263,7 +269,7 @@ function Realtime(server, config, store){
     store.dispatch({type: HANDLE_OUTPUT});
   }
   
-  function forceOutput(socket, index){
+  function forceOutput(index){
     const port = store.getState().output.ports[index];
   
     if (port.isForced){
@@ -303,7 +309,7 @@ function Realtime(server, config, store){
     store.dispatch({type: HANDLE_OUTPUT});
   }
 
-  function handleManual(socket, msg){
+  function handleManual(msg){
     store.dispatch({
       type: TABLE_ENTRY,
       payload: {
@@ -321,17 +327,36 @@ function Realtime(server, config, store){
     store.dispatch({type: HANDLE_OUTPUT});
   }
 
-  function deleteGeneralSL(socket, key){
+  function deleteGeneralSL(key){
     store.dispatch({type: SL_INDIVIDUAL_DELETE_GENERAL, payload: key});
   }
 
-  function deleteIndividualSL(socket, key){
+  function deleteIndividualSL(key){
     store.dispatch({type: SL_INDIVIDUAL_DELETE_INDIVIDUAL, payload: key});
   }
 
-  function resetIndividualSL(socket, key){
-    console.log('test')
+  function resetIndividualSL(key){
     store.dispatch({type: SL_RESET_INDIVIDUAL});
+  }
+
+  function checkConfigConsistency(newConfig, callback){
+    const oldConfig = require('../../configs/current');
+
+    for (let i = 0; i < oldConfig.serial.coms.length; i++){
+      if (oldConfig.serial.coms[i].name !== newConfig.serial.coms[i].name){
+        callback(false);
+        return;
+      }
+    }
+
+    for (let i = 0; i < oldConfig.table.cells.length; i++){
+      if (oldConfig.table.cells[i].name !== newConfig.table.cells[i].name){
+        callback(false);
+        return;
+      }
+    }
+
+    callback(true);
   }
 
   setInterval(() =>{
@@ -434,11 +459,12 @@ function Realtime(server, config, store){
       'manual': handleManual,
       'deleteGeneralSL': deleteGeneralSL,
       'deleteIndividualSL': deleteIndividualSL,
-      'resetIndividualSL': resetIndividualSL
+      'resetIndividualSL': resetIndividualSL,
+      'checkConfigConsistency': checkConfigConsistency
     }
       
     for(let command in commands){
-      socket.on(command, (msg, callback) => commands[command](socket, msg, callback));
+      socket.on(command, (msg, callback) => commands[command](msg, callback));
     }
   });
 }

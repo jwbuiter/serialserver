@@ -1,9 +1,11 @@
+const fs = require('fs');
 const XLSX = require('xlsx');
 const schedule = require('node-schedule');
 const dateFormat = require('dateformat');
 const path = require('path');
 
 const constants = require('../../config.static');
+const backupPath = path.join(constants.saveLogLocation, 'backup.json');
 
 const {
   STATE_CHANGED,
@@ -12,6 +14,9 @@ const {
   LOG_RESET,
   LOG_UNIQUE_OVERWRITE,
   LOG_SAVE,
+  LOG_BACKUP,
+  LOG_RECOVER,
+  RESTART
 } = require('../../actions/types')
 
 function LoggerModule(config, store) {
@@ -26,6 +31,12 @@ function LoggerModule(config, store) {
   }
 
   resetLog();
+
+  if (fs.existsSync(backupPath)){
+    const backup = require(backupPath);
+    fs.unlinkSync(backupPath);
+    store.dispatch({type: LOG_RECOVER, payload: backup})
+  }
   
   switch(resetMode){
     case 'interval':{
@@ -44,8 +55,6 @@ function LoggerModule(config, store) {
   }
 
   store.listen((lastAction)=>{
-    
-    
     switch (lastAction.type){
       case LOG_MAKE_ENTRY:{
         const state =  store.getState();
@@ -90,12 +99,13 @@ function LoggerModule(config, store) {
 
         store.dispatch({
           type: LOG_SAVE,
-          payload: newRow,
+          payload: fileName,
         });
         break;
       }
       case LOG_SAVE:{
         if(!writeToFile) break;
+        const fileName = lastAction.payload;
         const state = store.getState();
         const saveArray = [state.logger.legend].concat(state.logger.entries.map(entry=>([
           entry.name, 
@@ -110,6 +120,18 @@ function LoggerModule(config, store) {
         const ws = XLSX.utils.aoa_to_sheet(saveArray);
         XLSX.utils.book_append_sheet(wb, ws, 'data');
         XLSX.writeFile(wb, path.join(constants.saveLogLocation, fileName));
+        break;
+      }
+      case LOG_BACKUP:{
+        const logger = store.getState().logger;
+
+        fs.writeFile(backupPath, JSON.stringify(logger), 'utf8', (err)=>{
+          if (err){
+            console.log(err);
+          }
+
+          store.dispatch({type: RESTART});
+        });
         break;
       }
     }

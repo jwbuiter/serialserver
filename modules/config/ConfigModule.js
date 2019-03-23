@@ -34,7 +34,6 @@ function ConfigModule(store) {
     switch (lastAction.type){
       case CONFIG_UPDATE: {
         config = Object.assign(config, lastAction.payload);
-        console.log(config)
 
         const name = path.join(configPath, 'current.json');
 

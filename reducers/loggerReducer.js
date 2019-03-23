@@ -2,6 +2,7 @@ const {
   LOG_ENTRY,
   LOG_RESET,
   LOG_UNIQUE_OVERWRITE,
+  LOG_RECOVER,
   SL_SUCCESS,
 } = require('../actions/types');
 
@@ -36,6 +37,9 @@ module.exports = function(state = initialState, action) {
         ...state,
         entries: newEntries,
       }
+    }
+    case LOG_RECOVER: {
+      return action.payload;
     }
     case SL_SUCCESS:{
       const {comIndex, calibration, tolerance} = action.payload;

@@ -81,11 +81,24 @@ function individualReducer(state, action){
 
       if (key in state.individualEntries){
         const tolerance = entry*selfLearning.individualTolerance/100 + selfLearning.individualToleranceAbs;
-        newIndividualEntries[key] = {calibration: entry, extra, tolerance, numUpdates: newIndividualEntries[key].numUpdates + 1, increments: 0};
+        newIndividualEntries[key] = {
+          ...newIndividualEntries[key],
+          calibration: entry, 
+          extra, 
+          tolerance, 
+          numUpdates: newIndividualEntries[key].numUpdates + 1, 
+          increments: 0
+        };
       } else if (key in state.generalEntries) {
-        newGeneralEntries[key] = {entries: [entry].concat(Array.from(newGeneralEntries[key].entries)), extra} ;
+        newGeneralEntries[key] = {
+          entries: [entry].concat(Array.from(newGeneralEntries[key].entries)), 
+          extra
+        };
       } else {
-        newGeneralEntries[key] = {entries: [entry], extra};
+        newGeneralEntries[key] = {
+          entries: [entry], 
+          extra
+        };
       }
 
       return {
@@ -103,7 +116,15 @@ function individualReducer(state, action){
       delete newGeneralEntries[key];
 
       const tolerance = calibration*selfLearning.individualTolerance/100 + selfLearning.individualToleranceAbs;
-      newIndividualEntries[key]={calibration, extra: state.generalEntries[key].extra ,tolerance, numUpdates: 1, increments: 0};
+
+      newIndividualEntries[key]={
+        calibration, 
+        extra: state.generalEntries[key].extra ,
+        tolerance, 
+        numUpdates: 1, 
+        numUpdatesHistory: [],
+        increments: 0
+      };
       return {
         ...state,
         individualEntries: newIndividualEntries,
@@ -135,11 +156,18 @@ function individualReducer(state, action){
       for (let key in state.individualEntries){
         const entry = state.individualEntries[key];
         if (entry.numUpdates){
-          newIndividualEntries[key] = {...entry, numUpdates: 0}
+          newIndividualEntries[key] = {
+            ...entry, 
+            numUpdates: 0
+          }
         }
         else{
           const tolerance = (entry.calibration*selfLearning.individualTolerance/100 + selfLearning.individualToleranceAbs)*(1+(entry.increments + 1)*selfLearning.individualCorrectionIncrement/100);
-          newIndividualEntries[key] =  {...entry, tolerance, increments: entry.increments+1};
+          newIndividualEntries[key] =  {
+            ...entry, 
+            tolerance, 
+            increments: entry.increments+1
+          };
         }
       }
 

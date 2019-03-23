@@ -83,7 +83,10 @@ function Cell(index, config, store) {
       store.dispatch({type: TABLE_EMIT, payload: {index, entry, manual}});
       store.dispatch({type: STATE_CHANGED})
     }
+  }
+  
 
+  function dispatchColor(){
     let newColor = '';
     for (let option of colorConditions){
       if (myParser.parse(option.value)){
@@ -91,6 +94,7 @@ function Cell(index, config, store) {
         break;
       }
     }
+
     if (newColor !== color){
       color = newColor;
       store.dispatch({
@@ -102,23 +106,19 @@ function Cell(index, config, store) {
       })
     }
   }
-  
 
   store.listen((lastAction)=>{
     const state = store.getState();
     switch (lastAction.type){
       case STATE_CHANGED:
       case HANDLE_TABLE:{
-        if (manual) {
-          break;
-        }
         const allEntries = state.serial.coms.reduce((acc, cur) => (acc && !(cur.entry === '0' || cur.entry==='')), true);
-        if (waitForOther && !allEntries){
-          break;
+        if (!manual && (!waitForOther || allEntries) ){
+          let entry = myParser.parse(formula);
+          dispatch(entry)
         }
 
-        let entry = myParser.parse(formula);
-        dispatch(entry)
+        dispatchColor();
         break;
       }
       case LOG_RESET:{
