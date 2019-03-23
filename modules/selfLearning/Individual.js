@@ -82,6 +82,7 @@ function selfLearningIndividual(config, store){
     switch (lastAction.type){
       case LOG_RESET:{
         store.dispatch({type: SL_INDIVIDUAL_INCREMENT});
+        saveIndividualSelfLearning();
         break;
       }
       case SL_ENTRY:{

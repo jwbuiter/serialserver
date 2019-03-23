@@ -99,7 +99,7 @@ function LoggerModule(config, store) {
         const state = store.getState();
         const saveArray = [state.logger.legend].concat(state.logger.entries.map(entry=>([
           entry.name, 
-          entry.name, 
+          entry.id, 
           entry.date, 
           ...entry.coms, 
           ...entry.cells, 
