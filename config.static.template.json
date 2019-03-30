@@ -33,14 +33,14 @@
   "onlinePin": 5,
   "enabledModules": {
     "authentication": true,
-    "FTP": true,
-    "input": true,
-    "logger": true,
-    "output": true,
+    "FTP": false,
+    "input": false,
+    "logger": false,
+    "output": false,
     "site": true,
     "selfLearning": false,
     "serial": true,
-    "table": true
+    "table": false
   },
   "version": "3.0"
 }

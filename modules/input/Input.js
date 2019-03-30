@@ -114,33 +114,36 @@ function Input(index, config, store) {
   myGPIO.watch((err, val)=>{
     setTimeout(()=>{
       dispatchPhysical(myGPIO.readSync()?true:false);
-    },10);
+    }, 10);
   });
 
   store.listen((lastAction)=>{
     switch (lastAction.type){
       case INPUT_FORCED_CHANGED:{
-        store.dispatch({type: INPUT_CALCULATE_STATE, payload: {index}});
-        if (manualTimeout){
-          clearTimeout(force);
-          force = setTimeout(() => {
-            store.dispatch({
-              type: INPUT_FORCED_CHANGED, 
-              payload: {
-                index,
-                isForced: false,
-                previousForced: true,
-                forcedState: false,
-              }
-            });
-          }, manualTimeout*1000);
+        if (index === lastAction.payload.index) {
+          store.dispatch({type: INPUT_CALCULATE_STATE, payload: {index}});
+
+          if (manualTimeout && lastAction.payload.isForced){
+            clearTimeout(force);
+            force = setTimeout(() => {
+              store.dispatch({
+                type: INPUT_FORCED_CHANGED, 
+                payload: {
+                  index,
+                  isForced: false,
+                  previousForced: true,
+                  forcedState: false,
+                }
+              });
+            }, manualTimeout*1000);
+          }
         }
         break;
       }
       case INPUT_FOLLOWING_CHANGED:
       case INPUT_PHYSICAL_CHANGED:{
         if (index === lastAction.payload.index){
-          if (timeout){
+          if (timeout && !state){
             clearTimeout(debounce);
             debounce = setTimeout(()=>{
               store.dispatch({type: INPUT_CALCULATE_STATE, payload: {index}});

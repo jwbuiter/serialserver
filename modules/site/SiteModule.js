@@ -8,6 +8,7 @@ const dateFormat = require('dateformat');
 
 const {
   RESTART,
+  LOG_BACKUP
 } = require('../../actions/types');
 const Realtime = require('./Realtime');
 const constants = require('../../config.static');
@@ -34,7 +35,7 @@ function SiteModule(config, store) {
   
       console.log(__dirname + '/data/data.xls');
       res.send(titleString + '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.');
-      store.dispatch({type:RESTART});
+      store.dispatch({type:LOG_BACKUP});
     });
   }
   

@@ -33,9 +33,14 @@ function LoggerModule(config, store) {
   resetLog();
 
   if (fs.existsSync(backupPath)){
-    const backup = require(backupPath);
-    fs.unlinkSync(backupPath);
-    store.dispatch({type: LOG_RECOVER, payload: backup})
+    try {
+      const backup = require(backupPath);
+      fs.unlinkSync(backupPath);
+      store.dispatch({type: LOG_RECOVER, payload: backup})
+    } catch (err){
+      console.log(err)
+    }
+    
   }
   
   switch(resetMode){

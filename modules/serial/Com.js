@@ -196,7 +196,11 @@ function Com(index, config, store) {
             
             if (index === commandIndex){
               console.log('Command:', {index, command})
-              myPort.write(command);
+              command.split(';').forEach((subCommand, index) => {
+                setTimeout(() => {
+                  myPort.write(subCommand);
+                }, index*1000);
+              });
             }
           }
         }
