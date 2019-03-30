@@ -153,22 +153,32 @@ function individualReducer(state, action){
     }
     case SL_INDIVIDUAL_INCREMENT:{
       const newIndividualEntries = {};
+
       for (let key in state.individualEntries){
-        const entry = state.individualEntries[key];
+        let entry = state.individualEntries[key];
+
+        entry = {
+          ...entry,
+          numUpdatesHistory:[entry.numUpdates, ...entry.numUpdatesHistory].slice(0,3),
+        };
+        
+
         if (entry.numUpdates){
-          newIndividualEntries[key] = {
+          entry = {
             ...entry, 
             numUpdates: 0
           }
         }
         else{
           const tolerance = (entry.calibration*selfLearning.individualTolerance/100 + selfLearning.individualToleranceAbs)*(1+(entry.increments + 1)*selfLearning.individualCorrectionIncrement/100);
-          newIndividualEntries[key] =  {
+          entry =  {
             ...entry, 
             tolerance, 
             increments: entry.increments+1
           };
         }
+
+        newIndividualEntries[key]= entry;
       }
 
       return {

@@ -92,20 +92,16 @@ function SiteModule(config, store) {
       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
       const loggerState = store.getState().logger;
       const entries = loggerState.entries.slice().reverse();
-      const legend = loggerState.legend;
-      const accessors = loggerState.accessors;
 
-      res.send(JSON.stringify({entries, legend, accessors}, null, 2));
+      res.send(JSON.stringify({...loggerState, entries}, null, 2));
     },
     '/comlogu': (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
       const loggerState = store.getState().logger;
       const entries = loggerState.entries.filter(entry => entry.TU !== '').reverse();
-      const legend = loggerState.legend;
-      const accessors = loggerState.accessors;
       
-      res.send(JSON.stringify({entries, legend, accessors}, null, 2));
+      res.send(JSON.stringify({...loggerState, entries}, null, 2));
     },
     '/downloadConfig': (req, res) => res.download(path.join(__dirname, '../..', 'configs', req.query.file)),
     '/downloadLog':(req, res) => {

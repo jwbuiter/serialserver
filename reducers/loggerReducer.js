@@ -12,6 +12,7 @@ const {name} = require('../config.static');
 const initialState = {
   legend: ['Device', 'LogID', 'date', ...serial.coms.map(element=>element.name), ...table.cells.map(element=>element.name), 'TU'],
   accessors: ['name', 'id', 'date', ...serial.coms.map((_,i)=>`coms[${i}]`), ...table.cells.map((_,i)=>`cells[${i}]`), 'TU'],
+  digits: [-1, -1, -1, ...serial.coms.map(element=>element.digits), ...table.cells.map(element=>element.digits), 0],
   entries: [],
 };
 
