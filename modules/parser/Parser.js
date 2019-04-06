@@ -187,7 +187,7 @@ function Parser(store){
           .replace(/com[0-9]/g, parseCom)
           .replace(/\&[a-zA-Z0-9]+/g, parseStatistic)
           .replace(/#\w+/g, parseSelfLearning)
-          .replace(/date/g, (new Date().getTime()/1000/86400 + 25569).toString());
+          .replace(/date/g, Math.floor((new Date().getTime()/1000/86400 + 25569)).toString());
         result = eval(formula);
       }
       catch (err) {

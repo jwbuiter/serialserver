@@ -155,12 +155,13 @@ function selfLearningIndividual(config, store){
         break;
       }
       case SL_INDIVIDUAL_INCREMENT:{
-        Object.values(individualSL.individualEntries).forEach(entry => {
+        Object.entries(individualSL.individualEntries).forEach(([key, entry]) => {
+
           if (entry.increments >= individualCorrectionLimit){
-            store.dispatch({type: SL_INDIVIDUAL_DOWNGRADE, payload: entry.key})
+            store.dispatch({type: SL_INDIVIDUAL_DOWNGRADE, payload: key})
           }
         });
-
+        saveIndividualSelfLearning();
         break;
       }
       case SL_RESET_INDIVIDUAL:{
