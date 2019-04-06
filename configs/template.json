@@ -174,70 +174,70 @@
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": false
+        "manualConfirmation": true
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": false
+        "manualConfirmation": true
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": false
+        "manualConfirmation": true
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": false
+        "manualConfirmation": true
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": false
+        "manualConfirmation": true
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": false
+        "manualConfirmation": true
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": false
+        "manualConfirmation": true
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": false
+        "manualConfirmation": true
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": false
+        "manualConfirmation": true
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": false
+        "manualConfirmation": true
       }
     ]
   },
@@ -250,7 +250,7 @@
         "timeout": 20,
         "invert": false,
         "manualTimeout": 0,
-        "manualConfirmation": false,
+        "manualConfirmation": true,
         "commandCom": "",
         "commandValue": ""
       },
@@ -261,7 +261,7 @@
         "timeout": 20,
         "invert": false,
         "manualTimeout": 0,
-        "manualConfirmation": false,
+        "manualConfirmation": true,
         "commandCom": "",
         "commandValue": ""
       },
@@ -272,7 +272,7 @@
         "timeout": 20,
         "invert": false,
         "manualTimeout": 0,
-        "manualConfirmation": false,
+        "manualConfirmation": true,
         "commandCom": "",
         "commandValue": ""
       },
@@ -283,7 +283,7 @@
         "timeout": 20,
         "invert": false,
         "manualTimeout": 0,
-        "manualConfirmation": false,
+        "manualConfirmation": true,
         "commandCom": "",
         "commandValue": ""
       },
@@ -294,7 +294,7 @@
         "timeout": 20,
         "invert": false,
         "manualTimeout": 0,
-        "manualConfirmation": false,
+        "manualConfirmation": true,
         "commandCom": "",
         "commandValue": ""
       }
