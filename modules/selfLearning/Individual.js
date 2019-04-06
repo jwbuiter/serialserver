@@ -20,7 +20,8 @@ const {
 
 
 function selfLearningIndividual(config, store){
-  const {enabled, number, startCalibration, individualToleranceAbs, individualCorrectionLimit} = config;
+  const {enabled, totalNumber, numberPercentage, startCalibration, individualToleranceAbs, individualCorrectionLimit} = config;
+  const number = Math.round(totalNumber*numberPercentage/100);
   const tolerance = config.tolerance/100;
   const individualTolerance = config.individualTolerance/100;
   const individualCorrectionIncrement = config.individualCorrectionIncrement/100;

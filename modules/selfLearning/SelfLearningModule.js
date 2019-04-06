@@ -5,13 +5,14 @@ const {
   LOG_RESET,
   LOG_SAVE,
   CONFIG_UPDATE,
+  ERROR_OCCURRED
 } = require('../../actions/types');
 
 const Global = require('./Global');
 const Individual = require('./Individual');
 
 function SelfLearningModule(config, store) {
-  const {enabled} = config;
+  const {enabled, extraColumns} = config;
   if (enabled === 'off')
     return {};
 
@@ -38,15 +39,42 @@ function SelfLearningModule(config, store) {
         if (individual){
           const key = state.serial.coms[1-comIndex].entry;
 
-          let extra = '';
+          const columns = [newEntry, key];
 
-          if (config.tableExtraColumn !== -1){
-            extra = state.table.foundRow[config.tableExtraColumn];
+          function parseExcel(x){
+            x = x.charCodeAt(1) - 65;
+            return 'store.getState().table.foundRow['+x+']';
           }
+
+          function parseColumn(x){
+            x=parseInt(x.slice(1))-1;
+            return 'columns['+x+']';
+          }
+
+          extraColumns.forEach(column => {
+            try {
+              const formula = column.formula
+                .replace(/#[0-9]+/g, parseColumn)
+                .replace(/\$[A-Z]/g, parseExcel)
+                .replace(/date/g, Math.floor((new Date().getTime()/1000/86400 + 25569)).toString());
+
+              columns.push(eval(formula));
+            }
+            catch (err) {
+              store.dispatch({
+                type: ERROR_OCCURRED, 
+                payload: err
+              });
+            } 
+          });
 
           store.dispatch({
             type: SL_ENTRY, 
-            payload: {entry: newEntry, key, extra},
+            payload: {
+              entry: newEntry, 
+              key, 
+              extra: columns.slice(2)
+            }
           });
         } else {
           store.dispatch({

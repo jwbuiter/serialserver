@@ -10,8 +10,9 @@ const {
 
 
 function selfLearningGlobal(config, store){
-  const {enabled, number} = config;
+  const {enabled, totalNumber, numberPercentage} = config;
   const tolerance = config.tolerance/100;
+  const number = Math.round(totalNumber*numberPercentage/100);
 
 
   const comIndex = Number(enabled[3]);
