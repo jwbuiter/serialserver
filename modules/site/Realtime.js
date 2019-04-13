@@ -335,8 +335,33 @@ function Realtime(server, config, store){
     store.dispatch({type: SL_INDIVIDUAL_DELETE_INDIVIDUAL, payload: key});
   }
 
-  function resetIndividualSL(key){
+  function resetIndividualSL(){
     store.dispatch({type: SL_RESET_INDIVIDUAL});
+  }
+
+  function deleteSLData(){
+    store.dispatch({type: SL_RESET_INDIVIDUAL});
+
+    const startCalibration = require('../../configs/template').selfLearning.startCalibration;
+    const selfLearning = require('../../configs/current').selfLearning;
+
+    store.dispatch({
+      type: CONFIG_UPDATE,
+      payload: {selfLearning: { ...selfLearning, startCalibration}},
+    });
+
+    const dataFile = path.join(__dirname, '../../data/data.xls');
+    const templateFile = path.join(__dirname, '../../data/template.xls')
+
+    if (fs.existsSync(dataFile)){
+      fs.unlinkSync(dataFile);
+    }
+    
+    if (fs.existsSync(templateFile)){
+      fs.renameSync(templateFile, dataFile);
+    }
+    
+    store.dispatch({type: RESTART});
   }
 
   function checkConfigConsistency(newConfig, callback){
@@ -460,6 +485,7 @@ function Realtime(server, config, store){
       'deleteGeneralSL': deleteGeneralSL,
       'deleteIndividualSL': deleteIndividualSL,
       'resetIndividualSL': resetIndividualSL,
+      'deleteSLData': deleteSLData,
       'checkConfigConsistency': checkConfigConsistency
     }
       

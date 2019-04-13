@@ -105,14 +105,21 @@ function Parser(store){
   }
 
   const selfLearningFunctions = {
+    SCT: ()=> config.selfLearning.totalNumber,
+    SCN: ()=> Math.round(config.selfLearning.totalNumber*config.selfLearning.numberPercentage/100),
     SC: (state, tolerance, calibration) => calibration,
     SCmin: (state, tolerance, calibration) => calibration*(1 - tolerance),
     SCmax: (state, tolerance, calibration) => calibration*(1 + tolerance),
     SN: (state) => state.global.entries.length,
     ST: (state) => (state.endTime?(state.endTime - state.startTime):(new Date() - state.startTime))/60000,
+
+    SLC: (state) => state.calibration,
+    SLCmin: (state, tolerance) => state.calibration*(1 - tolerance),
+    SLCmax: (state, tolerance) => state.calibration*(1 + tolerance),
+    SLN: (state) => Object.values(state.individual.generalEntries).length,
     SIN: (state) => Object.values(state.individual.individualEntries).length,
-    SIC: (state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => acc + cur.increments, 0),
     SIT: (state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => acc + cur.calibration, 0),
+    SIA: (state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => acc + cur.calibration, 0)/Object.keys(state.individual.individualEntries).length,
     SImi: (state) => Math.min(...Object.values(state.individual.individualEntries).map(entry => entry.calibration)),
     SIma: (state) => Math.max(...Object.values(state.individual.individualEntries).map(entry => entry.calibration)),
     SIsp: (state) => {
@@ -121,23 +128,27 @@ function Parser(store){
       const spread = data.reduce((acc, cur)=> acc + (cur - mean)*(cur - mean), 0);
       return Math.sqrt(spread / (data.length || 1));
     },
-    SLN: (state) => Object.values(state.individual.generalEntries).length,
-    SST: (state) => Object.values(state.individual.generalEntries).reduce((acc, cur) => acc + cur.entries[0], 0),
-    SI0: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===0).length,
-    SI1: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===1).length,
-    SI2: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===2).length,
-    SI3: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===3).length,
-    SI4: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===4).length,
-    SI5: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===5).length,
-    SI6: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===6).length,
-    SI7: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===7).length,
-    SI8: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===8).length,
-    SI9: (state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===9).length,
+    SIC: (state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => acc + cur.increments, 0)
+  }
+
+  const selfLearningNumberedFunctions = {
+    SI: (index, state) => Object.values(state.individual.individualEntries).filter(entry=>entry.increments===index).length,
+    SIT: (index, state) => Object.values(state.individual.individualEntries).reduce((acc, cur)=> acc + cur.extra[index-3], 0),
+    SIA: (index, state) => Object.values(state.individual.individualEntries).reduce((acc, cur)=> acc + cur.extra[index-3], 0)/Object.keys(state.individual.individualEntries).length,
   }
 
   function parseSelfLearning(x){
     const property = x.slice(1);
     const state = store.getState().selfLearning;
+
+    const isNumbered = property.match(/[0-9]$/);
+    
+    if(isNumbered){
+      const index = Number(isNumbered[0]);
+      const numberedProperty = property.slice(0,-1);
+
+      return selfLearningNumberedFunctions[numberedProperty](index, state).toString();
+    }
 
     let tolerance, calibration;
 
@@ -186,7 +197,7 @@ function Parser(store){
           .replace(/\$[A-Z]/g, parseExcel)
           .replace(/com[0-9]/g, parseCom)
           .replace(/\&[a-zA-Z0-9]+/g, parseStatistic)
-          .replace(/#\w+/g, parseSelfLearning)
+          .replace(/#\w+[0-9]?/g, parseSelfLearning)
           .replace(/date/g, Math.floor((new Date().getTime()/1000/86400 + 25569)).toString());
         result = eval(formula);
       }

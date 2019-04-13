@@ -20,7 +20,16 @@ const {
 
 
 function selfLearningIndividual(config, store){
-  const {enabled, totalNumber, numberPercentage, startCalibration, individualToleranceAbs, individualCorrectionLimit} = config;
+  const {
+    enabled, 
+    totalNumber, 
+    numberPercentage, 
+    startCalibration, 
+    individualToleranceAbs, 
+    individualCorrectionLimit,
+    excelIndividualColumn,
+    excelDateColumn
+  } = config;
   const number = Math.round(totalNumber*numberPercentage/100);
   const tolerance = config.tolerance/100;
   const individualTolerance = config.individualTolerance/100;
@@ -124,7 +133,7 @@ function selfLearningIndividual(config, store){
  
               store.dispatch({
                 type: SL_INDIVIDUAL_UPGRADE,
-                payload: { key, calibration}
+                payload: { key, calibration, excelIndividualColumn, excelDateColumn}
               });
             }
           }

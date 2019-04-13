@@ -32,10 +32,24 @@ function SiteModule(config, store) {
       if (err){
         return res.status(500).send(err);
       }
-  
-      console.log(__dirname + '/data/data.xls');
       res.send(titleString + '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.');
       store.dispatch({type:LOG_BACKUP});
+    });
+  }
+
+  function importExcelTemplate(req, res){
+    console.log(req.files)
+    if (!req.files.importTemplate){
+      return res.send(titleString + '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.')
+    }
+    
+    let uploadedFile = req.files.importTemplate;
+    
+    uploadedFile.mv(path.join(__dirname, '../..', 'data', 'template.xls'), (err) => {
+      if (err){
+        return res.status(500).send(err);
+      }
+      res.send(titleString + '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.');
     });
   }
   
@@ -103,6 +117,7 @@ function SiteModule(config, store) {
       
       res.send(JSON.stringify({...loggerState, entries}, null, 2));
     },
+    '/downloadExcel': (req, res) => res.download(path.join(__dirname, '../../data/data.xls')),
     '/downloadConfig': (req, res) => res.download(path.join(__dirname, '../..', 'configs', req.query.file)),
     '/downloadLog':(req, res) => {
       
@@ -149,6 +164,7 @@ function SiteModule(config, store) {
   
   const uploadRoutes = {
     '/importFile': importFile,
+    '/importTemplate': importExcelTemplate,
     '/uploadConfig': uploadConfig, 
   }
 

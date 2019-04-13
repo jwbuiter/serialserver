@@ -91,7 +91,7 @@ function individualReducer(state, action){
         };
       } else if (key in state.generalEntries) {
         newGeneralEntries[key] = {
-          entries: [entry].concat(Array.from(newGeneralEntries[key].entries)), 
+          entries: [entry].concat(Array.from(newGeneralEntries[key].entries)).slice(-5), 
           extra
         };
       } else {

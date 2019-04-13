@@ -1,12 +1,14 @@
 const fs = require('fs');
 const path = require('path');
 const XLSX = require('xlsx');
+const dateFormat = require('dateformat');
 
 const {
   HANDLE_TABLE,
   TABLE_RESET,
   EXCEL_FOUND_ROW, 
   LOG_RESET,
+  SL_INDIVIDUAL_UPGRADE
 } = require('../../actions/types');
 const Cell = require('./Cell');
 
@@ -29,6 +31,13 @@ function sheetToArray(sheet){
   }
   return result;
 };
+
+function saveExcel(array){
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(array);
+  XLSX.utils.book_append_sheet(wb, ws, 'data');
+  XLSX.writeFile(wb, excelPath);
+}
 
 function TableModule(config, store) {
   const {trigger, useFile, waitForOther, searchColumn, cells} = config;
@@ -74,6 +83,27 @@ function TableModule(config, store) {
           }
         }
         break;
+      }
+      case SL_INDIVIDUAL_UPGRADE:{
+        if (useFile && excelSheet){
+          const {key, calibration, excelIndividualColumn, excelDateColumn } = lastAction.payload;
+
+          const foundRow = excelSheet.find((row) =>{
+            return (row[searchColumn] === key);
+          });
+
+          if (foundRow) return;
+
+          const newRow = [];
+
+          newRow[searchColumn] = key;
+          newRow[excelIndividualColumn]=calibration;
+          newRow[excelDateColumn]=dateFormat(new Date(), "dd-mm-yyyy");
+
+          excelSheet.push(newRow);
+          console.log(excelSheet)
+          saveExcel(excelSheet);
+        }
       }
     }
   });
