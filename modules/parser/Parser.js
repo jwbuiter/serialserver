@@ -1,3 +1,5 @@
+const {getExcelDate} = require('../../utils/dateUtils')
+
 const {
   ERROR_OCCURRED
 } = require('../../actions/types');
@@ -198,14 +200,6 @@ function Parser(store) {
     return selfLearningFunctions[property](state, tolerance, calibration).toString();
   }
 
-  function parseDate() {
-    const date = new Date();
-
-    const seconds = date.getTime()/1000 - 60 * date.getTimezoneOffset();
-    
-    return Math.floor(seconds / 86400 + 25569).toString();
-  }
-
   return {
     parse: (formula) => {
       let result;
@@ -221,7 +215,7 @@ function Parser(store) {
           .replace(/COM[0-9]/g, parseCom)
           .replace(/\&[A-Z0-9]+/g, parseStatistic)
           .replace(/#\w+[0-9]?/g, parseSelfLearning)
-          .replace(/DATE/g, parseDate);
+          .replace(/DATE/g, () => String(getExcelDate()));
         result = eval(formula);
       } catch (err) {
         store.dispatch({

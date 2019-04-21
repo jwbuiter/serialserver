@@ -313,6 +313,7 @@
   },
   "FTP": {
     "automatic": false,
+    "uploadExcel": false,
     "targets": [
       {
         "address": "ftp.mbdc.nl",

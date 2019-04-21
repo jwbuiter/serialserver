@@ -3,6 +3,8 @@ const path = require('path');
 const XLSX = require('xlsx');
 const dateFormat = require('dateformat');
 
+const {getExcelDate} = require('../../utils/dateUtils')
+
 const {
   HANDLE_TABLE,
   TABLE_RESET,
@@ -115,10 +117,9 @@ function TableModule(config, store) {
 
             newRow[searchColumn] = key;
             newRow[individualColumn] = calibration;
-            newRow[dateColumn] = dateFormat(new Date(), "dd-mm-yyyy");
+            newRow[dateColumn] = getExcelDate();
 
             excelSheet.push(newRow);
-            console.log(excelSheet)
             saveExcel(excelSheet);
           }
         }
