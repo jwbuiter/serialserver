@@ -2,6 +2,7 @@ const {
   LOG_ENTRY,
   LOG_RESET,
   LOG_UNIQUE_OVERWRITE,
+  LOG_ACTIVITY_OVERWRITE,
   LOG_RECOVER,
   SL_SUCCESS,
 } = require('../actions/types');
@@ -10,9 +11,9 @@ const {table, serial, logger} = require('../configs/current');
 const {name} = require('../config.static');
 
 const initialState = {
-  legend: ['Device', 'LogID', 'date', ...serial.coms.map(element=>element.name), ...table.cells.map(element=>element.name), 'TU'],
-  accessors: ['name', 'id', 'date', ...serial.coms.map((_,i)=>`coms[${i}]`), ...table.cells.map((_,i)=>`cells[${i}]`), 'TU'],
-  digits: [-1, -1, -1, ...serial.coms.map(element=>element.digits), ...table.cells.map(element=>element.digits), 0],
+  legend: ['Device', 'LogID', 'date', ...serial.coms.map(element=>element.name), ...table.cells.map(element=>element.name), 'TU', 'TA'],
+  accessors: ['name', 'id', 'date', ...serial.coms.map((_,i)=>`coms[${i}]`), ...table.cells.map((_,i)=>`cells[${i}]`), 'TU', 'TA'],
+  digits: [-1, -1, -1, ...serial.coms.map(element=>element.digits), ...table.cells.map(element=>element.digits), 0, 0],
   entries: [],
 };
 
@@ -32,11 +33,24 @@ module.exports = function(state = initialState, action) {
     }
     case LOG_UNIQUE_OVERWRITE:{
       const index = action.payload;
+
       const newEntries =  Array.from(state.entries);
       newEntries[index].TU = '';
+
       return {
         ...state,
         entries: newEntries,
+      }
+    }
+    case LOG_ACTIVITY_OVERWRITE:{
+      const {index, newValue} = action.payload;
+
+      const newEntries = Array.from(state.entries);
+      newEntries[index].TA = newValue;
+
+      return {
+        ...state,
+        entries: newEntries
       }
     }
     case LOG_RECOVER: {

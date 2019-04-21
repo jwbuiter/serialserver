@@ -54,6 +54,9 @@
     "useFile": false,
     "waitForOther": false,
     "searchColumn": 0,
+    "individualColumn": 1,
+    "dateColumn": 2,
+    "exitColumn": 3,
     "cells": [
       {
         "name": "",
@@ -336,8 +339,7 @@
     "individualToleranceAbs": 1.5,
     "individualCorrectionIncrement": 25,
     "individualCorrectionLimit": 3,
-    "excelIndividualColumn": "1",
-    "excelDateColumn": "2",
+    "activityCounter": false,
     "firstTopFormula": "",
     "secondTopFormula": "",
     "extraColumns": [],

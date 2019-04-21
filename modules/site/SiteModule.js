@@ -3,7 +3,9 @@ const fileUpload = require('express-fileupload');
 const zip = require('express-zip');
 const path = require('path');
 const fs = require('fs');
-const { exec } = require('child_process');
+const {
+  exec
+} = require('child_process');
 const dateFormat = require('dateformat');
 
 const {
@@ -20,54 +22,56 @@ const logPath = constants.saveLogLocation;
 const titleString = '<title>' + constants.name + '</title>';
 
 function SiteModule(config, store) {
-  function importFile(req, res){
+  function importFile(req, res) {
     console.log(req.files)
-    if (!req.files.importFile){
+    if (!req.files.importFile) {
       return res.send(titleString + '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.')
     }
-    
+
     let uploadedFile = req.files.importFile;
-    
+
     uploadedFile.mv(path.join(__dirname, '../..', 'data', 'data.xls'), (err) => {
-      if (err){
+      if (err) {
         return res.status(500).send(err);
       }
       res.send(titleString + '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.');
-      store.dispatch({type:LOG_BACKUP});
+      store.dispatch({
+        type: LOG_BACKUP
+      });
     });
   }
 
-  function importExcelTemplate(req, res){
+  function importExcelTemplate(req, res) {
     console.log(req.files)
-    if (!req.files.importTemplate){
+    if (!req.files.importTemplate) {
       return res.send(titleString + '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.')
     }
-    
+
     let uploadedFile = req.files.importTemplate;
-    
+
     uploadedFile.mv(path.join(__dirname, '../..', 'data', 'template.xls'), (err) => {
-      if (err){
+      if (err) {
         return res.status(500).send(err);
       }
       res.send(titleString + '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.');
     });
   }
-  
+
   function uploadConfig(req, res) {
     console.log(req.files)
-  
-    if (!req.files.importConfig){
+
+    if (!req.files.importConfig) {
       return res.send(titleString + '<meta http-equiv="refresh" content="1; url=/" /> No files were uploaded.')
 
     }
-  
+
     let uploadedFile = req.files.importConfig;
-    
+
     uploadedFile.mv(path.join(__dirname, '../..', 'configs', uploadedFile.name), (err) => {
-      if (err){
+      if (err) {
         return res.status(500).send(err);
       }
-  
+
       res.send(titleString + '<meta http-equiv="refresh" content="1; url=/" /> Config uploaded.');
     });
   }
@@ -85,21 +89,25 @@ function SiteModule(config, store) {
       res.send(constants);
     },
     '/slstate': (req, res) => {
-      res.send(JSON.stringify(store.getState().selfLearning, null,2))
+      res.send(JSON.stringify(store.getState().selfLearning, null, 2))
     },
     '/config': (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
       res.send(require(path.join(__dirname, '../..', 'configs', 'current.json')));
     },
-    '/com': (req, res) => res.send(titleString + (store.getState().input.executing?'1':'0')),
+    '/com': (req, res) => res.send(titleString + (store.getState().input.executing ? '1' : '0')),
     '/coml': (req, res) => {
       const loggerState = store.getState().logger;
       const entries = loggerState.entries.slice(-1);
       const legend = loggerState.legend;
       const accessors = loggerState.accessors;
 
-      res.send(JSON.stringify({entries, legend, accessors}, null, 2));
+      res.send(JSON.stringify({
+        entries,
+        legend,
+        accessors
+      }, null, 2));
     },
     '/comlog': (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
@@ -107,25 +115,37 @@ function SiteModule(config, store) {
       const loggerState = store.getState().logger;
       const entries = loggerState.entries.slice().reverse();
 
-      res.send(JSON.stringify({...loggerState, entries}, null, 2));
+      res.send(JSON.stringify({
+        ...loggerState,
+        entries
+      }, null, 2));
     },
     '/comlogu': (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
       const loggerState = store.getState().logger;
       const entries = loggerState.entries.filter(entry => entry.TU !== '').reverse();
-      
-      res.send(JSON.stringify({...loggerState, entries}, null, 2));
+
+      res.send(JSON.stringify({
+        ...loggerState,
+        entries
+      }, null, 2));
     },
-    '/downloadExcel': (req, res) => res.download(path.join(__dirname, '../../data/data.xls')),
+    '/downloadExcel': (req, res) => {
+      const logID = store.getState().config.logger.logID;
+      const fileName = `${constants.name}_${logID}.xls`;
+      res.download(path.join(__dirname, '../../data/data.xls'), fileName)
+    },
     '/downloadConfig': (req, res) => res.download(path.join(__dirname, '../..', 'configs', req.query.file)),
-    '/downloadLog':(req, res) => {
-      
-      if (req.query.multiFile){
-        const fileList = req.query.multiFile.split(',').map((element) => ({path: path.join(logPath, element), name: element}));
-        res.zip(fileList, dateFormat(new Date(),'yyyy-mm-dd_HH-MM-ss') + '.zip');
-      }
-      else if (req.query.file){
+    '/downloadLog': (req, res) => {
+
+      if (req.query.multiFile) {
+        const fileList = req.query.multiFile.split(',').map((element) => ({
+          path: path.join(logPath, element),
+          name: element
+        }));
+        res.zip(fileList, dateFormat(new Date(), 'yyyy-mm-dd_HH-MM-ss') + '.zip');
+      } else if (req.query.file) {
         res.download(path.join(logPath, req.query.file));
       }
     },
@@ -144,7 +164,9 @@ function SiteModule(config, store) {
       res.header("Access-Control-Allow-Origin", "*");
       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
       res.send(titleString + '<meta http-equiv="refresh" content="5; url=/" />Restarting now.')
-      store.dispatch({type: RESTART});
+      store.dispatch({
+        type: RESTART
+      });
       process.exit();
     },
     '/logo': (req, res) => {
@@ -158,35 +180,34 @@ function SiteModule(config, store) {
         res.status(404);
         res.send('No logo');
       }
-        
     }
   }
-  
+
   const uploadRoutes = {
     '/importFile': importFile,
     '/importTemplate': importExcelTemplate,
-    '/uploadConfig': uploadConfig, 
+    '/uploadConfig': uploadConfig,
   }
 
   app.use('/', express.static('client2/build'));
 
-  for(let route in staticRoutes){
+  for (let route in staticRoutes) {
     app.get(route, (req, res) => {
       res.sendFile(path.join(__dirname, clientPath, staticRoutes[route]))
     })
   }
 
-  for(let route in functionRoutes){
+  for (let route in functionRoutes) {
     app.get(route, functionRoutes[route]);
   }
 
-  for(let i = 0; i < store.getState().serial.coms.length; i++){
-    app.get('/com'+i, (req, res) =>{
+  for (let i = 0; i < store.getState().serial.coms.length; i++) {
+    app.get('/com' + i, (req, res) => {
       const com = store.getState().serial.coms[i];
       let sendString = titleString;
       console.log(store.getState().serial);
 
-      if (com.average === ''){
+      if (com.average === '') {
         sendString += com.entry;
       } else {
         sendString += com.average;
@@ -194,11 +215,11 @@ function SiteModule(config, store) {
       res.send(sendString);
     });
 
-    for(let route in uploadRoutes){
+    for (let route in uploadRoutes) {
       app.use(route, fileUpload());
       app.post(route, uploadRoutes[route]);
     }
-  
+
   }
 
   const server = app.listen(constants.port, () => console.log('Server listening on port ' + constants.port));

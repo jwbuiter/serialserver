@@ -1,4 +1,6 @@
-const { exec } = require('child_process');
+const {
+  exec
+} = require('child_process');
 const socketio = require('socket.io');
 const fs = require('fs');
 const path = require('path');
@@ -50,67 +52,118 @@ const configPath = path.join(__dirname, '../..', 'configs');
 const logPath = constants.saveLogLocation;
 const version = constants.version;
 
-function Realtime(server, config, store){
+function Realtime(server, config, store) {
   const io = socketio.listen(server);
 
-  function emitInput(port, index){
+  function emitInput(port, index) {
     let state;
-    if (port.isForced){ 
-      state = port.forcedState?'forcedOn':'forcedOff';
+    if (port.isForced) {
+      state = port.forcedState ? 'forcedOn' : 'forcedOff';
     } else {
-      state = port.state?'on':'off';
+      state = port.state ? 'on' : 'off';
     }
-    io.emit('state', {name: 'input'+index, state});
-    io.emit('input', {index, ...port});
+    io.emit('state', {
+      name: 'input' + index,
+      state
+    });
+    io.emit('input', {
+      index,
+      ...port
+    });
   }
-  
-  function emitOutput(port, index){
+
+  function emitOutput(port, index) {
     let state;
-    if (port.isForced){
-      state = port.forcedState?'forcedOn':'forcedOff';
+    if (port.isForced) {
+      state = port.forcedState ? 'forcedOn' : 'forcedOff';
     } else {
       if (!port.state && port.result)
         state = 'execute';
       else
-        state = port.state?'on':'off';
+        state = port.state ? 'on' : 'off';
     }
-    io.emit('state', {name: 'output'+index, state});
-    io.emit('output', {index, ...port});
+    io.emit('state', {
+      name: 'output' + index,
+      state
+    });
+    io.emit('output', {
+      index,
+      ...port
+    });
   }
 
-  function emitSelfLearning(){
+  function emitSelfLearning() {
     const state = store.getState();
 
-    switch (state.selfLearning.type){
-      case 'individual':{
-        const {calibration, tolerance, success, comIndex} = state.selfLearning;
-        const {generalEntries, individualEntries} = state.selfLearning.individual;
-        io.emit('selfLearning', {individual: true, calibration, tolerance, success, comIndex, generalEntries, individualEntries});
-        break;
-      }
-      case 'global':{
-        const {calibration, tolerance, success, comIndex} = state.selfLearning;
-        const {matchedTolerance} = state.selfLearning.global;
-        io.emit('selfLearning', {individual: false, calibration, tolerance, success, comIndex, matchedTolerance});
-        break;
-      }
+    switch (state.selfLearning.type) {
+      case 'individual':
+        {
+          const {
+            calibration,
+            tolerance,
+            success,
+            comIndex
+          } = state.selfLearning;
+          const {
+            generalEntries,
+            individualEntries
+          } = state.selfLearning.individual;
+          io.emit('selfLearning', {
+            individual: true,
+            calibration,
+            tolerance,
+            success,
+            comIndex,
+            generalEntries,
+            individualEntries
+          });
+          break;
+        }
+      case 'global':
+        {
+          const {
+            calibration,
+            tolerance,
+            success,
+            comIndex
+          } = state.selfLearning;
+          const {
+            matchedTolerance
+          } = state.selfLearning.global;
+          io.emit('selfLearning', {
+            individual: false,
+            calibration,
+            tolerance,
+            success,
+            comIndex,
+            matchedTolerance
+          });
+          break;
+        }
     }
   }
-  
-  function emitAllState(socket){
+
+  function emitAllState(socket) {
     const state = store.getState();
-  
+
     state.input.ports.forEach((port, index) => {
       emitInput(port, index)
     });
-  
+
     state.output.ports.forEach((port, index) => {
       emitOutput(port, index)
     });
 
     state.table.cells.forEach((cell, index) => {
-      socket.emit('table', {index, value: cell.entry, manual: cell.manual});
-      socket.emit('tableColor', {index, color: cell.color});
+      socket.emit('table', {
+        index,
+        value: cell.entry,
+        manual: cell.manual
+      });
+      socket.emit('tableColor', {
+        index,
+        color: cell.color
+      });
     })
 
     // state.serial.histories.forEach((history, index) => {
@@ -119,42 +172,60 @@ function Realtime(server, config, store){
     //   });
     // });
 
-    state.serial.coms.forEach(({entry, time, average}, index) => {
+    state.serial.coms.forEach(({
+      entry,
+      time,
+      average
+    }, index) => {
       if (!time) return;
-      
-      socket.emit('entry', {index, entryTime: time.getTime(), entry});
-      socket.emit('average', {index, average});
+
+      socket.emit('entry', {
+        index,
+        entryTime: time.getTime(),
+        entry
+      });
+      socket.emit('average', {
+        index,
+        average
+      });
     });
 
-    if (constants.enabledModules.selfLearning){
+    if (constants.enabledModules.selfLearning) {
       emitSelfLearning();
     }
   }
-  
-  function saveCurrentConfig(config, confirm){
+
+  function saveCurrentConfig(config, confirm) {
     checkConfigConsistency(config, consistent => {
       store.dispatch({
         type: CONFIG_UPDATE,
         payload: config,
       });
-  
-      if (consistent){
-        store.dispatch({type: LOG_BACKUP});
+
+      if (consistent) {
+        store.dispatch({
+          type: LOG_BACKUP
+        });
       } else {
-        store.dispatch({type: RESTART});
+        store.dispatch({
+          type: RESTART
+        });
       }
-    })  
+    })
   }
-  
-  function configExists(name, callback){
+
+  function configExists(name, callback) {
     if (!name.endsWith('.json'))
       name = name + 'V' + version + '.json';
-    
-    callback({result: fs.existsSync(path.join(configPath, name)), name});
+
+    callback({
+      result: fs.existsSync(path.join(configPath, name)),
+      name
+    });
   }
-  
-  function saveConfig(msg){
-    const name = path.join(configPath, msg.name +'V'+ version + '.json');
+
+  function saveConfig(msg) {
+    const name = path.join(configPath, msg.name + 'V' + version + '.json');
 
     store.dispatch({
       type: CONFIG_SAVE,
@@ -164,42 +235,41 @@ function Realtime(server, config, store){
       },
     });
   }
-  
-  function loadConfig(name, callback){
+
+  function loadConfig(name, callback) {
     const config = fs.readFileSync(path.join(configPath, name)).toString();
     callback(config.match(/{.*}/s)[0]);
   }
-  
-  function deleteConfig(name){
+
+  function deleteConfig(name) {
     try {
       fs.accessSync(path.join(configPath, name));
       fs.unlinkSync(path.join(configPath, name));
-    } 
-    catch (err) {
-    }
+    } catch (err) {}
   }
-  
-  function deleteLog(name){
+
+  function deleteLog(name) {
     try {
       fs.accessSync(path.join(logPath, name));
       fs.unlinkSync(path.join(logPath, name));
-    } 
-    catch (err) {
-    }
+    } catch (err) {}
   }
-  
-  function uploadLog({name, index}, callback){
+
+  function uploadLog({
+    name,
+    index
+  }, callback) {
     store.dispatch({
       type: LOG_UPLOAD,
       payload: {
-        fileName: name, 
+        fileName: name,
         ftpIndex: index,
         callback
       }
     })
   }
-  
-  function setDateTime(dateTimeString){
+
+  function setDateTime(dateTimeString) {
     console.log(`hwclock --set --date="${dateTimeString}"`);
     exec(`hwclock --set --date="${dateTimeString}"`, (err, stdout, stderr) => {
       if (err) {
@@ -208,32 +278,32 @@ function Realtime(server, config, store){
       }
     });
   }
-  
-  function getLogList(msg, callback){
-    fs.readdir(logPath, (err, files) =>{
-      callback(files.filter((element)=>element.endsWith('.csv')).sort().reverse());
+
+  function getLogList(msg, callback) {
+    fs.readdir(logPath, (err, files) => {
+      callback(files.filter((element) => element.endsWith('.csv')).sort().reverse());
     });
   }
-  
-  function getConfigList(msg, callback){
+
+  function getConfigList(msg, callback) {
     const mayorVersion = version.split('.')[0];
-    fs.readdir(configPath, (err, files) =>{
+    fs.readdir(configPath, (err, files) => {
       callback(files
-        .filter((element)=>element.match(/V[0-9]+.[0-9]+.json$/))
-        .filter((element)=>{
+        .filter((element) => element.match(/V[0-9]+.[0-9]+.json$/))
+        .filter((element) => {
           const elementVersion = element.match(/V[0-9]+./)[0];
-          const elementMayorVersion = elementVersion.slice(1,-1);
+          const elementMayorVersion = elementVersion.slice(1, -1);
           return (elementMayorVersion === mayorVersion)
         })
         .sort());
     });
   }
-  
-  function forceInput(index){
+
+  function forceInput(index) {
     const port = store.getState().input.ports[index];
-  
-    if (port.isForced){
-      if (port.previousForced){
+
+    if (port.isForced) {
+      if (port.previousForced) {
         store.dispatch({
           type: INPUT_FORCED_CHANGED,
           payload: {
@@ -265,15 +335,19 @@ function Realtime(server, config, store){
         }
       });
     }
-    store.dispatch({type: HANDLE_TABLE});
-    store.dispatch({type: HANDLE_OUTPUT});
+    store.dispatch({
+      type: HANDLE_TABLE
+    });
+    store.dispatch({
+      type: HANDLE_OUTPUT
+    });
   }
-  
-  function forceOutput(index){
+
+  function forceOutput(index) {
     const port = store.getState().output.ports[index];
-  
-    if (port.isForced){
-      if (port.previousForced){
+
+    if (port.isForced) {
+      if (port.previousForced) {
         store.dispatch({
           type: OUTPUT_FORCED_CHANGED,
           payload: {
@@ -305,11 +379,15 @@ function Realtime(server, config, store){
         }
       });
     }
-    store.dispatch({type: HANDLE_TABLE});
-    store.dispatch({type: HANDLE_OUTPUT});
+    store.dispatch({
+      type: HANDLE_TABLE
+    });
+    store.dispatch({
+      type: HANDLE_OUTPUT
+    });
   }
 
-  function handleManual(msg){
+  function handleManual(msg) {
     store.dispatch({
       type: TABLE_ENTRY,
       payload: {
@@ -318,64 +396,88 @@ function Realtime(server, config, store){
         manual: true
       }
     });
-    store.dispatch({type: TABLE_EMIT, payload: {
-      index: msg.index,
-      entry: msg.value,
-      manual: true
-    }});
-    store.dispatch({type: HANDLE_TABLE});
-    store.dispatch({type: HANDLE_OUTPUT});
+    store.dispatch({
+      type: TABLE_EMIT,
+      payload: {
+        index: msg.index,
+        entry: msg.value,
+        manual: true
+      }
+    });
+    store.dispatch({
+      type: HANDLE_TABLE
+    });
+    store.dispatch({
+      type: HANDLE_OUTPUT
+    });
   }
 
-  function deleteGeneralSL(key){
-    store.dispatch({type: SL_INDIVIDUAL_DELETE_GENERAL, payload: key});
+  function deleteGeneralSL(key) {
+    store.dispatch({
+      type: SL_INDIVIDUAL_DELETE_GENERAL,
+      payload: key
+    });
   }
 
-  function deleteIndividualSL(key){
-    store.dispatch({type: SL_INDIVIDUAL_DELETE_INDIVIDUAL, payload: key});
+  function deleteIndividualSL(key) {
+    store.dispatch({
+      type: SL_INDIVIDUAL_DELETE_INDIVIDUAL,
+      payload: key
+    });
   }
 
-  function resetIndividualSL(){
-    store.dispatch({type: SL_RESET_INDIVIDUAL});
+  function resetIndividualSL() {
+    store.dispatch({
+      type: SL_RESET_INDIVIDUAL
+    });
   }
 
-  function deleteSLData(){
-    store.dispatch({type: SL_RESET_INDIVIDUAL});
+  function deleteSLData() {
+    store.dispatch({
+      type: SL_RESET_INDIVIDUAL
+    });
 
     const startCalibration = require('../../configs/template').selfLearning.startCalibration;
     const selfLearning = require('../../configs/current').selfLearning;
 
     store.dispatch({
       type: CONFIG_UPDATE,
-      payload: {selfLearning: { ...selfLearning, startCalibration}},
+      payload: {
+        selfLearning: {
+          ...selfLearning,
+          startCalibration
+        }
+      },
     });
 
     const dataFile = path.join(__dirname, '../../data/data.xls');
     const templateFile = path.join(__dirname, '../../data/template.xls')
 
-    if (fs.existsSync(dataFile)){
+    if (fs.existsSync(dataFile)) {
       fs.unlinkSync(dataFile);
     }
-    
-    if (fs.existsSync(templateFile)){
+
+    if (fs.existsSync(templateFile)) {
       fs.renameSync(templateFile, dataFile);
     }
-    
-    store.dispatch({type: RESTART});
+
+    store.dispatch({
+      type: RESTART
+    });
   }
 
-  function checkConfigConsistency(newConfig, callback){
+  function checkConfigConsistency(newConfig, callback) {
     const oldConfig = require('../../configs/current');
 
-    for (let i = 0; i < oldConfig.serial.coms.length; i++){
-      if (oldConfig.serial.coms[i].name !== newConfig.serial.coms[i].name){
+    for (let i = 0; i < oldConfig.serial.coms.length; i++) {
+      if (oldConfig.serial.coms[i].name !== newConfig.serial.coms[i].name) {
         callback(false);
         return;
       }
     }
 
-    for (let i = 0; i < oldConfig.table.cells.length; i++){
-      if (oldConfig.table.cells[i].name !== newConfig.table.cells[i].name){
+    for (let i = 0; i < oldConfig.table.cells.length; i++) {
+      if (oldConfig.table.cells[i].name !== newConfig.table.cells[i].name) {
         callback(false);
         return;
       }
@@ -384,82 +486,119 @@ function Realtime(server, config, store){
     callback(true);
   }
 
-  setInterval(() =>{
+  setInterval(() => {
     io.emit('time', new Date().getTime());
   }, 1000);
 
-  store.listen((lastAction)=>{
+  store.listen((lastAction) => {
     const state = store.getState();
-    switch (lastAction.type){
-      case INPUT_EMIT: {
-        const index = lastAction.payload;
-        const port = state.input.ports[index];
-
-        emitInput(port, index);
-        break;
-      }
-      case OUTPUT_EMIT: {
-        const index = lastAction.payload;
-        const port = state.output.ports[index];
-
-        emitOutput(port, index);
-        break;
-      }
-      case SERIAL_ENTRY: {
-        const {index, entry} = lastAction.payload;
-
-        io.emit('entry', {index, entry, entryTime: new Date().getTime()});
-        break;
-      }
-      case SERIAL_AVERAGE: {
-        const {index, average} = lastAction.payload;
-
-        io.emit('average', {index, average, entryTime: new Date().getTime()});
-        break;
-      }
-      case SERIAL_RESET: {
-        if (typeof(lastAction.payload) !== 'undefined'){
+    switch (lastAction.type) {
+      case INPUT_EMIT:
+        {
           const index = lastAction.payload;
+          const port = state.input.ports[index];
 
-          io.emit('entry', {index, entry: '', entryTime: new Date().getTime()})
-        } else {
-          io.emit('clearserial');
+          emitInput(port, index);
+          break;
         }
-        break;
-      }
-      case TABLE_EMIT: {
-        const {index, entry, manual} = lastAction.payload;
-        
-        io.emit('table', {index, value: entry, manual: manual?true:false});
-        break;
-      }
-      case TABLE_COLOR: {
-        io.emit('tableColor', lastAction.payload);
-        break;
-      }
-      case EXCEL_FOUND_ROW: {
-        io.emit('notfound', !lastAction.payload.found);
-        break;
-      }
-      case ERROR_OCCURRED: {
-        const err = lastAction.payload;
-        
-        io.emit('error', err.message);
-        break;
-      }
+      case OUTPUT_EMIT:
+        {
+          const index = lastAction.payload;
+          const port = state.output.ports[index];
+
+          emitOutput(port, index);
+          break;
+        }
+      case SERIAL_ENTRY:
+        {
+          const {
+            index,
+            entry
+          } = lastAction.payload;
+
+          io.emit('entry', {
+            index,
+            entry,
+            entryTime: new Date().getTime()
+          });
+          break;
+        }
+      case SERIAL_AVERAGE:
+        {
+          const {
+            index,
+            average
+          } = lastAction.payload;
+
+          io.emit('average', {
+            index,
+            average,
+            entryTime: new Date().getTime()
+          });
+          break;
+        }
+      case SERIAL_RESET:
+        {
+          if (typeof (lastAction.payload) !== 'undefined') {
+            const index = lastAction.payload;
+
+            io.emit('entry', {
+              index,
+              entry: '',
+              entryTime: new Date().getTime()
+            })
+          } else {
+            io.emit('clearserial');
+          }
+          break;
+        }
+      case TABLE_EMIT:
+        {
+          const {
+            index,
+            entry,
+            manual
+          } = lastAction.payload;
+
+          io.emit('table', {
+            index,
+            value: entry,
+            manual: manual ? true : false
+          });
+          break;
+        }
+      case TABLE_COLOR:
+        {
+          io.emit('tableColor', lastAction.payload);
+          break;
+        }
+      case EXCEL_FOUND_ROW:
+        {
+          io.emit('notfound', !lastAction.payload.found);
+          break;
+        }
+      case ERROR_OCCURRED:
+        {
+          const err = lastAction.payload;
+
+          io.emit('error', err.message);
+          break;
+        }
       case SL_RESET_INDIVIDUAL:
       case SL_RESET_GLOBAL:
       case SL_INDIVIDUAL_DELETE_GENERAL:
       case SL_INDIVIDUAL_DELETE_INDIVIDUAL:
       case SL_ENTRY:
-      case SL_SUCCESS: {
-        emitSelfLearning();
-        break;
-      }
-      case EXECUTE_START: {
-        io.emit('executeStart'); 
-        break;
-      }
+      case SL_SUCCESS:
+        {
+          emitSelfLearning();
+          break;
+        }
+      case EXECUTE_START:
+        {
+          io.emit('executeStart');
+          break;
+        }
     }
   });
 
@@ -488,8 +627,8 @@ function Realtime(server, config, store){
       'deleteSLData': deleteSLData,
       'checkConfigConsistency': checkConfigConsistency
     }
-      
-    for(let command in commands){
+
+    for (let command in commands) {
       socket.on(command, (msg, callback) => commands[command](msg, callback));
     }
   });

@@ -16,7 +16,11 @@ const Parser = require('../parser/Parser');
 const constants = require('../../config.static');
 
 function Output(index, config, store) {
-  const {execute, seconds, formula} = config;
+  const {
+    execute,
+    seconds,
+    formula
+  } = config;
 
   const myGPIO = new Gpio(constants.outputPin[index], 'out');
   const myParser = new Parser(store);
@@ -24,81 +28,90 @@ function Output(index, config, store) {
   let stateJSON = '';
   let state = false;
 
-  store.listen((lastAction)=>{  
-    switch (lastAction.type){
+  store.listen((lastAction) => {
+    switch (lastAction.type) {
       case OUTPUT_EXECUTING_CHANGED:
       case OUTPUT_RESULT_CHANGED:
-      case OUTPUT_FORCED_CHANGED:{
-        if (index === lastAction.payload.index){
-          const newState = store.getState().output.ports[index];
-          const newStateJSON = JSON.stringify(newState);
-          if (state !== newState.state) {
-            state = newState.state;
-            myGPIO.writeSync(newState.state?1:0);
-            store.dispatch({type: STATE_CHANGED});
-          }
-          if (newStateJSON !== stateJSON){
-            stateJSON = newStateJSON;
-            store.dispatch({type: OUTPUT_EMIT, payload: index})
-          }
-        }
-        break;
-      }
-      case STATE_CHANGED:
-      case HANDLE_OUTPUT:{
-        const result = myParser.parse(formula)?true:false;
-        
-        store.dispatch({
-          type: OUTPUT_RESULT_CHANGED,
-          payload: {
-            index, 
-            result,
-          },
-        });
-        break;
-      }
-      case EXECUTE_START:{
-        if (execute && store.getState().output.ports[index].result){
-          store.dispatch({
-            type: OUTPUT_EXECUTING_CHANGED,
-            payload: {
-              index,
-              executing: true
-            }
-          });
-          if (seconds){
-            setTimeout(() => {
+      case OUTPUT_FORCED_CHANGED:
+        {
+          if (index === lastAction.payload.index) {
+            const newState = store.getState().output.ports[index];
+            const newStateJSON = JSON.stringify(newState);
+            if (state !== newState.state) {
+              state = newState.state;
+              myGPIO.writeSync(newState.state ? 1 : 0);
               store.dispatch({
-                type: OUTPUT_EXECUTING_CHANGED,
-                payload: {
-                  index,
-                  executing: false
-                }
+                type: STATE_CHANGED
               });
-            }, seconds*1000);
+            }
+            if (newStateJSON !== stateJSON) {
+              stateJSON = newStateJSON;
+              store.dispatch({
+                type: OUTPUT_EMIT,
+                payload: index
+              })
+            }
           }
+          break;
         }
-        break;  
-      }
-      case EXECUTE_STOP:{
-        if (execute && !seconds){
+      case STATE_CHANGED:
+      case HANDLE_OUTPUT:
+        {
+          const result = myParser.parse(formula) ? true : false;
+
           store.dispatch({
-            type: OUTPUT_EXECUTING_CHANGED,
+            type: OUTPUT_RESULT_CHANGED,
             payload: {
               index,
-              executing: false
-            }
+              result,
+            },
           });
+          break;
         }
-        break;
-      }
+      case EXECUTE_START:
+        {
+          if (execute && store.getState().output.ports[index].result) {
+            store.dispatch({
+              type: OUTPUT_EXECUTING_CHANGED,
+              payload: {
+                index,
+                executing: true
+              }
+            });
+            if (seconds) {
+              setTimeout(() => {
+                store.dispatch({
+                  type: OUTPUT_EXECUTING_CHANGED,
+                  payload: {
+                    index,
+                    executing: false
+                  }
+                });
+              }, seconds * 1000);
+            }
+          }
+          break;
+        }
+      case EXECUTE_STOP:
+        {
+          if (execute && !seconds) {
+            store.dispatch({
+              type: OUTPUT_EXECUTING_CHANGED,
+              payload: {
+                index,
+                executing: false
+              }
+            });
+          }
+          break;
+        }
     }
   });
 
   store.dispatch({
     type: OUTPUT_RESULT_CHANGED,
     payload: {
-      index, 
+      index,
       result: myParser.parse(formula)
     },
   });

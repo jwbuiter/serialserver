@@ -13,8 +13,18 @@ const {
 const Parser = require('../parser/Parser');
 
 function Cell(index, config, store) {
-  const {formula, digits, numeric, resetOnExe, waitForOther, type, menuOptions, colorConditions, readerPort} = config;
-  const manual = (type === 'manual' || type==="menu" || readerPort);
+  const {
+    formula,
+    digits,
+    numeric,
+    resetOnExe,
+    waitForOther,
+    type,
+    menuOptions,
+    colorConditions,
+    readerPort
+  } = config;
+  const manual = (type === 'manual' || type === "menu" || readerPort);
   const myParser = Parser(store);
 
   let content = '';
@@ -22,7 +32,7 @@ function Cell(index, config, store) {
 
   if (readerPort) {
     const server = http.createServer((req, res) => {
-      if (req.url === '/favicon.ico'){
+      if (req.url === '/favicon.ico') {
         res.end();
         return;
       }
@@ -34,68 +44,87 @@ function Cell(index, config, store) {
     });
     server.on('error', (err, socket) => {
       store.dispatch({
-        type: ERROR_OCCURRED, 
+        type: ERROR_OCCURRED,
         payload: err
       });
     });
-    
+
     server.listen(readerPort);
   }
 
 
-  function resetCell(){
-    if (type ===  'menu'){
+  function resetCell() {
+    if (type === 'menu') {
       content = menuOptions[0].key;
       store.dispatch({
-        type: TABLE_ENTRY, 
-        payload: {index, entry: content}
+        type: TABLE_ENTRY,
+        payload: {
+          index,
+          entry: content
+        }
       });
     } else {
-      content='';
+      content = '';
       store.dispatch({
         type: TABLE_RESET_CELL,
         payload: index,
       });
     }
-    
-    store.dispatch({type: TABLE_EMIT, payload: {index, entry: content, manual}});
+
+    store.dispatch({
+      type: TABLE_EMIT,
+      payload: {
+        index,
+        entry: content,
+        manual
+      }
+    });
   }
 
-  function dispatch(entry){
-    if (numeric){
-      entry = Number(entry).toFixed(digits); 
-    } else if (typeof(entry) === 'boolean'){
-      entry = entry?1:0;
-    }else {
+  function dispatch(entry) {
+    if (numeric) {
+      entry = Number(entry).toFixed(digits);
+    } else if (typeof (entry) === 'boolean') {
+      entry = entry ? 1 : 0;
+    } else {
       entry = String(entry).slice(-digits);
     }
 
     store.dispatch({
       type: TABLE_ENTRY,
-      payload:{
+      payload: {
         index,
         entry,
       }
     });
 
-    if(entry!==content){
-      content=entry;
-      store.dispatch({type: TABLE_EMIT, payload: {index, entry, manual}});
-      store.dispatch({type: STATE_CHANGED})
+    if (entry !== content) {
+      content = entry;
+      store.dispatch({
+        type: TABLE_EMIT,
+        payload: {
+          index,
+          entry,
+          manual
+        }
+      });
+      store.dispatch({
+        type: STATE_CHANGED
+      })
     }
   }
-  
 
-  function dispatchColor(){
+
+  function dispatchColor() {
     let newColor = '';
-    for (let option of colorConditions){
-      if (myParser.parse(option.value)){
+    for (let option of colorConditions) {
+      if (myParser.parse(option.value)) {
         newColor = option.key;
         break;
       }
     }
 
-    if (newColor !== color){
+    if (newColor !== color) {
       color = newColor;
       store.dispatch({
         type: TABLE_COLOR,
@@ -107,30 +136,33 @@ function Cell(index, config, store) {
     }
   }
 
-  store.listen((lastAction)=>{
+  store.listen((lastAction) => {
     const state = store.getState();
-    switch (lastAction.type){
+    switch (lastAction.type) {
       case STATE_CHANGED:
-      case HANDLE_TABLE:{
-        const allEntries = state.serial.coms.reduce((acc, cur) => (acc && !(cur.entry === '0' || cur.entry==='')), true);
-        if (!manual && (!waitForOther || allEntries) ){
-          let entry = myParser.parse(formula);
-          dispatch(entry)
-        }
+      case HANDLE_TABLE:
+        {
+          const allEntries = state.serial.coms.reduce((acc, cur) => (acc && !(cur.entry === '0' || cur.entry === '')), true);
+          if (!manual && (!waitForOther || allEntries)) {
+            let entry = myParser.parse(formula);
+            dispatch(entry)
+          }
 
-        dispatchColor();
-        break;
-      }
-      case LOG_RESET:{
-        resetCell();
-        break;
-      }
-      case TABLE_RESET:{
-        if (resetOnExe){
-          resetCell();
+          dispatchColor();
+          break;
         }
-        break;
-      }
+      case LOG_RESET:
+        {
+          resetCell();
+          break;
+        }
+      case TABLE_RESET:
+        {
+          if (resetOnExe) {
+            resetCell();
+          }
+          break;
+        }
     }
   });
 

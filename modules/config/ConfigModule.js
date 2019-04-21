@@ -15,37 +15,40 @@ function ConfigModule(store) {
   function saveConfig(config, name) {
     console.log('Saving config: ' + name);
     let conf = JSON.stringify(config, null, 2);
-    
+
     try {
       fs.accessSync(name);
       fs.unlinkSync(name);
-    } 
-    catch (err) {
-    }
-  
-    fs.writeFileSync(name, conf, (err) => {  
+    } catch (err) {}
+
+    fs.writeFileSync(name, conf, (err) => {
       if (err) throw err;
-  
+
       console.log('Config saved!');
     });
   }
 
   store.listen((lastAction) => {
-    switch (lastAction.type){
-      case CONFIG_UPDATE: {
-        config = Object.assign(config, lastAction.payload);
+    switch (lastAction.type) {
+      case CONFIG_UPDATE:
+        {
+          config = Object.assign(config, lastAction.payload);
 
-        const name = path.join(configPath, 'current.json');
+          const name = path.join(configPath, 'current.json');
 
-        fs.copyFileSync(name, path.join(configPath, 'lastgood.json'));
-        saveConfig(config, name);
-        break;
-      }
-      case CONFIG_SAVE: {
-        const {config, name} = lastAction.payload;
-        saveConfig(config, name);
-        break;
-      }
+          fs.copyFileSync(name, path.join(configPath, 'lastgood.json'));
+          saveConfig(config, name);
+          break;
+        }
+      case CONFIG_SAVE:
+        {
+          const {
+            config,
+            name
+          } = lastAction.payload;
+          saveConfig(config, name);
+          break;
+        }
     }
   })
 
