@@ -22,13 +22,13 @@ const logPath = constants.saveLogLocation;
 const titleString = '<title>' + constants.name + '</title>';
 
 function SiteModule(config, store) {
-  function importFile(req, res) {
+  function importExcel(req, res) {
     console.log(req.files)
-    if (!req.files.importFile) {
+    if (!req.files.excelFile) {
       return res.send(titleString + '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.')
     }
 
-    let uploadedFile = req.files.importFile;
+    let uploadedFile = req.files.excelFile;
 
     uploadedFile.mv(path.join(__dirname, '../..', 'data', 'data.xls'), (err) => {
       if (err) {
@@ -43,11 +43,11 @@ function SiteModule(config, store) {
 
   function importExcelTemplate(req, res) {
     console.log(req.files)
-    if (!req.files.importTemplate) {
+    if (!req.files.templateFile) {
       return res.send(titleString + '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.')
     }
 
-    let uploadedFile = req.files.importTemplate;
+    let uploadedFile = req.files.templateFile;
 
     uploadedFile.mv(path.join(__dirname, '../..', 'data', 'template.xls'), (err) => {
       if (err) {
@@ -60,12 +60,12 @@ function SiteModule(config, store) {
   function uploadConfig(req, res) {
     console.log(req.files)
 
-    if (!req.files.importConfig) {
+    if (!req.files.configFile) {
       return res.send(titleString + '<meta http-equiv="refresh" content="1; url=/" /> No files were uploaded.')
 
     }
 
-    let uploadedFile = req.files.importConfig;
+    let uploadedFile = req.files.configFile;
 
     uploadedFile.mv(path.join(__dirname, '../..', 'configs', uploadedFile.name), (err) => {
       if (err) {
@@ -184,7 +184,8 @@ function SiteModule(config, store) {
   }
 
   const uploadRoutes = {
-    '/importFile': importFile,
+    '/importFile': importExcel,
+    '/importExcel': importExcel,
     '/importTemplate': importExcelTemplate,
     '/uploadConfig': uploadConfig,
   }
