@@ -148,7 +148,7 @@ function Parser(store) {
   const selfLearningNumberedFunctions = {
     SI: (index, state) => Object.values(state.individual.individualEntries).filter(entry => entry.increments === index).length,
     SIT: (index, state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => acc + cur.extra[index - 3], 0),
-    SIA: (index, state) => average(Object.values(state.individual.individualEntries).map(entry=>cur.extra[index-3])),
+    SIA: (index, state) => average(Object.values(state.individual.individualEntries).map(entry=>entry.extra[index-3])),
   }
 
   function parseSelfLearning(x) {
