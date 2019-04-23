@@ -77,6 +77,7 @@ function Parser(store) {
     }
 
     const data = state.logger.entries
+      .filter(entry => entry.full)
       .filter(entry => !unique || entry.TU !== '')
       .map(entry => table ? entry.cells[x] : entry.coms[x]);
 
@@ -109,7 +110,7 @@ function Parser(store) {
   }
 
   function average(list) {
-    const sum = list.reduce((acc, cur) => acc + cur);
+    const sum = list.reduce((acc, cur) => acc + cur, 0);
     
     if (typeof(sum) !== 'number'){
       return 0;

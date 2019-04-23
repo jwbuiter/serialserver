@@ -12,9 +12,11 @@ const {
   SL_INDIVIDUAL_LOAD,
   SL_INDIVIDUAL_DELETE_GENERAL,
   SL_INDIVIDUAL_DELETE_INDIVIDUAL,
+  SERIAL_ENTRY,
   EXECUTE_START,
   LOG_RESET,
   LOG_SAVE,
+  LOG_MAKE_PARTIAL,
   CONFIG_UPDATE,
 } = require('../../actions/types');
 
@@ -28,7 +30,8 @@ function selfLearningIndividual(config, store) {
     individualToleranceAbs,
     individualCorrectionLimit,
     excelIndividualColumn,
-    excelDateColumn
+    excelDateColumn,
+    activityCounter
   } = config;
   const number = Math.round(totalNumber * numberPercentage / 100);
   const tolerance = config.tolerance / 100;
@@ -201,6 +204,13 @@ function selfLearningIndividual(config, store) {
           saveIndividualSelfLearning();
           break;
         }
+      case SERIAL_ENTRY:{
+        if (!activityCounter) break;
+        if (lastAction.payload.index === comIndex) break;
+        if (!lastAction.payload.entry) break;
+
+        store.dispatch({type: LOG_MAKE_PARTIAL, payload: lastAction.payload})
+      }
     }
   });
 

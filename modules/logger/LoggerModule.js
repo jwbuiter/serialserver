@@ -11,6 +11,7 @@ const {
   STATE_CHANGED,
   LOG_ENTRY,
   LOG_MAKE_ENTRY,
+  LOG_MAKE_PARTIAL,
   LOG_RESET,
   LOG_UNIQUE_OVERWRITE,
   LOG_ACTIVITY_OVERWRITE,
@@ -29,6 +30,9 @@ function LoggerModule(config, store) {
     logID,
     unique
   } = config;
+  const {activityCounter, enabled} = store.getState().config.selfLearning;
+  const activityIndex = 1 - Number(enabled[3]);
+  const activityEntries = new Map();
 
   let fileName;
 
@@ -38,6 +42,7 @@ function LoggerModule(config, store) {
         type: LOG_RESET,
         payload: fileName
       });
+    activityEntries.clear();
     fileName = constants.name + '_' + dateFormat(new Date(), 'yyyy-mm-dd_HH-MM-ss') + '.csv';
   }
 
@@ -54,8 +59,9 @@ function LoggerModule(config, store) {
     } catch (err) {
       console.log(err)
     }
-
   }
+
+
 
   switch (resetMode) {
     case 'interval':
@@ -75,14 +81,46 @@ function LoggerModule(config, store) {
       }
   }
 
+  function updateActivity(entry, full){
+    const logEntries = store.getState().logger.entries;
+    let TA = 0;
+
+    if (activityEntries.has(entry)){
+      const oldIndex = activityEntries.get(entry);
+      const oldEntry = logEntries[oldIndex];
+      TA = oldEntry.TA;
+
+      if (full || !oldEntry.full){
+        store.dispatch({
+          type: LOG_ACTIVITY_OVERWRITE, 
+          payload: {
+            index: oldIndex, 
+            newValue: '' 
+          }
+        });
+        activityEntries.set(entry, logEntries.length-1)
+      }
+    } else {
+      activityEntries.set(entry, logEntries.length-1)
+    }
+
+    if (!full) TA++
+
+    store.dispatch({
+      type: LOG_ACTIVITY_OVERWRITE, 
+      payload: {
+        index: activityEntries.get(entry), 
+        newValue: TA
+      }
+    });
+  }
+
+
   store.listen((lastAction) => {
     switch (lastAction.type) {
       case LOG_MAKE_ENTRY:
         {
           const state = store.getState();
-          store.dispatch({
-            type: STATE_CHANGED
-          });
 
           const newRow = {
             name: constants.name,
@@ -91,7 +129,8 @@ function LoggerModule(config, store) {
             coms: state.serial.coms.map(com => com.numeric ? Number(com.entry) : com.entry),
             cells: state.table.cells.map(cell => cell.numeric ? Number(cell.entry) : cell.entry),
             TU: '',
-            TA: ''
+            TA: '',
+            full: true
           };
 
           if (unique !== 'off') {
@@ -122,12 +161,52 @@ function LoggerModule(config, store) {
             payload: newRow,
           });
 
+          if (activityCounter){
+            updateActivity(state.serial.coms[activityIndex].entry, true);
+          }
+
           store.dispatch({
             type: LOG_SAVE,
             payload: fileName,
           });
+
+          store.dispatch({
+            type: STATE_CHANGED
+          });
           break;
         }
+      case LOG_MAKE_PARTIAL:{
+        const {index, entry} = lastAction.payload;
+        const state = store.getState();
+
+        const newRow = {
+          name: constants.name,
+          id: logID,
+          date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
+          coms: state.serial.coms.map(com => com.numeric ? Number(com.entry) : com.entry).map((entry, comIndex)=> comIndex===index?entry:''),
+          cells: state.table.cells.map(cell => ''),
+          TU: '',
+          TA: '',
+          full: false
+        };
+
+        store.dispatch({
+          type: LOG_ENTRY,
+          payload: newRow,
+        });
+
+        updateActivity(entry, false);
+
+        store.dispatch({
+          type: LOG_SAVE,
+          payload: fileName,
+        });
+
+        store.dispatch({
+          type: STATE_CHANGED
+        });
+        break;
+      }
       case LOG_SAVE:
         {
           if (!writeToFile) break;

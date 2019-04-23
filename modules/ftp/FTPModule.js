@@ -1,5 +1,7 @@
 const Client = require('ftp');
 const path = require('path');
+const fs = require('fs');
+const dateFormat = require('dateformat');
 
 const {
   LOG_UPLOAD,
@@ -11,8 +13,10 @@ const constants = require('../../config.static');
 function FTPModule(config, store) {
   const {
     targets,
-    automatic
+    automatic,
+    uploadExcel
   } = config;
+  const {logID} = store.getState().logger;
 
   function upload(address, folder, username, password, fileName, callback) {
     if (!callback)
@@ -44,6 +48,27 @@ function FTPModule(config, store) {
     });
   }
 
+  function uploadDataFile(address, folder, username, password){
+    const fileStats = fs.statSync(path.join(__dirname, '../../data/data.xls'));
+    const modifyDate = new Date(fileStats.mtimeMs);
+    const fileName = `${constants.name}_${logID}_${dateFormat(modifyDate,'yyyy-mm-dd_HH-MM-ss')}.xls`;
+
+    const c = new Client();
+    c.on('ready', ()=>{
+      c.mkdir(folder,true, () => {
+        c.put(path.join(__dirname, '../../data/data.xls'), path.join(folder, fileName), (err) => {
+          c.end();
+        });
+      })
+    })
+
+    c.connect({
+      host: address,
+      user: username,
+      password
+    })
+  }
+
   store.listen((lastAction) => {
     switch (lastAction.type) {
       case LOG_UPLOAD:
@@ -64,18 +89,19 @@ function FTPModule(config, store) {
         }
       case LOG_RESET:
         {
-          if (automatic) {
-            const fileName = lastAction.payload;
-            targets.forEach(element => {
-              const {
-                address,
-                folder,
-                username,
-                password
-              } = element;
+          const fileName = lastAction.payload;
+          targets.forEach(element => {
+            const {
+              address,
+              folder,
+              username,
+              password
+            } = element;
+            if (automatic)
               upload(address, folder, username, password, fileName);
-            });
-          }
+            if (uploadExcel)
+              uploadDataFile(address,folder,username, password)
+          });
           break;
         }
     }
