@@ -5,7 +5,7 @@ const inputReducer = require('./inputReducer');
 const tableReducer = require('./tableReducer');
 const lastActionReducer = require('./lastActionReducer');
 const loggerReducer = require('./loggerReducer');
-const selfLearningReducer = require('./selfLearningReducer');
+const selfLearningReducer = require('./selfLearning/selfLearningReducer');
 const configProvider = require('./configProvider')
 
 module.exports = combineReducers({

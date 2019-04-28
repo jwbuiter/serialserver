@@ -104,18 +104,13 @@ function Realtime(server, config, store) {
             success,
             comIndex
           } = state.selfLearning;
-          const {
-            generalEntries,
-            individualEntries
-          } = state.selfLearning.individual;
           io.emit('selfLearning', {
             individual: true,
             calibration,
             tolerance,
             success,
             comIndex,
-            generalEntries,
-            individualEntries
+            ...state.selfLearning.individual
           });
           break;
         }
@@ -548,7 +543,7 @@ function Realtime(server, config, store) {
               entryTime: new Date().getTime()
             })
           } else {
-            io.emit('clearserial');
+            io.emit('clearSerial');
           }
           break;
         }

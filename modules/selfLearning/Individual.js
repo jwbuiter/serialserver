@@ -12,6 +12,8 @@ const {
   SL_INDIVIDUAL_LOAD,
   SL_INDIVIDUAL_DELETE_GENERAL,
   SL_INDIVIDUAL_DELETE_INDIVIDUAL,
+  SL_INDIVIDUAL_ACTIVITY,
+  SL_INDIVIDUAL_HEADERS,
   SERIAL_ENTRY,
   EXECUTE_START,
   LOG_RESET,
@@ -19,6 +21,7 @@ const {
   LOG_MAKE_PARTIAL,
   CONFIG_UPDATE,
 } = require('../../actions/types');
+const Parser = require('../parser/Parser');
 
 
 function selfLearningIndividual(config, store) {
@@ -31,12 +34,19 @@ function selfLearningIndividual(config, store) {
     individualCorrectionLimit,
     excelIndividualColumn,
     excelDateColumn,
-    activityCounter
+    activityCounter,
+    firstTopFormula,
+    secondTopFormula,
+    extraColumns
   } = config;
   const number = Math.round(totalNumber * numberPercentage / 100);
   const tolerance = config.tolerance / 100;
   const individualTolerance = config.individualTolerance / 100;
   const individualCorrectionIncrement = config.individualCorrectionIncrement / 100;
+
+  const headerFormulas = [firstTopFormula, secondTopFormula, ...extraColumns.map(column=>column.topFormula)];
+
+  const myParser = Parser(store);
 
   const comIndex = Number(enabled[3]);
   console.log('Individual SL enabled on com' + comIndex);
@@ -209,7 +219,16 @@ function selfLearningIndividual(config, store) {
         if (lastAction.payload.index === comIndex) break;
         if (!lastAction.payload.entry) break;
 
-        store.dispatch({type: LOG_MAKE_PARTIAL, payload: lastAction.payload})
+        store.dispatch({type: LOG_MAKE_PARTIAL, payload: lastAction.payload});
+        store.dispatch({type: SL_INDIVIDUAL_ACTIVITY, payload: lastAction.payload.entry});
+        saveIndividualSelfLearning();
+        break;
+      }
+      case STATE_CHANGED:{
+        const newHeaders = headerFormulas.map(formula=>myParser.parse(formula));
+
+        store.dispatch({type: SL_INDIVIDUAL_HEADERS, payload: newHeaders});
+        break;
       }
     }
   });

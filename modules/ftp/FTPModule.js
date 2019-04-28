@@ -16,7 +16,7 @@ function FTPModule(config, store) {
     automatic,
     uploadExcel
   } = config;
-  const {logID} = store.getState().logger;
+  const {logID} = store.getState().config.logger;
 
   function upload(address, folder, username, password, fileName, callback) {
     if (!callback)
@@ -85,6 +85,8 @@ function FTPModule(config, store) {
             password
           } = targets[ftpIndex];
           upload(address, folder, username, password, fileName, callback);
+          if (uploadExcel)
+              uploadDataFile(address,folder,username, password)
           break;
         }
       case LOG_RESET:

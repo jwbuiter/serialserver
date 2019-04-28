@@ -23,7 +23,8 @@
         "alwaysPositive": false,
         "prefix": "ST,GS",
         "postfix": "kg",
-        "testMessage": "123.123"
+        "testMessage": "123.123",
+        "numeric": true
       },
       {
         "mode": "serial",
@@ -45,7 +46,8 @@
         "alwaysPositive": false,
         "prefix": "#\u0011",
         "postfix": "\u0010\u0003",
-        "testMessage": "6543210987654321"
+        "testMessage": "6543210987654321",
+        "numeric": false
       }
     ]
   },

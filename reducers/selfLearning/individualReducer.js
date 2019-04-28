@@ -1,9 +1,5 @@
 const {
-  SL_RESET_GLOBAL,
-  SL_RESET_INDIVIDUAL,
-  SL_START_INDIVIDUAL,
   SL_ENTRY,
-  SL_SUCCESS,
   SL_SET_TOLERANCE,
   SL_INDIVIDUAL_UPGRADE,
   SL_INDIVIDUAL_DOWNGRADE,
@@ -12,66 +8,23 @@ const {
   SL_INDIVIDUAL_DELETE_GENERAL,
   SL_INDIVIDUAL_DELETE_INDIVIDUAL,
   SL_INDIVIDUAL_EXTRA,
+  SL_INDIVIDUAL_ACTIVITY,
+  SL_INDIVIDUAL_HEADERS,
   SL_TEACH,
-} = require('../actions/types');
+} = require('../../actions/types');
 
-const {selfLearning} = require('../configs/current');
+const {selfLearning} = require('../../configs/current');
 
-function initialState(){
-  const {selfLearning} = require('../configs/current');
-  return {
-    global: initialStateGlobal(),
-    individual: initialStateIndividual(),
-    calibration: selfLearning.startCalibration,
-    tolerance: selfLearning.tolerance/100,
-    comIndex: Number(selfLearning.enabled[3]),
-    type: 'none',
-    success: 1,
-    teaching: false,
-    startTime: null,
-  }
-};
-
-function initialStateGlobal(){
-  return {
-    entries: [],
-    matchedTolerance: 0,
-  }
-}
 
 function initialStateIndividual(){
   return {
     generalEntries: {},
     individualEntries: {},
+    individualColumnHeaders:[]
   }
 }
 
-function globalReducer(state, action){
-  switch(action.type) {
-    case SL_ENTRY:{
-      if (state.succes) return state;
-
-      const {entry} = action.payload;
-      const newEntries =  Array.from(state.entries);
-      newEntries.push(entry);
-      return {
-        ...state,
-        entries: newEntries,
-      }
-    }
-    case SL_SUCCESS:{
-      const {matchedTolerance} = action.payload;
-      return {
-        ...state,
-        matchedTolerance,
-      }
-    }
-    default:
-      return state;
-  }
-}
-
-function individualReducer(state, action){
+module.exports = function individualReducer(state = initialStateIndividual(), action = {type: null, payload: null}){
   switch(action.type) {
     case SL_ENTRY:{
       const {entry, key, extra} = action.payload;
@@ -119,10 +72,12 @@ function individualReducer(state, action){
 
       newIndividualEntries[key]={
         calibration, 
-        extra: state.generalEntries[key].extra ,
+        extra: state.generalEntries[key].extra,
         tolerance, 
         numUpdates: 1, 
         numUpdatesHistory: [],
+        activity: 1,
+        activityHistory: [],
         increments: 0
       };
       return {
@@ -153,32 +108,23 @@ function individualReducer(state, action){
     }
     case SL_INDIVIDUAL_INCREMENT:{
       const newIndividualEntries = {};
+      const {individualTolerance, individualToleranceAbs, individualCorrectionIncrement} = selfLearning;
 
       for (let key in state.individualEntries){
-        let entry = state.individualEntries[key];
+        const oldEntry = state.individualEntries[key];
 
-        entry = {
-          ...entry,
-          numUpdatesHistory:[entry.numUpdates, ...entry.numUpdatesHistory].slice(0,3),
-        };
-        
+        const increments =  oldEntry.numUpdates?0:oldEntry.increments+1;
+        const tolerance = (oldEntry.calibration*individualTolerance/100 + individualToleranceAbs)*(1+increments*individualCorrectionIncrement/100);
 
-        if (entry.numUpdates){
-          entry = {
-            ...entry, 
-            numUpdates: 0
-          }
+        newIndividualEntries[key] = {
+          ...oldEntry,
+          numUpdatesHistory:[oldEntry.numUpdates, ...oldEntry.numUpdatesHistory].slice(0,3),
+          activityHistory:[oldEntry.activity, ...oldEntry.activityHistory].slice(0,3),
+          numUpdates: 0,
+          activity: 0,
+          increments,
+          tolerance
         }
-        else{
-          const tolerance = (entry.calibration*selfLearning.individualTolerance/100 + selfLearning.individualToleranceAbs)*(1+(entry.increments + 1)*selfLearning.individualCorrectionIncrement/100);
-          entry =  {
-            ...entry, 
-            tolerance, 
-            increments: entry.increments+1
-          };
-        }
-
-        newIndividualEntries[key]= entry;
       }
 
       return {
@@ -222,69 +168,27 @@ function individualReducer(state, action){
         }
       }
     }
-    case SL_INDIVIDUAL_EXTRA:{
-      return {...state}
+    case SL_INDIVIDUAL_ACTIVITY:{
+      const key = action.payload;
+
+      const newIndividualEntries =  Object.assign({}, state.individualEntries);
+
+      if (key in newIndividualEntries){
+        newIndividualEntries[key].activity++;
+      }
+      
+      return {
+        ...state,
+        individualEntries: newIndividualEntries
+      }
+    }
+    case SL_INDIVIDUAL_HEADERS:{
+      return {
+        ...state,
+        individualColumnHeaders: action.payload
+      }
     }
     default:
       return state;
   }
 }
-
-module.exports = function(state = initialState(), action) {
-  const newState = {
-    ...state,
-    global: globalReducer(state.global, action),
-    individual: individualReducer(state.individual, action)
-  }
-
-  switch(action.type) {
-    case SL_TEACH:{
-      const teaching = action.payload;
-      return {
-        ...state,
-        teaching
-      }
-    }
-    case SL_RESET_GLOBAL:{
-      return {
-        ...initialState(),
-        type: 'global',
-        tolerance: selfLearning.tolerance*(1+selfLearning.startTolerance/100)/100,
-        success: 0,
-        startTime: new Date(),
-        endTime: undefined,
-      }
-    }
-    case SL_RESET_INDIVIDUAL:{
-      return {
-        ...initialState(),
-        type: 'individual',
-        success: 0,
-        startTime: new Date(),
-        endTime: undefined,
-      }
-    }
-    case SL_START_INDIVIDUAL:{
-      return {
-        ...state,
-        type: 'individual',
-        success: 0,
-        startTime: new Date(),
-        endTime: undefined,
-      }
-    }
-    case SL_SUCCESS:{
-      const {success, calibration, matchedTolerance} = action.payload;
-      return {
-        ...newState,
-        success,
-        calibration,
-        tolerance: selfLearning.tolerance/100,
-        endTime: new Date(),
-      }
-    }
-    default:
-      return newState;
-  }
-};
-

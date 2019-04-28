@@ -37,6 +37,7 @@ function Com(index, config, store) {
     triggerCom,
     timeoutReset,
     zeroReset,
+    numeric
   } = config;
 
   const myGPIO = new Gpio(constants.comPin[index], 'out');
@@ -97,35 +98,29 @@ function Com(index, config, store) {
   }
 
   function decode(entry) {
-    let decodedEntry;
+    if (!numeric) {
+      return entry.slice(-digits);
+    } 
 
-    if (factor === 0) {
-      // Entry is not numeric
-      decodedEntry = entry.slice(-digits);
-    } else {
-      // Entry should be numeric if this is true
-      entry = entry.replace(/ /g, ''); // remove spaces inside number
-      let numericValue = parseFloat(entry) * factor;
-      numericValue = alwaysPositive ? Math.abs(numericValue) : numericValue;
+    entry = entry.replace(/ /g, ''); // remove spaces inside number
+    let numericValue = parseFloat(entry) * factor;
+    numericValue = alwaysPositive ? Math.abs(numericValue) : numericValue;
 
-      decodedEntry = numericValue.toFixed(digits);
+    if (average) {
+      averageList.push(numericValue);
+      averageList = averageList.slice(-entries);
 
-      if (average) {
-        averageList.push(numericValue);
-        averageList = averageList.slice(-entries);
-
-        const average = (averageList.reduce((acc, cur) => acc + cur) / averageList.length).toFixed(digits);
-        store.dispatch({
-          type: SERIAL_AVERAGE,
-          payload: {
-            average,
-            index,
-          }
-        });
-      }
+      const average = (averageList.reduce((acc, cur) => acc + cur) / averageList.length).toFixed(digits);
+      store.dispatch({
+        type: SERIAL_AVERAGE,
+        payload: {
+          average,
+          index,
+        }
+      });
     }
 
-    return decodedEntry;
+    return numericValue.toFixed(digits);
   }
 
   switch (mode) {

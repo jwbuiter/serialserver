@@ -1,6 +1,7 @@
 const {
   LOG_ENTRY,
   LOG_RESET,
+  LOG_OVERWRITE,
   LOG_UNIQUE_OVERWRITE,
   LOG_ACTIVITY_OVERWRITE,
   LOG_RECOVER,
@@ -30,6 +31,21 @@ module.exports = function(state = initialState, action) {
     }
     case LOG_RESET:{
       return initialState;
+    }
+    case LOG_OVERWRITE:{
+      const entry = action.payload;
+
+      const newEntries = Array.from(state.entries);
+      
+      if(newEntries.length)
+        newEntries[newEntries.length-1]=entry;
+      else  
+        newEntries.push(entry);
+
+      return {
+        ...state,
+        entries: newEntries
+      }
     }
     case LOG_UNIQUE_OVERWRITE:{
       const index = action.payload;

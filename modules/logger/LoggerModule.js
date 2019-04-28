@@ -10,9 +10,11 @@ const backupPath = path.join(constants.saveLogLocation, 'backup.json');
 const {
   STATE_CHANGED,
   LOG_ENTRY,
+  LOG_DELETE,
   LOG_MAKE_ENTRY,
   LOG_MAKE_PARTIAL,
   LOG_RESET,
+  LOG_OVERWRITE,
   LOG_UNIQUE_OVERWRITE,
   LOG_ACTIVITY_OVERWRITE,
   LOG_SAVE,
@@ -43,7 +45,7 @@ function LoggerModule(config, store) {
         payload: fileName
       });
     activityEntries.clear();
-    fileName = constants.name + '_' + dateFormat(new Date(), 'yyyy-mm-dd_HH-MM-ss') + '.csv';
+    fileName = `${constants.name}_${logID}_${dateFormat(new Date(), 'yyyy-mm-dd_HH-MM-ss')}.csv`;
   }
 
   resetLog();
@@ -60,8 +62,6 @@ function LoggerModule(config, store) {
       console.log(err)
     }
   }
-
-
 
   switch (resetMode) {
     case 'interval':
@@ -101,7 +101,7 @@ function LoggerModule(config, store) {
         activityEntries.set(entry, logEntries.length-1)
       }
     } else {
-      activityEntries.set(entry, logEntries.length-1)
+      activityEntries.set(entry, Math.max(0,logEntries.length-1));
     }
 
     if (!full) TA++
@@ -156,13 +156,17 @@ function LoggerModule(config, store) {
             newRow.TU = uniqueTimes;
           }
 
-          store.dispatch({
-            type: LOG_ENTRY,
-            payload: newRow,
-          });
-
           if (activityCounter){
+            store.dispatch({
+              type: LOG_OVERWRITE,
+              payload: newRow,
+            });
             updateActivity(state.serial.coms[activityIndex].entry, true);
+          } else {
+            store.dispatch({
+              type: LOG_ENTRY,
+              payload: newRow,
+            });
           }
 
           store.dispatch({
