@@ -10,7 +10,8 @@ const {
   TABLE_RESET,
   EXCEL_FOUND_ROW,
   LOG_RESET,
-  SL_INDIVIDUAL_UPGRADE
+  SL_INDIVIDUAL_UPGRADE,
+  SL_INDIVIDUAL_DELETE_INDIVIDUAL
 } = require('../../actions/types');
 const Cell = require('./Cell');
 
@@ -123,6 +124,28 @@ function TableModule(config, store) {
             saveExcel(excelSheet);
           }
         }
+      case SL_INDIVIDUAL_DELETE_INDIVIDUAL:{
+        if (useFile && excelSheet) {
+          const {
+            key,
+            message,
+          } = lastAction.payload;
+
+          const foundRow = excelSheet.find((row) => {
+            return (row[searchColumn] === key);
+          });
+
+          if (!foundRow) return;
+
+          const foundIndex = excelSheet.findIndex((row) => {
+            return (row[searchColumn] === key);
+          });
+
+          excelSheet[foundIndex][exitColumn] = Number(message);
+
+          saveExcel(excelSheet);
+        }
+      }
     }
   });
 

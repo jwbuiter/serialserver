@@ -414,10 +414,10 @@ function Realtime(server, config, store) {
     });
   }
 
-  function deleteIndividualSL(key) {
+  function deleteIndividualSL({key, message}) {
     store.dispatch({
       type: SL_INDIVIDUAL_DELETE_INDIVIDUAL,
-      payload: key
+      payload: {key, message}
     });
   }
 

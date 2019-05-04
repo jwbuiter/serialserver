@@ -199,7 +199,7 @@ function selfLearningIndividual(config, store) {
         {
           Object.entries(individualSL.individualEntries).forEach(([key, entry]) => {
 
-            if (entry.increments >= individualCorrectionLimit) {
+            if (entry.increments > individualCorrectionLimit) {
               store.dispatch({
                 type: SL_INDIVIDUAL_DOWNGRADE,
                 payload: key

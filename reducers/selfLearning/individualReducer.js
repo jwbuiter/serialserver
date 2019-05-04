@@ -151,9 +151,8 @@ module.exports = function individualReducer(state = initialStateIndividual(), ac
       }
     }
     case SL_INDIVIDUAL_DELETE_INDIVIDUAL: {
-      if (action.payload){
-        const key = action.payload;
-      
+      const {key} = action.payload;
+      if (key){
         const newIndividualEntries =  Object.assign({}, state.individualEntries);
         delete newIndividualEntries[key];
 

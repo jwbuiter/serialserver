@@ -69,7 +69,8 @@
         "type": "normal",
         "menuOptions": [],
         "colorConditions": [],
-        "readerPort": 0
+        "readerPort": 0,
+        "visible": false
       },
       {
         "name": "",
@@ -80,7 +81,8 @@
         "type": "normal",
         "menuOptions": [],
         "colorConditions": [],
-        "readerPort": 0
+        "readerPort": 0,
+        "visible": false
       },
       {
         "name": "",
@@ -91,7 +93,8 @@
         "type": "normal",
         "menuOptions": [],
         "colorConditions": [],
-        "readerPort": 0
+        "readerPort": 0,
+        "visible": false
       },
       {
         "name": "",
@@ -102,7 +105,8 @@
         "type": "normal",
         "menuOptions": [],
         "colorConditions": [],
-        "readerPort": 0
+        "readerPort": 0,
+        "visible": false
       },
       {
         "name": "",
@@ -113,7 +117,8 @@
         "type": "normal",
         "menuOptions": [],
         "colorConditions": [],
-        "readerPort": 0
+        "readerPort": 0,
+        "visible": false
       },
       {
         "name": "",
@@ -124,7 +129,8 @@
         "type": "normal",
         "menuOptions": [],
         "colorConditions": [],
-        "readerPort": 0
+        "readerPort": 0,
+        "visible": false
       },
       {
         "name": "",
@@ -135,7 +141,8 @@
         "type": "normal",
         "menuOptions": [],
         "colorConditions": [],
-        "readerPort": 0
+        "readerPort": 0,
+        "visible": false
       },
       {
         "name": "",
@@ -146,7 +153,8 @@
         "type": "normal",
         "menuOptions": [],
         "colorConditions": [],
-        "readerPort": 0
+        "readerPort": 0,
+        "visible": false
       },
       {
         "name": "",
@@ -157,7 +165,8 @@
         "type": "normal",
         "menuOptions": [],
         "colorConditions": [],
-        "readerPort": 0
+        "readerPort": 0,
+        "visible": false
       },
       {
         "name": "",
@@ -168,7 +177,8 @@
         "type": "normal",
         "menuOptions": [],
         "colorConditions": [],
-        "readerPort": 0
+        "readerPort": 0,
+        "visible": false
       }
     ]
   },
@@ -179,70 +189,80 @@
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": true
+        "manualConfirmation": true,
+        "visible": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": true
+        "manualConfirmation": true,
+        "visible": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": true
+        "manualConfirmation": true,
+        "visible": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": true
+        "manualConfirmation": true,
+        "visible": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": true
+        "manualConfirmation": true,
+        "visible": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": true
+        "manualConfirmation": true,
+        "visible": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": true
+        "manualConfirmation": true,
+        "visible": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": true
+        "manualConfirmation": true,
+        "visible": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": true
+        "manualConfirmation": true,
+        "visible": false
       },
       {
         "name": "",
         "formula": "",
         "execute": false,
         "seconds": 0,
-        "manualConfirmation": true
+        "manualConfirmation": true,
+        "visible": false
       }
     ]
   },
@@ -257,7 +277,8 @@
         "manualTimeout": 0,
         "manualConfirmation": true,
         "commandCom": "",
-        "commandValue": ""
+        "commandValue": "",
+        "visible": false
       },
       {
         "name": "",
@@ -268,7 +289,8 @@
         "manualTimeout": 0,
         "manualConfirmation": true,
         "commandCom": "",
-        "commandValue": ""
+        "commandValue": "",
+        "visible": false
       },
       {
         "name": "",
@@ -279,7 +301,8 @@
         "manualTimeout": 0,
         "manualConfirmation": true,
         "commandCom": "",
-        "commandValue": ""
+        "commandValue": "",
+        "visible": false
       },
       {
         "name": "",
@@ -290,7 +313,8 @@
         "manualTimeout": 0,
         "manualConfirmation": true,
         "commandCom": "",
-        "commandValue": ""
+        "commandValue": "",
+        "visible": false
       },
       {
         "name": "",
@@ -301,7 +325,8 @@
         "manualTimeout": 0,
         "manualConfirmation": true,
         "commandCom": "",
-        "commandValue": ""
+        "commandValue": "",
+        "visible": false
       }
     ]
   },
@@ -345,6 +370,7 @@
     "activityCounter": false,
     "firstTopFormula": "",
     "secondTopFormula": "",
+    "exitOptions": [],
     "extraColumns": [],
     "success": 0
   },

@@ -1,4 +1,4 @@
-const {getExcelDate} = require('../../utils/dateUtils')
+const {getExcelDate, getExcelDateTime} = require('../../utils/dateUtils')
 
 const {
   ERROR_OCCURRED
@@ -216,6 +216,7 @@ function Parser(store) {
           .replace(/COM[0-9]/g, parseCom)
           .replace(/\&[A-Z0-9]+/g, parseStatistic)
           .replace(/#\w+[0-9]?/g, parseSelfLearning)
+          .replace(/DATETIME/g, () => String(getExcelDateTime()))
           .replace(/DATE/g, () => String(getExcelDate()));
         result = eval(formula);
       } catch (err) {
