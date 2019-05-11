@@ -44,13 +44,16 @@ module.exports = function individualReducer(state = initialStateIndividual(), ac
         };
       } else if (key in state.generalEntries) {
         newGeneralEntries[key] = {
+          ...newGeneralEntries[key],
           entries: [entry].concat(Array.from(newGeneralEntries[key].entries)).slice(-5), 
           extra
         };
       } else {
         newGeneralEntries[key] = {
           entries: [entry], 
-          extra
+          extra,
+          activity: 1,
+          activityHistory: []
         };
       }
 
@@ -108,6 +111,7 @@ module.exports = function individualReducer(state = initialStateIndividual(), ac
     }
     case SL_INDIVIDUAL_INCREMENT:{
       const newIndividualEntries = {};
+      const newGeneralEntries = {}
       const {individualTolerance, individualToleranceAbs, individualCorrectionIncrement} = selfLearning;
 
       for (let key in state.individualEntries){
@@ -127,9 +131,20 @@ module.exports = function individualReducer(state = initialStateIndividual(), ac
         }
       }
 
+      for (let key in state.generalEntries){
+        const oldEntry = state.generalEntries[key];
+
+        newGeneralEntries[key] = {
+          ...oldEntry,
+          activityHistory:[oldEntry.activity, ...oldEntry.activityHistory].slice(0,3),
+          activity: 0
+        }
+      }
+
       return {
         ...state,
-        individualEntries: newIndividualEntries
+        individualEntries: newIndividualEntries,
+        generalEntries: newGeneralEntries
       }
     }
     case SL_INDIVIDUAL_DELETE_GENERAL: {
@@ -171,14 +186,25 @@ module.exports = function individualReducer(state = initialStateIndividual(), ac
       const key = action.payload;
 
       const newIndividualEntries =  Object.assign({}, state.individualEntries);
+      const newGeneralEntries =  Object.assign({}, state.generalEntries);
 
       if (key in newIndividualEntries){
         newIndividualEntries[key].activity++;
+      } else if (key in newGeneralEntries){
+        newGeneralEntries[key].activity++;
+      } else {
+        newGeneralEntries[key] = {
+          entries: [], 
+          extra: [],
+          activity: 1,
+          activityHistory: []
+        };
       }
       
       return {
         ...state,
-        individualEntries: newIndividualEntries
+        individualEntries: newIndividualEntries,
+        generalEntries: newGeneralEntries
       }
     }
     case SL_INDIVIDUAL_HEADERS:{

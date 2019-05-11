@@ -26,6 +26,7 @@ const {
   SL_RESET_GLOBAL,
   SL_INDIVIDUAL_DELETE_GENERAL,
   SL_INDIVIDUAL_DELETE_INDIVIDUAL,
+  SL_INDIVIDUAL_ACTIVITY,
   SL_SUCCESS,
   SL_ENTRY,
   TABLE_RESET_CELL,
@@ -585,6 +586,7 @@ function Realtime(server, config, store) {
       case SL_INDIVIDUAL_DELETE_INDIVIDUAL:
       case SL_ENTRY:
       case SL_SUCCESS:
+      case SL_INDIVIDUAL_ACTIVITY:
         {
           emitSelfLearning();
           break;
