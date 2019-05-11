@@ -34,7 +34,6 @@ function LoggerModule(config, store) {
   } = config;
   const {activityCounter, enabled} = store.getState().config.selfLearning;
   const activityIndex = 1 - Number(enabled[3]);
-  const activityEntries = new Map();
 
   let fileName;
 
@@ -44,7 +43,6 @@ function LoggerModule(config, store) {
         type: LOG_RESET,
         payload: fileName
       });
-    activityEntries.clear();
     fileName = `${constants.name}_${logID}_${dateFormat(new Date(), 'yyyy-mm-dd_HH-MM-ss')}.csv`;
   }
 
@@ -81,35 +79,39 @@ function LoggerModule(config, store) {
       }
   }
 
-  function updateActivity(entry, full){
+  function updateActivity(activityEntry, full){
     const logEntries = store.getState().logger.entries;
-    let TA = 0;
+    const oldEntry = logEntries.find(entry=>entry.coms[activityIndex] === activityEntry && entry.TA);
 
-    if (activityEntries.has(entry)){
-      const oldIndex = activityEntries.get(entry);
-      const oldEntry = logEntries[oldIndex];
-      TA = oldEntry.TA;
-
-      if (full || !oldEntry.full){
-        store.dispatch({
-          type: LOG_ACTIVITY_OVERWRITE, 
-          payload: {
-            index: oldIndex, 
-            newValue: '' 
-          }
-        });
-        activityEntries.set(entry, logEntries.length-1)
-      }
-    } else {
-      activityEntries.set(entry, Math.max(0,logEntries.length-1));
+    if (!oldEntry){
+      store.dispatch({
+        type: LOG_ACTIVITY_OVERWRITE, 
+        payload: {
+          index: logEntries.length - 1, 
+          newValue: 1
+        }
+      });
+      return;
     }
 
-    if (!full) TA++
+    const TA = logEntries.filter(entry=>entry.coms[activityIndex] === activityEntry).length; 
+    const oldIndex = logEntries.findIndex(entry=>entry.coms[activityIndex] === activityEntry && entry.TA);
+    const newIndex = (full || !oldEntry.full) ? logEntries.length-1 : oldIndex;
+
+    if (oldIndex !== newIndex){
+      store.dispatch({
+        type: LOG_ACTIVITY_OVERWRITE, 
+        payload: {
+          index: oldIndex, 
+          newValue: '' 
+        }
+      });
+    }
 
     store.dispatch({
       type: LOG_ACTIVITY_OVERWRITE, 
       payload: {
-        index: activityEntries.get(entry), 
+        index: newIndex,
         newValue: TA
       }
     });
