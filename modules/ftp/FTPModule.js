@@ -49,14 +49,18 @@ function FTPModule(config, store) {
   }
 
   function uploadDataFile(address, folder, username, password){
+    const sourceFile = path.join(__dirname, '../../data/data.xls');
     const fileStats = fs.statSync(path.join(__dirname, '../../data/data.xls'));
     const modifyDate = new Date(fileStats.mtimeMs);
     const fileName = `${constants.name}_${logID}_${dateFormat(modifyDate,'yyyy-mm-dd_HH-MM-ss')}.xls`;
 
+    if (!fs.existsSync(sourceFile))
+      return;
+    
     const c = new Client();
     c.on('ready', ()=>{
       c.mkdir(folder,true, () => {
-        c.put(path.join(__dirname, '../../data/data.xls'), path.join(folder, fileName), (err) => {
+        c.put(sourceFile, path.join(folder, fileName), (err) => {
           c.end();
         });
       })
