@@ -369,7 +369,9 @@
     "individualCorrectionLimit": 2,
     "activityCounter": false,
     "firstTopFormula": "",
+    "firstTopDigits": 0,
     "secondTopFormula": "",
+    "secondTopDigits": 0,
     "exitOptions": [],
     "extraColumns": [],
     "success": 0
