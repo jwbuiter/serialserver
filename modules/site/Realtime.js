@@ -454,7 +454,7 @@ function Realtime(server, config, store) {
     }
 
     if (fs.existsSync(templateFile)) {
-      fs.copySync(templateFile, dataFile);
+      fs.copyFileSync(templateFile, dataFile);
     }
 
     store.dispatch({
