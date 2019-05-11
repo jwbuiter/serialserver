@@ -7,6 +7,7 @@ const {
   CONFIG_UPDATE,
   ERROR_OCCURRED
 } = require('../../actions/types');
+const {getExcelDate, getExcelDateTime} = require('../../utils/dateUtils')
 
 const Global = require('./Global');
 const Individual = require('./Individual');
@@ -58,9 +59,11 @@ function SelfLearningModule(config, store) {
             extraColumns.forEach(column => {
               try {
                 const formula = column.formula
+                  .toUpperCase()
                   .replace(/#[0-9]+/g, parseColumn)
                   .replace(/\$[A-Z]/g, parseExcel)
-                  .replace(/date/g, Math.floor((new Date().getTime() / 1000 / 86400 + 25569)).toString());
+                  .replace(/DATETIME/g, () => String(getExcelDateTime()))
+                  .replace(/DATE/g, () => String(getExcelDate()));
 
                 columns.push(eval(formula));
               } catch (err) {
