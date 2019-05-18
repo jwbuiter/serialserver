@@ -73,6 +73,8 @@ module.exports = function(state = initialState, action) {
       return action.payload;
     }
     case SL_SUCCESS:{
+      if (!action.payload.filterLog) return state;
+      
       const {comIndex, calibration, tolerance} = action.payload;
       const newEntries = state.entries.filter((entry, index, entries) => {
         const testValue = Number(entry.coms[comIndex]);

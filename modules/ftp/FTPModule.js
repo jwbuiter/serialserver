@@ -34,7 +34,7 @@ function FTPModule(config, store) {
       });
     });
     c.on('error', (err) => {
-      callback(err)
+      callback(err.message)
     })
 
     if (!(username && password)) {
@@ -64,6 +64,10 @@ function FTPModule(config, store) {
           c.end();
         });
       })
+    })
+
+    c.on('error', (err) => {
+      console.log('FTP Error:' + err.message);
     })
 
     c.connect({

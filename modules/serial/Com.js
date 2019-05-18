@@ -130,18 +130,28 @@ function Com(index, config, store) {
         let dispatchTest;
         let nextTime = (new Date).getTime();
 
+        const dispatchValue = () =>{
+          switch (testMessage){
+            case 'randomWeight':
+              dispatch(decode(75 + Math.random() * 50 + ''));
+              break;
+            case 'randomRFID':
+              dispatch(decode(Math.floor(Math.random() * 5) + 1234567890 + ''));
+              break;
+            default:
+              dispatch(decode(testMessage));
+              break;
+          }
+        }
+
         if (timeoutReset) {
           const dispatchNothing = () => {
             dispatch(decode('0'));
           }
-
+          
           dispatchTest = () => {
-            if (testMessage === 'random') {
-              dispatch(decode(50 + Math.random() * 100 + ''))
-            } else {
-              dispatch(decode(testMessage));
-            }
-
+            dispatchValue();
+          
             setTimeout(dispatchNothing, timeout * 1000);
 
             nextTime += 2 * timeout * 1000;
@@ -150,7 +160,7 @@ function Com(index, config, store) {
           }
         } else {
           dispatchTest = () => {
-            dispatch(decode(testMessage));
+            dispatchValue();
 
             nextTime += timeout * 1000;
             const currentTime = (new Date).getTime();

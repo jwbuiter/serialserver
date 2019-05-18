@@ -112,17 +112,24 @@ function TableModule(config, store) {
               return (row[searchColumn] === key);
             });
 
-            if (foundRow) return;
+            if (foundRow){
+              if (!foundRow[individualColumn]) 
+                foundRow[individualColumn] = calibration;
+              if (!foundRow[dateColumn]) 
+                foundRow[dateColumn] = getExcelDate();
+            } else {
+              const newRow = [];
 
-            const newRow = [];
+              newRow[searchColumn] = key;
+              newRow[individualColumn] = calibration;
+              newRow[dateColumn] = getExcelDate();
 
-            newRow[searchColumn] = key;
-            newRow[individualColumn] = calibration;
-            newRow[dateColumn] = getExcelDate();
-
-            excelSheet.push(newRow);
+              excelSheet.push(newRow);
+            }
+            
             saveExcel(excelSheet);
           }
+          break;
         }
       case SL_INDIVIDUAL_DELETE_INDIVIDUAL:{
         if (useFile && excelSheet) {
@@ -145,6 +152,7 @@ function TableModule(config, store) {
 
           saveExcel(excelSheet);
         }
+        break;
       }
     }
   });

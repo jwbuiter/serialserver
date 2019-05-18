@@ -71,6 +71,7 @@ function selfLearningGlobal(config, store) {
                 matchedTolerance,
                 comIndex,
                 tolerance,
+                filterLog: true
               }
             });
             store.dispatch({

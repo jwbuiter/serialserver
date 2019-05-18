@@ -62,6 +62,13 @@ function Parser(store) {
   function parseStatistic(x) {
     const state = store.getState();
 
+    if (x==='&TAT') {
+      return state.logger.entries
+        .map(entry=>entry.TA)
+        .filter(val=>val)
+        .reduce((acc,cur)=>acc+cur);
+    }
+
     const unique = x.includes('U');
     const operator = x.slice(1, 3);
 
@@ -82,16 +89,16 @@ function Parser(store) {
       .map(entry => table ? entry.cells[x] : entry.coms[x]);
 
     const statisticFunctions = {
-      TN: (x) => data.length,
-      TO: (x) => data.reduce((acc, cur) => acc + cur, 0),
-      MI: (x) => Math.min(...data),
-      MA: (x) => Math.max(...data),
-      SP: (x) => {
+      TN: () => data.length,
+      TO: () => data.reduce((acc, cur) => acc + cur, 0),
+      MI: () => Math.min(...data),
+      MA: () => Math.max(...data),
+      SP: () => {
         const mean = data.reduce((acc, cur) => acc + cur, 0) / (data.length || 1);
         const spread = data.reduce((acc, cur) => acc + (cur - mean) * (cur - mean), 0);
         return Math.sqrt(spread / (data.length || 1));
       },
-      UN: (x) => data.reduce((acc, cur) => {
+      UN: () => data.reduce((acc, cur) => {
         if (acc.includes(cur)) {
           return acc;
         } else {
@@ -99,11 +106,16 @@ function Parser(store) {
           return acc;
         }
       }, []).length,
-      TU: (x) => {
+      TU: () => {
         if (data.length === 0) return '0';
 
         return state.logger.entries[state.logger.entries.length - 1].TU;
       },
+      TA: ()=>{
+        if (data.length === 0) return '0';
+
+        return state.logger.entries[state.logger.entries.length - 1].TA;
+      }
     }
 
     return statisticFunctions[operator](x).toString();
@@ -143,7 +155,7 @@ function Parser(store) {
       const spread = data.reduce((acc, cur) => acc + (cur - mean) * (cur - mean), 0);
       return Math.sqrt(spread / (data.length || 1));
     },
-    SIC: (state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => acc + cur.increments, 0)
+    SIC: (state) => Object.values(state.individual.individualEntries).reduce((acc, cur) => acc + cur.increments, 0),
   }
 
   const selfLearningNumberedFunctions = {

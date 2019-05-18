@@ -88,6 +88,7 @@ function selfLearningIndividual(config, store) {
           calibration,
           comIndex,
           tolerance,
+          filterLog: false,
         }
       });
 
@@ -182,6 +183,7 @@ function selfLearningIndividual(config, store) {
                 calibration: startCalibration,
                 comIndex,
                 tolerance,
+                filterLog:false
               }
             });
           } else {
