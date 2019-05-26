@@ -54,6 +54,7 @@ function Cell(index, config, store) {
 
 
   function resetCell() {
+    color = '';
     if (type === 'menu') {
       content = menuOptions[0].key;
       store.dispatch({
@@ -64,7 +65,6 @@ function Cell(index, config, store) {
         }
       });
     } else {
-      content = '';
       store.dispatch({
         type: TABLE_RESET_CELL,
         payload: index,
