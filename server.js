@@ -6,7 +6,7 @@ const usedModules = {
   recovery: require('./modules/recovery/RecoveryModule')()
 };
 
-if (!usedModules.recovery) process.exit();
+if (!usedModules.recovery) return;
 
 const store = require('./store.js');
 usedModules.recovery.bindStore(store);
