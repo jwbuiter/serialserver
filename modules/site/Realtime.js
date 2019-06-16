@@ -277,7 +277,22 @@ function Realtime(server, config, store) {
 
   function getLogList(msg, callback) {
     fs.readdir(logPath, (err, files) => {
-      callback(files.filter((element) => element.endsWith('.csv')).sort().reverse());
+      const logList = files.filter((element) => element.endsWith('.csv'))
+      const sortedLogList = logList.sort((a,b)=>{
+        const dateA = a.slice(-23);
+        const dateB = b.slice(-23);
+
+        if (dateA < dateB) {
+          return 1;
+        }
+        if (dateA > dateB) {
+          return -1;
+        }
+      
+        // dates must be equal
+        return 0;
+      })
+      callback(sortedLogList);
     });
   }
 
