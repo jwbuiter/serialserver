@@ -12,6 +12,7 @@ const {
   SL_INDIVIDUAL_LOAD,
   SL_INDIVIDUAL_DELETE_GENERAL,
   SL_INDIVIDUAL_DELETE_INDIVIDUAL,
+  SL_INDIVIDUAL_DECREMENT_TOTAL,
   SL_INDIVIDUAL_ACTIVITY,
   SL_INDIVIDUAL_HEADERS,
   SERIAL_ENTRY,
@@ -27,7 +28,6 @@ const Parser = require('../parser/Parser');
 function selfLearningIndividual(config, store) {
   const {
     enabled,
-    totalNumber,
     numberPercentage,
     startCalibration,
     individualToleranceAbs,
@@ -39,7 +39,8 @@ function selfLearningIndividual(config, store) {
     secondTopFormula,
     extraColumns
   } = config;
-  const number = Math.round(totalNumber * numberPercentage / 100);
+  let {totalNumber} = config;
+  let number = Math.round(totalNumber * numberPercentage / 100);
   const tolerance = config.tolerance / 100;
   const individualTolerance = config.individualTolerance / 100;
   const individualCorrectionIncrement = config.individualCorrectionIncrement / 100;
@@ -190,6 +191,19 @@ function selfLearningIndividual(config, store) {
             checkSuccess();
           }
           saveIndividualSelfLearning();
+          break;
+        }
+      case SL_INDIVIDUAL_DECREMENT_TOTAL:
+        {
+          totalNumber--;
+          number = Math.round(totalNumber * numberPercentage / 100);
+          config.totalNumber=totalNumber;
+          store.dispatch({
+            type: CONFIG_UPDATE,
+            payload: {
+              selfLearning: config,
+            }
+          });
           break;
         }
       case SL_INDIVIDUAL_DELETE_GENERAL:

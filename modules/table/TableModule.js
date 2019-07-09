@@ -11,7 +11,8 @@ const {
   EXCEL_FOUND_ROW,
   LOG_RESET,
   SL_INDIVIDUAL_UPGRADE,
-  SL_INDIVIDUAL_DELETE_INDIVIDUAL
+  SL_INDIVIDUAL_DELETE_INDIVIDUAL,
+  SL_INDIVIDUAL_DECREMENT_TOTAL
 } = require('../../actions/types');
 const Cell = require('./Cell');
 
@@ -138,6 +139,12 @@ function TableModule(config, store) {
             message,
           } = lastAction.payload;
 
+          const exitCode = Number(message);
+
+          if (exitCode) {
+            store.dispatch({type:SL_INDIVIDUAL_DECREMENT_TOTAL});
+          }
+
           const foundRow = excelSheet.find((row) => {
             return (row[searchColumn] === key);
           });
@@ -148,7 +155,7 @@ function TableModule(config, store) {
             return (row[searchColumn] === key);
           });
 
-          excelSheet[foundIndex][exitColumn] = Number(message);
+          excelSheet[foundIndex][exitColumn] = exitCode;
 
           saveExcel(excelSheet);
         }

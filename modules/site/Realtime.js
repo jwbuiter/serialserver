@@ -26,6 +26,7 @@ const {
   SL_RESET_GLOBAL,
   SL_INDIVIDUAL_DELETE_GENERAL,
   SL_INDIVIDUAL_DELETE_INDIVIDUAL,
+  SL_INDIVIDUAL_DECREMENT_TOTAL,
   SL_INDIVIDUAL_ACTIVITY,
   SL_SUCCESS,
   SL_ENTRY,
@@ -604,6 +605,12 @@ function Realtime(server, config, store) {
       case SL_INDIVIDUAL_ACTIVITY:
         {
           emitSelfLearning();
+          break;
+        }
+      case SL_INDIVIDUAL_DECREMENT_TOTAL:
+        {
+          const totalNumber = store.getState().config.selfLearning.totalNumber;
+          io.emit('error', `Total SL number has been lowered from ${totalNumber} to ${totalNumber - 1}`);
           break;
         }
       case EXECUTE_START:
