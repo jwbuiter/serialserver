@@ -195,9 +195,13 @@ function selfLearningIndividual(config, store) {
         }
       case SL_INDIVIDUAL_DECREMENT_TOTAL:
         {
+          const callback = lastAction.payload;
+
           totalNumber--;
           number = Math.round(totalNumber * numberPercentage / 100);
           config.totalNumber=totalNumber;
+
+          callback(totalNumber);
           store.dispatch({
             type: CONFIG_UPDATE,
             payload: {

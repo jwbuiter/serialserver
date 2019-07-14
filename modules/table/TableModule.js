@@ -137,12 +137,13 @@ function TableModule(config, store) {
           const {
             key,
             message,
+            callback
           } = lastAction.payload;
 
           const exitCode = Number(message);
 
           if (exitCode) {
-            store.dispatch({type:SL_INDIVIDUAL_DECREMENT_TOTAL});
+            store.dispatch({type:SL_INDIVIDUAL_DECREMENT_TOTAL, payload: callback});
           }
 
           const foundRow = excelSheet.find((row) => {
