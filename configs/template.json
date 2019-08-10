@@ -24,7 +24,12 @@
         "prefix": "ST,GS",
         "postfix": "kg",
         "testMessage": "123.123",
-        "numeric": true
+        "numeric": true,
+        "autoCommandEnabled": false,
+        "autoCommandMin": -20,
+        "autoCommandMax": -2,
+        "autoCommandTime": 10,
+        "autoCommandText": "Z;R"
       },
       {
         "mode": "serial",
@@ -47,7 +52,12 @@
         "prefix": "#\u0011",
         "postfix": "\u0010\u0003",
         "testMessage": "6543210987654321",
-        "numeric": false
+        "numeric": false,
+        "autoCommandEnabled": false,
+        "autoCommandMin": 0,
+        "autoCommandMax": 0,
+        "autoCommandTime": 0,
+        "autoCommandText": ""
       }
     ]
   },

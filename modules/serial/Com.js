@@ -37,7 +37,12 @@ function Com(index, config, store) {
     triggerCom,
     timeoutReset,
     zeroReset,
-    numeric
+    numeric,
+    autoCommandEnabled,
+    autoCommandMin,
+    autoCommandMax,
+    autoCommandTime,
+    autoCommandText
   } = config;
 
   const myGPIO = new Gpio(constants.comPin[index], "out");
@@ -47,6 +52,7 @@ function Com(index, config, store) {
 
   let myTimeout = setTimeout(() => 0, 1);
   let zeroResetTimeout = null;
+  let autoCommandTimeout = null;
 
   function addResetTimeout() {
     if (timeoutReset) {
@@ -119,6 +125,20 @@ function Com(index, config, store) {
           index
         }
       });
+    }
+
+    if (
+      autoCommandEnabled &&
+      numericValue > autoCommandMin &&
+      numericValue < autoCommandMax
+    ) {
+      clearTimeout(autoCommandTimeout);
+      autoCommandTimeout = setTimeout(() => {
+        store.dispatch({
+          type: SERIAL_COMMAND,
+          payload: { command: autoCommandText }
+        });
+      }, autoCommandTime * 1000);
     }
 
     return numericValue.toFixed(digits);
@@ -218,10 +238,10 @@ function Com(index, config, store) {
                 index,
                 command
               });
-              command.split(";").forEach((subCommand, index) => {
+              command.split(";").forEach((subCommand, subCommandNum) => {
                 setTimeout(() => {
                   myPort.write(subCommand);
-                }, index * 1000);
+                }, subCommandNum * 1000);
               });
             }
           }
