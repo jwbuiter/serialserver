@@ -1,4 +1,4 @@
-const http = require('http');
+const http = require("http");
 const {
   ERROR_OCCURRED,
   STATE_CHANGED,
@@ -9,8 +9,8 @@ const {
   TABLE_RESET_CELL,
   TABLE_EMIT,
   TABLE_COLOR
-} = require('../../actions/types');
-const Parser = require('../parser/Parser');
+} = require("../../actions/types");
+const Parser = require("../parser/Parser");
 
 function Cell(index, config, store) {
   const {
@@ -24,15 +24,15 @@ function Cell(index, config, store) {
     colorConditions,
     readerPort
   } = config;
-  const manual = (type === 'manual' || type === "menu" || readerPort);
+  const manual = type === "manual" || type === "menu" || readerPort;
   const myParser = Parser(store);
 
-  let content = '';
-  let color = '';
+  let content = "";
+  let color = "";
 
   if (readerPort) {
     const server = http.createServer((req, res) => {
-      if (req.url === '/favicon.ico') {
+      if (req.url === "/favicon.ico") {
         res.end();
         return;
       }
@@ -42,7 +42,7 @@ function Cell(index, config, store) {
 
       res.end();
     });
-    server.on('error', (err, socket) => {
+    server.on("error", (err, socket) => {
       store.dispatch({
         type: ERROR_OCCURRED,
         payload: err
@@ -52,10 +52,9 @@ function Cell(index, config, store) {
     server.listen(readerPort);
   }
 
-
   function resetCell() {
-    color = '';
-    if (type === 'menu') {
+    color = "";
+    if (type === "menu") {
       content = menuOptions[0].key;
       store.dispatch({
         type: TABLE_ENTRY,
@@ -67,7 +66,7 @@ function Cell(index, config, store) {
     } else {
       store.dispatch({
         type: TABLE_RESET_CELL,
-        payload: index,
+        payload: index
       });
     }
 
@@ -84,7 +83,7 @@ function Cell(index, config, store) {
   function dispatch(entry) {
     if (numeric) {
       entry = Number(entry).toFixed(digits);
-    } else if (typeof (entry) === 'boolean') {
+    } else if (typeof entry === "boolean") {
       entry = entry ? 1 : 0;
     } else {
       entry = String(entry).slice(-digits);
@@ -94,7 +93,7 @@ function Cell(index, config, store) {
       type: TABLE_ENTRY,
       payload: {
         index,
-        entry,
+        entry
       }
     });
 
@@ -110,13 +109,12 @@ function Cell(index, config, store) {
       });
       store.dispatch({
         type: STATE_CHANGED
-      })
+      });
     }
   }
 
-
   function dispatchColor() {
-    let newColor = '';
+    let newColor = "";
     for (let option of colorConditions) {
       if (myParser.parse(option.value)) {
         newColor = option.key;
@@ -130,39 +128,39 @@ function Cell(index, config, store) {
         type: TABLE_COLOR,
         payload: {
           index,
-          color,
+          color
         }
-      })
+      });
     }
   }
 
-  store.listen((lastAction) => {
+  store.listen(lastAction => {
     const state = store.getState();
     switch (lastAction.type) {
       case STATE_CHANGED:
-      case HANDLE_TABLE:
-        {
-          const allEntries = state.serial.coms.reduce((acc, cur) => (acc && !(cur.entry === '0' || cur.entry === '')), true);
-          if (!manual && (!waitForOther || allEntries)) {
-            let entry = myParser.parse(formula);
-            dispatch(entry)
-          }
+      case HANDLE_TABLE: {
+        const allEntries = state.serial.coms.reduce(
+          (acc, cur) => acc && !(cur.entry === "0" || cur.entry === ""),
+          true
+        );
+        if (!manual && (!waitForOther || allEntries)) {
+          let entry = myParser.parse(formula);
+          dispatch(entry);
+        }
 
-          dispatchColor();
-          break;
-        }
-      case LOG_RESET:
-        {
+        dispatchColor();
+        break;
+      }
+      case LOG_RESET: {
+        resetCell();
+        break;
+      }
+      case TABLE_RESET: {
+        if (resetOnExe) {
           resetCell();
-          break;
         }
-      case TABLE_RESET:
-        {
-          if (resetOnExe) {
-            resetCell();
-          }
-          break;
-        }
+        break;
+      }
     }
   });
 

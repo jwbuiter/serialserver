@@ -1,48 +1,46 @@
-const fs = require('fs');
-const path = require('path');
-const XLSX = require('xlsx');
-const dateFormat = require('dateformat');
+const fs = require("fs");
+const path = require("path");
+const XLSX = require("xlsx");
 
-const {getExcelDate} = require('../../utils/dateUtils')
+const { getExcelDate } = require("../../utils/dateUtils");
 
 const {
   HANDLE_TABLE,
-  TABLE_RESET,
   EXCEL_FOUND_ROW,
-  LOG_RESET,
   SL_INDIVIDUAL_UPGRADE,
   SL_INDIVIDUAL_DELETE_INDIVIDUAL,
   SL_INDIVIDUAL_DECREMENT_TOTAL
-} = require('../../actions/types');
-const Cell = require('./Cell');
+} = require("../../actions/types");
+const Cell = require("./Cell");
 
-const excelPath = path.join(__dirname, '../..', 'data', 'data.xls');
+const excelPath = path.join(__dirname, "../..", "data", "data.xls");
 
 function sheetToArray(sheet) {
   const result = [];
-  const range = XLSX.utils.decode_range(sheet['!ref']);
+  const range = XLSX.utils.decode_range(sheet["!ref"]);
   for (let rowNum = range.s.r; rowNum <= range.e.r; rowNum++) {
     const row = [];
     for (let colNum = range.s.c; colNum <= range.e.c; colNum++) {
-      var nextCell = sheet[
-        XLSX.utils.encode_cell({
-          r: rowNum,
-          c: colNum
-        })
-      ];
-      if (typeof nextCell === 'undefined') {
+      var nextCell =
+        sheet[
+          XLSX.utils.encode_cell({
+            r: rowNum,
+            c: colNum
+          })
+        ];
+      if (typeof nextCell === "undefined") {
         row.push(void 0);
       } else row.push(nextCell.v);
     }
     result.push(row);
   }
   return result;
-};
+}
 
 function saveExcel(array) {
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(array);
-  XLSX.utils.book_append_sheet(wb, ws, 'data');
+  XLSX.utils.book_append_sheet(wb, ws, "data");
   XLSX.writeFile(wb, excelPath);
 }
 
@@ -65,95 +63,88 @@ function TableModule(config, store) {
     excelSheet = sheetToArray(excelFile.Sheets[sheetName]);
   }
 
-  store.listen((lastAction) => {
+  store.listen(lastAction => {
     const state = store.getState();
 
     switch (lastAction.type) {
-      case HANDLE_TABLE:
-        {
-          if (useFile && excelSheet) {
-            const searchEntry = state.serial.coms[trigger].entry;
-            if (!searchEntry) break;
-
-            const foundRow = excelSheet.find((row) => {
-              return (row[searchColumn] === searchEntry);
-            });
-
-            if (foundRow) {
-              console.log('found')
-              store.dispatch({
-                type: EXCEL_FOUND_ROW,
-                payload: {
-                  found: true,
-                  foundRow,
-                }
-              });
-            } else {
-              console.log('not found')
-              store.dispatch({
-                type: EXCEL_FOUND_ROW,
-                payload: {
-                  found: false,
-                  foundRow,
-                }
-              });
-            }
-          }
-          break;
-        }
-      case SL_INDIVIDUAL_UPGRADE:
-        {
-          if (useFile && excelSheet) {
-            const {
-              key,
-              calibration,
-            } = lastAction.payload;
-
-            const foundRow = excelSheet.find((row) => {
-              return (row[searchColumn] === key);
-            });
-
-            if (foundRow){
-              if (!foundRow[individualColumn]) 
-                foundRow[individualColumn] = calibration;
-              if (!foundRow[dateColumn]) 
-                foundRow[dateColumn] = getExcelDate();
-            } else {
-              const newRow = [];
-
-              newRow[searchColumn] = key;
-              newRow[individualColumn] = calibration;
-              newRow[dateColumn] = getExcelDate();
-
-              excelSheet.push(newRow);
-            }
-            
-            saveExcel(excelSheet);
-          }
-          break;
-        }
-      case SL_INDIVIDUAL_DELETE_INDIVIDUAL:{
+      case HANDLE_TABLE: {
         if (useFile && excelSheet) {
-          const {
-            key,
-            message,
-            callback
-          } = lastAction.payload;
+          const searchEntry = state.serial.coms[trigger].entry;
+          if (!searchEntry) break;
+
+          const foundRow = excelSheet.find(row => {
+            return row[searchColumn] === searchEntry;
+          });
+
+          if (foundRow) {
+            console.log("found");
+            store.dispatch({
+              type: EXCEL_FOUND_ROW,
+              payload: {
+                found: true,
+                foundRow
+              }
+            });
+          } else {
+            console.log("not found");
+            store.dispatch({
+              type: EXCEL_FOUND_ROW,
+              payload: {
+                found: false,
+                foundRow
+              }
+            });
+          }
+        }
+        break;
+      }
+      case SL_INDIVIDUAL_UPGRADE: {
+        if (useFile && excelSheet) {
+          const { key, calibration } = lastAction.payload;
+
+          const foundRow = excelSheet.find(row => {
+            return row[searchColumn] === key;
+          });
+
+          if (foundRow) {
+            if (!foundRow[individualColumn])
+              foundRow[individualColumn] = calibration;
+            if (!foundRow[dateColumn]) foundRow[dateColumn] = getExcelDate();
+          } else {
+            const newRow = [];
+
+            newRow[searchColumn] = key;
+            newRow[individualColumn] = calibration;
+            newRow[dateColumn] = getExcelDate();
+
+            excelSheet.push(newRow);
+          }
+
+          saveExcel(excelSheet);
+        }
+        break;
+      }
+      case SL_INDIVIDUAL_DELETE_INDIVIDUAL: {
+        if (useFile && excelSheet) {
+          const { key, message, callback } = lastAction.payload;
 
           const exitCode = Number(message);
 
           if (exitCode) {
-            store.dispatch({type:SL_INDIVIDUAL_DECREMENT_TOTAL, payload: callback});
+            store.dispatch({
+              type: SL_INDIVIDUAL_DECREMENT_TOTAL,
+              payload: callback
+            });
           }
 
-          const foundRow = excelSheet.find((row) => {
-            return (row[searchColumn] === key);
+          const foundRow = excelSheet.find(row => {
+            return row[searchColumn] === key;
           });
 
           if (!foundRow) return;
 
-          const foundIndex = excelSheet.findIndex((row) => {
-            return (row[searchColumn] === key);
+          const foundIndex = excelSheet.findIndex(row => {
+            return row[searchColumn] === key;
           });
 
           excelSheet[foundIndex][exitColumn] = exitCode;
@@ -165,16 +156,23 @@ function TableModule(config, store) {
     }
   });
 
-  const tempCells = cells.map((cell, index) => new Cell(index, {
-    ...cell,
-    waitForOther
-  }, store));
+  const tempCells = cells.map(
+    (cell, index) =>
+      new Cell(
+        index,
+        {
+          ...cell,
+          waitForOther
+        },
+        store
+      )
+  );
   store.dispatch({
-    type: HANDLE_TABLE,
+    type: HANDLE_TABLE
   });
 
   return {
-    cells: tempCells,
+    cells: tempCells
   };
 }
 

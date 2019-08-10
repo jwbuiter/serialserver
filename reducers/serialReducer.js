@@ -1,34 +1,31 @@
 const {
   SERIAL_ENTRY,
   SERIAL_AVERAGE,
-  SERIAL_RESET,
-  SERIAL_TIMEOUT,
-} = require('../actions/types');
+  SERIAL_RESET
+} = require("../actions/types");
 
-const {serial} = require('../configs/current');
+const { serial } = require("../configs/current");
 
 const initialState = {
-  histories: Array.from({length: serial.coms.length}, () => ([])),
-  coms: Array.from({length: serial.coms.length}, (_, i) => ({
+  histories: Array.from({ length: serial.coms.length }, () => []),
+  coms: Array.from({ length: serial.coms.length }, (_, i) => ({
     time: null,
-    entry: '',
-    average: '',
-    numeric: serial.coms[i].factor!==0
-  })),
+    entry: "",
+    average: "",
+    numeric: serial.coms[i].factor !== 0
+  }))
 };
 
-
 module.exports = function(state = initialState, action) {
-  switch(action.type) {
-    
-    case SERIAL_ENTRY:{
-      const {index, entry} = action.payload;
+  switch (action.type) {
+    case SERIAL_ENTRY: {
+      const { index, entry } = action.payload;
 
       const newHistories = Array.from(state.histories);
-      if (state.coms[index].entry){
-        newHistories[index].push({ 
+      if (state.coms[index].entry) {
+        newHistories[index].push({
           entry: state.coms[index].entry,
-          time: state.coms[index].time,
+          time: state.coms[index].time
         });
 
         const historyLength = serial.coms[index].entries;
@@ -37,37 +34,37 @@ module.exports = function(state = initialState, action) {
 
       const newComs = Array.from(state.coms);
       newComs[index] = {
-        ...newComs[index], 
-        entry, 
+        ...newComs[index],
+        entry,
         time: new Date()
       };
 
       return {
         ...state,
         coms: newComs,
-        histories: newHistories,
-      }
+        histories: newHistories
+      };
     }
-    case SERIAL_AVERAGE:{
-      const {index, average} = action.payload;
+    case SERIAL_AVERAGE: {
+      const { index, average } = action.payload;
       const newComs = Array.from(state.coms);
-    
-      newComs[index] = {...newComs[index], average};
+
+      newComs[index] = { ...newComs[index], average };
 
       return {
         ...state,
-        coms: newComs,
-      }
+        coms: newComs
+      };
     }
-    case SERIAL_RESET:{
-      if (typeof(action.payload) !== 'undefined'){
+    case SERIAL_RESET: {
+      if (typeof action.payload !== "undefined") {
         const index = action.payload;
 
         const newHistories = Array.from(state.histories);
-        if (state.coms[index].entry){
+        if (state.coms[index].entry) {
           newHistories[index].push({
             entry: state.coms[index].entry,
-            time: state.coms[index].time,
+            time: state.coms[index].time
           });
 
           const historyLength = serial.coms[index].entries;
@@ -80,27 +77,29 @@ module.exports = function(state = initialState, action) {
         return {
           ...state,
           coms: newComs,
-          histories: newHistories,
-        }
+          histories: newHistories
+        };
       } else {
-        const newHistories = Array.from(state.histories).map((history, index) => {
-          if (state.coms[index].entry){
-            history.push({
-              entry: state.coms[index].entry,
-              time: state.coms[index].time,
-            });
+        const newHistories = Array.from(state.histories).map(
+          (history, index) => {
+            if (state.coms[index].entry) {
+              history.push({
+                entry: state.coms[index].entry,
+                time: state.coms[index].time
+              });
 
-            const historyLength = serial.coms[index].entries;
-            history = history.slice(-historyLength);
+              const historyLength = serial.coms[index].entries;
+              history = history.slice(-historyLength);
+            }
+            return history;
           }
-          return history;
-        });
+        );
 
         return {
           ...state,
           coms: initialState.coms,
-          histories: newHistories,
-        }
+          histories: newHistories
+        };
       }
     }
     default:

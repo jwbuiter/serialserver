@@ -1,12 +1,10 @@
-const {
-  exec
-} = require('child_process');
-const socketio = require('socket.io');
-const fs = require('fs');
-const path = require('path');
-const ip = require('ip');
+const { exec } = require("child_process");
+const socketio = require("socket.io");
+const fs = require("fs");
+const path = require("path");
+const ip = require("ip");
 
-const constants = require('../../config.static.json');
+const constants = require("../../config.static.json");
 
 const {
   SERIAL_ENTRY,
@@ -16,12 +14,8 @@ const {
   INPUT_EMIT,
   OUTPUT_FORCED_CHANGED,
   OUTPUT_EMIT,
-  LOG_ENTRY,
-  LOG_RESET,
   LOG_UPLOAD,
   LOG_BACKUP,
-  FTP_SUCCESS,
-  FTP_FAILURE,
   SL_RESET_INDIVIDUAL,
   SL_RESET_GLOBAL,
   SL_INDIVIDUAL_DELETE_GENERAL,
@@ -29,27 +23,22 @@ const {
   SL_INDIVIDUAL_ACTIVITY,
   SL_SUCCESS,
   SL_ENTRY,
-  TABLE_RESET_CELL,
   TABLE_ENTRY,
   TABLE_EMIT,
   TABLE_COLOR,
   EXCEL_FOUND_ROW,
   ERROR_OCCURRED,
   EXECUTE_START,
-  EXECUTE_STOP,
   HANDLE_TABLE,
   HANDLE_OUTPUT,
   CONFIG_UPDATE,
   CONFIG_SAVE,
-  RESTART,
-} = require('../../actions/types');
+  RESTART
+} = require("../../actions/types");
 
-const results = [
-  ['off', 'on'],
-  ['forcedOff', 'forcedOn'],
-];
+const results = [["off", "on"], ["forcedOff", "forcedOn"]];
 
-const configPath = path.join(__dirname, '../..', 'configs');
+const configPath = path.join(__dirname, "../..", "configs");
 const logPath = constants.saveLogLocation;
 const version = constants.version;
 
@@ -59,15 +48,15 @@ function Realtime(server, config, store) {
   function emitInput(port, index) {
     let state;
     if (port.isForced) {
-      state = port.forcedState ? 'forcedOn' : 'forcedOff';
+      state = port.forcedState ? "forcedOn" : "forcedOff";
     } else {
-      state = port.state ? 'on' : 'off';
+      state = port.state ? "on" : "off";
     }
-    io.emit('state', {
-      name: 'input' + index,
+    io.emit("state", {
+      name: "input" + index,
       state
     });
-    io.emit('input', {
+    io.emit("input", {
       index,
       ...port
     });
@@ -76,18 +65,16 @@ function Realtime(server, config, store) {
   function emitOutput(port, index) {
     let state;
     if (port.isForced) {
-      state = port.forcedState ? 'forcedOn' : 'forcedOff';
+      state = port.forcedState ? "forcedOn" : "forcedOff";
     } else {
-      if (!port.state && port.result)
-        state = 'execute';
-      else
-        state = port.state ? 'on' : 'off';
+      if (!port.state && port.result) state = "execute";
+      else state = port.state ? "on" : "off";
     }
-    io.emit('state', {
-      name: 'output' + index,
+    io.emit("state", {
+      name: "output" + index,
       state
     });
-    io.emit('output', {
+    io.emit("output", {
       index,
       ...port
     });
@@ -97,45 +84,41 @@ function Realtime(server, config, store) {
     const state = store.getState();
 
     switch (state.selfLearning.type) {
-      case 'individual':
-        {
-          const {
-            calibration,
-            tolerance,
-            success,
-            comIndex
-          } = state.selfLearning;
-          io.emit('selfLearning', {
-            individual: true,
-            calibration,
-            tolerance,
-            success,
-            comIndex,
-            ...state.selfLearning.individual
-          });
-          break;
-        }
-      case 'global':
-        {
-          const {
-            calibration,
-            tolerance,
-            success,
-            comIndex
-          } = state.selfLearning;
-          const {
-            matchedTolerance
-          } = state.selfLearning.global;
-          io.emit('selfLearning', {
-            individual: false,
-            calibration,
-            tolerance,
-            success,
-            comIndex,
-            matchedTolerance
-          });
-          break;
-        }
+      case "individual": {
+        const {
+          calibration,
+          tolerance,
+          success,
+          comIndex
+        } = state.selfLearning;
+        io.emit("selfLearning", {
+          individual: true,
+          calibration,
+          tolerance,
+          success,
+          comIndex,
+          ...state.selfLearning.individual
+        });
+        break;
+      }
+      case "global": {
+        const {
+          calibration,
+          tolerance,
+          success,
+          comIndex
+        } = state.selfLearning;
+        const { matchedTolerance } = state.selfLearning.global;
+        io.emit("selfLearning", {
+          individual: false,
+          calibration,
+          tolerance,
+          success,
+          comIndex,
+          matchedTolerance
+        });
+        break;
+      }
     }
   }
 
@@ -143,24 +126,24 @@ function Realtime(server, config, store) {
     const state = store.getState();
 
     state.input.ports.forEach((port, index) => {
-      emitInput(port, index)
+      emitInput(port, index);
     });
 
     state.output.ports.forEach((port, index) => {
-      emitOutput(port, index)
+      emitOutput(port, index);
     });
 
     state.table.cells.forEach((cell, index) => {
-      socket.emit('table', {
+      socket.emit("table", {
         index,
         value: cell.entry,
         manual: cell.manual
       });
-      socket.emit('tableColor', {
+      socket.emit("tableColor", {
         index,
         color: cell.color
       });
-    })
+    });
 
     // state.serial.histories.forEach((history, index) => {
     //   history.forEach(({entry, time}) => {
@@ -168,19 +151,15 @@ function Realtime(server, config, store) {
     //   });
     // });
 
-    state.serial.coms.forEach(({
-      entry,
-      time,
-      average
-    }, index) => {
+    state.serial.coms.forEach(({ entry, time, average }, index) => {
       if (!time) return;
 
-      socket.emit('entry', {
+      socket.emit("entry", {
         index,
         entryTime: time.getTime(),
         entry
       });
-      socket.emit('average', {
+      socket.emit("average", {
         index,
         average
       });
@@ -195,7 +174,7 @@ function Realtime(server, config, store) {
     checkConfigConsistency(config, consistent => {
       store.dispatch({
         type: CONFIG_UPDATE,
-        payload: config,
+        payload: config
       });
 
       if (consistent) {
@@ -207,12 +186,11 @@ function Realtime(server, config, store) {
           type: RESTART
         });
       }
-    })
+    });
   }
 
   function configExists(name, callback) {
-    if (!name.endsWith('.json'))
-      name = name + 'V' + version + '.json';
+    if (!name.endsWith(".json")) name = name + "V" + version + ".json";
 
     callback({
       result: fs.existsSync(path.join(configPath, name)),
@@ -221,14 +199,14 @@ function Realtime(server, config, store) {
   }
 
   function saveConfig(msg) {
-    const name = path.join(configPath, msg.name + 'V' + version + '.json');
+    const name = path.join(configPath, msg.name + "V" + version + ".json");
 
     store.dispatch({
       type: CONFIG_SAVE,
       payload: {
         name,
-        config: msg.config,
-      },
+        config: msg.config
+      }
     });
   }
 
@@ -251,10 +229,7 @@ function Realtime(server, config, store) {
     } catch (err) {}
   }
 
-  function uploadLog({
-    name,
-    index
-  }, callback) {
+  function uploadLog({ name, index }, callback) {
     store.dispatch({
       type: LOG_UPLOAD,
       payload: {
@@ -262,7 +237,7 @@ function Realtime(server, config, store) {
         ftpIndex: index,
         callback
       }
-    })
+    });
   }
 
   function setDateTime(dateTimeString) {
@@ -277,8 +252,8 @@ function Realtime(server, config, store) {
 
   function getLogList(msg, callback) {
     fs.readdir(logPath, (err, files) => {
-      const logList = files.filter((element) => element.endsWith('.csv'))
-      const sortedLogList = logList.sort((a,b)=>{
+      const logList = files.filter(element => element.endsWith(".csv"));
+      const sortedLogList = logList.sort((a, b) => {
         const dateA = a.slice(-23);
         const dateB = b.slice(-23);
 
@@ -288,25 +263,27 @@ function Realtime(server, config, store) {
         if (dateA > dateB) {
           return -1;
         }
-      
+
         // dates must be equal
         return 0;
-      })
+      });
       callback(sortedLogList);
     });
   }
 
   function getConfigList(msg, callback) {
-    const mayorVersion = version.split('.')[0];
+    const mayorVersion = version.split(".")[0];
     fs.readdir(configPath, (err, files) => {
-      callback(files
-        .filter((element) => element.match(/V[0-9]+.[0-9]+.json$/))
-        .filter((element) => {
-          const elementVersion = element.match(/V[0-9]+./)[0];
-          const elementMayorVersion = elementVersion.slice(1, -1);
-          return (elementMayorVersion === mayorVersion)
-        })
-        .sort());
+      callback(
+        files
+          .filter(element => element.match(/V[0-9]+.[0-9]+.json$/))
+          .filter(element => {
+            const elementVersion = element.match(/V[0-9]+./)[0];
+            const elementMayorVersion = elementVersion.slice(1, -1);
+            return elementMayorVersion === mayorVersion;
+          })
+          .sort()
+      );
     });
   }
 
@@ -321,7 +298,7 @@ function Realtime(server, config, store) {
             index,
             isForced: false,
             previousForced: true,
-            forcedState: false,
+            forcedState: false
           }
         });
       } else {
@@ -331,7 +308,7 @@ function Realtime(server, config, store) {
             index,
             isForced: true,
             previousForced: true,
-            forcedState: !port.forcedState,
+            forcedState: !port.forcedState
           }
         });
       }
@@ -342,7 +319,7 @@ function Realtime(server, config, store) {
           index,
           isForced: true,
           previousForced: false,
-          forcedState: !port.state,
+          forcedState: !port.state
         }
       });
     }
@@ -365,7 +342,7 @@ function Realtime(server, config, store) {
             index,
             isForced: false,
             previousForced: true,
-            forcedState: false,
+            forcedState: false
           }
         });
       } else {
@@ -375,7 +352,7 @@ function Realtime(server, config, store) {
             index,
             isForced: true,
             previousForced: true,
-            forcedState: !port.forcedState,
+            forcedState: !port.forcedState
           }
         });
       }
@@ -386,7 +363,7 @@ function Realtime(server, config, store) {
           index,
           isForced: true,
           previousForced: false,
-          forcedState: !port.state,
+          forcedState: !port.state
         }
       });
     }
@@ -430,10 +407,10 @@ function Realtime(server, config, store) {
     });
   }
 
-  function deleteIndividualSL({key, message}, callback) {
+  function deleteIndividualSL({ key, message }, callback) {
     store.dispatch({
       type: SL_INDIVIDUAL_DELETE_INDIVIDUAL,
-      payload: {key, message, callback}
+      payload: { key, message, callback }
     });
   }
 
@@ -448,8 +425,9 @@ function Realtime(server, config, store) {
       type: SL_RESET_INDIVIDUAL
     });
 
-    const startCalibration = require('../../configs/template').selfLearning.startCalibration;
-    const selfLearning = require('../../configs/current').selfLearning;
+    const startCalibration = require("../../configs/template").selfLearning
+      .startCalibration;
+    const selfLearning = require("../../configs/current").selfLearning;
 
     store.dispatch({
       type: CONFIG_UPDATE,
@@ -458,11 +436,11 @@ function Realtime(server, config, store) {
           ...selfLearning,
           startCalibration
         }
-      },
+      }
     });
 
-    const dataFile = path.join(__dirname, '../../data/data.xls');
-    const templateFile = path.join(__dirname, '../../data/template.xls')
+    const dataFile = path.join(__dirname, "../../data/data.xls");
+    const templateFile = path.join(__dirname, "../../data/template.xls");
 
     if (fs.existsSync(dataFile)) {
       fs.unlinkSync(dataFile);
@@ -478,7 +456,7 @@ function Realtime(server, config, store) {
   }
 
   function checkConfigConsistency(newConfig, callback) {
-    const oldConfig = require('../../configs/current');
+    const oldConfig = require("../../configs/current");
 
     for (let i = 0; i < oldConfig.serial.coms.length; i++) {
       if (oldConfig.serial.coms[i].name !== newConfig.serial.coms[i].name) {
@@ -498,147 +476,126 @@ function Realtime(server, config, store) {
   }
 
   setInterval(() => {
-    io.emit('time', new Date().getTime());
+    io.emit("time", new Date().getTime());
   }, 1000);
 
-  store.listen((lastAction) => {
+  store.listen(lastAction => {
     const state = store.getState();
     switch (lastAction.type) {
-      case INPUT_EMIT:
-        {
+      case INPUT_EMIT: {
+        const index = lastAction.payload;
+        const port = state.input.ports[index];
+
+        emitInput(port, index);
+        break;
+      }
+      case OUTPUT_EMIT: {
+        const index = lastAction.payload;
+        const port = state.output.ports[index];
+
+        emitOutput(port, index);
+        break;
+      }
+      case SERIAL_ENTRY: {
+        const { index, entry } = lastAction.payload;
+
+        io.emit("entry", {
+          index,
+          entry,
+          entryTime: new Date().getTime()
+        });
+        break;
+      }
+      case SERIAL_AVERAGE: {
+        const { index, average } = lastAction.payload;
+
+        io.emit("average", {
+          index,
+          average,
+          entryTime: new Date().getTime()
+        });
+        break;
+      }
+      case SERIAL_RESET: {
+        if (typeof lastAction.payload !== "undefined") {
           const index = lastAction.payload;
-          const port = state.input.ports[index];
 
-          emitInput(port, index);
-          break;
-        }
-      case OUTPUT_EMIT:
-        {
-          const index = lastAction.payload;
-          const port = state.output.ports[index];
-
-          emitOutput(port, index);
-          break;
-        }
-      case SERIAL_ENTRY:
-        {
-          const {
+          io.emit("entry", {
             index,
-            entry
-          } = lastAction.payload;
-
-          io.emit('entry', {
-            index,
-            entry,
+            entry: "",
             entryTime: new Date().getTime()
           });
-          break;
+        } else {
+          io.emit("clearSerial");
         }
-      case SERIAL_AVERAGE:
-        {
-          const {
-            index,
-            average
-          } = lastAction.payload;
+        break;
+      }
+      case TABLE_EMIT: {
+        const { index, entry, manual } = lastAction.payload;
 
-          io.emit('average', {
-            index,
-            average,
-            entryTime: new Date().getTime()
-          });
-          break;
-        }
-      case SERIAL_RESET:
-        {
-          if (typeof (lastAction.payload) !== 'undefined') {
-            const index = lastAction.payload;
+        io.emit("table", {
+          index,
+          value: entry,
+          manual: manual ? true : false
+        });
+        break;
+      }
+      case TABLE_COLOR: {
+        io.emit("tableColor", lastAction.payload);
+        break;
+      }
+      case EXCEL_FOUND_ROW: {
+        io.emit("notfound", !lastAction.payload.found);
+        break;
+      }
+      case ERROR_OCCURRED: {
+        const err = lastAction.payload;
 
-            io.emit('entry', {
-              index,
-              entry: '',
-              entryTime: new Date().getTime()
-            })
-          } else {
-            io.emit('clearSerial');
-          }
-          break;
-        }
-      case TABLE_EMIT:
-        {
-          const {
-            index,
-            entry,
-            manual
-          } = lastAction.payload;
-
-          io.emit('table', {
-            index,
-            value: entry,
-            manual: manual ? true : false
-          });
-          break;
-        }
-      case TABLE_COLOR:
-        {
-          io.emit('tableColor', lastAction.payload);
-          break;
-        }
-      case EXCEL_FOUND_ROW:
-        {
-          io.emit('notfound', !lastAction.payload.found);
-          break;
-        }
-      case ERROR_OCCURRED:
-        {
-          const err = lastAction.payload;
-
-          io.emit('error', err.message);
-          break;
-        }
+        io.emit("error", err.message);
+        break;
+      }
       case SL_RESET_INDIVIDUAL:
       case SL_RESET_GLOBAL:
       case SL_INDIVIDUAL_DELETE_GENERAL:
       case SL_INDIVIDUAL_DELETE_INDIVIDUAL:
       case SL_ENTRY:
       case SL_SUCCESS:
-      case SL_INDIVIDUAL_ACTIVITY:
-        {
-          emitSelfLearning();
-          break;
-        }
-      case EXECUTE_START:
-        {
-          io.emit('executeStart');
-          break;
-        }
+      case SL_INDIVIDUAL_ACTIVITY: {
+        emitSelfLearning();
+        break;
+      }
+      case EXECUTE_START: {
+        io.emit("executeStart");
+        break;
+      }
     }
   });
 
-  io.on('connection', socket => {
-    console.log('a user connected');
-    socket.emit('ip', ip.address());
+  io.on("connection", socket => {
+    console.log("a user connected");
+    socket.emit("ip", ip.address());
     emitAllState(socket);
 
     const commands = {
-      'configExists': configExists,
-      'settings': saveCurrentConfig,
-      'saveConfig': saveConfig,
-      'loadConfig': loadConfig,
-      'deleteConfig': deleteConfig,
-      'deleteLog': deleteLog,
-      'uploadLog': uploadLog,
-      'setDateTime': setDateTime,
-      'getLogList': getLogList,
-      'getConfigList': getConfigList,
-      'forceInput': forceInput,
-      'forceOutput': forceOutput,
-      'manual': handleManual,
-      'deleteGeneralSL': deleteGeneralSL,
-      'deleteIndividualSL': deleteIndividualSL,
-      'resetIndividualSL': resetIndividualSL,
-      'deleteSLData': deleteSLData,
-      'checkConfigConsistency': checkConfigConsistency
-    }
+      configExists: configExists,
+      settings: saveCurrentConfig,
+      saveConfig: saveConfig,
+      loadConfig: loadConfig,
+      deleteConfig: deleteConfig,
+      deleteLog: deleteLog,
+      uploadLog: uploadLog,
+      setDateTime: setDateTime,
+      getLogList: getLogList,
+      getConfigList: getConfigList,
+      forceInput: forceInput,
+      forceOutput: forceOutput,
+      manual: handleManual,
+      deleteGeneralSL: deleteGeneralSL,
+      deleteIndividualSL: deleteIndividualSL,
+      resetIndividualSL: resetIndividualSL,
+      deleteSLData: deleteSLData,
+      checkConfigConsistency: checkConfigConsistency
+    };
 
     for (let command in commands) {
       socket.on(command, (msg, callback) => commands[command](msg, callback));

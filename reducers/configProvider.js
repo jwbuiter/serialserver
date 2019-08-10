@@ -1,3 +1,3 @@
-const config = require('../configs/current');
+const config = require("../configs/current");
 
 module.exports = () => config;

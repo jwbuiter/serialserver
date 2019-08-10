@@ -1,46 +1,44 @@
 const {
   OUTPUT_RESULT_CHANGED,
   OUTPUT_FORCED_CHANGED,
-  OUTPUT_EXECUTING_CHANGED,
-} = require('../actions/types');
+  OUTPUT_EXECUTING_CHANGED
+} = require("../actions/types");
 
-const {output} = require('../configs/current');
+const { output } = require("../configs/current");
 
 const initialState = {
-  ports: Array.from({length: output.ports.length}, u => ({
+  ports: Array.from({ length: output.ports.length }, u => ({
     state: false,
     result: false,
     isForced: false,
     previousForced: false,
     forcedState: false,
-    executing: false,
-  })),
+    executing: false
+  }))
 };
 
-function calculateState(port, index){
-  if (port.isForced)
-    return port.forcedState;
+function calculateState(port, index) {
+  if (port.isForced) return port.forcedState;
 
-  if (output.ports[index].execute)
-    return (port.executing)
-  
+  if (output.ports[index].execute) return port.executing;
+
   return port.result;
 }
 
 module.exports = function(state = initialState, action) {
-  switch(action.type) {
-    case OUTPUT_RESULT_CHANGED:{
-      const {index, result} = action.payload;
+  switch (action.type) {
+    case OUTPUT_RESULT_CHANGED: {
+      const { index, result } = action.payload;
       const newPorts = Array.from(state.ports);
-      newPorts[index].result = result?true:false;
+      newPorts[index].result = result ? true : false;
       newPorts[index].state = calculateState(newPorts[index], index);
       return {
         ...state,
-        ports: newPorts,
-      }
+        ports: newPorts
+      };
     }
-    case OUTPUT_FORCED_CHANGED:{
-      const {index, isForced, previousForced, forcedState} = action.payload;
+    case OUTPUT_FORCED_CHANGED: {
+      const { index, isForced, previousForced, forcedState } = action.payload;
       const newPorts = Array.from(state.ports);
       newPorts[index].isForced = isForced;
       newPorts[index].previousForced = previousForced;
@@ -48,20 +46,20 @@ module.exports = function(state = initialState, action) {
       newPorts[index].state = calculateState(newPorts[index], index);
       return {
         ...state,
-        ports: newPorts,
-      }
+        ports: newPorts
+      };
     }
-    case OUTPUT_EXECUTING_CHANGED:{
-      const {index, executing} = action.payload;
+    case OUTPUT_EXECUTING_CHANGED: {
+      const { index, executing } = action.payload;
       const newPorts = Array.from(state.ports);
       newPorts[index].executing = executing;
       newPorts[index].state = calculateState(newPorts[index], index);
       return {
         ...state,
-        ports: newPorts,
-      }
+        ports: newPorts
+      };
     }
     default:
       return state;
   }
-}
+};

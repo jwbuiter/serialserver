@@ -1,16 +1,15 @@
-const fs = require('fs');
-const XLSX = require('xlsx');
-const schedule = require('node-schedule');
-const dateFormat = require('dateformat');
-const path = require('path');
+const fs = require("fs");
+const XLSX = require("xlsx");
+const schedule = require("node-schedule");
+const dateFormat = require("dateformat");
+const path = require("path");
 
-const constants = require('../../config.static');
-const backupPath = path.join(constants.saveLogLocation, 'backup.json');
+const constants = require("../../config.static");
+const backupPath = path.join(constants.saveLogLocation, "backup.json");
 
 const {
   STATE_CHANGED,
   LOG_ENTRY,
-  LOG_DELETE,
   LOG_MAKE_ENTRY,
   LOG_MAKE_PARTIAL,
   LOG_RESET,
@@ -21,7 +20,7 @@ const {
   LOG_BACKUP,
   LOG_RECOVER,
   RESTART
-} = require('../../actions/types')
+} = require("../../actions/types");
 
 function LoggerModule(config, store) {
   const {
@@ -32,7 +31,7 @@ function LoggerModule(config, store) {
     logID,
     unique
   } = config;
-  const {activityCounter, enabled} = store.getState().config.selfLearning;
+  const { activityCounter, enabled } = store.getState().config.selfLearning;
   const activityIndex = 1 - Number(enabled[3]);
 
   let fileName;
@@ -43,7 +42,10 @@ function LoggerModule(config, store) {
         type: LOG_RESET,
         payload: fileName
       });
-    fileName = `${constants.name}_${logID}_${dateFormat(new Date(), 'yyyy-mm-dd_HH-MM-ss')}.csv`;
+    fileName = `${constants.name}_${logID}_${dateFormat(
+      new Date(),
+      "yyyy-mm-dd_HH-MM-ss"
+    )}.csv`;
   }
 
   resetLog();
@@ -55,61 +57,65 @@ function LoggerModule(config, store) {
       store.dispatch({
         type: LOG_RECOVER,
         payload: backup
-      })
+      });
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
   }
 
   switch (resetMode) {
-    case 'interval':
-      {
-        setInterval(() => {
-          resetLog();
-        }, resetInterval * 60 * 1000);
-        break;
-      }
-    case 'time':
-      {
-        const time = resetTime.split(':');
-        schedule.scheduleJob(time[1] + ' ' + time[0] + ' * * *', () => {
-          resetLog();
-        });
-        break;
-      }
+    case "interval": {
+      setInterval(() => {
+        resetLog();
+      }, resetInterval * 60 * 1000);
+      break;
+    }
+    case "time": {
+      const time = resetTime.split(":");
+      schedule.scheduleJob(time[1] + " " + time[0] + " * * *", () => {
+        resetLog();
+      });
+      break;
+    }
   }
 
-  function updateActivity(activityEntry, full){
+  function updateActivity(activityEntry, full) {
     const logEntries = store.getState().logger.entries;
-    const oldEntry = logEntries.find(entry=>entry.coms[activityIndex] === activityEntry && entry.TA);
+    const oldEntry = logEntries.find(
+      entry => entry.coms[activityIndex] === activityEntry && entry.TA
+    );
 
-    if (!oldEntry){
+    if (!oldEntry) {
       store.dispatch({
-        type: LOG_ACTIVITY_OVERWRITE, 
+        type: LOG_ACTIVITY_OVERWRITE,
         payload: {
-          index: logEntries.length - 1, 
+          index: logEntries.length - 1,
           newValue: 1
         }
       });
       return;
     }
 
-    const TA = logEntries.filter(entry=>entry.coms[activityIndex] === activityEntry).length; 
-    const oldIndex = logEntries.findIndex(entry=>entry.coms[activityIndex] === activityEntry && entry.TA);
-    const newIndex = (full || !oldEntry.full) ? logEntries.length-1 : oldIndex;
+    const TA = logEntries.filter(
+      entry => entry.coms[activityIndex] === activityEntry
+    ).length;
+    const oldIndex = logEntries.findIndex(
+      entry => entry.coms[activityIndex] === activityEntry && entry.TA
+    );
+    const newIndex = full || !oldEntry.full ? logEntries.length - 1 : oldIndex;
 
-    if (oldIndex !== newIndex){
+    if (oldIndex !== newIndex) {
       store.dispatch({
-        type: LOG_ACTIVITY_OVERWRITE, 
+        type: LOG_ACTIVITY_OVERWRITE,
         payload: {
-          index: oldIndex, 
-          newValue: '' 
+          index: oldIndex,
+          newValue: ""
         }
       });
     }
 
     store.dispatch({
-      type: LOG_ACTIVITY_OVERWRITE, 
+      type: LOG_ACTIVITY_OVERWRITE,
       payload: {
         index: newIndex,
         newValue: TA
@@ -117,95 +123,65 @@ function LoggerModule(config, store) {
     });
   }
 
-
-  store.listen((lastAction) => {
+  store.listen(lastAction => {
     switch (lastAction.type) {
-      case LOG_MAKE_ENTRY:
-        {
-          const state = store.getState();
-
-          const newRow = {
-            name: constants.name,
-            id: logID,
-            date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-            coms: state.serial.coms.map(com => com.numeric ? Number(com.entry) : com.entry),
-            cells: state.table.cells.map(cell => cell.numeric ? Number(cell.entry) : cell.entry),
-            TU: '',
-            TA: '',
-            full: true
-          };
-
-          if (unique !== 'off') {
-            const uniqueIndex = Number(unique.slice(-1));
-            const comValue = state.serial.coms[uniqueIndex].entry;
-            let uniqueTimes = 1;
-
-            foundOther = state.logger.entries.reduce((found, entry, index) => {
-              if (entry.coms[uniqueIndex] === comValue && entry.TU !== '') {
-                uniqueTimes = entry.TU + 1;
-                return index;
-              }
-              return found;
-            }, -1)
-
-            if (foundOther !== -1) {
-              store.dispatch({
-                type: LOG_UNIQUE_OVERWRITE,
-                payload: foundOther,
-              })
-            }
-
-            newRow.TU = uniqueTimes;
-          }
-
-          if (activityCounter){
-            store.dispatch({
-              type: LOG_OVERWRITE,
-              payload: newRow,
-            });
-            updateActivity(state.serial.coms[activityIndex].entry, true);
-          } else {
-            store.dispatch({
-              type: LOG_ENTRY,
-              payload: newRow,
-            });
-          }
-
-          store.dispatch({
-            type: LOG_SAVE,
-            payload: fileName,
-          });
-
-          store.dispatch({
-            type: STATE_CHANGED
-          });
-          break;
-        }
-      case LOG_MAKE_PARTIAL:{
-        const {index, entry} = lastAction.payload;
+      case LOG_MAKE_ENTRY: {
         const state = store.getState();
 
         const newRow = {
           name: constants.name,
           id: logID,
-          date: dateFormat(new Date(), 'yyyy-mm-dd HH:MM:ss'),
-          coms: state.serial.coms.map(com => com.numeric ? Number(com.entry) : com.entry).map((entry, comIndex)=> comIndex===index?entry:''),
-          cells: state.table.cells.map(cell => ''),
-          TU: '',
-          TA: '',
-          full: false
+          date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),
+          coms: state.serial.coms.map(com =>
+            com.numeric ? Number(com.entry) : com.entry
+          ),
+          cells: state.table.cells.map(cell =>
+            cell.numeric ? Number(cell.entry) : cell.entry
+          ),
+          TU: "",
+          TA: "",
+          full: true
         };
 
-        store.dispatch({
-          type: LOG_ENTRY,
-          payload: newRow,
-        });
+        if (unique !== "off") {
+          const uniqueIndex = Number(unique.slice(-1));
+          const comValue = state.serial.coms[uniqueIndex].entry;
+          let uniqueTimes = 1;
 
-        updateActivity(entry, false);
+          foundOther = state.logger.entries.reduce((found, entry, index) => {
+            if (entry.coms[uniqueIndex] === comValue && entry.TU !== "") {
+              uniqueTimes = entry.TU + 1;
+              return index;
+            }
+            return found;
+          }, -1);
+
+          if (foundOther !== -1) {
+            store.dispatch({
+              type: LOG_UNIQUE_OVERWRITE,
+              payload: foundOther
+            });
+          }
+
+          newRow.TU = uniqueTimes;
+        }
+
+        if (activityCounter) {
+          store.dispatch({
+            type: LOG_OVERWRITE,
+            payload: newRow
+          });
+          updateActivity(state.serial.coms[activityIndex].entry, true);
+        } else {
+          store.dispatch({
+            type: LOG_ENTRY,
+            payload: newRow
+          });
+        }
 
         store.dispatch({
           type: LOG_SAVE,
-          payload: fileName,
+          payload: fileName
         });
 
         store.dispatch({
@@ -213,12 +189,46 @@ function LoggerModule(config, store) {
         });
         break;
       }
-      case LOG_SAVE:
-        {
-          if (!writeToFile) break;
-          const fileName = lastAction.payload;
-          const state = store.getState();
-          const saveArray = [state.logger.legend].concat(state.logger.entries.map(entry => ([
+      case LOG_MAKE_PARTIAL: {
+        const { index, entry } = lastAction.payload;
+        const state = store.getState();
+
+        const newRow = {
+          name: constants.name,
+          id: logID,
+          date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),
+          coms: state.serial.coms
+            .map(com => (com.numeric ? Number(com.entry) : com.entry))
+            .map((entry, comIndex) => (comIndex === index ? entry : "")),
+          cells: state.table.cells.map(cell => ""),
+          TU: "",
+          TA: "",
+          full: false
+        };
+
+        store.dispatch({
+          type: LOG_ENTRY,
+          payload: newRow
+        });
+
+        updateActivity(entry, false);
+
+        store.dispatch({
+          type: LOG_SAVE,
+          payload: fileName
+        });
+
+        store.dispatch({
+          type: STATE_CHANGED
+        });
+        break;
+      }
+      case LOG_SAVE: {
+        if (!writeToFile) break;
+        const fileName = lastAction.payload;
+        const state = store.getState();
+        const saveArray = [state.logger.legend].concat(
+          state.logger.entries.map(entry => [
             entry.name,
             entry.id,
             entry.date,
@@ -226,29 +236,29 @@ function LoggerModule(config, store) {
             ...entry.cells,
             entry.TU,
             entry.TA
-          ])));
+          ])
+        );
 
-          const wb = XLSX.utils.book_new();
-          const ws = XLSX.utils.aoa_to_sheet(saveArray);
-          XLSX.utils.book_append_sheet(wb, ws, 'data');
-          XLSX.writeFile(wb, path.join(constants.saveLogLocation, fileName));
-          break;
-        }
-      case LOG_BACKUP:
-        {
-          const logger = store.getState().logger;
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(saveArray);
+        XLSX.utils.book_append_sheet(wb, ws, "data");
+        XLSX.writeFile(wb, path.join(constants.saveLogLocation, fileName));
+        break;
+      }
+      case LOG_BACKUP: {
+        const logger = store.getState().logger;
 
-          fs.writeFile(backupPath, JSON.stringify(logger), 'utf8', (err) => {
-            if (err) {
-              console.log(err);
-            }
+        fs.writeFile(backupPath, JSON.stringify(logger), "utf8", err => {
+          if (err) {
+            console.log(err);
+          }
 
-            store.dispatch({
-              type: RESTART
-            });
+          store.dispatch({
+            type: RESTART
           });
-          break;
-        }
+        });
+        break;
+      }
     }
   });
 
