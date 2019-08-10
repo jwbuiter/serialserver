@@ -67,20 +67,20 @@ function Com(index, config, store) {
   }
 
   function dispatch(entry) {
-      const numericValue = Number(entry)
-      if (
-        autoCommandEnabled &&
-        numericValue > autoCommandMin &&
-        numericValue < autoCommandMax
-      ) {
-        clearTimeout(autoCommandTimeout);
-        autoCommandTimeout = setTimeout(() => {
-          store.dispatch({
-            type: SERIAL_COMMAND,
-            payload: { command: autoCommandText }
-          });
-        }, autoCommandTime * 1000);
-      }
+    const numericValue = Number(entry);
+    if (
+      autoCommandEnabled &&
+      numericValue > autoCommandMin &&
+      numericValue < autoCommandMax
+    ) {
+      clearTimeout(autoCommandTimeout);
+      autoCommandTimeout = setTimeout(() => {
+        store.dispatch({
+          type: SERIAL_COMMAND,
+          payload: { command: autoCommandText, index }
+        });
+      }, autoCommandTime * 1000);
+    }
 
     if (zeroReset && numericValue == 0 && !zeroResetTimeout) {
       store.dispatch({
