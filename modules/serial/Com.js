@@ -67,7 +67,22 @@ function Com(index, config, store) {
   }
 
   function dispatch(entry) {
-    if (zeroReset && Number(entry) == 0 && !zeroResetTimeout) {
+      const numericValue = Number(entry)
+      if (
+        autoCommandEnabled &&
+        numericValue > autoCommandMin &&
+        numericValue < autoCommandMax
+      ) {
+        clearTimeout(autoCommandTimeout);
+        autoCommandTimeout = setTimeout(() => {
+          store.dispatch({
+            type: SERIAL_COMMAND,
+            payload: { command: autoCommandText }
+          });
+        }, autoCommandTime * 1000);
+      }
+
+    if (zeroReset && numericValue == 0 && !zeroResetTimeout) {
       store.dispatch({
         type: TABLE_RESET
       });
@@ -125,20 +140,6 @@ function Com(index, config, store) {
           index
         }
       });
-    }
-
-    if (
-      autoCommandEnabled &&
-      numericValue > autoCommandMin &&
-      numericValue < autoCommandMax
-    ) {
-      clearTimeout(autoCommandTimeout);
-      autoCommandTimeout = setTimeout(() => {
-        store.dispatch({
-          type: SERIAL_COMMAND,
-          payload: { command: autoCommandText }
-        });
-      }, autoCommandTime * 1000);
     }
 
     return numericValue.toFixed(digits);
