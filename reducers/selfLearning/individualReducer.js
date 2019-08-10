@@ -48,7 +48,7 @@ module.exports = function individualReducer(
           ...newGeneralEntries[key],
           entries: [entry]
             .concat(Array.from(newGeneralEntries[key].entries))
-            .slice(-5),
+            .slice(0, 5),
           extra
         };
       } else {
