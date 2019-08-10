@@ -241,12 +241,17 @@ function Realtime(server, config, store) {
   }
 
   function setDateTime(dateTimeString) {
-    console.log(`hwclock --set --date="${dateTimeString}"`);
     exec(`hwclock --set --date="${dateTimeString}"`, (err, stdout, stderr) => {
       if (err) {
         console.error(`exec error: ${err}`);
         return;
       }
+      exec(`hwclock -s`, (err, stdout, stderr) => {
+        if (err) {
+          console.error(`exec error: ${err}`);
+          return;
+        }
+      });
     });
   }
 
