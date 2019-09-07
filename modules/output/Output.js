@@ -26,7 +26,7 @@ function Output(index, config, store) {
 
   if (myGPIO) {
     myGPIO.watch((err, val) => {
-      state = GPIO.readSync() ? true : false;
+      state = myGPIO.readSync() ? true : false;
     });
   }
 

@@ -201,7 +201,7 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
-        "hardwareOutput": 0
+        "hardwareOutput": -1
       },
       {
         "name": "",
@@ -210,7 +210,7 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
-        "hardwareOutput": 1
+        "hardwareOutput": -1
       },
       {
         "name": "",
@@ -219,7 +219,7 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
-        "hardwareOutput": 2
+        "hardwareOutput": -1
       },
       {
         "name": "",
@@ -228,7 +228,7 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
-        "hardwareOutput": 3
+        "hardwareOutput": -1
       },
       {
         "name": "",
@@ -237,7 +237,7 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
-        "hardwareOutput": 4
+        "hardwareOutput": -1
       },
       {
         "name": "",
@@ -246,7 +246,7 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
-        "hardwareOutput": 5
+        "hardwareOutput": -1
       },
       {
         "name": "",
@@ -255,7 +255,7 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
-        "hardwareOutput": 6
+        "hardwareOutput": -1
       },
       {
         "name": "",
@@ -264,7 +264,7 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
-        "hardwareOutput": 7
+        "hardwareOutput": -1
       },
       {
         "name": "",
@@ -273,7 +273,7 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
-        "hardwareOutput": 8
+        "hardwareOutput": -1
       },
       {
         "name": "",
@@ -282,7 +282,7 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
-        "hardwareOutput": 9
+        "hardwareOutput": -1
       }
     ]
   },
