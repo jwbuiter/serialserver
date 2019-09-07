@@ -455,6 +455,7 @@
     "startTolerance": 50,
     "individualTolerance": 4,
     "individualToleranceAbs": 2,
+    "individualToleranceShift": 34,
     "individualCorrectionIncrement": 25,
     "individualCorrectionLimit": 2,
     "activityCounter": false,

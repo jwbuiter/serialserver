@@ -253,6 +253,19 @@ function Parser(store) {
         calibration = state.individual.individualEntries[key].calibration;
         tolerance =
           state.individual.individualEntries[key].tolerance / calibration;
+
+        // individualToleranceShift only affects learned entries in individual mode and only SCMAX and SCMIN
+        const shift = config.selfLearning.individualToleranceShift / 100;
+        switch (property) {
+          case "SCMAX": {
+            tolerance *= 1 + shift;
+            break;
+          }
+          case "SCMIN": {
+            tolerance *= 1 - shift;
+            break;
+          }
+        }
       } else {
         tolerance = state.tolerance;
         calibration = state.calibration;
