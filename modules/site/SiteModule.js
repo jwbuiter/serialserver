@@ -1,6 +1,7 @@
 const express = require("express");
 const fileUpload = require("express-fileupload");
 const path = require("path");
+const zip = require("express-zip");
 const fs = require("fs");
 const { exec } = require("child_process");
 const dateFormat = require("dateformat");
