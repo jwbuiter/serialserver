@@ -1,6 +1,5 @@
 const express = require("express");
 const fileUpload = require("express-fileupload");
-const zip = require("express-zip");
 const path = require("path");
 const fs = require("fs");
 const { exec } = require("child_process");
@@ -197,10 +196,10 @@ function SiteModule(config, store) {
           path: path.join(logPath, element),
           name: element
         }));
-        res.zip(
-          fileList,
-          dateFormat(new Date(), "yyyy-mm-dd_HH-MM-ss") + ".zip"
-        );
+        const logID = store.getState().config.logger.logID;
+        const date = dateFormat(new Date(), "yyyy-mm-dd_HH-MM-ss");
+
+        res.zip(fileList, `${constants.name}_${logID}_${date}.zip`);
       } else if (req.query.file) {
         res.download(path.join(logPath, req.query.file));
       }

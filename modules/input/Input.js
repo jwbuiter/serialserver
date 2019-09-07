@@ -22,7 +22,6 @@ const {
   SL_TEACH,
   RESTART
 } = require("../../actions/types");
-const parser = require("../parser/Parser");
 const constants = require("../../config.static");
 
 function Input(index, config, store) {
@@ -33,13 +32,25 @@ function Input(index, config, store) {
     invert,
     manualTimeout,
     commandCom,
-    commandValue
+    commandValue,
+    hardwareInput
   } = config;
-  const myGPIO = new Gpio(constants.inputPin[index], "in", "both");
+
+  const myGPIO = ~hardwareInput
+    ? new Gpio(constants.inputPin[hardwareInput], "in", "both")
+    : null;
   let debounce = setTimeout(() => 0, 1);
   let force = setTimeout(() => 0, 1);
   let stateJSON = "";
   let state = false;
+
+  if (myGPIO) {
+    myGPIO.watch((err, val) => {
+      setTimeout(() => {
+        dispatchPhysical(myGPIO.readSync() ? true : false);
+      }, 10);
+    });
+  }
 
   function handleInput(state) {
     switch (formula) {
@@ -146,12 +157,6 @@ function Input(index, config, store) {
       }
     });
   }
-
-  myGPIO.watch((err, val) => {
-    setTimeout(() => {
-      dispatchPhysical(myGPIO.readSync() ? true : false);
-    }, 10);
-  });
 
   store.listen(lastAction => {
     switch (lastAction.type) {

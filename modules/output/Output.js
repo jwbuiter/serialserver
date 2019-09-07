@@ -14,13 +14,21 @@ const Parser = require("../parser/Parser");
 const constants = require("../../config.static");
 
 function Output(index, config, store) {
-  const { execute, seconds, formula } = config;
+  const { execute, seconds, formula, hardwareOutput } = config;
 
-  const myGPIO = new Gpio(constants.outputPin[index], "out");
+  const myGPIO = ~hardwareOutput
+    ? new Gpio(constants.outputPin[hardwareOutput], "out")
+    : null;
   const myParser = new Parser(store);
 
   let stateJSON = "";
   let state = false;
+
+  if (myGPIO) {
+    myGPIO.watch((err, val) => {
+      state = GPIO.readSync() ? true : false;
+    });
+  }
 
   store.listen(lastAction => {
     switch (lastAction.type) {
@@ -31,8 +39,9 @@ function Output(index, config, store) {
           const newState = store.getState().output.ports[index];
           const newStateJSON = JSON.stringify(newState);
           if (state !== newState.state) {
+            if (myGPIO) myGPIO.writeSync(newState.state ? 1 : 0);
+
             state = newState.state;
-            myGPIO.writeSync(newState.state ? 1 : 0);
             store.dispatch({
               type: STATE_CHANGED
             });
