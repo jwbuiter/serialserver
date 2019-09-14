@@ -189,6 +189,78 @@
         "colorConditions": [],
         "readerPort": 0,
         "visible": false
+      },
+      {
+        "name": "",
+        "formula": "",
+        "numeric": true,
+        "digits": 0,
+        "resetOnExe": true,
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": [],
+        "readerPort": 0,
+        "visible": false
+      },
+      {
+        "name": "",
+        "formula": "",
+        "numeric": true,
+        "digits": 0,
+        "resetOnExe": true,
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": [],
+        "readerPort": 0,
+        "visible": false
+      },
+      {
+        "name": "",
+        "formula": "",
+        "numeric": true,
+        "digits": 0,
+        "resetOnExe": true,
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": [],
+        "readerPort": 0,
+        "visible": false
+      },
+      {
+        "name": "",
+        "formula": "",
+        "numeric": true,
+        "digits": 0,
+        "resetOnExe": true,
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": [],
+        "readerPort": 0,
+        "visible": false
+      },
+      {
+        "name": "",
+        "formula": "",
+        "numeric": true,
+        "digits": 0,
+        "resetOnExe": true,
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": [],
+        "readerPort": 0,
+        "visible": false
+      },
+      {
+        "name": "",
+        "formula": "",
+        "numeric": true,
+        "digits": 0,
+        "resetOnExe": true,
+        "type": "normal",
+        "menuOptions": [],
+        "colorConditions": [],
+        "readerPort": 0,
+        "visible": false
       }
     ]
   },
@@ -299,7 +371,7 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": 0
+        "hardwareInput": -1
       },
       {
         "name": "",
@@ -312,7 +384,7 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": 1
+        "hardwareInput": -1
       },
       {
         "name": "",
@@ -325,7 +397,7 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": 2
+        "hardwareInput": -1
       },
       {
         "name": "",
@@ -338,7 +410,7 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": 3
+        "hardwareInput": -1
       },
       {
         "name": "",
@@ -351,7 +423,7 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": 4
+        "hardwareInput": -1
       },
       {
         "name": "",

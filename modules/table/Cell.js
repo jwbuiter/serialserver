@@ -64,12 +64,12 @@ function Cell(index, config, store) {
         }
       });
     } else {
+      content = ""
       store.dispatch({
         type: TABLE_RESET_CELL,
         payload: index
       });
     }
-
     store.dispatch({
       type: TABLE_EMIT,
       payload: {

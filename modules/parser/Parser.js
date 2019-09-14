@@ -302,8 +302,8 @@ function Parser(store) {
       try {
         formula = formula
           .toUpperCase()
-          .replace("AND", "&&")
-          .replace("OR", "||")
+          .replace(" AND ", " && ")
+          .replace(" OR ", " || ")
           .replace(/#[A-G][0-9]/g, parseTable)
           .replace(/#I[0-9]+/g, parseInput)
           .replace(/#O[0-9]+/g, parseOutput)

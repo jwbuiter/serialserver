@@ -97,6 +97,18 @@ function Input(index, config, store) {
         });
         break;
       }
+      case "reset":{
+        store.dispatch({
+          type: SERIAL_RESET
+        });
+        store.dispatch({
+          type: TABLE_RESET
+        });
+        store.dispatch({
+          type: HANDLE_OUTPUT
+        });
+        break;
+      }
       case "teach": {
         store.dispatch({
           type: SL_TEACH,
