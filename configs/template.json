@@ -249,18 +249,6 @@
         "colorConditions": [],
         "readerPort": 0,
         "visible": false
-      },
-      {
-        "name": "",
-        "formula": "",
-        "numeric": true,
-        "digits": 0,
-        "resetOnExe": true,
-        "type": "normal",
-        "menuOptions": [],
-        "colorConditions": [],
-        "readerPort": 0,
-        "visible": false
       }
     ]
   },
