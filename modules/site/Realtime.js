@@ -475,6 +475,10 @@ function Realtime(server, config, store) {
         callback(false);
         return;
       }
+      if (oldConfig.table.cells[i].showInLog !== newConfig.table.cells[i].showInLog) {
+        callback(false);
+        return;
+      }
     }
 
     callback(true);

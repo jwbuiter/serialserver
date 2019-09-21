@@ -54,7 +54,7 @@ function Cell(index, config, store) {
 
   function resetCell() {
     color = "";
-    if (type === "menu") {
+    if (type === "menu" && menuOptions[0]) {
       content = menuOptions[0].key;
       store.dispatch({
         type: TABLE_ENTRY,

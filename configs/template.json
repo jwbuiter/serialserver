@@ -80,7 +80,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       },
       {
         "name": "",
@@ -92,7 +93,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       },
       {
         "name": "",
@@ -104,7 +106,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       },
       {
         "name": "",
@@ -116,7 +119,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       },
       {
         "name": "",
@@ -128,7 +132,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       },
       {
         "name": "",
@@ -140,7 +145,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       },
       {
         "name": "",
@@ -152,7 +158,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       },
       {
         "name": "",
@@ -164,7 +171,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       },
       {
         "name": "",
@@ -176,7 +184,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       },
       {
         "name": "",
@@ -188,7 +197,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       },
       {
         "name": "",
@@ -200,7 +210,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       },
       {
         "name": "",
@@ -212,7 +223,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       },
       {
         "name": "",
@@ -224,7 +236,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       },
       {
         "name": "",
@@ -236,7 +249,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       },
       {
         "name": "",
@@ -248,7 +262,8 @@
         "menuOptions": [],
         "colorConditions": [],
         "readerPort": 0,
-        "visible": false
+        "visible": false,
+        "showInLog": false
       }
     ]
   },

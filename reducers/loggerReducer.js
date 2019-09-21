@@ -38,6 +38,15 @@ const initialState = {
     0,
     0
   ],
+  visible: [
+    false,
+    false,
+    true,
+    ...serial.coms.map(_ => true),
+    ...table.cells.map(element => element.showInLog),
+    true,
+    true
+  ],
   entries: []
 };
 
