@@ -82,7 +82,7 @@ function Cell(index, config, store) {
 
   function dispatch(entry) {
     if (numeric) {
-      entry = Number(entry).toFixed(digits);
+      entry = +Number(entry).toFixed(digits);
     } else if (typeof entry === "boolean") {
       entry = entry ? 1 : 0;
     } else {
