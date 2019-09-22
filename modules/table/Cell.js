@@ -97,7 +97,7 @@ function Cell(index, config, store) {
       }
     });
 
-    if (entry !== content) {
+    if (entry !== content  && !Number.isNaN(entry) && !Number.isNaN(content)) {
       content = entry;
       store.dispatch({
         type: TABLE_EMIT,
