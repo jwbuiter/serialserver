@@ -163,12 +163,6 @@ module.exports = function individualReducer(
         if(measurements.length == 0)
           continue;
 
-        const increments = oldEntry.numUpdates ? 0 : oldEntry.increments + 1;
-        const tolerance =
-          ((oldEntry.calibration * individualTolerance) / 100 +
-            individualToleranceAbs) *
-          (1 + (increments * individualCorrectionIncrement) / 100);
-
         newIndividualEntries[key] = {
           ...oldEntry,
           measurements,
