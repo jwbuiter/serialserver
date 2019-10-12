@@ -20,6 +20,32 @@ function initialStateIndividual() {
   };
 }
 
+function average(arr){
+  return arr.reduce((acc,cur)=>acc+cur)/arr.length;
+}
+
+function calculateEntry(measurements){
+  const {
+    individualTolerance,
+    individualToleranceAbs,
+    individualCorrectionIncrement
+  } = selfLearning;
+
+  const calibration = average(measurements.map(elem=>elem.value));
+  const increments = average(measurements.map(elem=>Math.max(0, elem.age - 1)));
+
+  const tolerance =
+    ((calibration * individualTolerance) / 100 +
+      individualToleranceAbs) *
+    (1 + (increments * individualCorrectionIncrement) / 100); 
+
+  return {
+    tolerance,
+    increments,
+    calibration
+  }
+}
+
 module.exports = function individualReducer(
   state = initialStateIndividual(),
   action = { type: null, payload: null }
@@ -32,16 +58,21 @@ module.exports = function individualReducer(
       const newIndividualEntries = Object.assign({}, state.individualEntries);
 
       if (key in state.individualEntries) {
-        const tolerance =
-          (entry * selfLearning.individualTolerance) / 100 +
-          selfLearning.individualToleranceAbs;
+        const newMeasurement = {
+          value: entry, 
+          age: 0
+        }
+        const measurements = [
+          newMeasurement, 
+          ...newIndividualEntries[key].measurements
+        ].slice(0, selfLearning.individualAverageNumber);
+
         newIndividualEntries[key] = {
           ...newIndividualEntries[key],
-          calibration: entry,
+          measurements,
           extra,
-          tolerance,
           numUpdates: newIndividualEntries[key].numUpdates + 1,
-          increments: 0
+          ...calculateEntry(measurements)
         };
       } else if (key in state.generalEntries) {
         newGeneralEntries[key] = {
@@ -74,19 +105,21 @@ module.exports = function individualReducer(
 
       delete newGeneralEntries[key];
 
-      const tolerance =
-        (calibration * selfLearning.individualTolerance) / 100 +
-        selfLearning.individualToleranceAbs;
+      const newMeasurement = {
+        value: calibration, 
+        age: 0
+      }
+
+      const measurements = Array(selfLearning.individualAverageNumber).fill(newMeasurement);
 
       newIndividualEntries[key] = {
-        calibration,
+        ...calculateEntry(measurements),
+        measurements,
         extra: state.generalEntries[key].extra,
-        tolerance,
         numUpdates: 1,
         numUpdatesHistory: [],
         activity: 1,
         activityHistory: [],
-        increments: 0
       };
       return {
         ...state,
@@ -118,13 +151,17 @@ module.exports = function individualReducer(
       const newIndividualEntries = {};
       const newGeneralEntries = {};
       const {
-        individualTolerance,
-        individualToleranceAbs,
-        individualCorrectionIncrement
+        individualCorrectionLimit
       } = selfLearning;
 
       for (let key in state.individualEntries) {
         const oldEntry = state.individualEntries[key];
+        const measurements = oldEntry.measurements
+          .map(elem => ({...elem, age: elem.age + 1}))
+          .filter(elem => elem.age <= individualCorrectionLimit + 1);
+
+        if(measurements.length == 0)
+          continue;
 
         const increments = oldEntry.numUpdates ? 0 : oldEntry.increments + 1;
         const tolerance =
@@ -134,6 +171,8 @@ module.exports = function individualReducer(
 
         newIndividualEntries[key] = {
           ...oldEntry,
+          measurements,
+          ...calculateEntry(measurements),
           numUpdatesHistory: [
             oldEntry.numUpdates,
             ...oldEntry.numUpdatesHistory
@@ -144,8 +183,6 @@ module.exports = function individualReducer(
           ].slice(0, 3),
           numUpdates: 0,
           activity: 0,
-          increments,
-          tolerance
         };
       }
 

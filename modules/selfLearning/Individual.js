@@ -220,24 +220,8 @@ function selfLearningIndividual(config, store) {
         });
         break;
       }
-      case SL_INDIVIDUAL_DELETE_GENERAL: {
-        saveIndividualSelfLearning();
-        break;
-      }
-      case SL_INDIVIDUAL_INCREMENT: {
-        Object.entries(individualSL.individualEntries).forEach(
-          ([key, entry]) => {
-            if (entry.increments > individualCorrectionLimit) {
-              store.dispatch({
-                type: SL_INDIVIDUAL_DOWNGRADE,
-                payload: key
-              });
-            }
-          }
-        );
-        saveIndividualSelfLearning();
-        break;
-      }
+      case SL_INDIVIDUAL_DELETE_GENERAL:
+      case SL_INDIVIDUAL_INCREMENT:
       case SL_RESET_INDIVIDUAL: {
         saveIndividualSelfLearning();
         break;

@@ -42,7 +42,7 @@ const initialState = {
     false,
     false,
     true,
-    ...serial.coms.map(_ => true),
+    ...serial.coms.map(element => element.name !== ""),
     ...table.cells.map(element => element.showInLog),
     true,
     true
