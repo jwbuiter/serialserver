@@ -250,6 +250,18 @@ function SiteModule(config, store) {
     }
   };
 
+  function addTableRoute(i, j) {
+    functionRoutes[`/${String.fromCharCode(65 + i)}${j + 1}`] = (req, res) => {
+      res.send(titleString + store.getState().table.cells[i * 5 + j].entry);
+    };
+  }
+
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 5; j++) {
+      addTableRoute(i, j);
+    }
+  }
+
   const uploadRoutes = {
     "/importFile": importExcel,
     "/importExcel": importExcel,

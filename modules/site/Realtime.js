@@ -36,7 +36,10 @@ const {
   RESTART
 } = require("../../actions/types");
 
-const results = [["off", "on"], ["forcedOff", "forcedOn"]];
+const results = [
+  ["off", "on"],
+  ["forcedOff", "forcedOn"]
+];
 
 const configPath = path.join(__dirname, "../..", "configs");
 const logPath = constants.saveLogLocation;
@@ -241,6 +244,7 @@ function Realtime(server, config, store) {
   }
 
   function setDateTime(dateTimeString) {
+    console.log("setting date and time to: " + dateTimeString);
     exec(`hwclock --set --date="${dateTimeString}"`, (err, stdout, stderr) => {
       if (err) {
         console.error(`exec error: ${err}`);
@@ -475,7 +479,10 @@ function Realtime(server, config, store) {
         callback(false);
         return;
       }
-      if (oldConfig.table.cells[i].showInLog !== newConfig.table.cells[i].showInLog) {
+      if (
+        oldConfig.table.cells[i].showInLog !==
+        newConfig.table.cells[i].showInLog
+      ) {
         callback(false);
         return;
       }

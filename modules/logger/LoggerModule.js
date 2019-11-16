@@ -239,10 +239,14 @@ function LoggerModule(config, store) {
           ])
         );
 
-        const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.aoa_to_sheet(saveArray);
-        XLSX.utils.book_append_sheet(wb, ws, "data");
-        XLSX.writeFile(wb, path.join(constants.saveLogLocation, fileName));
+        const csvFile = XLSX.utils.sheet_to_csv(ws, {
+          FS: config.csvSeparator
+        });
+        fs.writeFileSync(
+          path.join(constants.saveLogLocation, fileName),
+          csvFile
+        );
         break;
       }
       case LOG_BACKUP: {
