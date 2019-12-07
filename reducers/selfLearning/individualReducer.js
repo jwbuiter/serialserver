@@ -20,24 +20,24 @@ function initialStateIndividual() {
   };
 }
 
-function average(arr){
-  return arr.reduce((acc,cur)=>acc+cur)/arr.length;
+function average(arr) {
+  return arr.reduce((acc, cur) => acc + cur) / arr.length;
 }
 
-function calculateEntry(measurements){
+function calculateEntry(measurements) {
   const {
     individualTolerance,
     individualToleranceAbs,
     individualCorrectionIncrement
   } = selfLearning;
 
-  const calibration = average(measurements.map(elem=>elem.value));
-  const increments = average(measurements.map(elem=>Math.max(0, elem.age - 1)));
+  const calibration = average(measurements.map(elem => elem.value));
+  const increments = average(measurements.map(elem => Math.max(0, elem.age - 1)));
 
   const tolerance =
     ((calibration * individualTolerance) / 100 +
       individualToleranceAbs) *
-    (1 + (increments * individualCorrectionIncrement) / 100); 
+    (1 + (increments * individualCorrectionIncrement) / 100);
 
   return {
     tolerance,
@@ -59,11 +59,11 @@ module.exports = function individualReducer(
 
       if (key in state.individualEntries) {
         const newMeasurement = {
-          value: entry, 
+          value: entry,
           age: 0
         }
         const measurements = [
-          newMeasurement, 
+          newMeasurement,
           ...newIndividualEntries[key].measurements
         ].slice(0, selfLearning.individualAverageNumber);
 
@@ -106,7 +106,7 @@ module.exports = function individualReducer(
       delete newGeneralEntries[key];
 
       const newMeasurement = {
-        value: calibration, 
+        value: calibration,
         age: 0
       }
 
@@ -157,10 +157,10 @@ module.exports = function individualReducer(
       for (let key in state.individualEntries) {
         const oldEntry = state.individualEntries[key];
         const measurements = oldEntry.measurements
-          .map(elem => ({...elem, age: elem.age + 1}))
-          .filter(elem => elem.age <= individualCorrectionLimit + 1);
+          .map(elem => ({ ...elem, age: elem.age + 1 }))
+          .filter(elem => elem.age <= individualCorrectionLimit);
 
-        if(measurements.length == 0)
+        if (measurements.length == 0)
           continue;
 
         newIndividualEntries[key] = {

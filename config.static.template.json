@@ -6,6 +6,7 @@
   "exposeUpload": false,
   "exposeShutdown": true,
   "exposeSettings": true,
+  "showTolerance": false,
   "tableColumns": 5,
   "resetPin": 7,
   "outputPin": [

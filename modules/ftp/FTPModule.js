@@ -7,12 +7,63 @@ const { LOG_UPLOAD, LOG_RESET } = require("../../actions/types");
 
 const constants = require("../../config.static");
 
+const xlsxDir = path.join(__dirname, "../../data/data.xls");
+const ftpBacklogDir = path.join(__dirname, "../../data/ftpBacklog.json");
+
 function FTPModule(config, store) {
   const { targets, automatic, uploadExcel } = config;
   const { logID } = store.getState().config.logger;
 
-  function upload(address, folder, username, password, fileName, callback) {
-    if (!callback) callback = () => {};
+  let ftpBacklog = [];
+
+  function addToBackLog(fileName) {
+    ftpBacklog.push(fileName);
+    tryBacklog();
+  }
+
+  function tryBacklog() {
+    for (fileName of ftpBacklog) {
+      let numSuccess = 0;
+      const callback = msg => {
+        if (!msg.startsWith("Success"))
+          return;
+
+        numSuccess++;
+
+        if (numSuccess == targets.length) {
+          ftpBacklog = ftpBacklog.filter(name => name != fileName);
+          saveFtpBacklog();
+        }
+      };
+
+      for (let i = 0; i < targets.length; i++) {
+        upload(i, fileName, callback);
+      }
+
+    }
+    saveFtpBacklog();
+  }
+
+  function saveFtpBacklog() {
+    fs.writeFile(
+      ftpBacklogDir,
+      JSON.stringify(ftpBacklog),
+      "utf8",
+      err => {
+        if (err) {
+          console.log(err);
+        }
+      }
+    );
+  }
+
+  function upload(index, fileName, callback) {
+    const { address, folder, username, password } = targets[index];
+
+    if (!address) {
+      callback("Success: nothing to do");
+      return;
+    }
 
     const localPath = constants.saveLogLocation;
 
@@ -44,11 +95,12 @@ function FTPModule(config, store) {
     });
   }
 
-  function uploadDataFile(address, folder, username, password) {
-    const sourceFile = path.join(__dirname, "../../data/data.xls");
-    if (!fs.existsSync(sourceFile)) return;
+  function uploadDataFile(index) {
+    const { address, folder, username, password } = targets[index];
 
-    const fileStats = fs.statSync(path.join(__dirname, "../../data/data.xls"));
+    if (!fs.existsSync(xlsxDir)) return;
+
+    const fileStats = fs.statSync(xlsxDir);
     const modifyDate = new Date(fileStats.mtimeMs);
     const fileName = `${constants.name}_${logID}_${dateFormat(
       modifyDate,
@@ -79,22 +131,31 @@ function FTPModule(config, store) {
     switch (lastAction.type) {
       case LOG_UPLOAD: {
         const { fileName, ftpIndex, callback } = lastAction.payload;
-        const { address, folder, username, password } = targets[ftpIndex];
-        upload(address, folder, username, password, fileName, callback);
-        if (uploadExcel) uploadDataFile(address, folder, username, password);
+        upload(ftpIndex, fileName, callback);
+        if (uploadExcel) uploadDataFile(ftpIndex);
         break;
       }
       case LOG_RESET: {
         const fileName = lastAction.payload;
-        targets.forEach(element => {
-          const { address, folder, username, password } = element;
-          if (automatic) upload(address, folder, username, password, fileName);
-          if (uploadExcel) uploadDataFile(address, folder, username, password);
-        });
+        if (automatic)
+          addToBackLog(fileName);
+        for (let i = 0; i < targets.length; i++) {
+          if (uploadExcel) uploadDataFile(i);
+        }
         break;
       }
     }
   });
+
+  if (fs.existsSync(ftpBacklogDir)) {
+    try {
+      individualData = require(ftpBacklogDir);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  setInterval(tryBacklog, 3600000);
 
   return {};
 }

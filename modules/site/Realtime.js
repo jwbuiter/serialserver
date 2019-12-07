@@ -222,14 +222,14 @@ function Realtime(server, config, store) {
     try {
       fs.accessSync(path.join(configPath, name));
       fs.unlinkSync(path.join(configPath, name));
-    } catch (err) {}
+    } catch (err) { }
   }
 
   function deleteLog(name) {
     try {
       fs.accessSync(path.join(logPath, name));
       fs.unlinkSync(path.join(logPath, name));
-    } catch (err) {}
+    } catch (err) { }
   }
 
   function uploadLog({ name, index }, callback) {
@@ -429,7 +429,7 @@ function Realtime(server, config, store) {
     });
   }
 
-  function deleteSLData() {
+  function deleteSLData(_, callback) {
     store.dispatch({
       type: SL_RESET_INDIVIDUAL
     });
@@ -458,6 +458,8 @@ function Realtime(server, config, store) {
     if (fs.existsSync(templateFile)) {
       fs.copyFileSync(templateFile, dataFile);
     }
+
+    callback(true);
 
     store.dispatch({
       type: RESTART
@@ -489,6 +491,15 @@ function Realtime(server, config, store) {
     }
 
     callback(true);
+  }
+
+  function confirmPassword(password, callback) {
+    try {
+      callback(require("../../config.alternate.json").password == password);
+    }
+    catch (e) {
+      callback(true);
+    }
   }
 
   setInterval(() => {
@@ -610,7 +621,8 @@ function Realtime(server, config, store) {
       deleteIndividualSL: deleteIndividualSL,
       resetIndividualSL: resetIndividualSL,
       deleteSLData: deleteSLData,
-      checkConfigConsistency: checkConfigConsistency
+      checkConfigConsistency: checkConfigConsistency,
+      confirmPassword: confirmPassword
     };
 
     for (let command in commands) {
