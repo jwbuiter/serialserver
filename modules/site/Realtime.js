@@ -461,9 +461,11 @@ function Realtime(server, config, store) {
 
     callback(true);
 
-    store.dispatch({
-      type: RESTART
-    });
+    setTimeout(() => {
+      store.dispatch({
+        type: RESTART
+      });
+    }, 1000)
   }
 
   function checkConfigConsistency(newConfig, callback) {
