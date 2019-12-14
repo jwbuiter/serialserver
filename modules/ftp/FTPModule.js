@@ -110,7 +110,7 @@ function FTPModule(config, store) {
     const c = new Client();
     c.on("ready", () => {
       c.mkdir(folder, true, () => {
-        c.put(sourceFile, path.join(folder, fileName), err => {
+        c.put(xlsxDir, path.join(folder, fileName), err => {
           c.end();
         });
       });
