@@ -512,13 +512,13 @@
         "address": "ftp.mbdc.nl",
         "folder": "",
         "username": "com",
-        "Password": "Com1234"
+        "password": "Com1234"
       },
       {
         "address": "",
         "folder": "",
         "username": "",
-        "Password": ""
+        "password": ""
       }
     ]
   },
