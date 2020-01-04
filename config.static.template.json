@@ -3,6 +3,7 @@
   "QS": "000 000 000",
   "port": 80,
   "saveLogLocation": "/home/pi/Documents",
+  "configPassword": "MBDCrp66",
   "exposeUpload": false,
   "exposeShutdown": true,
   "exposeSettings": true,

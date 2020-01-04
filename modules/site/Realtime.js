@@ -496,12 +496,7 @@ function Realtime(server, config, store) {
   }
 
   function confirmPassword(password, callback) {
-    try {
-      callback(require("../../config.alternate.json").password == password);
-    }
-    catch (e) {
-      callback(true);
-    }
+    callback(constants.configPassword == password);
   }
 
   setInterval(() => {

@@ -1,5 +1,4 @@
 config.static.json
-config.alternate.json
 seriallog*.txt
 data/*
 configs/*
