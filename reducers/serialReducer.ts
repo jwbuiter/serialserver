@@ -1,12 +1,21 @@
-const {
-  SERIAL_ENTRY,
-  SERIAL_AVERAGE,
-  SERIAL_RESET
-} = require("../actions/types");
+import { Action } from "../actions/types";
 
 const { serial } = require("../configs/current");
 
-const initialState = {
+type History = { entry: string; time: Date | null }[];
+type Com = {
+  time: Date | null;
+  entry: string;
+  average: string;
+  numeric: boolean;
+};
+
+export interface ISerialState {
+  histories: History[];
+  coms: Com[];
+}
+
+const initialState: ISerialState = {
   histories: Array.from({ length: serial.coms.length }, () => []),
   coms: Array.from({ length: serial.coms.length }, (_, i) => ({
     time: null,
@@ -16,12 +25,12 @@ const initialState = {
   }))
 };
 
-module.exports = function(state = initialState, action) {
+export default function(state: ISerialState = initialState, action: Action) {
   switch (action.type) {
-    case SERIAL_ENTRY: {
+    case "SERIAL_ENTRY": {
       const { index, entry } = action.payload;
 
-      const newHistories = Array.from(state.histories);
+      const newHistories: History[] = Array.from(state.histories);
       if (state.coms[index].entry) {
         newHistories[index].push({
           entry: state.coms[index].entry,
@@ -32,7 +41,7 @@ module.exports = function(state = initialState, action) {
         newHistories[index] = newHistories[index].slice(-historyLength);
       }
 
-      const newComs = Array.from(state.coms);
+      const newComs: Com[] = Array.from(state.coms);
       newComs[index] = {
         ...newComs[index],
         entry,
@@ -45,9 +54,9 @@ module.exports = function(state = initialState, action) {
         histories: newHistories
       };
     }
-    case SERIAL_AVERAGE: {
+    case "SERIAL_AVERAGE": {
       const { index, average } = action.payload;
-      const newComs = Array.from(state.coms);
+      const newComs: Com[] = Array.from(state.coms);
 
       newComs[index] = { ...newComs[index], average };
 
@@ -56,11 +65,11 @@ module.exports = function(state = initialState, action) {
         coms: newComs
       };
     }
-    case SERIAL_RESET: {
+    case "SERIAL_RESET": {
       if (typeof action.payload !== "undefined") {
         const index = action.payload;
 
-        const newHistories = Array.from(state.histories);
+        const newHistories: History[] = Array.from(state.histories);
         if (state.coms[index].entry) {
           newHistories[index].push({
             entry: state.coms[index].entry,
@@ -105,4 +114,4 @@ module.exports = function(state = initialState, action) {
     default:
       return state;
   }
-};
+}

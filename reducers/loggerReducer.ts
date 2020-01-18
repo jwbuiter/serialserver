@@ -1,22 +1,44 @@
-const {
-  LOG_ENTRY,
-  LOG_RESET,
-  LOG_OVERWRITE,
-  LOG_UNIQUE_OVERWRITE,
-  LOG_ACTIVITY_OVERWRITE,
-  LOG_RECOVER,
-  SL_SUCCESS
-} = require("../actions/types");
+import { Action } from "../actions/types";
 
 const { table, serial, logger } = require("../configs/current");
+
+export interface IEntry {
+  name: string;
+  id: number;
+  date: string;
+  coms: string[];
+  cells: string[];
+  TU: string;
+  TA: string;
+  full: boolean;
+}
+
+export interface ILoggerState {
+  legend: string[];
+  accessors: string[];
+  digits: number[];
+  visible: boolean[];
+  entries: IEntry[];
+}
+
+type ComConfig = {
+  name: string;
+  digits: number;
+};
+
+type CellConfig = {
+  name: string;
+  digits: number;
+  showInLog: boolean;
+};
 
 const initialState = {
   legend: [
     "Device",
     "LogID",
     "date",
-    ...serial.coms.map(element => element.name),
-    ...table.cells.map(element => element.name),
+    ...serial.coms.map((element: ComConfig) => element.name),
+    ...table.cells.map((element: CellConfig) => element.name),
     "TU",
     "TA"
   ],
@@ -24,8 +46,8 @@ const initialState = {
     "name",
     "id",
     "date",
-    ...serial.coms.map((_, i) => `coms[${i}]`),
-    ...table.cells.map((_, i) => `cells[${i}]`),
+    ...serial.coms.map((_: ComConfig, i: number) => `coms[${i}]`),
+    ...table.cells.map((_: CellConfig, i: number) => `cells[${i}]`),
     "TU",
     "TA"
   ],
@@ -33,8 +55,8 @@ const initialState = {
     -1,
     -1,
     -1,
-    ...serial.coms.map(element => element.digits),
-    ...table.cells.map(element => element.digits),
+    ...serial.coms.map((element: ComConfig) => element.digits),
+    ...table.cells.map((element: CellConfig) => element.digits),
     0,
     0
   ],
@@ -42,17 +64,20 @@ const initialState = {
     false,
     false,
     true,
-    ...serial.coms.map(element => element.name !== ""),
-    ...table.cells.map(element => element.showInLog),
+    ...serial.coms.map((element: ComConfig) => element.name !== ""),
+    ...table.cells.map((element: CellConfig) => element.showInLog),
     true,
     true
   ],
   entries: []
 };
 
-module.exports = function(state = initialState, action) {
+export default function(
+  state: ILoggerState = initialState,
+  action: Action
+): ILoggerState {
   switch (action.type) {
-    case LOG_ENTRY: {
+    case "LOG_ENTRY": {
       const entry = action.payload;
       const newEntries = Array.from(state.entries);
       newEntries.push(entry);
@@ -61,10 +86,10 @@ module.exports = function(state = initialState, action) {
         entries: newEntries
       };
     }
-    case LOG_RESET: {
+    case "LOG_RESET": {
       return initialState;
     }
-    case LOG_OVERWRITE: {
+    case "LOG_OVERWRITE": {
       const entry = action.payload;
 
       const newEntries = Array.from(state.entries);
@@ -77,10 +102,10 @@ module.exports = function(state = initialState, action) {
         entries: newEntries
       };
     }
-    case LOG_UNIQUE_OVERWRITE: {
+    case "LOG_UNIQUE_OVERWRITE": {
       const index = action.payload;
 
-      const newEntries = Array.from(state.entries);
+      const newEntries: IEntry[] = Array.from(state.entries);
       newEntries[index].TU = "";
 
       return {
@@ -88,7 +113,7 @@ module.exports = function(state = initialState, action) {
         entries: newEntries
       };
     }
-    case LOG_ACTIVITY_OVERWRITE: {
+    case "LOG_ACTIVITY_OVERWRITE": {
       const { index, newValue } = action.payload;
 
       const newEntries = Array.from(state.entries);
@@ -99,10 +124,10 @@ module.exports = function(state = initialState, action) {
         entries: newEntries
       };
     }
-    case LOG_RECOVER: {
+    case "LOG_RECOVER": {
       return action.payload;
     }
-    case SL_SUCCESS: {
+    case "SL_SUCCESS": {
       if (!action.payload.filterLog) return state;
 
       const { comIndex, calibration, tolerance } = action.payload;
@@ -144,4 +169,4 @@ module.exports = function(state = initialState, action) {
     default:
       return state;
   }
-};
+}

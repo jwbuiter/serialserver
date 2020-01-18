@@ -1,16 +1,23 @@
-const {
-  INPUT_PHYSICAL_CHANGED,
-  INPUT_FORCED_CHANGED,
-  INPUT_FOLLOWING_CHANGED,
-  INPUT_BLOCKING_CHANGED,
-  INPUT_CALCULATE_STATE,
-  EXECUTE_START,
-  EXECUTE_STOP
-} = require("../actions/types");
+import { Action } from "../actions/types";
 
-const { input } = require("../configs/current");
+const { input } = require("../configs/current.json");
 
-const initialState = {
+interface Port {
+  state: boolean;
+  physical: boolean;
+  isForced: boolean;
+  previousForced: boolean;
+  forcedState: boolean;
+  isFollowing: boolean;
+  blocking: boolean;
+}
+
+export interface IInputState {
+  ports: Port[];
+  executing: boolean;
+}
+
+const initialState: IInputState = {
   ports: Array.from({ length: input.ports.length }, u => ({
     state: false,
     physical: false,
@@ -23,7 +30,7 @@ const initialState = {
   executing: false
 };
 
-function calculateState(port) {
+function calculateState(port: Port) {
   if (port.isForced) return port.forcedState;
 
   if (port.isFollowing) return true;
@@ -31,9 +38,9 @@ function calculateState(port) {
   return port.physical;
 }
 
-module.exports = function(state = initialState, action) {
+export default function(state: IInputState = initialState, action: Action) {
   switch (action.type) {
-    case INPUT_PHYSICAL_CHANGED: {
+    case "INPUT_PHYSICAL_CHANGED": {
       const { index, physical } = action.payload;
       const newPorts = Array.from(state.ports);
       newPorts[index].physical = physical;
@@ -42,7 +49,7 @@ module.exports = function(state = initialState, action) {
         ports: newPorts
       };
     }
-    case INPUT_FORCED_CHANGED: {
+    case "INPUT_FORCED_CHANGED": {
       const { index, previousForced, isForced, forcedState } = action.payload;
       const newPorts = Array.from(state.ports);
       newPorts[index].isForced = isForced;
@@ -53,7 +60,7 @@ module.exports = function(state = initialState, action) {
         ports: newPorts
       };
     }
-    case INPUT_FOLLOWING_CHANGED: {
+    case "INPUT_FOLLOWING_CHANGED": {
       const { index, isFollowing } = action.payload;
       const newPorts = Array.from(state.ports);
       newPorts[index].isFollowing = isFollowing;
@@ -62,7 +69,7 @@ module.exports = function(state = initialState, action) {
         ports: newPorts
       };
     }
-    case INPUT_BLOCKING_CHANGED: {
+    case "INPUT_BLOCKING_CHANGED": {
       const { index, blocking } = action.payload;
       const newPorts = Array.from(state.ports);
       newPorts[index].blocking = blocking;
@@ -71,22 +78,22 @@ module.exports = function(state = initialState, action) {
         ports: newPorts
       };
     }
-    case INPUT_CALCULATE_STATE: {
+    case "INPUT_CALCULATE_STATE": {
       const { index } = action.payload;
       const newPorts = Array.from(state.ports);
-      newPorts[index].state = calculateState(newPorts[index], index);
+      newPorts[index].state = calculateState(newPorts[index]);
       return {
         ...state,
         ports: newPorts
       };
     }
-    case EXECUTE_START: {
+    case "EXECUTE_START": {
       return {
         ...state,
         executing: true
       };
     }
-    case EXECUTE_STOP: {
+    case "EXECUTE_STOP": {
       return {
         ...state,
         executing: false
@@ -95,4 +102,4 @@ module.exports = function(state = initialState, action) {
     default:
       return state;
   }
-};
+}

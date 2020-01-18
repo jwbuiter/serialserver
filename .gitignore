@@ -5,7 +5,10 @@ configs/*
 logo/*
 client2/*
 selfLearning/*
+build/*
+node_modules
 !data/.gitkeep
 !configs/template.json
 !logo/.gitkeep
 !selfLearning/.gitkeep
+!build/.gitkeep

@@ -1,32 +1,49 @@
-const {
-  SL_RESET_GLOBAL,
-  SL_RESET_INDIVIDUAL,
-  SL_START_INDIVIDUAL,
-  SL_SUCCESS,
-  SL_TEACH
-} = require("../../actions/types");
+import { Action } from "../../actions/types";
 
 const { selfLearning } = require("../../configs/current");
 
-const globalReducer = require("./globalReducer");
-const individualReducer = require("./individualReducer");
+import globalReducer, {
+  IGlobalSelfLearningState,
+  initialStateGlobal
+} from "./globalReducer";
+import individualReducer, {
+  IIndividualSelfLearningState,
+  initialStateIndividual
+} from "./individualReducer";
 
-function initialState() {
+export interface ISelfLearningState {
+  global: IGlobalSelfLearningState;
+  individual: IIndividualSelfLearningState;
+  calibration: number;
+  tolerance: number;
+  comIndex: number;
+  type: "none" | "individual" | "global";
+  success: number;
+  teaching: boolean;
+  startTime: Date | null;
+  endTime: Date | null;
+}
+
+function initialState(): ISelfLearningState {
   const { selfLearning } = require("../../configs/current");
   return {
-    global: globalReducer(),
-    individual: individualReducer(),
+    global: initialStateGlobal,
+    individual: initialStateIndividual,
     calibration: selfLearning.startCalibration,
     tolerance: selfLearning.tolerance / 100,
     comIndex: Number(selfLearning.enabled[3]),
     type: "none",
     success: 1,
     teaching: false,
-    startTime: null
+    startTime: null,
+    endTime: null
   };
 }
 
-module.exports = function(state = initialState(), action) {
+export default function(
+  state: ISelfLearningState = initialState(),
+  action: Action
+): ISelfLearningState {
   const newState = {
     ...state,
     global: globalReducer(state.global, action),
@@ -34,14 +51,14 @@ module.exports = function(state = initialState(), action) {
   };
 
   switch (action.type) {
-    case SL_TEACH: {
+    case "SL_TEACH": {
       const teaching = action.payload;
       return {
         ...state,
         teaching
       };
     }
-    case SL_RESET_GLOBAL: {
+    case "SL_RESET_GLOBAL": {
       return {
         ...initialState(),
         type: "global",
@@ -50,28 +67,28 @@ module.exports = function(state = initialState(), action) {
           100,
         success: 0,
         startTime: new Date(),
-        endTime: undefined
+        endTime: null
       };
     }
-    case SL_RESET_INDIVIDUAL: {
+    case "SL_RESET_INDIVIDUAL": {
       return {
         ...initialState(),
         type: "individual",
         success: 0,
         startTime: new Date(),
-        endTime: undefined
+        endTime: null
       };
     }
-    case SL_START_INDIVIDUAL: {
+    case "SL_START_INDIVIDUAL": {
       return {
         ...state,
         type: "individual",
         success: 0,
         startTime: new Date(),
-        endTime: undefined
+        endTime: null
       };
     }
-    case SL_SUCCESS: {
+    case "SL_SUCCESS": {
       const { success, calibration, matchedTolerance } = action.payload;
       return {
         ...newState,
@@ -84,4 +101,4 @@ module.exports = function(state = initialState(), action) {
     default:
       return newState;
   }
-};
+}
