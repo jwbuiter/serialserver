@@ -119,20 +119,20 @@ function selfLearningIndividual(config, store) {
         break;
       }
       case SL_ENTRY: {
-        const { key } = lastAction.payload;
+        const { key, entry } = lastAction.payload;
 
-        if (key in individualSL.generalEntries) {
+        if (store.getState().selfLearning.teaching) {
+          store.dispatch({
+            type: SL_INDIVIDUAL_UPGRADE,
+            payload: {
+              key,
+              calibration: entry
+            }
+          });
+        } else if (key in individualSL.generalEntries) {
           const { entries } = individualSL.generalEntries[key];
 
-          if (store.getState().selfLearning.teaching) {
-            store.dispatch({
-              type: SL_INDIVIDUAL_UPGRADE,
-              payload: {
-                key,
-                calibration: entries[0]
-              }
-            });
-          } else if (entries.length >= 3) {
+          if (entries.length >= 3) {
             const matches = entries.map(entry => ({
               value: entry,
               matches: entries.reduce((total, compEntry) => {
