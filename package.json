@@ -2,10 +2,12 @@
   "name": "serialserver",
   "version": "1.0.0",
   "description": " Webserver that hosts all incoming serial data",
-  "main": "app.js",
+  "main": "build/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "debug": "nodemon --ignore configs/current.js --ignore selfLearning/individualData.json server.js"
+    "start" : "node ./build/server.js",
+    "tsc": "tsc",
+    "dev": "ts-node-dev --respawn --transpileOnly ./server.ts",
+    "prod": "tsc && node ./build/server.js"
   },
   "repository": {
     "type": "git",
@@ -18,6 +20,8 @@
   },
   "homepage": "https://github.com/jwbuiter/serialserver#readme",
   "dependencies": {
+    "@types/node": "^13.1.8",
+    "@types/xlsx": "0.0.36",
     "dateformat": "^3.0.3",
     "express": "^4.16.2",
     "express-fileupload": "^0.4.0",
@@ -29,6 +33,8 @@
     "redux": "^4.0.0",
     "serialport": "^6.0.5",
     "socket.io": "^2.0.4",
+    "ts-node-dev": "^1.0.0-pre.44",
+    "typescript": "^3.7.3",
     "xlsx": "^0.12.10"
   }
 }
