@@ -8,6 +8,7 @@ apt-get install -y nodejs
 cd ..
 rm -rf tmp
 npm install
+npm run build
 adduser --disabled-password --gecos "" serialserver
 chown -R serialserver:serialserver /srv/serialserver
 chmod 777 /srv/serialserver
