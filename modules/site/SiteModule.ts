@@ -99,7 +99,6 @@ function SiteModule(config, store: StoreType) {
   }
 
   const staticRoutes = {
-    "/": "client.html",
     "/current.json": "../../configs/current.json",
     "/config.static.json": "../../config.static.json"
   };
@@ -273,7 +272,7 @@ function SiteModule(config, store: StoreType) {
     "/uploadConfig": uploadConfig
   };
 
-  app.use("/", express.static("client2/build"));
+  app.use("/", express.static("../client2/build"));
 
   for (let route in staticRoutes) {
     app.get(route, (req, res) => {
