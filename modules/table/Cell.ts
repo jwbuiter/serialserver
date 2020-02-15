@@ -1,18 +1,9 @@
-const http = require("http");
-const {
-  ERROR_OCCURRED,
-  STATE_CHANGED,
-  HANDLE_TABLE,
-  LOG_RESET,
-  TABLE_ENTRY,
-  TABLE_RESET,
-  TABLE_RESET_CELL,
-  TABLE_EMIT,
-  TABLE_COLOR
-} = require("../../actions/types");
-const Parser = require("../parser/Parser");
+import http from "http";
 
-function Cell(index, config, store) {
+import { StoreType } from "../../store";
+import Parser from "../parser/Parser";
+
+export default function Cell(index: number, config: any, store: StoreType) {
   const {
     formula,
     digits,
@@ -27,8 +18,8 @@ function Cell(index, config, store) {
   const manual = type === "manual" || type === "menu" || readerPort;
   const myParser = Parser(store);
 
-  let content = "";
-  let color = "";
+  let content: string | number = "";
+  let color: string = "";
 
   if (readerPort) {
     const server = http.createServer((req, res) => {
@@ -42,9 +33,9 @@ function Cell(index, config, store) {
 
       res.end();
     });
-    server.on("error", (err, socket) => {
+    server.on("error", err => {
       store.dispatch({
-        type: ERROR_OCCURRED,
+        type: "ERROR_OCCURRED",
         payload: err
       });
     });
@@ -57,21 +48,21 @@ function Cell(index, config, store) {
     if (type === "menu" && menuOptions[0]) {
       content = menuOptions[0].key;
       store.dispatch({
-        type: TABLE_ENTRY,
+        type: "TABLE_ENTRY",
         payload: {
           index,
           entry: content
         }
       });
     } else {
-      content = ""
+      content = "";
       store.dispatch({
-        type: TABLE_RESET_CELL,
+        type: "TABLE_RESET_CELL",
         payload: index
       });
     }
     store.dispatch({
-      type: TABLE_EMIT,
+      type: "TABLE_EMIT",
       payload: {
         index,
         entry: content,
@@ -80,7 +71,7 @@ function Cell(index, config, store) {
     });
   }
 
-  function dispatch(entry) {
+  function dispatch(entry: string | number) {
     if (numeric) {
       entry = +Number(entry).toFixed(digits);
     } else if (typeof entry === "boolean") {
@@ -90,17 +81,20 @@ function Cell(index, config, store) {
     }
 
     store.dispatch({
-      type: TABLE_ENTRY,
+      type: "TABLE_ENTRY",
       payload: {
         index,
         entry
       }
     });
 
-    if (entry !== content  && !Number.isNaN(entry) && !Number.isNaN(content)) {
+    if (
+      entry !== content &&
+      !(typeof entry == "number" && Number.isNaN(entry))
+    ) {
       content = entry;
       store.dispatch({
-        type: TABLE_EMIT,
+        type: "TABLE_EMIT",
         payload: {
           index,
           entry,
@@ -108,7 +102,7 @@ function Cell(index, config, store) {
         }
       });
       store.dispatch({
-        type: STATE_CHANGED
+        type: "STATE_CHANGED"
       });
     }
   }
@@ -125,7 +119,7 @@ function Cell(index, config, store) {
     if (newColor !== color) {
       color = newColor;
       store.dispatch({
-        type: TABLE_COLOR,
+        type: "TABLE_COLOR",
         payload: {
           index,
           color
@@ -137,8 +131,8 @@ function Cell(index, config, store) {
   store.listen(lastAction => {
     const state = store.getState();
     switch (lastAction.type) {
-      case STATE_CHANGED:
-      case HANDLE_TABLE: {
+      case "STATE_CHANGED":
+      case "HANDLE_TABLE": {
         const allEntries = state.serial.coms.reduce(
           (acc, cur) => acc && !(cur.entry === "0" || cur.entry === ""),
           true
@@ -151,11 +145,11 @@ function Cell(index, config, store) {
         dispatchColor();
         break;
       }
-      case LOG_RESET: {
+      case "LOG_RESET": {
         resetCell();
         break;
       }
-      case TABLE_RESET: {
+      case "TABLE_RESET": {
         if (resetOnExe) {
           resetCell();
         }
@@ -165,8 +159,4 @@ function Cell(index, config, store) {
   });
 
   resetCell();
-
-  return {};
 }
-
-module.exports = Cell;

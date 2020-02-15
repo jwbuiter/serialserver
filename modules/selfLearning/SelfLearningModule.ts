@@ -1,18 +1,10 @@
-const {
-  SL_ENTRY,
-  SL_SUCCESS,
-  EXECUTE_START,
-  LOG_RESET,
-  LOG_SAVE,
-  CONFIG_UPDATE,
-  ERROR_OCCURRED
-} = require("../../actions/types");
-const { getExcelDate, getExcelDateTime } = require("../../utils/dateUtils");
+import { getExcelDate, getExcelDateTime } from "../../utils/dateUtils";
 
-const Global = require("./Global");
-const Individual = require("./Individual");
+import Global from "./Global";
+import Individual from "./Individual";
+import { StoreType } from "../../store";
 
-function SelfLearningModule(config, store) {
+function SelfLearningModule(config, store: StoreType) {
   const { enabled, extraColumns } = config;
   if (enabled === "off") return {};
 
@@ -29,7 +21,7 @@ function SelfLearningModule(config, store) {
     const state = store.getState();
 
     switch (lastAction.type) {
-      case EXECUTE_START: {
+      case "EXECUTE_START": {
         const newEntry = Number(state.serial.coms[comIndex].entry);
         if (isNaN(newEntry) || !isFinite(newEntry)) {
           console.log(
@@ -65,14 +57,14 @@ function SelfLearningModule(config, store) {
               columns.push(eval(formula));
             } catch (err) {
               store.dispatch({
-                type: ERROR_OCCURRED,
+                type: "ERROR_OCCURRED",
                 payload: err
               });
             }
           });
 
           store.dispatch({
-            type: SL_ENTRY,
+            type: "SL_ENTRY",
             payload: {
               entry: newEntry,
               key,
@@ -81,7 +73,7 @@ function SelfLearningModule(config, store) {
           });
         } else {
           store.dispatch({
-            type: SL_ENTRY,
+            type: "SL_ENTRY",
             payload: {
               entry: newEntry
             }
@@ -94,4 +86,4 @@ function SelfLearningModule(config, store) {
   return {};
 }
 
-module.exports = SelfLearningModule;
+export default SelfLearningModule;

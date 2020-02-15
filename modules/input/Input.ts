@@ -1,30 +1,10 @@
-const Gpio = require("onoff").Gpio;
-const { exec } = require("child_process");
+import { Gpio } from "onoff";
+import { exec } from "child_process";
 
-const {
-  SERIAL_COMMAND,
-  INPUT_PHYSICAL_CHANGED,
-  INPUT_BLOCKING_CHANGED,
-  INPUT_FORCED_CHANGED,
-  INPUT_FOLLOWING_CHANGED,
-  INPUT_CALCULATE_STATE,
-  INPUT_EMIT,
-  OUTPUT_RESULT_CHANGED,
-  OUTPUT_FORCED_CHANGED,
-  OUTPUT_EXECUTING_CHANGED,
-  HANDLE_OUTPUT,
-  STATE_CHANGED,
-  LOG_MAKE_ENTRY,
-  EXECUTE_START,
-  EXECUTE_STOP,
-  SERIAL_RESET,
-  TABLE_RESET,
-  SL_TEACH,
-  RESTART
-} = require("../../actions/types");
-const constants = require("../../config.static");
+import { StoreType } from "../../store";
+const constants = require("../../../config.static");
 
-function Input(index, config, store) {
+function Input(index, config, store: StoreType) {
   const {
     formula,
     timeout,
@@ -66,30 +46,30 @@ function Input(index, config, store) {
         );
         if (state && !blocked && !stillExecuting) {
           store.dispatch({
-            type: LOG_MAKE_ENTRY
+            type: "LOG_MAKE_ENTRY"
           });
           store.dispatch({
-            type: EXECUTE_START
+            type: "EXECUTE_START"
           });
         } else if (!state && reduxState.input.executing) {
           store.dispatch({
-            type: EXECUTE_STOP
+            type: "EXECUTE_STOP"
           });
           store.dispatch({
-            type: SERIAL_RESET
+            type: "SERIAL_RESET"
           });
           store.dispatch({
-            type: TABLE_RESET
+            type: "TABLE_RESET"
           });
           store.dispatch({
-            type: HANDLE_OUTPUT
+            type: "HANDLE_OUTPUT"
           });
         }
         break;
       }
       case "exebl": {
         store.dispatch({
-          type: INPUT_BLOCKING_CHANGED,
+          type: "INPUT_BLOCKING_CHANGED",
           payload: {
             index,
             blocking: state
@@ -97,35 +77,35 @@ function Input(index, config, store) {
         });
         break;
       }
-      case "reset":{
+      case "reset": {
         store.dispatch({
-          type: SERIAL_RESET
+          type: "SERIAL_RESET"
         });
         store.dispatch({
-          type: TABLE_RESET
+          type: "TABLE_RESET"
         });
         store.dispatch({
-          type: HANDLE_OUTPUT
+          type: "HANDLE_OUTPUT"
         });
         break;
       }
       case "teach": {
         store.dispatch({
-          type: SL_TEACH,
+          type: "SL_TEACH",
           payload: state
         });
         store.dispatch({
-          type: STATE_CHANGED
+          type: "STATE_CHANGED"
         });
         break;
       }
       case "restart": {
         if (state) {
           store.dispatch({
-            type: SERIAL_RESET
+            type: "SERIAL_RESET"
           });
           store.dispatch({
-            type: RESTART
+            type: "RESTART"
           });
         }
         break;
@@ -133,7 +113,7 @@ function Input(index, config, store) {
       case "shutdown": {
         if (state) {
           store.dispatch({
-            type: SERIAL_RESET
+            type: "SERIAL_RESET"
           });
           exec("shutdown now", (err, stdout, stderr) => {
             if (err) {
@@ -148,7 +128,7 @@ function Input(index, config, store) {
         if (state) {
           const index = Number(commandCom.slice(3));
           store.dispatch({
-            type: SERIAL_COMMAND,
+            type: "SERIAL_COMMAND",
             payload: {
               index,
               command: commandValue
@@ -162,7 +142,7 @@ function Input(index, config, store) {
 
   function dispatchPhysical(state) {
     store.dispatch({
-      type: INPUT_PHYSICAL_CHANGED,
+      type: "INPUT_PHYSICAL_CHANGED",
       payload: {
         physical: state,
         index
@@ -172,10 +152,10 @@ function Input(index, config, store) {
 
   store.listen(lastAction => {
     switch (lastAction.type) {
-      case INPUT_FORCED_CHANGED: {
+      case "INPUT_FORCED_CHANGED": {
         if (index === lastAction.payload.index) {
           store.dispatch({
-            type: INPUT_CALCULATE_STATE,
+            type: "INPUT_CALCULATE_STATE",
             payload: {
               index
             }
@@ -185,7 +165,7 @@ function Input(index, config, store) {
             clearTimeout(force);
             force = setTimeout(() => {
               store.dispatch({
-                type: INPUT_FORCED_CHANGED,
+                type: "INPUT_FORCED_CHANGED",
                 payload: {
                   index,
                   isForced: false,
@@ -198,14 +178,14 @@ function Input(index, config, store) {
         }
         break;
       }
-      case INPUT_FOLLOWING_CHANGED:
-      case INPUT_PHYSICAL_CHANGED: {
+      case "INPUT_FOLLOWING_CHANGED":
+      case "INPUT_PHYSICAL_CHANGED": {
         if (index === lastAction.payload.index) {
           if (timeout && !state) {
             clearTimeout(debounce);
             debounce = setTimeout(() => {
               store.dispatch({
-                type: INPUT_CALCULATE_STATE,
+                type: "INPUT_CALCULATE_STATE",
                 payload: {
                   index
                 }
@@ -213,7 +193,7 @@ function Input(index, config, store) {
             }, timeout);
           } else {
             store.dispatch({
-              type: INPUT_CALCULATE_STATE,
+              type: "INPUT_CALCULATE_STATE",
               payload: {
                 index
               }
@@ -222,34 +202,34 @@ function Input(index, config, store) {
         }
         break;
       }
-      case INPUT_CALCULATE_STATE: {
+      case "INPUT_CALCULATE_STATE": {
         const newState = store.getState().input.ports[index];
         const newStateJSON = JSON.stringify(newState);
 
         if (state !== newState.state) {
           state = newState.state;
           store.dispatch({
-            type: STATE_CHANGED
+            type: "STATE_CHANGED"
           });
           handleInput(newState.state);
         }
         if (stateJSON !== newStateJSON) {
           stateJSON = newStateJSON;
           store.dispatch({
-            type: INPUT_EMIT,
+            type: "INPUT_EMIT",
             payload: index
           });
         }
         break;
       }
-      case OUTPUT_RESULT_CHANGED:
-      case OUTPUT_FORCED_CHANGED:
-      case OUTPUT_EXECUTING_CHANGED: {
+      case "OUTPUT_RESULT_CHANGED":
+      case "OUTPUT_FORCED_CHANGED":
+      case "OUTPUT_EXECUTING_CHANGED": {
         if (follow === lastAction.payload.index) {
           const outputState = store.getState().output.ports[follow].state;
-          const isFollowing = outputState ^ invert;
+          const isFollowing = invert !== outputState;
           store.dispatch({
-            type: INPUT_FOLLOWING_CHANGED,
+            type: "INPUT_FOLLOWING_CHANGED",
             payload: {
               index,
               isFollowing: isFollowing ? true : false
@@ -264,4 +244,4 @@ function Input(index, config, store) {
   return {};
 }
 
-module.exports = Input;
+export default Input;

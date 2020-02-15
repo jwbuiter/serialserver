@@ -1,11 +1,9 @@
-const Client = require("ftp");
-const path = require("path");
-const fs = require("fs");
-const dateFormat = require("dateformat");
+import Client from "ftp";
+import path from "path";
+import fs from "fs";
+import dateFormat from "dateformat";
 
-const { LOG_UPLOAD, LOG_RESET } = require("../../actions/types");
-
-const constants = require("../../config.static");
+const constants = require("../../../config.static");
 
 const xlsxDir = path.join(__dirname, "../../data/data.xls");
 const ftpBacklogDir = path.join(__dirname, "../../data/ftpBacklog.json");
@@ -22,11 +20,10 @@ function FTPModule(config, store) {
   }
 
   function tryBacklog() {
-    for (fileName of ftpBacklog) {
+    for (let fileName of ftpBacklog) {
       let numSuccess = 0;
       const callback = msg => {
-        if (!msg.startsWith("Success"))
-          return;
+        if (!msg.startsWith("Success")) return;
 
         numSuccess++;
 
@@ -39,22 +36,16 @@ function FTPModule(config, store) {
       for (let i = 0; i < targets.length; i++) {
         upload(i, fileName, callback);
       }
-
     }
     saveFtpBacklog();
   }
 
   function saveFtpBacklog() {
-    fs.writeFile(
-      ftpBacklogDir,
-      JSON.stringify(ftpBacklog),
-      "utf8",
-      err => {
-        if (err) {
-          console.log(err);
-        }
+    fs.writeFile(ftpBacklogDir, JSON.stringify(ftpBacklog), "utf8", err => {
+      if (err) {
+        console.log(err);
       }
-    );
+    });
   }
 
   function upload(index, fileName, callback) {
@@ -129,16 +120,15 @@ function FTPModule(config, store) {
 
   store.listen(lastAction => {
     switch (lastAction.type) {
-      case LOG_UPLOAD: {
+      case "LOG_UPLOAD": {
         const { fileName, ftpIndex, callback } = lastAction.payload;
         upload(ftpIndex, fileName, callback);
         if (uploadExcel) uploadDataFile(ftpIndex);
         break;
       }
-      case LOG_RESET: {
+      case "LOG_RESET": {
         const fileName = lastAction.payload;
-        if (automatic)
-          addToBackLog(fileName);
+        if (automatic) addToBackLog(fileName);
         for (let i = 0; i < targets.length; i++) {
           if (uploadExcel) uploadDataFile(i);
         }
@@ -149,7 +139,7 @@ function FTPModule(config, store) {
 
   if (fs.existsSync(ftpBacklogDir)) {
     try {
-      individualData = require(ftpBacklogDir);
+      // individualData = require(ftpBacklogDir);
     } catch (err) {
       console.log(err);
     }
@@ -160,4 +150,4 @@ function FTPModule(config, store) {
   return {};
 }
 
-module.exports = FTPModule;
+export default FTPModule;

@@ -24,4 +24,6 @@ store.subscribe(() => {
   });
 });
 
+export type StoreType = typeof store;
+
 export default store;

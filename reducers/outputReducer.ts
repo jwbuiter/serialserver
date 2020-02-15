@@ -1,6 +1,6 @@
 import { Action } from "../actions/types";
 
-const { output } = require("../configs/current");
+const { output } = require("../../configs/current");
 
 interface IPort {
   state: boolean;

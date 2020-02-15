@@ -1,47 +1,19 @@
-const { exec } = require("child_process");
-const socketio = require("socket.io");
-const fs = require("fs");
-const path = require("path");
-const ip = require("ip");
+import { exec } from "child_process";
+import socketio  from "socket.io";
+import fs  from "fs";
+import path  from "path";
+import ip  from "ip";
 
-const constants = require("../../config.static.json");
+const constants = require("../../../config.static");
 
-const {
-  SERIAL_ENTRY,
-  SERIAL_AVERAGE,
-  SERIAL_RESET,
-  INPUT_FORCED_CHANGED,
-  INPUT_EMIT,
-  OUTPUT_FORCED_CHANGED,
-  OUTPUT_EMIT,
-  LOG_UPLOAD,
-  LOG_BACKUP,
-  SL_RESET_INDIVIDUAL,
-  SL_RESET_GLOBAL,
-  SL_INDIVIDUAL_DELETE_GENERAL,
-  SL_INDIVIDUAL_DELETE_INDIVIDUAL,
-  SL_INDIVIDUAL_ACTIVITY,
-  SL_SUCCESS,
-  SL_ENTRY,
-  TABLE_ENTRY,
-  TABLE_EMIT,
-  TABLE_COLOR,
-  EXCEL_FOUND_ROW,
-  ERROR_OCCURRED,
-  EXECUTE_START,
-  HANDLE_TABLE,
-  HANDLE_OUTPUT,
-  CONFIG_UPDATE,
-  CONFIG_SAVE,
-  RESTART
-} = require("../../actions/types");
+
 
 const results = [
   ["off", "on"],
   ["forcedOff", "forcedOn"]
 ];
 
-const configPath = path.join(__dirname, "../..", "configs");
+const configPath = path.join(__dirname, "../../..", "configs");
 const logPath = constants.saveLogLocation;
 const version = constants.version;
 
@@ -176,17 +148,17 @@ function Realtime(server, config, store) {
   function saveCurrentConfig(config, confirm) {
     checkConfigConsistency(config, consistent => {
       store.dispatch({
-        type: CONFIG_UPDATE,
+        type: "CONFIG_UPDATE",
         payload: config
       });
 
       if (consistent) {
         store.dispatch({
-          type: LOG_BACKUP
+          type: "LOG_BACKUP"
         });
       } else {
         store.dispatch({
-          type: RESTART
+          type: "RESTART"
         });
       }
     });
@@ -205,7 +177,7 @@ function Realtime(server, config, store) {
     const name = path.join(configPath, msg.name + "V" + version + ".json");
 
     store.dispatch({
-      type: CONFIG_SAVE,
+      type: "CONFIG_SAVE",
       payload: {
         name,
         config: msg.config
@@ -234,7 +206,7 @@ function Realtime(server, config, store) {
 
   function uploadLog({ name, index }, callback) {
     store.dispatch({
-      type: LOG_UPLOAD,
+      type: "LOG_UPLOAD",
       payload: {
         fileName: name,
         ftpIndex: index,
@@ -302,7 +274,7 @@ function Realtime(server, config, store) {
     if (port.isForced) {
       if (port.previousForced) {
         store.dispatch({
-          type: INPUT_FORCED_CHANGED,
+          type: "INPUT_FORCED_CHANGED",
           payload: {
             index,
             isForced: false,
@@ -312,7 +284,7 @@ function Realtime(server, config, store) {
         });
       } else {
         store.dispatch({
-          type: INPUT_FORCED_CHANGED,
+          type: "INPUT_FORCED_CHANGED",
           payload: {
             index,
             isForced: true,
@@ -323,7 +295,7 @@ function Realtime(server, config, store) {
       }
     } else {
       store.dispatch({
-        type: INPUT_FORCED_CHANGED,
+        type: "INPUT_FORCED_CHANGED",
         payload: {
           index,
           isForced: true,
@@ -333,10 +305,10 @@ function Realtime(server, config, store) {
       });
     }
     store.dispatch({
-      type: HANDLE_TABLE
+      type: "HANDLE_TABLE"
     });
     store.dispatch({
-      type: HANDLE_OUTPUT
+      type: "HANDLE_OUTPUT"
     });
   }
 
@@ -346,7 +318,7 @@ function Realtime(server, config, store) {
     if (port.isForced) {
       if (port.previousForced) {
         store.dispatch({
-          type: OUTPUT_FORCED_CHANGED,
+          type: "OUTPUT_FORCED_CHANGED",
           payload: {
             index,
             isForced: false,
@@ -356,7 +328,7 @@ function Realtime(server, config, store) {
         });
       } else {
         store.dispatch({
-          type: OUTPUT_FORCED_CHANGED,
+          type: "OUTPUT_FORCED_CHANGED",
           payload: {
             index,
             isForced: true,
@@ -367,7 +339,7 @@ function Realtime(server, config, store) {
       }
     } else {
       store.dispatch({
-        type: OUTPUT_FORCED_CHANGED,
+        type: "OUTPUT_FORCED_CHANGED",
         payload: {
           index,
           isForced: true,
@@ -377,16 +349,16 @@ function Realtime(server, config, store) {
       });
     }
     store.dispatch({
-      type: HANDLE_TABLE
+      type: "HANDLE_TABLE"
     });
     store.dispatch({
-      type: HANDLE_OUTPUT
+      type: "HANDLE_OUTPUT"
     });
   }
 
   function handleManual(msg) {
     store.dispatch({
-      type: TABLE_ENTRY,
+      type: "TABLE_ENTRY",
       payload: {
         index: msg.index,
         entry: msg.value,
@@ -394,7 +366,7 @@ function Realtime(server, config, store) {
       }
     });
     store.dispatch({
-      type: TABLE_EMIT,
+      type: "TABLE_EMIT",
       payload: {
         index: msg.index,
         entry: msg.value,
@@ -402,44 +374,44 @@ function Realtime(server, config, store) {
       }
     });
     store.dispatch({
-      type: HANDLE_TABLE
+      type: "HANDLE_TABLE"
     });
     store.dispatch({
-      type: HANDLE_OUTPUT
+      type: "HANDLE_OUTPUT"
     });
   }
 
   function deleteGeneralSL(key) {
     store.dispatch({
-      type: SL_INDIVIDUAL_DELETE_GENERAL,
+      type: "SL_INDIVIDUAL_DELETE_GENERAL",
       payload: key
     });
   }
 
   function deleteIndividualSL({ key, message }, callback) {
     store.dispatch({
-      type: SL_INDIVIDUAL_DELETE_INDIVIDUAL,
+      type: "SL_INDIVIDUAL_DELETE_INDIVIDUAL",
       payload: { key, message, callback }
     });
   }
 
   function resetIndividualSL() {
     store.dispatch({
-      type: SL_RESET_INDIVIDUAL
+      type: "SL_RESET_INDIVIDUAL"
     });
   }
 
   function deleteSLData(_, callback) {
     store.dispatch({
-      type: SL_RESET_INDIVIDUAL
+      type: "SL_RESET_INDIVIDUAL"
     });
 
-    const startCalibration = require("../../configs/template").selfLearning
+    const startCalibration = require(path.join(configPath ,"template")).selfLearning
       .startCalibration;
-    const selfLearning = require("../../configs/current").selfLearning;
+    const selfLearning = require(path.join(configPath ,"current")).selfLearning;
 
     store.dispatch({
-      type: CONFIG_UPDATE,
+      type: "CONFIG_UPDATE",
       payload: {
         selfLearning: {
           ...selfLearning,
@@ -448,8 +420,8 @@ function Realtime(server, config, store) {
       }
     });
 
-    const dataFile = path.join(__dirname, "../../data/data.xls");
-    const templateFile = path.join(__dirname, "../../data/template.xls");
+    const dataFile = path.join(__dirname, "../../../data/data.xls");
+    const templateFile = path.join(__dirname, "../../../data/template.xls");
 
     if (fs.existsSync(dataFile)) {
       fs.unlinkSync(dataFile);
@@ -463,13 +435,13 @@ function Realtime(server, config, store) {
 
     setTimeout(() => {
       store.dispatch({
-        type: RESTART
+        type: "RESTART"
       });
     }, 1000)
   }
 
   function checkConfigConsistency(newConfig, callback) {
-    const oldConfig = require("../../configs/current");
+    const oldConfig = require(path.join(configPath ,"current"));
 
     for (let i = 0; i < oldConfig.serial.coms.length; i++) {
       if (oldConfig.serial.coms[i].name !== newConfig.serial.coms[i].name) {
@@ -506,21 +478,21 @@ function Realtime(server, config, store) {
   store.listen(lastAction => {
     const state = store.getState();
     switch (lastAction.type) {
-      case INPUT_EMIT: {
+      case "INPUT_EMIT": {
         const index = lastAction.payload;
         const port = state.input.ports[index];
 
         emitInput(port, index);
         break;
       }
-      case OUTPUT_EMIT: {
+      case "OUTPUT_EMIT": {
         const index = lastAction.payload;
         const port = state.output.ports[index];
 
         emitOutput(port, index);
         break;
       }
-      case SERIAL_ENTRY: {
+      case "SERIAL_ENTRY": {
         const { index, entry } = lastAction.payload;
 
         io.emit("entry", {
@@ -530,7 +502,7 @@ function Realtime(server, config, store) {
         });
         break;
       }
-      case SERIAL_AVERAGE: {
+      case "SERIAL_AVERAGE": {
         const { index, average } = lastAction.payload;
 
         io.emit("average", {
@@ -540,7 +512,7 @@ function Realtime(server, config, store) {
         });
         break;
       }
-      case SERIAL_RESET: {
+      case "SERIAL_RESET": {
         if (typeof lastAction.payload !== "undefined") {
           const index = lastAction.payload;
 
@@ -554,7 +526,7 @@ function Realtime(server, config, store) {
         }
         break;
       }
-      case TABLE_EMIT: {
+      case "TABLE_EMIT": {
         const { index, entry, manual } = lastAction.payload;
 
         io.emit("table", {
@@ -564,31 +536,31 @@ function Realtime(server, config, store) {
         });
         break;
       }
-      case TABLE_COLOR: {
+      case "TABLE_COLOR": {
         io.emit("tableColor", lastAction.payload);
         break;
       }
-      case EXCEL_FOUND_ROW: {
+      case "EXCEL_FOUND_ROW": {
         io.emit("notfound", !lastAction.payload.found);
         break;
       }
-      case ERROR_OCCURRED: {
+      case "ERROR_OCCURRED": {
         const err = lastAction.payload;
 
         io.emit("error", err.message);
         break;
       }
-      case SL_RESET_INDIVIDUAL:
-      case SL_RESET_GLOBAL:
-      case SL_INDIVIDUAL_DELETE_GENERAL:
-      case SL_INDIVIDUAL_DELETE_INDIVIDUAL:
-      case SL_ENTRY:
-      case SL_SUCCESS:
-      case SL_INDIVIDUAL_ACTIVITY: {
+      case "SL_RESET_INDIVIDUAL":
+      case "SL_RESET_GLOBAL":
+      case "SL_INDIVIDUAL_DELETE_GENERAL":
+      case "SL_INDIVIDUAL_DELETE_INDIVIDUAL":
+      case "SL_ENTRY":
+      case "SL_SUCCESS":
+      case "SL_INDIVIDUAL_ACTIVITY": {
         emitSelfLearning();
         break;
       }
-      case EXECUTE_START: {
+      case "EXECUTE_START": {
         io.emit("executeStart");
         break;
       }
@@ -628,4 +600,4 @@ function Realtime(server, config, store) {
   });
 }
 
-module.exports = Realtime;
+export default Realtime;

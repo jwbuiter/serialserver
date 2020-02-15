@@ -1,11 +1,11 @@
-const Gpio = require("onoff").Gpio;
-const fs = require("fs");
-const path = require("path");
+import { Gpio } from "onoff";
+import fs from "fs";
+import path from "path";
 
-const { resetPin, onlinePin } = require("../../config.static");
-const { ERROR_OCCURRED, RESTART } = require("../../actions/types");
+import { StoreType } from "../../store";
+const { resetPin, onlinePin } = require("../../../config.static");
 
-const configPath = path.join(__dirname, "../..", "configs");
+const configPath = path.join(__dirname, "../../..", "configs");
 
 function RecoveryModule() {
   const onlineGPIO = new Gpio(onlinePin, "out");
@@ -33,14 +33,14 @@ function RecoveryModule() {
     process.exit();
   }
 
-  let store;
+  let store: StoreType;
 
-  function bindStore(newStore) {
+  function bindStore(newStore: StoreType) {
     store = newStore;
 
     store.listen(lastAction => {
       switch (lastAction.type) {
-        case ERROR_OCCURRED: {
+        case "ERROR_OCCURRED": {
           console.log(lastAction);
           console.log(lastAction.payload.message);
           setTimeout(() => {
@@ -49,7 +49,7 @@ function RecoveryModule() {
           }, 2000);
           break;
         }
-        case RESTART: {
+        case "RESTART": {
           restart();
           break;
         }
@@ -79,7 +79,7 @@ function RecoveryModule() {
   }
 
   try {
-    eval("require(path.join(configPath, 'current.json'))");
+    eval("require(configPath+\"/\"+'current.json')");
   } catch (err) {
     console.log(err);
     reset();
@@ -89,7 +89,7 @@ function RecoveryModule() {
   // Catch CTRL+C
   process.on("SIGINT", () => {
     store.dispatch({
-      type: RESTART
+      type: "RESTART"
     });
   });
 
@@ -100,4 +100,4 @@ function RecoveryModule() {
   };
 }
 
-module.exports = RecoveryModule;
+export default RecoveryModule;

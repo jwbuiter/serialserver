@@ -1,13 +1,15 @@
-const Com = require("./Com.js");
+import Com from "./Com";
 
-function SerialModule(config, store) {
+import { StoreType } from "../../store";
+
+function SerialModule(config, store: StoreType) {
   const { coms } = config;
   return {
     coms: coms.map((com, index) => {
       const zeroReset =
         config.resetTrigger === "on" || config.resetTrigger === "com" + index;
 
-      return new Com(
+      return Com(
         index,
         {
           ...com,
@@ -19,4 +21,4 @@ function SerialModule(config, store) {
   };
 }
 
-module.exports = SerialModule;
+export default SerialModule;

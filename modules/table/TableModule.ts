@@ -1,22 +1,15 @@
-const fs = require("fs");
-const path = require("path");
-const XLSX = require("xlsx");
+import fs from "fs";
+import path from "path";
+import XLSX from "xlsx";
 
-const { getExcelDate } = require("../../utils/dateUtils");
+import { getExcelDate } from "../../utils/dateUtils";
+import Cell from "./Cell";
+import { StoreType } from "../../store";
 
-const {
-  HANDLE_TABLE,
-  EXCEL_FOUND_ROW,
-  SL_INDIVIDUAL_UPGRADE,
-  SL_INDIVIDUAL_DELETE_INDIVIDUAL,
-  SL_INDIVIDUAL_DECREMENT_TOTAL
-} = require("../../actions/types");
-const Cell = require("./Cell");
+const excelPath = path.join(__dirname, "../../..", "data", "data.xls");
 
-const excelPath = path.join(__dirname, "../..", "data", "data.xls");
-
-function sheetToArray(sheet) {
-  const result = [];
+function sheetToArray(sheet: XLSX.WorkSheet) {
+  const result: any[][] = [];
   const range = XLSX.utils.decode_range(sheet["!ref"]);
   for (let rowNum = range.s.r; rowNum <= range.e.r; rowNum++) {
     const row = [];
@@ -37,14 +30,14 @@ function sheetToArray(sheet) {
   return result;
 }
 
-function saveExcel(array) {
+function saveExcel(array: any[][]) {
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(array);
   XLSX.utils.book_append_sheet(wb, ws, "data");
   XLSX.writeFile(wb, excelPath);
 }
 
-function TableModule(config, store) {
+function TableModule(config, store: StoreType) {
   const {
     trigger,
     useFile,
@@ -59,6 +52,7 @@ function TableModule(config, store) {
   let excelSheet;
   if (fs.existsSync(excelPath)) {
     let excelFile = XLSX.readFile(excelPath);
+    // @ts-ignore
     let sheetName = excelFile.Workbook.Sheets[0].name;
     excelSheet = sheetToArray(excelFile.Sheets[sheetName]);
   }
@@ -67,7 +61,7 @@ function TableModule(config, store) {
     const state = store.getState();
 
     switch (lastAction.type) {
-      case HANDLE_TABLE: {
+      case "HANDLE_TABLE": {
         if (useFile && excelSheet) {
           const searchEntry = state.serial.coms[trigger].entry;
           if (!searchEntry) break;
@@ -79,7 +73,7 @@ function TableModule(config, store) {
           if (foundRow) {
             console.log("found");
             store.dispatch({
-              type: EXCEL_FOUND_ROW,
+              type: "EXCEL_FOUND_ROW",
               payload: {
                 found: true,
                 foundRow
@@ -88,7 +82,7 @@ function TableModule(config, store) {
           } else {
             console.log("not found");
             store.dispatch({
-              type: EXCEL_FOUND_ROW,
+              type: "EXCEL_FOUND_ROW",
               payload: {
                 found: false,
                 foundRow
@@ -98,7 +92,7 @@ function TableModule(config, store) {
         }
         break;
       }
-      case SL_INDIVIDUAL_UPGRADE: {
+      case "SL_INDIVIDUAL_UPGRADE": {
         if (useFile && excelSheet) {
           const { key, calibration } = lastAction.payload;
 
@@ -124,7 +118,7 @@ function TableModule(config, store) {
         }
         break;
       }
-      case SL_INDIVIDUAL_DELETE_INDIVIDUAL: {
+      case "SL_INDIVIDUAL_DELETE_INDIVIDUAL": {
         if (useFile && excelSheet) {
           const { key, message, callback } = lastAction.payload;
 
@@ -132,7 +126,7 @@ function TableModule(config, store) {
 
           if (exitCode) {
             store.dispatch({
-              type: SL_INDIVIDUAL_DECREMENT_TOTAL,
+              type: "SL_INDIVIDUAL_DECREMENT_TOTAL",
               payload: callback
             });
           }
@@ -157,7 +151,7 @@ function TableModule(config, store) {
   });
 
   const tempCells = cells.map(
-    (cell, index) =>
+    (cell, index: number) =>
       new Cell(
         index,
         {
@@ -168,7 +162,7 @@ function TableModule(config, store) {
       )
   );
   store.dispatch({
-    type: HANDLE_TABLE
+    type: "HANDLE_TABLE"
   });
 
   return {
@@ -176,4 +170,4 @@ function TableModule(config, store) {
   };
 }
 
-module.exports = TableModule;
+export default TableModule;

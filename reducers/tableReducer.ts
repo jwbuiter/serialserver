@@ -1,6 +1,6 @@
 import { Action } from "../actions/types";
 
-const { table } = require("../configs/current");
+const { table } = require("../../configs/current");
 
 type Cell = { entry: string; color: string; manual: boolean; numeric: boolean };
 

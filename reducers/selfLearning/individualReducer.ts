@@ -1,6 +1,6 @@
 import { Action } from "../../actions/types";
 
-const { selfLearning } = require("../../configs/current");
+const { selfLearning } = require("../../../configs/current");
 
 export type GeneralEntry = {
   entries: number[];

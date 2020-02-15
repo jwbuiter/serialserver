@@ -1,22 +1,23 @@
-const express = require("express");
-const fileUpload = require("express-fileupload");
-const path = require("path");
-const zip = require("express-zip");
-const fs = require("fs");
-const { exec } = require("child_process");
-const dateFormat = require("dateformat");
+import express from "express";
+import fileUpload from "express-fileupload";
+import path from "path";
+import zip from "express-zip";
+import fs from "fs";
+import { exec } from "child_process";
+import dateFormat from "dateformat";
 
-const { RESTART, LOG_BACKUP } = require("../../actions/types");
-const Realtime = require("./Realtime");
-const constants = require("../../config.static");
+import { StoreType } from "../../store";
+import Realtime from "./Realtime";
+
+const constants = require("../../../config.static");
 
 const app = express();
-const clientPath = "../../client";
-const logoPath = "../../logo";
+const clientPath = "../../../client";
+const logoPath = "../../../logo";
 const logPath = constants.saveLogLocation;
 const titleString = "<title>" + constants.name + "</title>";
 
-function SiteModule(config, store) {
+function SiteModule(config, store: StoreType) {
   function importExcel(req, res) {
     console.log(req.files);
     if (!req.files.excelFile) {
@@ -28,18 +29,21 @@ function SiteModule(config, store) {
 
     let uploadedFile = req.files.excelFile;
 
-    uploadedFile.mv(path.join(__dirname, "../..", "data", "data.xls"), err => {
-      if (err) {
-        return res.status(500).send(err);
+    uploadedFile.mv(
+      path.join(__dirname, "../../..", "data", "data.xls"),
+      err => {
+        if (err) {
+          return res.status(500).send(err);
+        }
+        res.send(
+          titleString +
+            '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.'
+        );
+        store.dispatch({
+          type: "LOG_BACKUP"
+        });
       }
-      res.send(
-        titleString +
-          '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.'
-      );
-      store.dispatch({
-        type: LOG_BACKUP
-      });
-    });
+    );
   }
 
   function importExcelTemplate(req, res) {
@@ -54,7 +58,7 @@ function SiteModule(config, store) {
     let uploadedFile = req.files.templateFile;
 
     uploadedFile.mv(
-      path.join(__dirname, "../..", "data", "template.xls"),
+      path.join(__dirname, "../../..", "data", "template.xls"),
       err => {
         if (err) {
           return res.status(500).send(err);
@@ -96,8 +100,8 @@ function SiteModule(config, store) {
 
   const staticRoutes = {
     "/": "client.html",
-    "/current.json": "../configs/current.json",
-    "/config.static.json": "../config.static.json"
+    "/current.json": "../../configs/current.json",
+    "/config.static.json": "../../config.static.json"
   };
 
   const functionRoutes = {
@@ -119,7 +123,7 @@ function SiteModule(config, store) {
         "Origin, X-Requested-With, Content-Type, Accept"
       );
       res.send(
-        require(path.join(__dirname, "../..", "configs", "current.json"))
+        require(path.join(__dirname, "../../..", "configs", "current.json"))
       );
     },
     "/com": (req, res) =>
@@ -230,7 +234,7 @@ function SiteModule(config, store) {
           '<meta http-equiv="refresh" content="5; url=/" />Restarting now.'
       );
       store.dispatch({
-        type: RESTART
+        type: "RESTART"
       });
       process.exit();
     },
@@ -256,8 +260,8 @@ function SiteModule(config, store) {
     };
   }
 
-  for (i = 0; i < 3; i++) {
-    for (j = 0; j < 5; j++) {
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 5; j++) {
       addTableRoute(i, j);
     }
   }
@@ -309,4 +313,4 @@ function SiteModule(config, store) {
   return {};
 }
 
-module.exports = SiteModule;
+export default SiteModule;

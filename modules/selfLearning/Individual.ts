@@ -1,28 +1,9 @@
-const fs = require("fs");
+import fs from "fs";
 
-const {
-  STATE_CHANGED,
-  SL_RESET_INDIVIDUAL,
-  SL_START_INDIVIDUAL,
-  SL_SUCCESS,
-  SL_ENTRY,
-  SL_INDIVIDUAL_UPGRADE,
-  SL_INDIVIDUAL_DOWNGRADE,
-  SL_INDIVIDUAL_INCREMENT,
-  SL_INDIVIDUAL_LOAD,
-  SL_INDIVIDUAL_DELETE_GENERAL,
-  SL_INDIVIDUAL_DELETE_INDIVIDUAL,
-  SL_INDIVIDUAL_DECREMENT_TOTAL,
-  SL_INDIVIDUAL_ACTIVITY,
-  SL_INDIVIDUAL_HEADERS,
-  SERIAL_ENTRY,
-  LOG_RESET,
-  LOG_MAKE_PARTIAL,
-  CONFIG_UPDATE
-} = require("../../actions/types");
-const Parser = require("../parser/Parser");
+import Parser from "../parser/Parser";
+import { StoreType } from "../../store";
 
-function selfLearningIndividual(config, store) {
+function selfLearningIndividual(config, store: StoreType) {
   const {
     enabled,
     numberPercentage,
@@ -52,7 +33,7 @@ function selfLearningIndividual(config, store) {
 
   function saveIndividualSelfLearning() {
     store.dispatch({
-      type: STATE_CHANGED
+      type: "STATE_CHANGED"
     });
     const individualSL = store.getState().selfLearning.individual;
 
@@ -74,7 +55,7 @@ function selfLearningIndividual(config, store) {
   }
 
   function checkSuccess() {
-    individualSL = store.getState().selfLearning.individual;
+    let individualSL = store.getState().selfLearning.individual;
 
     if (Object.keys(individualSL.individualEntries).length >= number) {
       const values = Object.values(individualSL.individualEntries).map(
@@ -87,7 +68,7 @@ function selfLearningIndividual(config, store) {
       const calibration = (max + min) / 2;
 
       store.dispatch({
-        type: SL_SUCCESS,
+        type: "SL_SUCCESS",
         payload: {
           success: 1,
           calibration,
@@ -99,7 +80,7 @@ function selfLearningIndividual(config, store) {
 
       config.startCalibration = calibration;
       store.dispatch({
-        type: CONFIG_UPDATE,
+        type: "CONFIG_UPDATE",
         payload: {
           selfLearning: config
         }
@@ -111,19 +92,19 @@ function selfLearningIndividual(config, store) {
     let individualSL = store.getState().selfLearning.individual;
 
     switch (lastAction.type) {
-      case LOG_RESET: {
+      case "LOG_RESET": {
         store.dispatch({
-          type: SL_INDIVIDUAL_INCREMENT
+          type: "SL_INDIVIDUAL_INCREMENT"
         });
         saveIndividualSelfLearning();
         break;
       }
-      case SL_ENTRY: {
+      case "SL_ENTRY": {
         const { key, entry } = lastAction.payload;
 
         if (store.getState().selfLearning.teaching) {
           store.dispatch({
-            type: SL_INDIVIDUAL_UPGRADE,
+            type: "SL_INDIVIDUAL_UPGRADE",
             payload: {
               key,
               calibration: entry
@@ -168,7 +149,7 @@ function selfLearningIndividual(config, store) {
                 matchedEntries.length;
 
               store.dispatch({
-                type: SL_INDIVIDUAL_UPGRADE,
+                type: "SL_INDIVIDUAL_UPGRADE",
                 payload: {
                   key,
                   calibration
@@ -182,14 +163,14 @@ function selfLearningIndividual(config, store) {
         saveIndividualSelfLearning();
         break;
       }
-      case SL_INDIVIDUAL_DELETE_INDIVIDUAL: {
+      case "SL_INDIVIDUAL_DELETE_INDIVIDUAL": {
         if (
           Object.entries(
             store.getState().selfLearning.individual.individualEntries
           ).length < number
         ) {
           store.dispatch({
-            type: SL_SUCCESS,
+            type: "SL_SUCCESS",
             payload: {
               success: 0,
               calibration: startCalibration,
@@ -204,7 +185,7 @@ function selfLearningIndividual(config, store) {
         saveIndividualSelfLearning();
         break;
       }
-      case SL_INDIVIDUAL_DECREMENT_TOTAL: {
+      case "SL_INDIVIDUAL_DECREMENT_TOTAL": {
         const callback = lastAction.payload;
 
         totalNumber--;
@@ -213,38 +194,41 @@ function selfLearningIndividual(config, store) {
 
         callback(totalNumber);
         store.dispatch({
-          type: CONFIG_UPDATE,
+          type: "CONFIG_UPDATE",
           payload: {
             selfLearning: config
           }
         });
         break;
       }
-      case SL_INDIVIDUAL_DELETE_GENERAL:
-      case SL_INDIVIDUAL_INCREMENT:
-      case SL_RESET_INDIVIDUAL: {
+      case "SL_INDIVIDUAL_DELETE_GENERAL":
+      case "SL_INDIVIDUAL_INCREMENT":
+      case "SL_RESET_INDIVIDUAL": {
         saveIndividualSelfLearning();
         break;
       }
-      case SERIAL_ENTRY: {
+      case "SERIAL_ENTRY": {
         if (!activityCounter) break;
         if (lastAction.payload.index === comIndex) break;
         if (!lastAction.payload.entry) break;
 
-        store.dispatch({ type: LOG_MAKE_PARTIAL, payload: lastAction.payload });
         store.dispatch({
-          type: SL_INDIVIDUAL_ACTIVITY,
-          payload: lastAction.payload.entry
+          type: "LOG_MAKE_PARTIAL",
+          payload: lastAction.payload
+        });
+        store.dispatch({
+          type: "SL_INDIVIDUAL_ACTIVITY",
+          payload: { key: lastAction.payload.entry }
         });
         saveIndividualSelfLearning();
         break;
       }
-      case STATE_CHANGED: {
+      case "STATE_CHANGED": {
         const newHeaders = headerFormulas.map(formula =>
           myParser.parse(formula)
         );
 
-        store.dispatch({ type: SL_INDIVIDUAL_HEADERS, payload: newHeaders });
+        store.dispatch({ type: "SL_INDIVIDUAL_HEADERS", payload: newHeaders });
         break;
       }
     }
@@ -254,7 +238,7 @@ function selfLearningIndividual(config, store) {
     try {
       const individualData = require("../../selfLearning/individualData");
       store.dispatch({
-        type: SL_INDIVIDUAL_LOAD,
+        type: "SL_INDIVIDUAL_LOAD",
         payload: individualData
       });
       checkSuccess();
@@ -264,8 +248,8 @@ function selfLearningIndividual(config, store) {
   }
 
   store.dispatch({
-    type: SL_START_INDIVIDUAL
+    type: "SL_START_INDIVIDUAL"
   });
 }
 
-module.exports = selfLearningIndividual;
+export default selfLearningIndividual;

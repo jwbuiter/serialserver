@@ -1,12 +1,3 @@
-const {
-  SL_ENTRY,
-  SL_SUCCESS,
-  SL_RESET_GLOBAL,
-  LOG_RESET,
-  LOG_SAVE,
-  CONFIG_UPDATE
-} = require("../../actions/types");
-
 function selfLearningGlobal(config, store) {
   const { enabled, totalNumber, numberPercentage } = config;
   const tolerance = config.tolerance / 100;
@@ -17,13 +8,13 @@ function selfLearningGlobal(config, store) {
 
   store.listen(lastAction => {
     switch (lastAction.type) {
-      case LOG_RESET: {
+      case "LOG_RESET": {
         store.dispatch({
-          type: SL_RESET_GLOBAL
+          type: "SL_RESET_GLOBAL"
         });
         break;
       }
-      case SL_ENTRY: {
+      case "SL_ENTRY": {
         if (store.getState().selfLearning.success) break;
 
         const entries = store.getState().selfLearning.global.entries;
@@ -67,7 +58,7 @@ function selfLearningGlobal(config, store) {
 
           const success = successfullMatches.length > number ? 2 : 1;
           store.dispatch({
-            type: SL_SUCCESS,
+            type: "SL_SUCCESS",
             payload: {
               success,
               calibration,
@@ -78,12 +69,12 @@ function selfLearningGlobal(config, store) {
             }
           });
           store.dispatch({
-            type: LOG_SAVE
+            type: "LOG_SAVE"
           });
           config.success = success;
           config.startCalibration = calibration;
           store.dispatch({
-            type: CONFIG_UPDATE,
+            type: "CONFIG_UPDATE",
             payload: {
               selfLearning: config
             }
@@ -94,8 +85,8 @@ function selfLearningGlobal(config, store) {
     }
   });
   store.dispatch({
-    type: SL_RESET_GLOBAL
+    type: "SL_RESET_GLOBAL"
   });
 }
 
-module.exports = selfLearningGlobal;
+export default selfLearningGlobal;

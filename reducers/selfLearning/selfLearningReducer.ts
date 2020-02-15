@@ -1,6 +1,6 @@
 import { Action } from "../../actions/types";
 
-const { selfLearning } = require("../../configs/current");
+const { selfLearning } = require("../../../configs/current");
 
 import globalReducer, {
   IGlobalSelfLearningState,
@@ -25,7 +25,7 @@ export interface ISelfLearningState {
 }
 
 function initialState(): ISelfLearningState {
-  const { selfLearning } = require("../../configs/current");
+  const { selfLearning } = require("../../../configs/current");
   return {
     global: initialStateGlobal,
     individual: initialStateIndividual,

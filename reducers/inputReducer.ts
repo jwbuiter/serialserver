@@ -1,6 +1,6 @@
 import { Action } from "../actions/types";
 
-const { input } = require("../configs/current.json");
+const { input } = require("../../configs/current.json");
 
 interface Port {
   state: boolean;

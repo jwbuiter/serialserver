@@ -1,11 +1,13 @@
-const { getExcelDate, getExcelDateTime } = require("../../utils/dateUtils");
+import { getExcelDate, getExcelDateTime } from "../../utils/dateUtils";
+import { StoreType } from "../../store";
+import { ISelfLearningState } from "../../reducers/selfLearning/selfLearningReducer";
 
-const { ERROR_OCCURRED } = require("../../actions/types");
-const { tableColumns } = require("../../config.static");
-const config = require("../../configs/current");
 
-function Parser(store) {
-  function assert(condition, message) {
+const { tableColumns } = require("../../../config.static");
+const config = require("../../../configs/current");
+
+export default function Parser(store: StoreType) {
+  function assert(condition: boolean, message: string) {
     if (!condition) {
       message = message || "Assertion failed";
       if (typeof Error !== "undefined") {
@@ -15,9 +17,9 @@ function Parser(store) {
     }
   }
 
-  function parseTable(x) {
-    let row = x.charCodeAt(1) - 65;
-    let column = parseInt(x[2]);
+  function parseTable(x: string) {
+    const row = x.charCodeAt(1) - 65;
+    const column = parseInt(x[2]);
     assert(
       row * tableColumns + column - 1 >= 0 &&
         row * tableColumns + column - 1 < store.getState().table.cells.length,
@@ -31,46 +33,46 @@ function Parser(store) {
     );
   }
 
-  function parseInput(x) {
-    x = parseInt(x.slice(2)) - 1;
+  function parseInput(x: string) {
+    const i = parseInt(x.slice(2)) - 1;
     assert(
-      x >= 0 && x < store.getState().input.ports.length,
+      i >= 0 && i < store.getState().input.ports.length,
       "Input index out of bounds"
     );
 
-    return "store.getState().input.ports[" + x + "].state";
+    return "store.getState().input.ports[" + i + "].state";
   }
 
-  function parseOutput(x) {
-    x = parseInt(x.slice(2)) - 1;
+  function parseOutput(x: string) {
+    const i = parseInt(x.slice(2)) - 1;
     assert(
-      x >= 0 && x < store.getState().output.ports.length,
+      i >= 0 && i < store.getState().output.ports.length,
       "Output index out of bounds"
     );
 
-    return "store.getState().output.ports[" + x + "].state";
+    return "store.getState().output.ports[" + i + "].state";
   }
 
-  function parseExcel(x) {
-    x = x.charCodeAt(1) - 65;
-    assert(x >= 0 && x <= 26, "Out of bounds of excel table");
+  function parseExcel(x: string) {
+    const i = x.charCodeAt(1) - 65;
+    assert(i >= 0 && i <= 26, "Out of bounds of excel table");
 
-    return "store.getState().table.foundRow[" + x + "]";
+    return "store.getState().table.foundRow[" + i + "]";
   }
 
-  function parseCom(x) {
-    x = parseInt(x[3]);
+  function parseCom(x: string) {
+    const i = parseInt(x[3]);
     assert(
-      x >= 0 && x < store.getState().serial.coms.length,
+      i >= 0 && i < store.getState().serial.coms.length,
       "Com port out of bounds"
     );
 
-    if (config.serial.coms[x].factor === 0)
-      return "store.getState().serial.coms[" + x + "].entry";
-    else return "Number(store.getState().serial.coms[" + x + "].entry)";
+    if (config.serial.coms[i].factor === 0)
+      return "store.getState().serial.coms[" + i + "].entry";
+    else return "Number(store.getState().serial.coms[" + i + "].entry)";
   }
 
-  function parseStatistic(x) {
+  function parseStatistic(x: string) {
     const state = store.getState();
 
     if (x === "&TAT") {
@@ -85,21 +87,24 @@ function Parser(store) {
 
     x = x.slice(-2);
 
-    let table;
+    let i: number;
+
+    let table: boolean;
     if (x.match(/[A-E][0-9]/)) {
       table = true;
-      x = (x.charCodeAt(0) - 65) * tableColumns + Number(x[1]) - 1;
+      i = (x.charCodeAt(0) - 65) * tableColumns + Number(x[1]) - 1;
     } else {
       table = false;
-      x = Number(x[1]);
+      i = Number(x[1]);
     }
 
     const data = state.logger.entries
       .filter(entry => entry.full)
       .filter(entry => !unique || entry.TU !== "")
-      .map(entry => (table ? entry.cells[x] : entry.coms[x]));
+      .map(entry => (table ? entry.cells[i] : entry.coms[i]))
+      .map(entry => Number(entry));
 
-    const statisticFunctions = {
+    const statisticFunctions: Record<string, () => number> = {
       TN: () => data.length,
       TO: () => data.reduce((acc, cur) => acc + cur, 0),
       MI: () => Math.min(...data),
@@ -114,7 +119,7 @@ function Parser(store) {
         return Math.sqrt(spread / (data.length || 1));
       },
       UN: () =>
-        data.reduce((acc, cur) => {
+        data.reduce((acc: number[], cur) => {
           if (acc.includes(cur)) {
             return acc;
           } else {
@@ -123,21 +128,21 @@ function Parser(store) {
           }
         }, []).length,
       TU: () => {
-        if (data.length === 0) return "0";
+        if (data.length === 0) return 0;
 
-        return state.logger.entries[state.logger.entries.length - 1].TU;
+        return Number(state.logger.entries[state.logger.entries.length - 1].TU);
       },
       TA: () => {
-        if (data.length === 0) return "0";
+        if (data.length === 0) return 0;
 
-        return state.logger.entries[state.logger.entries.length - 1].TA;
+        return Number(state.logger.entries[state.logger.entries.length - 1].TA);
       }
     };
 
-    return statisticFunctions[operator](x).toString();
+    return statisticFunctions[operator]().toString();
   }
 
-  function average(list) {
+  function average(list: number[]) {
     const sum = list.reduce((acc, cur) => acc + cur, 0);
 
     if (typeof sum !== "number") {
@@ -147,7 +152,14 @@ function Parser(store) {
     return sum / list.length;
   }
 
-  const selfLearningFunctions = {
+  const selfLearningFunctions: Record<
+    string,
+    (
+      state: ISelfLearningState,
+      tolerance: number,
+      calibration: number
+    ) => number
+  > = {
     SCT: () => config.selfLearning.totalNumber,
     SCN: () =>
       Math.round(
@@ -161,8 +173,8 @@ function Parser(store) {
     SN: state => state.global.entries.length,
     ST: state =>
       (state.endTime
-        ? state.endTime - state.startTime
-        : new Date() - state.startTime) / 60000,
+        ? state.endTime?.getTime() - state.startTime?.getTime()
+        : new Date().getTime() - state.startTime?.getTime()) / 60000,
 
     SLC: state => state.calibration,
     SLCMIN: state => state.calibration * (1 - state.tolerance),
@@ -210,7 +222,10 @@ function Parser(store) {
       )
   };
 
-  const selfLearningNumberedFunctions = {
+  const selfLearningNumberedFunctions: Record<
+    string,
+    (index: number, state: ISelfLearningState) => number
+  > = {
     SI: (index, state) =>
       Object.values(state.individual.individualEntries).filter(
         entry => entry.increments === index
@@ -228,7 +243,7 @@ function Parser(store) {
       )
   };
 
-  function parseSelfLearning(x) {
+  function parseSelfLearning(x: string) {
     const property = x.slice(1);
     const state = store.getState().selfLearning;
 
@@ -297,7 +312,7 @@ function Parser(store) {
   }
 
   return {
-    parse: formula => {
+    parse: (formula: string) => {
       let result;
       try {
         formula = formula
@@ -316,7 +331,7 @@ function Parser(store) {
         result = eval(formula);
       } catch (err) {
         store.dispatch({
-          type: ERROR_OCCURRED,
+          type: "ERROR_OCCURRED",
           payload: err
         });
       }
@@ -324,5 +339,3 @@ function Parser(store) {
     }
   };
 }
-
-module.exports = Parser;

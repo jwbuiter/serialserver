@@ -1,18 +1,8 @@
-const serialPort = require("serialport");
-const http = require("http");
-const Gpio = require("onoff").Gpio;
+import serialPort from "serialport";
+import http from "http";
+import { Gpio } from "onoff";
 
-const {
-  SERIAL_ENTRY,
-  SERIAL_AVERAGE,
-  SERIAL_RESET,
-  SERIAL_COMMAND,
-  HANDLE_OUTPUT,
-  HANDLE_TABLE,
-  TABLE_RESET,
-  ERROR_OCCURRED
-} = require("../../actions/types.js");
-const constants = require("../../config.static");
+const constants = require("../../../config.static");
 
 function Com(index, config, store) {
   const {
@@ -34,7 +24,6 @@ function Com(index, config, store) {
     average,
     alwaysPositive,
     entries,
-    triggerCom,
     timeoutReset,
     zeroReset,
     numeric,
@@ -47,7 +36,7 @@ function Com(index, config, store) {
 
   const myGPIO = new Gpio(constants.comPin[index], "out");
 
-  let remainingEntries = Buffer("0");
+  let remainingEntries = new Buffer("0");
   let averageList = [];
 
   let myTimeout = setTimeout(() => 0, 1);
@@ -59,7 +48,7 @@ function Com(index, config, store) {
       clearTimeout(myTimeout);
       myTimeout = setTimeout(() => {
         store.dispatch({
-          type: SERIAL_RESET,
+          type: "SERIAL_RESET",
           payload: index
         });
       }, timeout * 1000);
@@ -76,7 +65,7 @@ function Com(index, config, store) {
       clearTimeout(autoCommandTimeout);
       autoCommandTimeout = setTimeout(() => {
         store.dispatch({
-          type: SERIAL_COMMAND,
+          type: "SERIAL_COMMAND",
           payload: { command: autoCommandText, index }
         });
       }, autoCommandTime * 1000);
@@ -84,16 +73,16 @@ function Com(index, config, store) {
 
     if (zeroReset && numericValue == 0 && !zeroResetTimeout) {
       store.dispatch({
-        type: TABLE_RESET
+        type: "TABLE_RESET"
       });
       store.dispatch({
-        type: SERIAL_RESET
+        type: "SERIAL_RESET"
       });
       store.dispatch({
-        type: HANDLE_OUTPUT
+        type: "HANDLE_OUTPUT"
       });
       store.dispatch({
-        type: HANDLE_TABLE
+        type: "HANDLE_TABLE"
       });
 
       zeroResetTimeout = setTimeout(() => {
@@ -101,7 +90,7 @@ function Com(index, config, store) {
       }, timeout * 1000);
     } else {
       store.dispatch({
-        type: SERIAL_ENTRY,
+        type: "SERIAL_ENTRY",
         payload: {
           entry: entry,
           index: index
@@ -109,10 +98,10 @@ function Com(index, config, store) {
       });
       zeroResetTimeout = null;
       store.dispatch({
-        type: HANDLE_TABLE
+        type: "HANDLE_TABLE"
       });
       store.dispatch({
-        type: HANDLE_OUTPUT
+        type: "HANDLE_OUTPUT"
       });
     }
   }
@@ -134,7 +123,7 @@ function Com(index, config, store) {
         averageList.reduce((acc, cur) => acc + cur) / averageList.length
       ).toFixed(digits);
       store.dispatch({
-        type: SERIAL_AVERAGE,
+        type: "SERIAL_AVERAGE",
         payload: {
           average,
           index
@@ -209,7 +198,7 @@ function Com(index, config, store) {
       });
       server.on("error", (err, socket) => {
         store.dispatch({
-          type: ERROR_OCCURRED,
+          type: " ERROR_OCCURRED",
           payload: err
         });
       });
@@ -230,7 +219,7 @@ function Com(index, config, store) {
 
       store.listen(action => {
         switch (action.type) {
-          case SERIAL_COMMAND: {
+          case "SERIAL_COMMAND": {
             const { command } = action.payload;
             const commandIndex = action.payload.index;
 
@@ -276,7 +265,7 @@ function Com(index, config, store) {
 
           let newEntry = remainingEntries
             .slice(
-              nextEntry + Buffer(prefix).length,
+              nextEntry + new Buffer(prefix).length,
               nextEntryEnd === 0
                 ? remainingEntries.length
                 : nextEntryEnd + nextEntry
@@ -284,14 +273,6 @@ function Com(index, config, store) {
             .toString();
 
           newEntry = decode(newEntry);
-
-          // dont remember why this is here
-          if (index == triggerCom && latestLogEntry[index] != newEntry) {
-            store.dispatch({
-              type: SERIAL_RESET
-            });
-            console.log("clear");
-          }
 
           if (newEntry !== store.getState().serial.coms[index].entry) {
             dispatch(newEntry);
@@ -306,4 +287,4 @@ function Com(index, config, store) {
   }
 }
 
-module.exports = Com;
+export default Com;

@@ -1,6 +1,6 @@
 import { Action } from "../actions/types";
 
-const { serial } = require("../configs/current");
+const { serial } = require("../../configs/current");
 
 type History = { entry: string; time: Date | null }[];
 type Com = {

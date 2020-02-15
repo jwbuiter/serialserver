@@ -1,6 +1,6 @@
 import { Action } from "../actions/types";
 
-const { table, serial, logger } = require("../configs/current");
+const { table, serial, logger } = require("../../configs/current");
 
 export interface IEntry {
   name: string;
@@ -8,7 +8,7 @@ export interface IEntry {
   date: string;
   coms: string[];
   cells: string[];
-  TU: string;
+  TU: number | "";
   TA: string;
   full: boolean;
 }

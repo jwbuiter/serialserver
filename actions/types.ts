@@ -69,19 +69,21 @@ type ActionType =
 
 export default interface IAction {
   type: ActionType;
-  payload: unknown;
 }
 
 export interface ConfigSaveAction extends IAction {
   type: "CONFIG_SAVE";
+  payload: any;
 }
 
 export interface ConfigUpdateAction extends IAction {
   type: "CONFIG_UPDATE";
+  payload: any;
 }
 
 export interface ErrorOccurredAction extends IAction {
   type: "ERROR_OCCURRED";
+  payload: Error;
 }
 
 export interface ExcelFoundRowAction extends IAction {
@@ -278,7 +280,7 @@ export interface SerialEntryAction extends IAction {
 
 export interface SerialResetAction extends IAction {
   type: "SERIAL_RESET";
-  payload: number;
+  payload?: number;
 }
 
 export interface SerialTimeoutAction extends IAction {
@@ -289,8 +291,8 @@ export interface SLEntryAction extends IAction {
   type: "SL_ENTRY";
   payload: {
     entry: number;
-    key: string;
-    extra: any;
+    key?: string;
+    extra?: any;
   };
 }
 
@@ -301,6 +303,7 @@ export interface SLIndividualActivityAction extends IAction {
 
 export interface SLIndividualDecrementTotalAction extends IAction {
   type: "SL_INDIVIDUAL_DECREMENT_TOTAL";
+  payload: (totalNumber: number) => void;
 }
 
 export interface SLIndividualDeleteGeneralAction extends IAction {
@@ -310,7 +313,7 @@ export interface SLIndividualDeleteGeneralAction extends IAction {
 
 export interface SLIndividualDeleteIndividualAction extends IAction {
   type: "SL_INDIVIDUAL_DELETE_INDIVIDUAL";
-  payload: { key: string };
+  payload: { key: string; message: string; callback };
 }
 
 export interface SLIndividualDowngradeAction extends IAction {
@@ -364,7 +367,7 @@ export interface SLSuccessAction extends IAction {
   payload: {
     success: number;
     calibration: number;
-    matchedTolerance: number;
+    matchedTolerance?: number;
     comIndex: number;
     tolerance: number;
     filterLog: boolean;
@@ -396,7 +399,7 @@ export interface TableEntryAction extends IAction {
   type: "TABLE_ENTRY";
   payload: {
     index: number;
-    entry: string;
+    entry: string | number;
   };
 }
 

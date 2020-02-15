@@ -1,11 +1,11 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
 
-const { CONFIG_UPDATE, CONFIG_SAVE } = require("../../actions/types");
+import { StoreType } from "../../store";
 
-const configPath = path.join(__dirname, "../..", "configs");
+const configPath = path.join(__dirname, "../../..", "configs");
 
-function ConfigModule(store) {
+function ConfigModule(store: StoreType) {
   let config = require(path.join(configPath, "current.json"));
 
   function saveConfig(config, name) {
@@ -17,16 +17,12 @@ function ConfigModule(store) {
       fs.unlinkSync(name);
     } catch (err) {}
 
-    fs.writeFileSync(name, conf, err => {
-      if (err) throw err;
-
-      console.log("Config saved!");
-    });
+    fs.writeFileSync(name, conf);
   }
 
   store.listen(lastAction => {
     switch (lastAction.type) {
-      case CONFIG_UPDATE: {
+      case "CONFIG_UPDATE": {
         config = Object.assign(config, lastAction.payload);
 
         const name = path.join(configPath, "current.json");
@@ -35,7 +31,7 @@ function ConfigModule(store) {
         saveConfig(config, name);
         break;
       }
-      case CONFIG_SAVE: {
+      case "CONFIG_SAVE": {
         const { config, name } = lastAction.payload;
         saveConfig(config, name);
         break;
@@ -46,4 +42,4 @@ function ConfigModule(store) {
   return config;
 }
 
-module.exports = ConfigModule;
+export default ConfigModule;

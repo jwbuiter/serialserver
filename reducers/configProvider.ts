@@ -1,3 +1,3 @@
-const config = require("../configs/current");
+const config = require("../../configs/current");
 
 export default () => config;

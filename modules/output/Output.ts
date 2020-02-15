@@ -1,25 +1,17 @@
-const Gpio = require("onoff").Gpio;
+import { Gpio } from "onoff";
 
-const {
-  OUTPUT_RESULT_CHANGED,
-  OUTPUT_FORCED_CHANGED,
-  OUTPUT_EXECUTING_CHANGED,
-  OUTPUT_EMIT,
-  STATE_CHANGED,
-  HANDLE_OUTPUT,
-  EXECUTE_START,
-  EXECUTE_STOP
-} = require("../../actions/types");
-const Parser = require("../parser/Parser");
-const constants = require("../../config.static");
+import Parser from "../parser/Parser";
+import { StoreType } from "../../store";
 
-function Output(index, config, store) {
+const constants = require("../../../config.static");
+
+function Output(index: number, config, store: StoreType) {
   const { execute, seconds, formula, hardwareOutput } = config;
 
   const myGPIO = ~hardwareOutput
     ? new Gpio(constants.outputPin[hardwareOutput], "out")
     : null;
-  const myParser = new Parser(store);
+  const myParser = Parser(store);
 
   let stateJSON = "";
   let state = false;
@@ -32,9 +24,9 @@ function Output(index, config, store) {
 
   store.listen(lastAction => {
     switch (lastAction.type) {
-      case OUTPUT_EXECUTING_CHANGED:
-      case OUTPUT_RESULT_CHANGED:
-      case OUTPUT_FORCED_CHANGED: {
+      case "OUTPUT_EXECUTING_CHANGED":
+      case "OUTPUT_RESULT_CHANGED":
+      case "OUTPUT_FORCED_CHANGED": {
         if (index === lastAction.payload.index) {
           const newState = store.getState().output.ports[index];
           const newStateJSON = JSON.stringify(newState);
@@ -43,25 +35,25 @@ function Output(index, config, store) {
 
             state = newState.state;
             store.dispatch({
-              type: STATE_CHANGED
+              type: "STATE_CHANGED"
             });
           }
           if (newStateJSON !== stateJSON) {
             stateJSON = newStateJSON;
             store.dispatch({
-              type: OUTPUT_EMIT,
+              type: "OUTPUT_EMIT",
               payload: index
             });
           }
         }
         break;
       }
-      case STATE_CHANGED:
-      case HANDLE_OUTPUT: {
+      case "STATE_CHANGED":
+      case "HANDLE_OUTPUT": {
         const result = myParser.parse(formula) ? true : false;
 
         store.dispatch({
-          type: OUTPUT_RESULT_CHANGED,
+          type: "OUTPUT_RESULT_CHANGED",
           payload: {
             index,
             result
@@ -69,10 +61,10 @@ function Output(index, config, store) {
         });
         break;
       }
-      case EXECUTE_START: {
+      case "EXECUTE_START": {
         if (execute && store.getState().output.ports[index].result) {
           store.dispatch({
-            type: OUTPUT_EXECUTING_CHANGED,
+            type: "OUTPUT_EXECUTING_CHANGED",
             payload: {
               index,
               executing: true
@@ -81,7 +73,7 @@ function Output(index, config, store) {
           if (seconds) {
             setTimeout(() => {
               store.dispatch({
-                type: OUTPUT_EXECUTING_CHANGED,
+                type: "OUTPUT_EXECUTING_CHANGED",
                 payload: {
                   index,
                   executing: false
@@ -92,10 +84,10 @@ function Output(index, config, store) {
         }
         break;
       }
-      case EXECUTE_STOP: {
+      case "EXECUTE_STOP": {
         if (execute && !seconds) {
           store.dispatch({
-            type: OUTPUT_EXECUTING_CHANGED,
+            type: "OUTPUT_EXECUTING_CHANGED",
             payload: {
               index,
               executing: false
@@ -108,7 +100,7 @@ function Output(index, config, store) {
   });
 
   store.dispatch({
-    type: OUTPUT_RESULT_CHANGED,
+    type: "OUTPUT_RESULT_CHANGED",
     payload: {
       index,
       result: myParser.parse(formula)
@@ -116,4 +108,4 @@ function Output(index, config, store) {
   });
 }
 
-module.exports = Output;
+export default Output;
