@@ -4,8 +4,8 @@
   "description": " Webserver that hosts all incoming serial data",
   "main": "build/server.js",
   "scripts": {
-    "start" : "node ./build/server.js",
-    "tsc": "tsc",
+    "start": "node ./build/server.js",
+    "build": "tsc",
     "dev": "ts-node-dev --respawn --transpileOnly ./server.ts",
     "prod": "tsc && node ./build/server.js"
   },
