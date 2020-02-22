@@ -43,7 +43,7 @@ function selfLearningIndividual(config, store: StoreType) {
     };
 
     fs.writeFile(
-      __dirname + "/../../selfLearning/individualData.json",
+      __dirname + "/../../../selfLearning/individualData.json",
       JSON.stringify(individualData),
       "utf8",
       err => {
@@ -234,9 +234,9 @@ function selfLearningIndividual(config, store: StoreType) {
     }
   });
 
-  if (fs.existsSync(__dirname + "/../../selfLearning/individualData.json")) {
+  if (fs.existsSync(__dirname + "/../../../selfLearning/individualData.json")) {
     try {
-      const individualData = require("../../selfLearning/individualData");
+      const individualData = require("../../../selfLearning/individualData");
       store.dispatch({
         type: "SL_INDIVIDUAL_LOAD",
         payload: individualData

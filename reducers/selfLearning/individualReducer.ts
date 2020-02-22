@@ -122,7 +122,11 @@ export default function individualReducer(
       const newGeneralEntries = Object.assign({}, state.generalEntries);
       const newIndividualEntries = Object.assign({}, state.individualEntries);
 
-      delete newGeneralEntries[key];
+      let extra = [];
+      if (key in state.generalEntries) {
+        const extra = state.generalEntries[key].extra;
+        delete newGeneralEntries[key];
+      }
 
       const newMeasurement = {
         value: calibration,
@@ -136,7 +140,7 @@ export default function individualReducer(
       newIndividualEntries[key] = {
         ...calculateEntry(measurements),
         measurements,
-        extra: state.generalEntries[key].extra,
+        extra,
         numUpdates: 1,
         numUpdatesHistory: [],
         activity: 1,
