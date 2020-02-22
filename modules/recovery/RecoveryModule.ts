@@ -66,10 +66,10 @@ function RecoveryModule() {
   if (!resetGPIO.readSync()) {
     reset();
     reset();
-    let gpioState = 1;
+    let gpioState: 1 | 0 = 1;
 
     setInterval(() => {
-      gpioState = 1 - gpioState;
+      gpioState = gpioState === 1 ? 0 : 1;
       console.log("Blink " + gpioState);
       onlineGPIO.writeSync(gpioState);
       if (resetGPIO.readSync()) restart();
