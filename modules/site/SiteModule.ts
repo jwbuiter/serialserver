@@ -1,7 +1,7 @@
 import express from "express";
 import fileUpload from "express-fileupload";
 import path from "path";
-import zip from "express-zip";
+import zip from "express-easy-zip";
 import fs from "fs";
 import { exec } from "child_process";
 import dateFormat from "dateformat";
@@ -12,7 +12,8 @@ import Realtime from "./Realtime";
 const constants = require("../../../config.static");
 
 const app = express();
-const clientPath = "../../../client";
+app.use(zip());
+const clientPath = "../../../client2";
 const logoPath = "../../../logo";
 const logPath = constants.saveLogLocation;
 const titleString = "<title>" + constants.name + "</title>";
@@ -84,7 +85,7 @@ function SiteModule(config, store: StoreType) {
     let uploadedFile = req.files.configFile;
 
     uploadedFile.mv(
-      path.join(__dirname, "../..", "configs", uploadedFile.name),
+      path.join(__dirname, "../../..", "configs", uploadedFile.name),
       err => {
         if (err) {
           return res.status(500).send(err);
@@ -97,11 +98,6 @@ function SiteModule(config, store: StoreType) {
       }
     );
   }
-
-  const staticRoutes = {
-    "/current.json": "../../configs/current.json",
-    "/config.static.json": "../../config.static.json"
-  };
 
   const functionRoutes = {
     "/static": (req, res) => {
@@ -190,20 +186,20 @@ function SiteModule(config, store: StoreType) {
     "/downloadExcel": (req, res) => {
       const logID = store.getState().config.logger.logID;
       const fileName = `${constants.name}_${logID}.xls`;
-      res.download(path.join(__dirname, "../../data/data.xls"), fileName);
+      res.download(path.join(__dirname, "../../../data/data.xls"), fileName);
     },
     "/downloadConfig": (req, res) =>
-      res.download(path.join(__dirname, "../..", "configs", req.query.file)),
+      res.download(path.join(__dirname, "../../..", "configs", req.query.file)),
     "/downloadLog": (req, res) => {
       if (req.query.multiFile) {
-        const fileList = req.query.multiFile.split(",").map(element => ({
+        const files = req.query.multiFile.split(",").map(element => ({
           path: path.join(logPath, element),
           name: element
         }));
         const logID = store.getState().config.logger.logID;
         const date = dateFormat(new Date(), "yyyy-mm-dd_HH-MM-ss");
 
-        res.zip(fileList, `${constants.name}_${logID}_${date}.zip`);
+        res.zip({ files, filename: `${constants.name}_${logID}_${date}.zip` });
       } else if (req.query.file) {
         res.download(path.join(logPath, req.query.file));
       }
@@ -272,13 +268,7 @@ function SiteModule(config, store: StoreType) {
     "/uploadConfig": uploadConfig
   };
 
-  app.use("/", express.static("../client2/build"));
-
-  for (let route in staticRoutes) {
-    app.get(route, (req, res) => {
-      res.sendFile(path.join(__dirname, clientPath, staticRoutes[route]));
-    });
-  }
+  app.use("/", express.static(path.join(__dirname, clientPath, "build")));
 
   for (let route in functionRoutes) {
     app.get(route, functionRoutes[route]);
