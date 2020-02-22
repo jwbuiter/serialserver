@@ -276,6 +276,8 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
+        "warning": false,
+        "warningPeriod": 0,
         "hardwareOutput": -1
       },
       {
@@ -285,6 +287,8 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
+        "warning": false,
+        "warningPeriod": 0,
         "hardwareOutput": -1
       },
       {
@@ -294,6 +298,8 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
+        "warning": false,
+        "warningPeriod": 0,
         "hardwareOutput": -1
       },
       {
@@ -303,6 +309,8 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
+        "warning": false,
+        "warningPeriod": 0,
         "hardwareOutput": -1
       },
       {
@@ -312,6 +320,8 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
+        "warning": false,
+        "warningPeriod": 0,
         "hardwareOutput": -1
       },
       {
@@ -321,6 +331,8 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
+        "warning": false,
+        "warningPeriod": 0,
         "hardwareOutput": -1
       },
       {
@@ -330,6 +342,8 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
+        "warning": false,
+        "warningPeriod": 0,
         "hardwareOutput": -1
       },
       {
@@ -339,6 +353,8 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
+        "warning": false,
+        "warningPeriod": 0,
         "hardwareOutput": -1
       },
       {
@@ -348,6 +364,8 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
+        "warning": false,
+        "warningPeriod": 0,
         "hardwareOutput": -1
       },
       {
@@ -357,6 +375,8 @@
         "seconds": 0,
         "manualConfirmation": true,
         "visible": false,
+        "warning": false,
+        "warningPeriod": 0,
         "hardwareOutput": -1
       }
     ]
@@ -544,5 +564,5 @@
     "extraColumns": [],
     "success": 0
   },
-  "version": "3.0"
+  "version": "4.0"
 }

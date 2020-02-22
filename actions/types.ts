@@ -65,7 +65,8 @@ type ActionType =
   | "TABLE_EMIT"
   | "TABLE_ENTRY"
   | "TABLE_RESET_CELL"
-  | "TABLE_RESET";
+  | "TABLE_RESET"
+  | "SET_WARNING";
 
 export default interface IAction {
   type: ActionType;
@@ -412,6 +413,11 @@ export interface TableResetCellAction extends IAction {
   payload: number;
 }
 
+export interface SetWarningAction extends IAction {
+  type: "SET_WARNING";
+  payload: boolean;
+}
+
 export type Action =
   | ConfigSaveAction
   | ConfigUpdateAction
@@ -473,4 +479,5 @@ export type Action =
   | TableEmitAction
   | TableEntryAction
   | TableResetAction
-  | TableResetCellAction;
+  | TableResetCellAction
+  | SetWarningAction;

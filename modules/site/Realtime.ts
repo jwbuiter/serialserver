@@ -1,12 +1,10 @@
 import { exec } from "child_process";
-import socketio  from "socket.io";
-import fs  from "fs";
-import path  from "path";
-import ip  from "ip";
+import socketio from "socket.io";
+import fs from "fs";
+import path from "path";
+import ip from "ip";
 
 const constants = require("../../../config.static");
-
-
 
 const results = [
   ["off", "on"],
@@ -194,14 +192,14 @@ function Realtime(server, config, store) {
     try {
       fs.accessSync(path.join(configPath, name));
       fs.unlinkSync(path.join(configPath, name));
-    } catch (err) { }
+    } catch (err) {}
   }
 
   function deleteLog(name) {
     try {
       fs.accessSync(path.join(logPath, name));
       fs.unlinkSync(path.join(logPath, name));
-    } catch (err) { }
+    } catch (err) {}
   }
 
   function uploadLog({ name, index }, callback) {
@@ -406,9 +404,9 @@ function Realtime(server, config, store) {
       type: "SL_RESET_INDIVIDUAL"
     });
 
-    const startCalibration = require(path.join(configPath ,"template")).selfLearning
-      .startCalibration;
-    const selfLearning = require(path.join(configPath ,"current")).selfLearning;
+    const startCalibration = require(path.join(configPath, "template"))
+      .selfLearning.startCalibration;
+    const selfLearning = require(path.join(configPath, "current")).selfLearning;
 
     store.dispatch({
       type: "CONFIG_UPDATE",
@@ -437,11 +435,11 @@ function Realtime(server, config, store) {
       store.dispatch({
         type: "RESTART"
       });
-    }, 1000)
+    }, 1000);
   }
 
   function checkConfigConsistency(newConfig, callback) {
-    const oldConfig = require(path.join(configPath ,"current"));
+    const oldConfig = require(path.join(configPath, "current"));
 
     for (let i = 0; i < oldConfig.serial.coms.length; i++) {
       if (oldConfig.serial.coms[i].name !== newConfig.serial.coms[i].name) {
@@ -562,6 +560,10 @@ function Realtime(server, config, store) {
       }
       case "EXECUTE_START": {
         io.emit("executeStart");
+        break;
+      }
+      case "SET_WARNING": {
+        io.emit("setWarning", lastAction.payload);
         break;
       }
     }

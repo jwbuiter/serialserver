@@ -6,7 +6,14 @@ import { StoreType } from "../../store";
 const constants = require("../../../config.static");
 
 function Output(index: number, config, store: StoreType) {
-  const { execute, seconds, formula, hardwareOutput } = config;
+  const {
+    execute,
+    seconds,
+    formula,
+    hardwareOutput,
+    warning,
+    warningPeriod
+  } = config;
 
   const myGPIO = ~hardwareOutput
     ? new Gpio(constants.outputPin[hardwareOutput], "out")
@@ -15,10 +22,34 @@ function Output(index: number, config, store: StoreType) {
 
   let stateJSON = "";
   let state = false;
+  let warningInterval: NodeJS.Timeout = null;
+
+  function setState(newState: boolean) {
+    state = newState;
+
+    if (warning) {
+      clearInterval(warningInterval);
+      store.dispatch({
+        type: "SET_WARNING",
+        payload: false
+      });
+
+      if (newState) {
+        let on = true;
+        warningInterval = setInterval(() => {
+          on = !on;
+          store.dispatch({
+            type: "SET_WARNING",
+            payload: on
+          });
+        }, warningPeriod * 1000);
+      }
+    }
+  }
 
   if (myGPIO) {
     myGPIO.watch((err, val) => {
-      state = myGPIO.readSync() ? true : false;
+      setState(myGPIO.readSync() ? true : false);
     });
   }
 
@@ -33,7 +64,7 @@ function Output(index: number, config, store: StoreType) {
           if (state !== newState.state) {
             if (myGPIO) myGPIO.writeSync(newState.state ? 1 : 0);
 
-            state = newState.state;
+            setState(newState.state);
             store.dispatch({
               type: "STATE_CHANGED"
             });
