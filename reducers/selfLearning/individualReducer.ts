@@ -124,7 +124,7 @@ export default function individualReducer(
 
       let extra = [];
       if (key in state.generalEntries) {
-        const extra = state.generalEntries[key].extra;
+        extra = state.generalEntries[key].extra;
         delete newGeneralEntries[key];
       }
 
