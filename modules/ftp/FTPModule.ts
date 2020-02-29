@@ -5,8 +5,8 @@ import dateFormat from "dateformat";
 
 const constants = require("../../../config.static");
 
-const xlsxDir = path.join(__dirname, "../../data/data.xls");
-const ftpBacklogDir = path.join(__dirname, "../../data/ftpBacklog.json");
+const xlsxDir = path.join(__dirname, "../../../data/data.xls");
+const ftpBacklogDir = path.join(__dirname, "../../../data/ftpBacklog.json");
 
 function FTPModule(config, store) {
   const { targets, automatic, uploadExcel } = config;
