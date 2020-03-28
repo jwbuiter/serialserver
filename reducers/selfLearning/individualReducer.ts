@@ -222,9 +222,8 @@ export default function individualReducer(
       };
     }
     case "SL_INDIVIDUAL_DELETE_GENERAL": {
-      if (action.payload) {
-        const { key } = action.payload;
-
+      const { key } = action.payload;
+      if (key) {
         const newGeneralEntries = Object.assign({}, state.generalEntries);
         delete newGeneralEntries[key];
 

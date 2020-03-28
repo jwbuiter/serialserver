@@ -39,6 +39,7 @@ type ActionType =
   | "OUTPUT_RESULT_CHANGED"
   | "RESET_LAST_ACTION"
   | "RESTART"
+  | "HARD_REBOOT"
   | "SERIAL_AVERAGE"
   | "SERIAL_COMMAND"
   | "SERIAL_ENTRY"
@@ -259,6 +260,10 @@ export interface RestartAction extends IAction {
   type: "RESTART";
 }
 
+export interface HardRebootAction extends IAction {
+  type: "HARD_REBOOT";
+}
+
 export interface SerialAverageAction extends IAction {
   type: "SERIAL_AVERAGE";
   payload: {
@@ -453,6 +458,7 @@ export type Action =
   | OutputResultChangedAction
   | ResetLastAction
   | RestartAction
+  | HardRebootAction
   | SerialAverageAction
   | SerialCommandAction
   | SerialEntryAction

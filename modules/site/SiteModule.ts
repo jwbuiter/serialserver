@@ -228,10 +228,15 @@ function SiteModule(config, store: StoreType) {
         titleString +
           '<meta http-equiv="refresh" content="5; url=/" />Restarting now.'
       );
-      store.dispatch({
-        type: "RESTART"
-      });
-      process.exit();
+      if (constants.manualResetHard) {
+        store.dispatch({
+          type: "HARD_REBOOT"
+        });
+      } else {
+        store.dispatch({
+          type: "RESTART"
+        });
+      }
     },
     "/logo": (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");

@@ -101,12 +101,18 @@ function Input(index, config, store: StoreType) {
       }
       case "restart": {
         if (state) {
-          store.dispatch({
-            type: "SERIAL_RESET"
-          });
-          store.dispatch({
-            type: "RESTART"
-          });
+          if (constants.inputResetHard) {
+            store.dispatch({
+              type: "HARD_REBOOT"
+            });
+          } else {
+            store.dispatch({
+              type: "SERIAL_RESET"
+            });
+            store.dispatch({
+              type: "RESTART"
+            });
+          }
         }
         break;
       }

@@ -23,6 +23,11 @@ function LoggerModule(config, store) {
   let fileName;
 
   function resetLog() {
+    if (constants.autoResetHard)
+      store.dispatch({
+        type: "HARD_REBOOT"
+      });
+
     if (fileName)
       store.dispatch({
         type: "LOG_RESET",

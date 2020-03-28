@@ -1,6 +1,7 @@
 import { Gpio } from "onoff";
 import fs from "fs";
 import path from "path";
+import { exec } from "child_process";
 
 import { StoreType } from "../../store";
 const { resetPin, onlinePin } = require("../../../config.static");
@@ -33,6 +34,12 @@ function RecoveryModule() {
     process.exit();
   }
 
+  function hardReboot() {
+    onlineGPIO.writeSync(0);
+    console.log("Restarting...");
+    exec("shutdown -r now");
+  }
+
   let store: StoreType;
 
   function bindStore(newStore: StoreType) {
@@ -51,6 +58,10 @@ function RecoveryModule() {
         }
         case "RESTART": {
           restart();
+          break;
+        }
+        case "HARD_REBOOT": {
+          hardReboot();
           break;
         }
       }

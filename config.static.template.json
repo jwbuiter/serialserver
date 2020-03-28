@@ -45,5 +45,8 @@
     "serial": true,
     "table": true
   },
+  "autoResetHard": false,
+  "manualResetHard": false,
+  "inputResetHard": false,
   "version": "4.0"
 }
