@@ -22,8 +22,8 @@ function LoggerModule(config, store) {
 
   let fileName;
 
-  function resetLog() {
-    if (constants.autoResetHard)
+  function resetLog(onBoot: bool) {
+    if (!onBoot && constants.autoResetHard)
       store.dispatch({
         type: "HARD_REBOOT"
       });
@@ -39,7 +39,7 @@ function LoggerModule(config, store) {
     )}.csv`;
   }
 
-  resetLog();
+  resetLog(true);
 
   if (fs.existsSync(backupPath)) {
     try {
@@ -57,14 +57,14 @@ function LoggerModule(config, store) {
   switch (resetMode) {
     case "interval": {
       setInterval(() => {
-        resetLog();
+        resetLog(false);
       }, resetInterval * 60 * 1000);
       break;
     }
     case "time": {
       const time = resetTime.split(":");
       schedule.scheduleJob(time[1] + " " + time[0] + " * * *", () => {
-        resetLog();
+        resetLog(false);
       });
       break;
     }
