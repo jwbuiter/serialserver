@@ -1,6 +1,6 @@
 import { Action } from "../actions/types";
-
-const { table, serial, logger } = require("../../configs/current");
+import config from "../config";
+const { table, serial, logger } = config;
 
 export interface IEntry {
   name: string;
@@ -40,7 +40,7 @@ const initialState = {
     ...serial.coms.map((element: ComConfig) => element.name),
     ...table.cells.map((element: CellConfig) => element.name),
     "TU",
-    "TA"
+    "TA",
   ],
   accessors: [
     "name",
@@ -49,7 +49,7 @@ const initialState = {
     ...serial.coms.map((_: ComConfig, i: number) => `coms[${i}]`),
     ...table.cells.map((_: CellConfig, i: number) => `cells[${i}]`),
     "TU",
-    "TA"
+    "TA",
   ],
   digits: [
     -1,
@@ -58,7 +58,7 @@ const initialState = {
     ...serial.coms.map((element: ComConfig) => element.digits),
     ...table.cells.map((element: CellConfig) => element.digits),
     0,
-    0
+    0,
   ],
   visible: [
     false,
@@ -67,12 +67,12 @@ const initialState = {
     ...serial.coms.map((element: ComConfig) => element.name !== ""),
     ...table.cells.map((element: CellConfig) => element.showInLog),
     true,
-    true
+    true,
   ],
-  entries: []
+  entries: [],
 };
 
-export default function(
+export default function (
   state: ILoggerState = initialState,
   action: Action
 ): ILoggerState {
@@ -83,7 +83,7 @@ export default function(
       newEntries.push(entry);
       return {
         ...state,
-        entries: newEntries
+        entries: newEntries,
       };
     }
     case "LOG_RESET": {
@@ -99,7 +99,7 @@ export default function(
 
       return {
         ...state,
-        entries: newEntries
+        entries: newEntries,
       };
     }
     case "LOG_UNIQUE_OVERWRITE": {
@@ -110,7 +110,7 @@ export default function(
 
       return {
         ...state,
-        entries: newEntries
+        entries: newEntries,
       };
     }
     case "LOG_ACTIVITY_OVERWRITE": {
@@ -121,7 +121,7 @@ export default function(
 
       return {
         ...state,
-        entries: newEntries
+        entries: newEntries,
       };
     }
     case "LOG_RECOVER": {
@@ -163,7 +163,7 @@ export default function(
 
       return {
         ...state,
-        entries: newEntries
+        entries: newEntries,
       };
     }
     default:

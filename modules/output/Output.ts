@@ -1,9 +1,8 @@
 import { Gpio } from "onoff";
 
+import constants from "../../constants";
 import Parser from "../parser/Parser";
 import { StoreType } from "../../store";
-
-const constants = require("../../../config.static");
 
 function Output(index: number, config, store: StoreType) {
   const {
@@ -12,7 +11,7 @@ function Output(index: number, config, store: StoreType) {
     formula,
     hardwareOutput,
     warning,
-    warningPeriod
+    warningPeriod,
   } = config;
 
   const myGPIO = ~hardwareOutput
@@ -31,7 +30,7 @@ function Output(index: number, config, store: StoreType) {
       clearInterval(warningInterval);
       store.dispatch({
         type: "SET_WARNING",
-        payload: false
+        payload: false,
       });
 
       if (newState) {
@@ -40,7 +39,7 @@ function Output(index: number, config, store: StoreType) {
           on = !on;
           store.dispatch({
             type: "SET_WARNING",
-            payload: on
+            payload: on,
           });
         }, warningPeriod * 1000);
       }
@@ -53,7 +52,7 @@ function Output(index: number, config, store: StoreType) {
     });
   }
 
-  store.listen(lastAction => {
+  store.listen((lastAction) => {
     switch (lastAction.type) {
       case "OUTPUT_EXECUTING_CHANGED":
       case "OUTPUT_RESULT_CHANGED":
@@ -66,14 +65,14 @@ function Output(index: number, config, store: StoreType) {
 
             setState(newState.state);
             store.dispatch({
-              type: "STATE_CHANGED"
+              type: "STATE_CHANGED",
             });
           }
           if (newStateJSON !== stateJSON) {
             stateJSON = newStateJSON;
             store.dispatch({
               type: "OUTPUT_EMIT",
-              payload: index
+              payload: index,
             });
           }
         }
@@ -87,8 +86,8 @@ function Output(index: number, config, store: StoreType) {
           type: "OUTPUT_RESULT_CHANGED",
           payload: {
             index,
-            result
-          }
+            result,
+          },
         });
         break;
       }
@@ -98,8 +97,8 @@ function Output(index: number, config, store: StoreType) {
             type: "OUTPUT_EXECUTING_CHANGED",
             payload: {
               index,
-              executing: true
-            }
+              executing: true,
+            },
           });
           if (seconds) {
             setTimeout(() => {
@@ -107,8 +106,8 @@ function Output(index: number, config, store: StoreType) {
                 type: "OUTPUT_EXECUTING_CHANGED",
                 payload: {
                   index,
-                  executing: false
-                }
+                  executing: false,
+                },
               });
             }, seconds * 1000);
           }
@@ -121,8 +120,8 @@ function Output(index: number, config, store: StoreType) {
             type: "OUTPUT_EXECUTING_CHANGED",
             payload: {
               index,
-              executing: false
-            }
+              executing: false,
+            },
           });
         }
         break;
@@ -134,8 +133,8 @@ function Output(index: number, config, store: StoreType) {
     type: "OUTPUT_RESULT_CHANGED",
     payload: {
       index,
-      result: myParser.parse(formula)
-    }
+      result: myParser.parse(formula),
+    },
   });
 }
 

@@ -7,7 +7,7 @@ export interface IGlobalSelfLearningState {
 
 export const initialStateGlobal: IGlobalSelfLearningState = {
   entries: [],
-  matchedTolerance: 0
+  matchedTolerance: 0,
 };
 
 export default function globalReducer(
@@ -21,14 +21,14 @@ export default function globalReducer(
       newEntries.push(entry);
       return {
         ...state,
-        entries: newEntries
+        entries: newEntries,
       };
     }
     case "SL_SUCCESS": {
       const { matchedTolerance } = action.payload;
       return {
         ...state,
-        matchedTolerance
+        matchedTolerance,
       };
     }
     default:

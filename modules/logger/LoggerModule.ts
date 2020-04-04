@@ -3,9 +3,10 @@ import XLSX from "xlsx";
 import schedule from "node-schedule";
 import dateFormat from "dateformat";
 import path from "path";
+
+import constants from "../../constants";
 import { IEntry } from "../../reducers/loggerReducer";
 
-const constants = require("../../../config.static");
 const backupPath = path.join(constants.saveLogLocation, "backup.json");
 
 function LoggerModule(config, store) {
@@ -15,7 +16,7 @@ function LoggerModule(config, store) {
     resetMode,
     writeToFile,
     logID,
-    unique
+    unique,
   } = config;
   const { activityCounter, enabled } = store.getState().config.selfLearning;
   const activityIndex = 1 - Number(enabled[3]);
@@ -26,7 +27,7 @@ function LoggerModule(config, store) {
     if (fileName)
       store.dispatch({
         type: "LOG_RESET",
-        payload: fileName
+        payload: fileName,
       });
     fileName = `${constants.name}_${logID}_${dateFormat(
       new Date(),
@@ -36,7 +37,7 @@ function LoggerModule(config, store) {
     if (!onBoot && constants.autoResetHard)
       setTimeout(() => {
         store.dispatch({
-          type: "HARD_REBOOT"
+          type: "HARD_REBOOT",
         });
       }, 1000);
   }
@@ -49,7 +50,7 @@ function LoggerModule(config, store) {
       fs.unlinkSync(backupPath);
       store.dispatch({
         type: "LOG_RECOVER",
-        payload: backup
+        payload: backup,
       });
     } catch (err) {
       console.log(err);
@@ -75,7 +76,7 @@ function LoggerModule(config, store) {
   function updateActivity(activityEntry, full) {
     const logEntries = store.getState().logger.entries;
     const oldEntry = logEntries.find(
-      entry => entry.coms[activityIndex] === activityEntry && entry.TA
+      (entry) => entry.coms[activityIndex] === activityEntry && entry.TA
     );
 
     if (!oldEntry) {
@@ -83,17 +84,17 @@ function LoggerModule(config, store) {
         type: "LOG_ACTIVITY_OVERWRITE",
         payload: {
           index: logEntries.length - 1,
-          newValue: 1
-        }
+          newValue: 1,
+        },
       });
       return;
     }
 
     const TA = logEntries.filter(
-      entry => entry.coms[activityIndex] === activityEntry
+      (entry) => entry.coms[activityIndex] === activityEntry
     ).length;
     const oldIndex = logEntries.findIndex(
-      entry => entry.coms[activityIndex] === activityEntry && entry.TA
+      (entry) => entry.coms[activityIndex] === activityEntry && entry.TA
     );
     const newIndex = full || !oldEntry.full ? logEntries.length - 1 : oldIndex;
 
@@ -102,8 +103,8 @@ function LoggerModule(config, store) {
         type: "LOG_ACTIVITY_OVERWRITE",
         payload: {
           index: oldIndex,
-          newValue: ""
-        }
+          newValue: "",
+        },
       });
     }
 
@@ -111,12 +112,12 @@ function LoggerModule(config, store) {
       type: "LOG_ACTIVITY_OVERWRITE",
       payload: {
         index: newIndex,
-        newValue: TA
-      }
+        newValue: TA,
+      },
     });
   }
 
-  store.listen(lastAction => {
+  store.listen((lastAction) => {
     switch (lastAction.type) {
       case "LOG_MAKE_ENTRY": {
         const state = store.getState();
@@ -125,15 +126,15 @@ function LoggerModule(config, store) {
           name: constants.name,
           id: logID,
           date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),
-          coms: state.serial.coms.map(com =>
+          coms: state.serial.coms.map((com) =>
             com.numeric ? Number(com.entry) : com.entry
           ),
-          cells: state.table.cells.map(cell =>
+          cells: state.table.cells.map((cell) =>
             cell.numeric ? Number(cell.entry) : cell.entry
           ),
           TU: "",
           TA: "",
-          full: true
+          full: true,
         };
 
         if (unique !== "off") {
@@ -155,7 +156,7 @@ function LoggerModule(config, store) {
           if (foundOther !== -1) {
             store.dispatch({
               type: "LOG_UNIQUE_OVERWRITE",
-              payload: foundOther
+              payload: foundOther,
             });
           }
 
@@ -165,23 +166,23 @@ function LoggerModule(config, store) {
         if (activityCounter) {
           store.dispatch({
             type: "LOG_OVERWRITE",
-            payload: newRow
+            payload: newRow,
           });
           updateActivity(state.serial.coms[activityIndex].entry, true);
         } else {
           store.dispatch({
             type: "LOG_ENTRY",
-            payload: newRow
+            payload: newRow,
           });
         }
 
         store.dispatch({
           type: "LOG_SAVE",
-          payload: fileName
+          payload: fileName,
         });
 
         store.dispatch({
-          type: "STATE_CHANGED"
+          type: "STATE_CHANGED",
         });
         break;
       }
@@ -194,28 +195,28 @@ function LoggerModule(config, store) {
           id: logID,
           date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),
           coms: state.serial.coms
-            .map(com => (com.numeric ? Number(com.entry) : com.entry))
+            .map((com) => (com.numeric ? Number(com.entry) : com.entry))
             .map((entry, comIndex) => (comIndex === index ? entry : "")),
-          cells: state.table.cells.map(cell => ""),
+          cells: state.table.cells.map((cell) => ""),
           TU: "",
           TA: "",
-          full: false
+          full: false,
         };
 
         store.dispatch({
           type: "LOG_ENTRY",
-          payload: newRow
+          payload: newRow,
         });
 
         updateActivity(entry, false);
 
         store.dispatch({
           type: "LOG_SAVE",
-          payload: fileName
+          payload: fileName,
         });
 
         store.dispatch({
-          type: "STATE_CHANGED"
+          type: "STATE_CHANGED",
         });
         break;
       }
@@ -224,20 +225,20 @@ function LoggerModule(config, store) {
         const fileName = lastAction.payload;
         const state = store.getState();
         const saveArray = [state.logger.legend].concat(
-          state.logger.entries.map(entry => [
+          state.logger.entries.map((entry) => [
             entry.name,
             entry.id,
             entry.date,
             ...entry.coms,
             ...entry.cells,
             entry.TU,
-            entry.TA
+            entry.TA,
           ])
         );
 
         const ws = XLSX.utils.aoa_to_sheet(saveArray);
         const csvFile = XLSX.utils.sheet_to_csv(ws, {
-          FS: config.csvSeparator
+          FS: config.csvSeparator,
         });
         fs.writeFileSync(
           path.join(constants.saveLogLocation, fileName),
@@ -248,13 +249,13 @@ function LoggerModule(config, store) {
       case "LOG_BACKUP": {
         const logger = store.getState().logger;
 
-        fs.writeFile(backupPath, JSON.stringify(logger), "utf8", err => {
+        fs.writeFile(backupPath, JSON.stringify(logger), "utf8", (err) => {
           if (err) {
             console.log(err);
           }
 
           store.dispatch({
-            type: "RESTART"
+            type: "RESTART",
           });
         });
         break;

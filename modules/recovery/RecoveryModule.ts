@@ -3,9 +3,10 @@ import fs from "fs";
 import path from "path";
 import { exec } from "child_process";
 
+import constants from "../../constants";
 import { StoreType } from "../../store";
-const { resetPin, onlinePin } = require("../../../config.static");
 
+const { resetPin, onlinePin } = constants;
 const configPath = path.join(__dirname, "../../..", "configs");
 
 function RecoveryModule() {
@@ -45,7 +46,7 @@ function RecoveryModule() {
   function bindStore(newStore: StoreType) {
     store = newStore;
 
-    store.listen(lastAction => {
+    store.listen((lastAction) => {
       switch (lastAction.type) {
         case "ERROR_OCCURRED": {
           console.log(lastAction);
@@ -100,14 +101,14 @@ function RecoveryModule() {
   // Catch CTRL+C
   process.on("SIGINT", () => {
     store.dispatch({
-      type: "RESTART"
+      type: "RESTART",
     });
   });
 
   onlineGPIO.writeSync(1);
 
   return {
-    bindStore
+    bindStore,
   };
 }
 

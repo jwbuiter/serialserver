@@ -1,6 +1,6 @@
 import { Action } from "../../actions/types";
-
-const { selfLearning } = require("../../../configs/current");
+import config from "../../config";
+const { selfLearning } = config;
 
 export type GeneralEntry = {
   entries: number[];
@@ -35,7 +35,7 @@ export interface IIndividualSelfLearningState {
 export const initialStateIndividual: IIndividualSelfLearningState = {
   generalEntries: {},
   individualEntries: {},
-  individualColumnHeaders: []
+  individualColumnHeaders: [],
 };
 
 function average(arr: number[]) {
@@ -46,12 +46,12 @@ function calculateEntry(measurements: Measurement[]) {
   const {
     individualTolerance,
     individualToleranceAbs,
-    individualCorrectionIncrement
+    individualCorrectionIncrement,
   } = selfLearning;
 
-  const calibration = average(measurements.map(elem => elem.value));
+  const calibration = average(measurements.map((elem) => elem.value));
   const increments = average(
-    measurements.map(elem => Math.max(0, elem.age - 1))
+    measurements.map((elem) => Math.max(0, elem.age - 1))
   );
 
   const tolerance =
@@ -61,7 +61,7 @@ function calculateEntry(measurements: Measurement[]) {
   return {
     tolerance,
     increments,
-    calibration
+    calibration,
   };
 }
 
@@ -79,11 +79,11 @@ export default function individualReducer(
       if (key in state.individualEntries) {
         const newMeasurement = {
           value: entry,
-          age: 0
+          age: 0,
         };
         const measurements = [
           newMeasurement,
-          ...newIndividualEntries[key].measurements
+          ...newIndividualEntries[key].measurements,
         ].slice(0, selfLearning.individualAverageNumber);
 
         newIndividualEntries[key] = {
@@ -91,7 +91,7 @@ export default function individualReducer(
           measurements,
           extra,
           numUpdates: newIndividualEntries[key].numUpdates + 1,
-          ...calculateEntry(measurements)
+          ...calculateEntry(measurements),
         };
       } else if (key in state.generalEntries) {
         newGeneralEntries[key] = {
@@ -99,21 +99,21 @@ export default function individualReducer(
           entries: [entry]
             .concat(Array.from(newGeneralEntries[key].entries))
             .slice(0, 5),
-          extra
+          extra,
         };
       } else {
         newGeneralEntries[key] = {
           entries: [entry],
           extra,
           activity: 1,
-          activityHistory: []
+          activityHistory: [],
         };
       }
 
       return {
         ...state,
         individualEntries: newIndividualEntries,
-        generalEntries: newGeneralEntries
+        generalEntries: newGeneralEntries,
       };
     }
     case "SL_INDIVIDUAL_UPGRADE": {
@@ -130,7 +130,7 @@ export default function individualReducer(
 
       const newMeasurement = {
         value: calibration,
-        age: 0
+        age: 0,
       };
 
       const measurements = Array(selfLearning.individualAverageNumber).fill(
@@ -144,12 +144,12 @@ export default function individualReducer(
         numUpdates: 1,
         numUpdatesHistory: [],
         activity: 1,
-        activityHistory: []
+        activityHistory: [],
       };
       return {
         ...state,
         individualEntries: newIndividualEntries,
-        generalEntries: newGeneralEntries
+        generalEntries: newGeneralEntries,
       };
     }
     case "SL_INDIVIDUAL_DOWNGRADE": {
@@ -160,7 +160,7 @@ export default function individualReducer(
       delete newIndividualEntries[key];
       return {
         ...state,
-        individualEntries: newIndividualEntries
+        individualEntries: newIndividualEntries,
       };
     }
     case "SL_INDIVIDUAL_LOAD": {
@@ -169,7 +169,7 @@ export default function individualReducer(
       return {
         ...state,
         individualEntries,
-        generalEntries
+        generalEntries,
       };
     }
     case "SL_INDIVIDUAL_INCREMENT": {
@@ -180,8 +180,8 @@ export default function individualReducer(
       for (let key in state.individualEntries) {
         const oldEntry = state.individualEntries[key];
         const measurements = oldEntry.measurements
-          .map(elem => ({ ...elem, age: elem.age + 1 }))
-          .filter(elem => elem.age <= individualCorrectionLimit + 1);
+          .map((elem) => ({ ...elem, age: elem.age + 1 }))
+          .filter((elem) => elem.age <= individualCorrectionLimit + 1);
 
         if (measurements.length == 0) continue;
 
@@ -191,14 +191,14 @@ export default function individualReducer(
           ...calculateEntry(measurements),
           numUpdatesHistory: [
             oldEntry.numUpdates,
-            ...oldEntry.numUpdatesHistory
+            ...oldEntry.numUpdatesHistory,
           ].slice(0, 3),
           activityHistory: [
             oldEntry.activity,
-            ...oldEntry.activityHistory
+            ...oldEntry.activityHistory,
           ].slice(0, 3),
           numUpdates: 0,
-          activity: 0
+          activity: 0,
         };
       }
 
@@ -209,16 +209,16 @@ export default function individualReducer(
           ...oldEntry,
           activityHistory: [
             oldEntry.activity,
-            ...oldEntry.activityHistory
+            ...oldEntry.activityHistory,
           ].slice(0, 3),
-          activity: 0
+          activity: 0,
         };
       }
 
       return {
         ...state,
         individualEntries: newIndividualEntries,
-        generalEntries: newGeneralEntries
+        generalEntries: newGeneralEntries,
       };
     }
     case "SL_INDIVIDUAL_DELETE_GENERAL": {
@@ -229,12 +229,12 @@ export default function individualReducer(
 
         return {
           ...state,
-          generalEntries: newGeneralEntries
+          generalEntries: newGeneralEntries,
         };
       } else {
         return {
           ...state,
-          generalEntries: {}
+          generalEntries: {},
         };
       }
     }
@@ -246,12 +246,12 @@ export default function individualReducer(
 
         return {
           ...state,
-          individualEntries: newIndividualEntries
+          individualEntries: newIndividualEntries,
         };
       } else {
         return {
           ...state,
-          individualEntries: {}
+          individualEntries: {},
         };
       }
     }
@@ -270,20 +270,20 @@ export default function individualReducer(
           entries: [],
           extra: [],
           activity: 1,
-          activityHistory: []
+          activityHistory: [],
         };
       }
 
       return {
         ...state,
         individualEntries: newIndividualEntries,
-        generalEntries: newGeneralEntries
+        generalEntries: newGeneralEntries,
       };
     }
     case "SL_INDIVIDUAL_HEADERS": {
       return {
         ...state,
-        individualColumnHeaders: action.payload
+        individualColumnHeaders: action.payload,
       };
     }
     default:

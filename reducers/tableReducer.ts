@@ -1,6 +1,6 @@
 import { Action } from "../actions/types";
-
-const { table } = require("../../configs/current");
+import config from "../config";
+const { table } = config;
 
 type Cell = { entry: string; color: string; manual: boolean; numeric: boolean };
 
@@ -9,17 +9,17 @@ export interface ITableState {
   foundRow: string[];
 }
 
-const initialState: ITableState = {
+const initialState = {
   cells: table.cells.map((cell: { formula: string; numeric: boolean }) => ({
     entry: "",
     color: "",
     manual: cell.formula === "#" || cell.formula.startsWith("#M"),
-    numeric: cell.numeric
+    numeric: cell.numeric,
   })),
-  foundRow: Array<string>(26).fill("")
+  foundRow: Array<string>(26).fill(""),
 };
 
-export default function(state: ITableState = initialState, action: Action) {
+export default function (state: ITableState = initialState, action: Action) {
   switch (action.type) {
     case "TABLE_ENTRY": {
       const { index, entry } = action.payload;
@@ -27,7 +27,7 @@ export default function(state: ITableState = initialState, action: Action) {
       newCells[index].entry = entry;
       return {
         ...state,
-        cells: newCells
+        cells: newCells,
       };
     }
     case "TABLE_COLOR": {
@@ -36,7 +36,7 @@ export default function(state: ITableState = initialState, action: Action) {
       newCells[index].color = color;
       return {
         ...state,
-        cells: newCells
+        cells: newCells,
       };
     }
     case "TABLE_RESET_CELL": {
@@ -45,7 +45,7 @@ export default function(state: ITableState = initialState, action: Action) {
       newCells[index] = Object.assign({}, initialState.cells[index]);
       return {
         ...state,
-        cells: newCells
+        cells: newCells,
       };
     }
     case "EXCEL_FOUND_ROW": {
@@ -53,12 +53,12 @@ export default function(state: ITableState = initialState, action: Action) {
       if (found) {
         return {
           ...state,
-          foundRow
+          foundRow,
         };
       } else {
         return {
           ...state,
-          foundRow: initialState.foundRow
+          foundRow: initialState.foundRow,
         };
       }
     }

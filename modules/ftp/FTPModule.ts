@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import dateFormat from "dateformat";
 
-const constants = require("../../../config.static");
+import constants from "../../constants";
 
 const xlsxDir = path.join(__dirname, "../../../data/data.xls");
 const ftpBacklogDir = path.join(__dirname, "../../../data/ftpBacklog.json");
@@ -22,13 +22,13 @@ function FTPModule(config, store) {
   function tryBacklog() {
     for (let fileName of ftpBacklog) {
       let numSuccess = 0;
-      const callback = msg => {
+      const callback = (msg) => {
         if (!msg.startsWith("Success")) return;
 
         numSuccess++;
 
         if (numSuccess == targets.length) {
-          ftpBacklog = ftpBacklog.filter(name => name != fileName);
+          ftpBacklog = ftpBacklog.filter((name) => name != fileName);
           saveFtpBacklog();
         }
       };
@@ -41,7 +41,7 @@ function FTPModule(config, store) {
   }
 
   function saveFtpBacklog() {
-    fs.writeFile(ftpBacklogDir, JSON.stringify(ftpBacklog), "utf8", err => {
+    fs.writeFile(ftpBacklogDir, JSON.stringify(ftpBacklog), "utf8", (err) => {
       if (err) {
         console.log(err);
       }
@@ -64,14 +64,14 @@ function FTPModule(config, store) {
         c.put(
           path.join(localPath, fileName),
           path.join(folder, fileName),
-          err => {
+          (err) => {
             c.end();
             callback("Successfully uploaded " + fileName);
           }
         );
       });
     });
-    c.on("error", err => {
+    c.on("error", (err) => {
       callback(err.message);
     });
 
@@ -82,7 +82,7 @@ function FTPModule(config, store) {
     c.connect({
       host: address,
       user: username,
-      password
+      password,
     });
   }
 
@@ -101,24 +101,24 @@ function FTPModule(config, store) {
     const c = new Client();
     c.on("ready", () => {
       c.mkdir(folder, true, () => {
-        c.put(xlsxDir, path.join(folder, fileName), err => {
+        c.put(xlsxDir, path.join(folder, fileName), (err) => {
           c.end();
         });
       });
     });
 
-    c.on("error", err => {
+    c.on("error", (err) => {
       console.log("FTP Error:" + err.message);
     });
 
     c.connect({
       host: address,
       user: username,
-      password
+      password,
     });
   }
 
-  store.listen(lastAction => {
+  store.listen((lastAction) => {
     switch (lastAction.type) {
       case "LOG_UPLOAD": {
         const { fileName, ftpIndex, callback } = lastAction.payload;

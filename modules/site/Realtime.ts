@@ -3,14 +3,10 @@ import socketio from "socket.io";
 import fs from "fs";
 import path from "path";
 import ip from "ip";
+
+import constants from "../../constants";
+import oldConfig, { template } from "../../config";
 import { StoreType } from "../../store";
-
-const constants = require("../../../config.static");
-
-const results = [
-  ["off", "on"],
-  ["forcedOff", "forcedOn"]
-];
 
 const configPath = path.join(__dirname, "../../..", "configs");
 const logPath = constants.saveLogLocation;
@@ -28,11 +24,11 @@ function Realtime(server, config, store: StoreType) {
     }
     io.emit("state", {
       name: "input" + index,
-      state
+      state,
     });
     io.emit("input", {
       index,
-      ...port
+      ...port,
     });
   }
 
@@ -46,11 +42,11 @@ function Realtime(server, config, store: StoreType) {
     }
     io.emit("state", {
       name: "output" + index,
-      state
+      state,
     });
     io.emit("output", {
       index,
-      ...port
+      ...port,
     });
   }
 
@@ -63,7 +59,7 @@ function Realtime(server, config, store: StoreType) {
           calibration,
           tolerance,
           success,
-          comIndex
+          comIndex,
         } = state.selfLearning;
         io.emit("selfLearning", {
           individual: true,
@@ -71,7 +67,7 @@ function Realtime(server, config, store: StoreType) {
           tolerance,
           success,
           comIndex,
-          ...state.selfLearning.individual
+          ...state.selfLearning.individual,
         });
         break;
       }
@@ -80,7 +76,7 @@ function Realtime(server, config, store: StoreType) {
           calibration,
           tolerance,
           success,
-          comIndex
+          comIndex,
         } = state.selfLearning;
         const { matchedTolerance } = state.selfLearning.global;
         io.emit("selfLearning", {
@@ -89,7 +85,7 @@ function Realtime(server, config, store: StoreType) {
           tolerance,
           success,
           comIndex,
-          matchedTolerance
+          matchedTolerance,
         });
         break;
       }
@@ -111,11 +107,11 @@ function Realtime(server, config, store: StoreType) {
       socket.emit("table", {
         index,
         value: cell.entry,
-        manual: cell.manual
+        manual: cell.manual,
       });
       socket.emit("tableColor", {
         index,
-        color: cell.color
+        color: cell.color,
       });
     });
 
@@ -131,11 +127,11 @@ function Realtime(server, config, store: StoreType) {
       socket.emit("entry", {
         index,
         entryTime: time.getTime(),
-        entry
+        entry,
       });
       socket.emit("average", {
         index,
-        average
+        average,
       });
     });
 
@@ -145,19 +141,19 @@ function Realtime(server, config, store: StoreType) {
   }
 
   function saveCurrentConfig(config, confirm) {
-    checkConfigConsistency(config, consistent => {
+    checkConfigConsistency(config, (consistent) => {
       store.dispatch({
         type: "CONFIG_UPDATE",
-        payload: config
+        payload: config,
       });
 
       if (consistent) {
         store.dispatch({
-          type: "LOG_BACKUP"
+          type: "LOG_BACKUP",
         });
       } else {
         store.dispatch({
-          type: "RESTART"
+          type: "RESTART",
         });
       }
     });
@@ -168,7 +164,7 @@ function Realtime(server, config, store: StoreType) {
 
     callback({
       result: fs.existsSync(path.join(configPath, name)),
-      name
+      name,
     });
   }
 
@@ -179,8 +175,8 @@ function Realtime(server, config, store: StoreType) {
       type: "CONFIG_SAVE",
       payload: {
         name,
-        config: msg.config
-      }
+        config: msg.config,
+      },
     });
   }
 
@@ -209,8 +205,8 @@ function Realtime(server, config, store: StoreType) {
       payload: {
         fileName: name,
         ftpIndex: index,
-        callback
-      }
+        callback,
+      },
     });
   }
 
@@ -232,7 +228,7 @@ function Realtime(server, config, store: StoreType) {
 
   function getLogList(msg, callback) {
     fs.readdir(logPath, (err, files) => {
-      const logList = files.filter(element => element.endsWith(".csv"));
+      const logList = files.filter((element) => element.endsWith(".csv"));
       const sortedLogList = logList.sort((a, b) => {
         const dateA = a.slice(-23);
         const dateB = b.slice(-23);
@@ -256,8 +252,8 @@ function Realtime(server, config, store: StoreType) {
     fs.readdir(configPath, (err, files) => {
       callback(
         files
-          .filter(element => element.match(/V[0-9]+.[0-9]+.json$/))
-          .filter(element => {
+          .filter((element) => element.match(/V[0-9]+.[0-9]+.json$/))
+          .filter((element) => {
             const elementVersion = element.match(/V[0-9]+./)[0];
             const elementMayorVersion = elementVersion.slice(1, -1);
             return elementMayorVersion === mayorVersion;
@@ -278,8 +274,8 @@ function Realtime(server, config, store: StoreType) {
             index,
             isForced: false,
             previousForced: true,
-            forcedState: false
-          }
+            forcedState: false,
+          },
         });
       } else {
         store.dispatch({
@@ -288,8 +284,8 @@ function Realtime(server, config, store: StoreType) {
             index,
             isForced: true,
             previousForced: true,
-            forcedState: !port.forcedState
-          }
+            forcedState: !port.forcedState,
+          },
         });
       }
     } else {
@@ -299,15 +295,15 @@ function Realtime(server, config, store: StoreType) {
           index,
           isForced: true,
           previousForced: false,
-          forcedState: !port.state
-        }
+          forcedState: !port.state,
+        },
       });
     }
     store.dispatch({
-      type: "HANDLE_TABLE"
+      type: "HANDLE_TABLE",
     });
     store.dispatch({
-      type: "HANDLE_OUTPUT"
+      type: "HANDLE_OUTPUT",
     });
   }
 
@@ -322,8 +318,8 @@ function Realtime(server, config, store: StoreType) {
             index,
             isForced: false,
             previousForced: true,
-            forcedState: false
-          }
+            forcedState: false,
+          },
         });
       } else {
         store.dispatch({
@@ -332,8 +328,8 @@ function Realtime(server, config, store: StoreType) {
             index,
             isForced: true,
             previousForced: true,
-            forcedState: !port.forcedState
-          }
+            forcedState: !port.forcedState,
+          },
         });
       }
     } else {
@@ -343,15 +339,15 @@ function Realtime(server, config, store: StoreType) {
           index,
           isForced: true,
           previousForced: false,
-          forcedState: !port.state
-        }
+          forcedState: !port.state,
+        },
       });
     }
     store.dispatch({
-      type: "HANDLE_TABLE"
+      type: "HANDLE_TABLE",
     });
     store.dispatch({
-      type: "HANDLE_OUTPUT"
+      type: "HANDLE_OUTPUT",
     });
   }
 
@@ -361,62 +357,61 @@ function Realtime(server, config, store: StoreType) {
       payload: {
         index: msg.index,
         entry: msg.value,
-        manual: true
-      }
+        manual: true,
+      },
     });
     store.dispatch({
       type: "TABLE_EMIT",
       payload: {
         index: msg.index,
         entry: msg.value,
-        manual: true
-      }
+        manual: true,
+      },
     });
     store.dispatch({
-      type: "HANDLE_TABLE"
+      type: "HANDLE_TABLE",
     });
     store.dispatch({
-      type: "HANDLE_OUTPUT"
+      type: "HANDLE_OUTPUT",
     });
   }
 
   function deleteGeneralSL(key) {
     store.dispatch({
       type: "SL_INDIVIDUAL_DELETE_GENERAL",
-      payload: key
+      payload: key,
     });
   }
 
   function deleteIndividualSL({ key, message }, callback) {
     store.dispatch({
       type: "SL_INDIVIDUAL_DELETE_INDIVIDUAL",
-      payload: { key, message, callback }
+      payload: { key, message, callback },
     });
   }
 
   function resetIndividualSL() {
     store.dispatch({
-      type: "SL_RESET_INDIVIDUAL"
+      type: "SL_RESET_INDIVIDUAL",
     });
   }
 
   function deleteSLData(_, callback) {
     store.dispatch({
-      type: "SL_RESET_INDIVIDUAL"
+      type: "SL_RESET_INDIVIDUAL",
     });
 
-    const startCalibration = require(path.join(configPath, "template"))
-      .selfLearning.startCalibration;
-    const selfLearning = require(path.join(configPath, "current")).selfLearning;
+    const startCalibration = template.selfLearning.startCalibration;
+    const selfLearning = config.selfLearning;
 
     store.dispatch({
       type: "CONFIG_UPDATE",
       payload: {
         selfLearning: {
           ...selfLearning,
-          startCalibration
-        }
-      }
+          startCalibration,
+        },
+      },
     });
 
     const dataFile = path.join(__dirname, "../../../data/data.xls");
@@ -432,31 +427,29 @@ function Realtime(server, config, store: StoreType) {
 
     callback(true);
 
-    setTimeout(() => {
-      store.dispatch({
-        type: "RESTART"
-      });
-    }, 1000);
+    if (!constants.newCycleResetHard)
+      setTimeout(() => {
+        store.dispatch({
+          type: "RESTART",
+        });
+      }, 1000);
   }
 
   function checkConfigConsistency(newConfig, callback) {
-    const oldConfig = require(path.join(configPath, "current"));
-
-    for (let i = 0; i < oldConfig.serial.coms.length; i++) {
-      if (oldConfig.serial.coms[i].name !== newConfig.serial.coms[i].name) {
+    for (let i = 0; i < config.serial.coms.length; i++) {
+      if (config.serial.coms[i].name !== newConfig.serial.coms[i].name) {
         callback(false);
         return;
       }
     }
 
-    for (let i = 0; i < oldConfig.table.cells.length; i++) {
-      if (oldConfig.table.cells[i].name !== newConfig.table.cells[i].name) {
+    for (let i = 0; i < config.table.cells.length; i++) {
+      if (config.table.cells[i].name !== newConfig.table.cells[i].name) {
         callback(false);
         return;
       }
       if (
-        oldConfig.table.cells[i].showInLog !==
-        newConfig.table.cells[i].showInLog
+        config.table.cells[i].showInLog !== newConfig.table.cells[i].showInLog
       ) {
         callback(false);
         return;
@@ -472,7 +465,7 @@ function Realtime(server, config, store: StoreType) {
 
   function hardReboot() {
     store.dispatch({
-      type: "HARD_REBOOT"
+      type: "HARD_REBOOT",
     });
   }
 
@@ -480,7 +473,7 @@ function Realtime(server, config, store: StoreType) {
     io.emit("time", new Date().getTime());
   }, 1000);
 
-  store.listen(lastAction => {
+  store.listen((lastAction) => {
     const state = store.getState();
     switch (lastAction.type) {
       case "INPUT_EMIT": {
@@ -503,7 +496,7 @@ function Realtime(server, config, store: StoreType) {
         io.emit("entry", {
           index,
           entry,
-          entryTime: new Date().getTime()
+          entryTime: new Date().getTime(),
         });
         break;
       }
@@ -513,7 +506,7 @@ function Realtime(server, config, store: StoreType) {
         io.emit("average", {
           index,
           average,
-          entryTime: new Date().getTime()
+          entryTime: new Date().getTime(),
         });
         break;
       }
@@ -524,7 +517,7 @@ function Realtime(server, config, store: StoreType) {
           io.emit("entry", {
             index,
             entry: "",
-            entryTime: new Date().getTime()
+            entryTime: new Date().getTime(),
           });
         } else {
           io.emit("clearSerial");
@@ -537,7 +530,7 @@ function Realtime(server, config, store: StoreType) {
         io.emit("table", {
           index,
           value: entry,
-          manual: manual ? true : false
+          manual: manual ? true : false,
         });
         break;
       }
@@ -576,7 +569,7 @@ function Realtime(server, config, store: StoreType) {
     }
   });
 
-  io.on("connection", socket => {
+  io.on("connection", (socket) => {
     console.log("a user connected");
     socket.emit("ip", ip.address());
     emitAllState(socket);
@@ -601,7 +594,7 @@ function Realtime(server, config, store: StoreType) {
       deleteSLData: deleteSLData,
       checkConfigConsistency: checkConfigConsistency,
       confirmPassword: confirmPassword,
-      hardReboot: hardReboot
+      hardReboot: hardReboot,
     };
 
     for (let command in commands) {

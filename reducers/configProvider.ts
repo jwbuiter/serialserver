@@ -1,3 +1,3 @@
-const config = require("../../configs/current");
+import config from "../config";
 
 export default () => config;

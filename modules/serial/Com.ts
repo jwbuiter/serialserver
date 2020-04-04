@@ -2,7 +2,7 @@ import serialPort from "serialport";
 import http from "http";
 import { Gpio } from "onoff";
 
-const constants = require("../../../config.static");
+import constants from "../../constants";
 
 function Com(index, config, store) {
   const {
@@ -31,7 +31,7 @@ function Com(index, config, store) {
     autoCommandMin,
     autoCommandMax,
     autoCommandTime,
-    autoCommandText
+    autoCommandText,
   } = config;
 
   const myGPIO = new Gpio(constants.comPin[index], "out");
@@ -49,7 +49,7 @@ function Com(index, config, store) {
       myTimeout = setTimeout(() => {
         store.dispatch({
           type: "SERIAL_RESET",
-          payload: index
+          payload: index,
         });
       }, timeout * 1000);
     }
@@ -66,23 +66,23 @@ function Com(index, config, store) {
       autoCommandTimeout = setTimeout(() => {
         store.dispatch({
           type: "SERIAL_COMMAND",
-          payload: { command: autoCommandText, index }
+          payload: { command: autoCommandText, index },
         });
       }, autoCommandTime * 1000);
     }
 
     if (zeroReset && numericValue == 0 && !zeroResetTimeout) {
       store.dispatch({
-        type: "TABLE_RESET"
+        type: "TABLE_RESET",
       });
       store.dispatch({
-        type: "SERIAL_RESET"
+        type: "SERIAL_RESET",
       });
       store.dispatch({
-        type: "HANDLE_OUTPUT"
+        type: "HANDLE_OUTPUT",
       });
       store.dispatch({
-        type: "HANDLE_TABLE"
+        type: "HANDLE_TABLE",
       });
 
       zeroResetTimeout = setTimeout(() => {
@@ -93,15 +93,15 @@ function Com(index, config, store) {
         type: "SERIAL_ENTRY",
         payload: {
           entry: entry,
-          index: index
-        }
+          index: index,
+        },
       });
       zeroResetTimeout = null;
       store.dispatch({
-        type: "HANDLE_TABLE"
+        type: "HANDLE_TABLE",
       });
       store.dispatch({
-        type: "HANDLE_OUTPUT"
+        type: "HANDLE_OUTPUT",
       });
     }
   }
@@ -126,8 +126,8 @@ function Com(index, config, store) {
         type: "SERIAL_AVERAGE",
         payload: {
           average,
-          index
-        }
+          index,
+        },
       });
     }
 
@@ -181,7 +181,7 @@ function Com(index, config, store) {
       break;
     }
     case "reader": {
-      const server = http.createServer(function(req, res) {
+      const server = http.createServer(function (req, res) {
         myGPIO.writeSync(1);
         setTimeout(() => myGPIO.writeSync(0), 500);
 
@@ -199,7 +199,7 @@ function Com(index, config, store) {
       server.on("error", (err, socket) => {
         store.dispatch({
           type: " ERROR_OCCURRED",
-          payload: err
+          payload: err,
         });
       });
 
@@ -214,10 +214,10 @@ function Com(index, config, store) {
         parity: parity,
         rtscts: RTSCTS,
         xon: XONXOFF,
-        xoff: XONXOFF
+        xoff: XONXOFF,
       });
 
-      store.listen(action => {
+      store.listen((action) => {
         switch (action.type) {
           case "SERIAL_COMMAND": {
             const { command } = action.payload;
@@ -226,7 +226,7 @@ function Com(index, config, store) {
             if (index === commandIndex) {
               console.log("Command:", {
                 index,
-                command
+                command,
               });
               command.split(";").forEach((subCommand, subCommandNum) => {
                 setTimeout(() => {

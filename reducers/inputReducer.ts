@@ -1,6 +1,6 @@
 import { Action } from "../actions/types";
-
-const { input } = require("../../configs/current.json");
+import config from "../config";
+const { input } = config;
 
 interface Port {
   state: boolean;
@@ -18,16 +18,16 @@ export interface IInputState {
 }
 
 const initialState: IInputState = {
-  ports: Array.from({ length: input.ports.length }, u => ({
+  ports: Array.from({ length: input.ports.length }, (u) => ({
     state: false,
     physical: false,
     isForced: false,
     previousForced: false,
     forcedState: false,
     isFollowing: false,
-    blocking: false
+    blocking: false,
   })),
-  executing: false
+  executing: false,
 };
 
 function calculateState(port: Port) {
@@ -38,7 +38,7 @@ function calculateState(port: Port) {
   return port.physical;
 }
 
-export default function(state: IInputState = initialState, action: Action) {
+export default function (state: IInputState = initialState, action: Action) {
   switch (action.type) {
     case "INPUT_PHYSICAL_CHANGED": {
       const { index, physical } = action.payload;
@@ -46,7 +46,7 @@ export default function(state: IInputState = initialState, action: Action) {
       newPorts[index].physical = physical;
       return {
         ...state,
-        ports: newPorts
+        ports: newPorts,
       };
     }
     case "INPUT_FORCED_CHANGED": {
@@ -57,7 +57,7 @@ export default function(state: IInputState = initialState, action: Action) {
       newPorts[index].forcedState = forcedState;
       return {
         ...state,
-        ports: newPorts
+        ports: newPorts,
       };
     }
     case "INPUT_FOLLOWING_CHANGED": {
@@ -66,7 +66,7 @@ export default function(state: IInputState = initialState, action: Action) {
       newPorts[index].isFollowing = isFollowing;
       return {
         ...state,
-        ports: newPorts
+        ports: newPorts,
       };
     }
     case "INPUT_BLOCKING_CHANGED": {
@@ -75,7 +75,7 @@ export default function(state: IInputState = initialState, action: Action) {
       newPorts[index].blocking = blocking;
       return {
         ...state,
-        ports: newPorts
+        ports: newPorts,
       };
     }
     case "INPUT_CALCULATE_STATE": {
@@ -84,19 +84,19 @@ export default function(state: IInputState = initialState, action: Action) {
       newPorts[index].state = calculateState(newPorts[index]);
       return {
         ...state,
-        ports: newPorts
+        ports: newPorts,
       };
     }
     case "EXECUTE_START": {
       return {
         ...state,
-        executing: true
+        executing: true,
       };
     }
     case "EXECUTE_STOP": {
       return {
         ...state,
-        executing: false
+        executing: false,
       };
     }
     default:

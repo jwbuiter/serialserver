@@ -1,10 +1,10 @@
 import { getExcelDate, getExcelDateTime } from "../../utils/dateUtils";
 import { StoreType } from "../../store";
 import { ISelfLearningState } from "../../reducers/selfLearning/selfLearningReducer";
+import constants from "../../constants";
+import config from "../../config";
 
-
-const { tableColumns } = require("../../../config.static");
-const config = require("../../../configs/current");
+const { tableColumns } = constants;
 
 export default function Parser(store: StoreType) {
   function assert(condition: boolean, message: string) {
@@ -77,8 +77,8 @@ export default function Parser(store: StoreType) {
 
     if (x === "&TAT") {
       return state.logger.entries
-        .map(entry => entry.TA)
-        .filter(val => val)
+        .map((entry) => entry.TA)
+        .filter((val) => val)
         .reduce((acc, cur) => acc + cur);
     }
 
@@ -99,10 +99,10 @@ export default function Parser(store: StoreType) {
     }
 
     const data = state.logger.entries
-      .filter(entry => entry.full)
-      .filter(entry => !unique || entry.TU !== "")
-      .map(entry => (table ? entry.cells[i] : entry.coms[i]))
-      .map(entry => Number(entry));
+      .filter((entry) => entry.full)
+      .filter((entry) => !unique || entry.TU !== "")
+      .map((entry) => (table ? entry.cells[i] : entry.coms[i]))
+      .map((entry) => Number(entry));
 
     const statisticFunctions: Record<string, () => number> = {
       TN: () => data.length,
@@ -136,7 +136,7 @@ export default function Parser(store: StoreType) {
         if (data.length === 0) return 0;
 
         return Number(state.logger.entries[state.logger.entries.length - 1].TA);
-      }
+      },
     };
 
     return statisticFunctions[operator]().toString();
@@ -170,43 +170,43 @@ export default function Parser(store: StoreType) {
     SC: (state, tolerance, calibration) => calibration,
     SCMIN: (state, tolerance, calibration) => calibration * (1 - tolerance),
     SCMAX: (state, tolerance, calibration) => calibration * (1 + tolerance),
-    SN: state => state.global.entries.length,
-    ST: state =>
+    SN: (state) => state.global.entries.length,
+    ST: (state) =>
       (state.endTime
         ? state.endTime?.getTime() - state.startTime?.getTime()
         : new Date().getTime() - state.startTime?.getTime()) / 60000,
 
-    SLC: state => state.calibration,
-    SLCMIN: state => state.calibration * (1 - state.tolerance),
-    SLCMAX: state => state.calibration * (1 + state.tolerance),
-    SLN: state => Object.values(state.individual.generalEntries).length,
-    SIN: state => Object.values(state.individual.individualEntries).length,
-    SIT: state =>
+    SLC: (state) => state.calibration,
+    SLCMIN: (state) => state.calibration * (1 - state.tolerance),
+    SLCMAX: (state) => state.calibration * (1 + state.tolerance),
+    SLN: (state) => Object.values(state.individual.generalEntries).length,
+    SIN: (state) => Object.values(state.individual.individualEntries).length,
+    SIT: (state) =>
       Object.values(state.individual.individualEntries).reduce(
         (acc, cur) => acc + cur.calibration,
         0
       ),
-    SIA: state =>
+    SIA: (state) =>
       average(
         Object.values(state.individual.individualEntries).map(
-          entry => entry.calibration
+          (entry) => entry.calibration
         )
       ),
-    SIMI: state =>
+    SIMI: (state) =>
       Math.min(
         ...Object.values(state.individual.individualEntries).map(
-          entry => entry.calibration
+          (entry) => entry.calibration
         )
       ),
-    SIMA: state =>
+    SIMA: (state) =>
       Math.max(
         ...Object.values(state.individual.individualEntries).map(
-          entry => entry.calibration
+          (entry) => entry.calibration
         )
       ),
-    SISP: state => {
+    SISP: (state) => {
       const data = Object.values(state.individual.individualEntries).map(
-        entry => entry.calibration
+        (entry) => entry.calibration
       );
       const mean = data.reduce((acc, cur) => acc + cur, 0) / (data.length || 1);
       const spread = data.reduce(
@@ -215,11 +215,11 @@ export default function Parser(store: StoreType) {
       );
       return Math.sqrt(spread / (data.length || 1));
     },
-    SIC: state =>
+    SIC: (state) =>
       Object.values(state.individual.individualEntries).reduce(
         (acc, cur) => acc + cur.increments,
         0
-      )
+      ),
   };
 
   const selfLearningNumberedFunctions: Record<
@@ -228,7 +228,7 @@ export default function Parser(store: StoreType) {
   > = {
     SI: (index, state) =>
       Object.values(state.individual.individualEntries).filter(
-        entry => entry.increments === index
+        (entry) => entry.increments === index
       ).length,
     SIT: (index, state) =>
       Object.values(state.individual.individualEntries).reduce(
@@ -238,9 +238,9 @@ export default function Parser(store: StoreType) {
     SIA: (index, state) =>
       average(
         Object.values(state.individual.individualEntries).map(
-          entry => entry.extra[index - 3]
+          (entry) => entry.extra[index - 3]
         )
-      )
+      ),
   };
 
   function parseSelfLearning(x: string) {
@@ -332,10 +332,10 @@ export default function Parser(store: StoreType) {
       } catch (err) {
         store.dispatch({
           type: "ERROR_OCCURRED",
-          payload: err
+          payload: err,
         });
       }
       return typeof result === "undefined" ? "" : result;
-    }
+    },
   };
 }

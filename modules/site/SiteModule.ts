@@ -6,10 +6,10 @@ import fs from "fs";
 import { exec } from "child_process";
 import dateFormat from "dateformat";
 
+import constants from "../../constants";
+import fullConfig from "../../config";
 import { StoreType } from "../../store";
 import Realtime from "./Realtime";
-
-const constants = require("../../../config.static");
 
 const app = express();
 app.use(zip());
@@ -32,7 +32,7 @@ function SiteModule(config, store: StoreType) {
 
     uploadedFile.mv(
       path.join(__dirname, "../../..", "data", "data.xls"),
-      err => {
+      (err) => {
         if (err) {
           return res.status(500).send(err);
         }
@@ -41,7 +41,7 @@ function SiteModule(config, store: StoreType) {
             '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.'
         );
         store.dispatch({
-          type: "LOG_BACKUP"
+          type: "LOG_BACKUP",
         });
       }
     );
@@ -60,7 +60,7 @@ function SiteModule(config, store: StoreType) {
 
     uploadedFile.mv(
       path.join(__dirname, "../../..", "data", "template.xls"),
-      err => {
+      (err) => {
         if (err) {
           return res.status(500).send(err);
         }
@@ -86,7 +86,7 @@ function SiteModule(config, store: StoreType) {
 
     uploadedFile.mv(
       path.join(__dirname, "../../..", "configs", uploadedFile.name),
-      err => {
+      (err) => {
         if (err) {
           return res.status(500).send(err);
         }
@@ -117,9 +117,7 @@ function SiteModule(config, store: StoreType) {
         "Access-Control-Allow-Headers",
         "Origin, X-Requested-With, Content-Type, Accept"
       );
-      res.send(
-        require(path.join(__dirname, "../../..", "configs", "current.json"))
-      );
+      res.send(fullConfig);
     },
     "/com": (req, res) =>
       res.send(titleString + (store.getState().input.executing ? "1" : "0")),
@@ -134,7 +132,7 @@ function SiteModule(config, store: StoreType) {
           {
             entries,
             legend,
-            accessors
+            accessors,
           },
           null,
           2
@@ -154,7 +152,7 @@ function SiteModule(config, store: StoreType) {
         JSON.stringify(
           {
             ...loggerState,
-            entries
+            entries,
           },
           null,
           2
@@ -169,14 +167,14 @@ function SiteModule(config, store: StoreType) {
       );
       const loggerState = store.getState().logger;
       const entries = loggerState.entries
-        .filter(entry => entry.TU !== "")
+        .filter((entry) => entry.TU !== "")
         .reverse();
 
       res.send(
         JSON.stringify(
           {
             ...loggerState,
-            entries
+            entries,
           },
           null,
           2
@@ -192,9 +190,9 @@ function SiteModule(config, store: StoreType) {
       res.download(path.join(__dirname, "../../..", "configs", req.query.file)),
     "/downloadLog": (req, res) => {
       if (req.query.multiFile) {
-        const files = req.query.multiFile.split(",").map(element => ({
+        const files = req.query.multiFile.split(",").map((element) => ({
           path: path.join(logPath, element),
-          name: element
+          name: element,
         }));
         const logID = store.getState().config.logger.logID;
         const date = dateFormat(new Date(), "yyyy-mm-dd_HH-MM-ss");
@@ -230,11 +228,11 @@ function SiteModule(config, store: StoreType) {
       );
       if (constants.manualResetHard) {
         store.dispatch({
-          type: "HARD_REBOOT"
+          type: "HARD_REBOOT",
         });
       } else {
         store.dispatch({
-          type: "RESTART"
+          type: "RESTART",
         });
       }
     },
@@ -251,7 +249,7 @@ function SiteModule(config, store: StoreType) {
         res.status(404);
         res.send("No logo");
       }
-    }
+    },
   };
 
   function addTableRoute(i, j) {
@@ -270,7 +268,7 @@ function SiteModule(config, store: StoreType) {
     "/importFile": importExcel,
     "/importExcel": importExcel,
     "/importTemplate": importExcelTemplate,
-    "/uploadConfig": uploadConfig
+    "/uploadConfig": uploadConfig,
   };
 
   app.use("/", express.static(path.join(__dirname, clientPath, "build")));

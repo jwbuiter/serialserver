@@ -1,6 +1,6 @@
 import { Action } from "../actions/types";
-
-const { output } = require("../../configs/current");
+import config from "../config";
+const { output } = config;
 
 interface IPort {
   state: boolean;
@@ -16,14 +16,14 @@ export interface IOutputState {
 }
 
 const initialState: IOutputState = {
-  ports: Array.from({ length: output.ports.length }, u => ({
+  ports: Array.from({ length: output.ports.length }, (u) => ({
     state: false,
     result: false,
     isForced: false,
     previousForced: false,
     forcedState: false,
-    executing: false
-  }))
+    executing: false,
+  })),
 };
 
 function calculateState(port: IPort, index: number) {
@@ -34,7 +34,7 @@ function calculateState(port: IPort, index: number) {
   return port.result;
 }
 
-export default function(state: IOutputState = initialState, action: Action) {
+export default function (state: IOutputState = initialState, action: Action) {
   switch (action.type) {
     case "OUTPUT_RESULT_CHANGED": {
       const { index, result } = action.payload;
@@ -43,7 +43,7 @@ export default function(state: IOutputState = initialState, action: Action) {
       newPorts[index].state = calculateState(newPorts[index], index);
       return {
         ...state,
-        ports: newPorts
+        ports: newPorts,
       };
     }
     case "OUTPUT_FORCED_CHANGED": {
@@ -55,7 +55,7 @@ export default function(state: IOutputState = initialState, action: Action) {
       newPorts[index].state = calculateState(newPorts[index], index);
       return {
         ...state,
-        ports: newPorts
+        ports: newPorts,
       };
     }
     case "OUTPUT_EXECUTING_CHANGED": {
@@ -65,7 +65,7 @@ export default function(state: IOutputState = initialState, action: Action) {
       newPorts[index].state = calculateState(newPorts[index], index);
       return {
         ...state,
-        ports: newPorts
+        ports: newPorts,
       };
     }
     default:

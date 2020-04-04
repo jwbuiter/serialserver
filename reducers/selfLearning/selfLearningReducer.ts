@@ -1,14 +1,14 @@
 import { Action } from "../../actions/types";
-
-const { selfLearning } = require("../../../configs/current");
+import config from "../../config";
+const { selfLearning } = config;
 
 import globalReducer, {
   IGlobalSelfLearningState,
-  initialStateGlobal
+  initialStateGlobal,
 } from "./globalReducer";
 import individualReducer, {
   IIndividualSelfLearningState,
-  initialStateIndividual
+  initialStateIndividual,
 } from "./individualReducer";
 
 export interface ISelfLearningState {
@@ -25,7 +25,6 @@ export interface ISelfLearningState {
 }
 
 function initialState(): ISelfLearningState {
-  const { selfLearning } = require("../../../configs/current");
   return {
     global: initialStateGlobal,
     individual: initialStateIndividual,
@@ -36,18 +35,18 @@ function initialState(): ISelfLearningState {
     success: 1,
     teaching: false,
     startTime: null,
-    endTime: null
+    endTime: null,
   };
 }
 
-export default function(
+export default function (
   state: ISelfLearningState = initialState(),
   action: Action
 ): ISelfLearningState {
   const newState = {
     ...state,
     global: globalReducer(state.global, action),
-    individual: individualReducer(state.individual, action)
+    individual: individualReducer(state.individual, action),
   };
 
   switch (action.type) {
@@ -55,7 +54,7 @@ export default function(
       const teaching = action.payload;
       return {
         ...state,
-        teaching
+        teaching,
       };
     }
     case "SL_RESET_GLOBAL": {
@@ -67,7 +66,7 @@ export default function(
           100,
         success: 0,
         startTime: new Date(),
-        endTime: null
+        endTime: null,
       };
     }
     case "SL_RESET_INDIVIDUAL": {
@@ -76,7 +75,7 @@ export default function(
         type: "individual",
         success: 0,
         startTime: new Date(),
-        endTime: null
+        endTime: null,
       };
     }
     case "SL_START_INDIVIDUAL": {
@@ -85,7 +84,7 @@ export default function(
         type: "individual",
         success: 0,
         startTime: new Date(),
-        endTime: null
+        endTime: null,
       };
     }
     case "SL_SUCCESS": {
@@ -95,7 +94,7 @@ export default function(
         success,
         calibration,
         tolerance: selfLearning.tolerance / 100,
-        endTime: new Date()
+        endTime: new Date(),
       };
     }
     default:

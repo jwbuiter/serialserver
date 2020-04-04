@@ -1,8 +1,8 @@
 import { Gpio } from "onoff";
 import { exec } from "child_process";
 
+import constants from "../../constants";
 import { StoreType } from "../../store";
-const constants = require("../../../config.static");
 
 function Input(index, config, store: StoreType) {
   const {
@@ -13,7 +13,7 @@ function Input(index, config, store: StoreType) {
     manualTimeout,
     commandCom,
     commandValue,
-    hardwareInput
+    hardwareInput,
   } = config;
 
   const myGPIO = ~hardwareInput
@@ -46,23 +46,23 @@ function Input(index, config, store: StoreType) {
         );
         if (state && !blocked && !stillExecuting) {
           store.dispatch({
-            type: "LOG_MAKE_ENTRY"
+            type: "LOG_MAKE_ENTRY",
           });
           store.dispatch({
-            type: "EXECUTE_START"
+            type: "EXECUTE_START",
           });
         } else if (!state && reduxState.input.executing) {
           store.dispatch({
-            type: "EXECUTE_STOP"
+            type: "EXECUTE_STOP",
           });
           store.dispatch({
-            type: "SERIAL_RESET"
+            type: "SERIAL_RESET",
           });
           store.dispatch({
-            type: "TABLE_RESET"
+            type: "TABLE_RESET",
           });
           store.dispatch({
-            type: "HANDLE_OUTPUT"
+            type: "HANDLE_OUTPUT",
           });
         }
         break;
@@ -72,30 +72,30 @@ function Input(index, config, store: StoreType) {
           type: "INPUT_BLOCKING_CHANGED",
           payload: {
             index,
-            blocking: state
-          }
+            blocking: state,
+          },
         });
         break;
       }
       case "reset": {
         store.dispatch({
-          type: "SERIAL_RESET"
+          type: "SERIAL_RESET",
         });
         store.dispatch({
-          type: "TABLE_RESET"
+          type: "TABLE_RESET",
         });
         store.dispatch({
-          type: "HANDLE_OUTPUT"
+          type: "HANDLE_OUTPUT",
         });
         break;
       }
       case "teach": {
         store.dispatch({
           type: "SL_TEACH",
-          payload: state
+          payload: state,
         });
         store.dispatch({
-          type: "STATE_CHANGED"
+          type: "STATE_CHANGED",
         });
         break;
       }
@@ -103,14 +103,14 @@ function Input(index, config, store: StoreType) {
         if (state) {
           if (constants.inputResetHard) {
             store.dispatch({
-              type: "HARD_REBOOT"
+              type: "HARD_REBOOT",
             });
           } else {
             store.dispatch({
-              type: "SERIAL_RESET"
+              type: "SERIAL_RESET",
             });
             store.dispatch({
-              type: "RESTART"
+              type: "RESTART",
             });
           }
         }
@@ -119,7 +119,7 @@ function Input(index, config, store: StoreType) {
       case "shutdown": {
         if (state) {
           store.dispatch({
-            type: "SERIAL_RESET"
+            type: "SERIAL_RESET",
           });
           exec("shutdown now", (err, stdout, stderr) => {
             if (err) {
@@ -137,8 +137,8 @@ function Input(index, config, store: StoreType) {
             type: "SERIAL_COMMAND",
             payload: {
               index,
-              command: commandValue
-            }
+              command: commandValue,
+            },
           });
         }
         break;
@@ -151,20 +151,20 @@ function Input(index, config, store: StoreType) {
       type: "INPUT_PHYSICAL_CHANGED",
       payload: {
         physical: state,
-        index
-      }
+        index,
+      },
     });
   }
 
-  store.listen(lastAction => {
+  store.listen((lastAction) => {
     switch (lastAction.type) {
       case "INPUT_FORCED_CHANGED": {
         if (index === lastAction.payload.index) {
           store.dispatch({
             type: "INPUT_CALCULATE_STATE",
             payload: {
-              index
-            }
+              index,
+            },
           });
 
           if (manualTimeout && lastAction.payload.isForced) {
@@ -176,8 +176,8 @@ function Input(index, config, store: StoreType) {
                   index,
                   isForced: false,
                   previousForced: true,
-                  forcedState: false
-                }
+                  forcedState: false,
+                },
               });
             }, manualTimeout * 1000);
           }
@@ -193,16 +193,16 @@ function Input(index, config, store: StoreType) {
               store.dispatch({
                 type: "INPUT_CALCULATE_STATE",
                 payload: {
-                  index
-                }
+                  index,
+                },
               });
             }, timeout);
           } else {
             store.dispatch({
               type: "INPUT_CALCULATE_STATE",
               payload: {
-                index
-              }
+                index,
+              },
             });
           }
         }
@@ -215,7 +215,7 @@ function Input(index, config, store: StoreType) {
         if (state !== newState.state) {
           state = newState.state;
           store.dispatch({
-            type: "STATE_CHANGED"
+            type: "STATE_CHANGED",
           });
           handleInput(newState.state);
         }
@@ -223,7 +223,7 @@ function Input(index, config, store: StoreType) {
           stateJSON = newStateJSON;
           store.dispatch({
             type: "INPUT_EMIT",
-            payload: index
+            payload: index,
           });
         }
         break;
@@ -238,8 +238,8 @@ function Input(index, config, store: StoreType) {
             type: "INPUT_FOLLOWING_CHANGED",
             payload: {
               index,
-              isFollowing: isFollowing ? true : false
-            }
+              isFollowing: isFollowing ? true : false,
+            },
           });
         }
         break;

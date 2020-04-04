@@ -1,13 +1,13 @@
 import fs from "fs";
 import path from "path";
 
+import fullConfig from "../../config";
 import { StoreType } from "../../store";
 
 const configPath = path.join(__dirname, "../../..", "configs");
 
 function ConfigModule(store: StoreType) {
-  let config = require(path.join(configPath, "current.json"));
-
+  let config = fullConfig;
   function saveConfig(config, name) {
     console.log("Saving config: " + name);
     let conf = JSON.stringify(config, null, 2);
@@ -20,7 +20,7 @@ function ConfigModule(store: StoreType) {
     fs.writeFileSync(name, conf);
   }
 
-  store.listen(lastAction => {
+  store.listen((lastAction) => {
     switch (lastAction.type) {
       case "CONFIG_UPDATE": {
         config = Object.assign(config, lastAction.payload);
