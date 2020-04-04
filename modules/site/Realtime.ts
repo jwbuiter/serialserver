@@ -3,6 +3,7 @@ import socketio from "socket.io";
 import fs from "fs";
 import path from "path";
 import ip from "ip";
+import { StoreType } from "../../store";
 
 const constants = require("../../../config.static");
 
@@ -15,7 +16,7 @@ const configPath = path.join(__dirname, "../../..", "configs");
 const logPath = constants.saveLogLocation;
 const version = constants.version;
 
-function Realtime(server, config, store) {
+function Realtime(server, config, store: StoreType) {
   const io = socketio.listen(server);
 
   function emitInput(port, index) {
@@ -469,6 +470,12 @@ function Realtime(server, config, store) {
     callback(constants.configPassword == password);
   }
 
+  function hardReboot() {
+    store.dispatch({
+      type: "HARD_REBOOT"
+    });
+  }
+
   setInterval(() => {
     io.emit("time", new Date().getTime());
   }, 1000);
@@ -593,7 +600,8 @@ function Realtime(server, config, store) {
       resetIndividualSL: resetIndividualSL,
       deleteSLData: deleteSLData,
       checkConfigConsistency: checkConfigConsistency,
-      confirmPassword: confirmPassword
+      confirmPassword: confirmPassword,
+      hardReboot: hardReboot
     };
 
     for (let command in commands) {

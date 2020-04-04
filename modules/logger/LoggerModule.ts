@@ -22,12 +22,7 @@ function LoggerModule(config, store) {
 
   let fileName;
 
-  function resetLog(onBoot: bool) {
-    if (!onBoot && constants.autoResetHard)
-      store.dispatch({
-        type: "HARD_REBOOT"
-      });
-
+  function resetLog(onBoot: boolean) {
     if (fileName)
       store.dispatch({
         type: "LOG_RESET",
@@ -37,6 +32,13 @@ function LoggerModule(config, store) {
       new Date(),
       "yyyy-mm-dd_HH-MM-ss"
     )}.csv`;
+
+    if (!onBoot && constants.autoResetHard)
+      setTimeout(() => {
+        store.dispatch({
+          type: "HARD_REBOOT"
+        });
+      }, 1000);
   }
 
   resetLog(true);

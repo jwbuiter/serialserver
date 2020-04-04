@@ -48,5 +48,6 @@
   "autoResetHard": false,
   "manualResetHard": false,
   "inputResetHard": false,
-  "version": "4.0"
+  "newCycleResetHard": false,
+  "version": "4.1"
 }

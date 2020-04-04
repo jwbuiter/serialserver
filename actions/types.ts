@@ -137,6 +137,7 @@ export interface InputCalculateStateAction extends IAction {
 
 export interface InputEmitAction extends IAction {
   type: "INPUT_EMIT";
+  payload: number;
 }
 
 export interface InputFollowingChangedAction extends IAction {
@@ -223,6 +224,7 @@ export interface LogUploadAction extends IAction {
 
 export interface OutputEmitAction extends IAction {
   type: "OUTPUT_EMIT";
+  payload: number;
 }
 
 export interface OutputExecutingChangedAction extends IAction {
@@ -399,6 +401,11 @@ export interface TableColorAction extends IAction {
 
 export interface TableEmitAction extends IAction {
   type: "TABLE_EMIT";
+  payload: {
+    index: number;
+    entry: any;
+    manual: boolean;
+  };
 }
 
 export interface TableEntryAction extends IAction {

@@ -139,13 +139,14 @@ function FTPModule(config, store) {
 
   if (fs.existsSync(ftpBacklogDir)) {
     try {
-      // individualData = require(ftpBacklogDir);
+      ftpBacklog = require(ftpBacklogDir);
     } catch (err) {
       console.log(err);
     }
   }
 
   setInterval(tryBacklog, 3600000);
+  tryBacklog();
 
   return {};
 }
