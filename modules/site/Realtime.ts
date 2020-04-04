@@ -402,7 +402,7 @@ function Realtime(server, config, store: StoreType) {
     });
 
     const startCalibration = template.selfLearning.startCalibration;
-    const selfLearning = config.selfLearning;
+    const selfLearning = oldConfig.selfLearning;
 
     store.dispatch({
       type: "CONFIG_UPDATE",
@@ -436,20 +436,21 @@ function Realtime(server, config, store: StoreType) {
   }
 
   function checkConfigConsistency(newConfig, callback) {
-    for (let i = 0; i < config.serial.coms.length; i++) {
-      if (config.serial.coms[i].name !== newConfig.serial.coms[i].name) {
+    for (let i = 0; i < oldConfig.serial.coms.length; i++) {
+      if (oldConfig.serial.coms[i].name !== newConfig.serial.coms[i].name) {
         callback(false);
         return;
       }
     }
 
-    for (let i = 0; i < config.table.cells.length; i++) {
-      if (config.table.cells[i].name !== newConfig.table.cells[i].name) {
+    for (let i = 0; i < oldConfig.table.cells.length; i++) {
+      if (oldConfig.table.cells[i].name !== newConfig.table.cells[i].name) {
         callback(false);
         return;
       }
       if (
-        config.table.cells[i].showInLog !== newConfig.table.cells[i].showInLog
+        oldConfig.table.cells[i].showInLog !==
+        newConfig.table.cells[i].showInLog
       ) {
         callback(false);
         return;
