@@ -6,13 +6,13 @@ import ip from "ip";
 
 import constants from "../../constants";
 import oldConfig, { template } from "../../config";
-import { StoreType } from "../../store";
+import { IStore } from "../../store";
 
 const configPath = path.join(__dirname, "../../..", "configs");
 const logPath = constants.saveLogLocation;
 const version = constants.version;
 
-function Realtime(server, config, store: StoreType) {
+function Realtime(server, config, store: IStore) {
   const io = socketio.listen(server);
 
   function emitInput(port, index) {

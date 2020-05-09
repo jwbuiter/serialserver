@@ -4,12 +4,12 @@ const { table, serial, logger } = config;
 
 export interface IEntry {
   name: string;
-  id: number;
+  id: string;
   date: string;
-  coms: string[];
-  cells: string[];
+  coms: (string | number)[];
+  cells: (string | number)[];
   TU: number | "";
-  TA: string;
+  TA: number | "";
   full: boolean;
 }
 

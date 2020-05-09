@@ -2,9 +2,10 @@ import { Gpio } from "onoff";
 
 import constants from "../../constants";
 import Parser from "../parser/Parser";
-import { StoreType } from "../../store";
+import { IStore } from "../../store";
+import { IOutputConfig } from "../../config";
 
-function Output(index: number, config, store: StoreType) {
+function Output(index: number, config: IOutputConfig, store: IStore) {
   const {
     execute,
     seconds,

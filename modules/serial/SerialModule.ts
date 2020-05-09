@@ -1,8 +1,8 @@
 import Com from "./Com";
 
-import { StoreType } from "../../store";
+import { IStore } from "../../store";
 
-function SerialModule(config, store: StoreType) {
+function SerialModule(config, store: IStore) {
   const { coms } = config;
   return {
     coms: coms.map((com, index) => {
@@ -13,11 +13,11 @@ function SerialModule(config, store: StoreType) {
         index,
         {
           ...com,
-          zeroReset
+          zeroReset,
         },
         store
       );
-    })
+    }),
   };
 }
 

@@ -1,9 +1,10 @@
 import fs from "fs";
 
 import Parser from "../parser/Parser";
-import { StoreType } from "../../store";
+import { IStore } from "../../store";
+import { ISelfLearningConfig } from "../../config";
 
-function selfLearningIndividual(config, store: StoreType) {
+function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
   const {
     enabled,
     numberPercentage,
@@ -13,7 +14,7 @@ function selfLearningIndividual(config, store: StoreType) {
     activityCounter,
     firstTopFormula,
     secondTopFormula,
-    extraColumns
+    extraColumns,
   } = config;
   let { totalNumber } = config;
   let number = Math.round((totalNumber * numberPercentage) / 100);
@@ -23,7 +24,7 @@ function selfLearningIndividual(config, store: StoreType) {
   const headerFormulas = [
     firstTopFormula,
     secondTopFormula,
-    ...extraColumns.map(column => column.topFormula)
+    ...extraColumns.map((column) => column.topFormula),
   ];
 
   const myParser = Parser(store);
@@ -33,20 +34,20 @@ function selfLearningIndividual(config, store: StoreType) {
 
   function saveIndividualSelfLearning() {
     store.dispatch({
-      type: "STATE_CHANGED"
+      type: "STATE_CHANGED",
     });
     const individualSL = store.getState().selfLearning.individual;
 
     const individualData = {
       generalEntries: individualSL.generalEntries,
-      individualEntries: individualSL.individualEntries
+      individualEntries: individualSL.individualEntries,
     };
 
     fs.writeFile(
       __dirname + "/../../../selfLearning/individualData.json",
       JSON.stringify(individualData),
       "utf8",
-      err => {
+      (err) => {
         if (err) {
           console.log(err);
         }
@@ -59,7 +60,7 @@ function selfLearningIndividual(config, store: StoreType) {
 
     if (Object.keys(individualSL.individualEntries).length >= number) {
       const values = Object.values(individualSL.individualEntries).map(
-        entry => entry.calibration
+        (entry) => entry.calibration
       );
 
       const min = Math.min(...values);
@@ -74,27 +75,27 @@ function selfLearningIndividual(config, store: StoreType) {
           calibration,
           comIndex,
           tolerance,
-          filterLog: false
-        }
+          filterLog: false,
+        },
       });
 
       config.startCalibration = calibration;
       store.dispatch({
         type: "CONFIG_UPDATE",
         payload: {
-          selfLearning: config
-        }
+          selfLearning: config,
+        },
       });
     }
   }
 
-  store.listen(lastAction => {
+  store.listen((lastAction) => {
     let individualSL = store.getState().selfLearning.individual;
 
     switch (lastAction.type) {
       case "LOG_RESET": {
         store.dispatch({
-          type: "SL_INDIVIDUAL_INCREMENT"
+          type: "SL_INDIVIDUAL_INCREMENT",
         });
         saveIndividualSelfLearning();
         break;
@@ -107,14 +108,14 @@ function selfLearningIndividual(config, store: StoreType) {
             type: "SL_INDIVIDUAL_UPGRADE",
             payload: {
               key,
-              calibration: entry
-            }
+              calibration: entry,
+            },
           });
         } else if (key in individualSL.generalEntries) {
           const { entries } = individualSL.generalEntries[key];
 
           if (entries.length >= 3) {
-            const matches = entries.map(entry => ({
+            const matches = entries.map((entry) => ({
               value: entry,
               matches: entries.reduce((total, compEntry) => {
                 const entryTolerance =
@@ -126,14 +127,14 @@ function selfLearningIndividual(config, store: StoreType) {
                 )
                   return total + 1;
                 return total;
-              }, 0)
+              }, 0),
             }));
 
             const successfullMatches = matches.filter(
-              elem => elem.matches >= 3
+              (elem) => elem.matches >= 3
             );
             if (successfullMatches.length) {
-              const matchedEntries = entries.filter(entry =>
+              const matchedEntries = entries.filter((entry) =>
                 successfullMatches.reduce((acc, cur) => {
                   if (
                     entry > cur.value * (1 - individualTolerance) &&
@@ -152,8 +153,8 @@ function selfLearningIndividual(config, store: StoreType) {
                 type: "SL_INDIVIDUAL_UPGRADE",
                 payload: {
                   key,
-                  calibration
-                }
+                  calibration,
+                },
               });
             }
           }
@@ -176,8 +177,8 @@ function selfLearningIndividual(config, store: StoreType) {
               calibration: startCalibration,
               comIndex,
               tolerance,
-              filterLog: false
-            }
+              filterLog: false,
+            },
           });
         } else {
           checkSuccess();
@@ -196,8 +197,8 @@ function selfLearningIndividual(config, store: StoreType) {
         store.dispatch({
           type: "CONFIG_UPDATE",
           payload: {
-            selfLearning: config
-          }
+            selfLearning: config,
+          },
         });
         break;
       }
@@ -214,17 +215,17 @@ function selfLearningIndividual(config, store: StoreType) {
 
         store.dispatch({
           type: "LOG_MAKE_PARTIAL",
-          payload: lastAction.payload
+          payload: lastAction.payload,
         });
         store.dispatch({
           type: "SL_INDIVIDUAL_ACTIVITY",
-          payload: { key: lastAction.payload.entry }
+          payload: { key: lastAction.payload.entry },
         });
         saveIndividualSelfLearning();
         break;
       }
       case "STATE_CHANGED": {
-        const newHeaders = headerFormulas.map(formula =>
+        const newHeaders = headerFormulas.map((formula) =>
           myParser.parse(formula)
         );
 
@@ -239,7 +240,7 @@ function selfLearningIndividual(config, store: StoreType) {
       const individualData = require("../../../selfLearning/individualData");
       store.dispatch({
         type: "SL_INDIVIDUAL_LOAD",
-        payload: individualData
+        payload: individualData,
       });
       checkSuccess();
     } catch (err) {
@@ -248,7 +249,7 @@ function selfLearningIndividual(config, store: StoreType) {
   }
 
   store.dispatch({
-    type: "SL_START_INDIVIDUAL"
+    type: "SL_START_INDIVIDUAL",
   });
 }
 

@@ -1,12 +1,12 @@
 import { getExcelDate, getExcelDateTime } from "../../utils/dateUtils";
-import { StoreType } from "../../store";
+import { IStore } from "../../store";
 import { ISelfLearningState } from "../../reducers/selfLearning/selfLearningReducer";
 import constants from "../../constants";
 import config from "../../config";
 
 const { tableColumns } = constants;
 
-export default function Parser(store: StoreType) {
+export default function Parser(store: IStore) {
   function assert(condition: boolean, message: string) {
     if (!condition) {
       message = message || "Assertion failed";
@@ -76,10 +76,11 @@ export default function Parser(store: StoreType) {
     const state = store.getState();
 
     if (x === "&TAT") {
-      return state.logger.entries
-        .map((entry) => entry.TA)
-        .filter((val) => val)
-        .reduce((acc, cur) => acc + cur);
+      return String(
+        state.logger.entries
+          .map((entry) => Number(entry.TA))
+          .reduce((acc, cur) => acc + cur)
+      );
     }
 
     const unique = x.includes("U");

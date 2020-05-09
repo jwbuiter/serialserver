@@ -2,9 +2,10 @@ import { getExcelDate, getExcelDateTime } from "../../utils/dateUtils";
 
 import Global from "./Global";
 import Individual from "./Individual";
-import { StoreType } from "../../store";
+import { IStore } from "../../store";
+import { ISelfLearningConfig } from "../../config";
 
-function SelfLearningModule(config, store: StoreType) {
+function SelfLearningModule(config: ISelfLearningConfig, store: IStore) {
   const { enabled, extraColumns } = config;
   if (enabled === "off") return {};
 
@@ -17,7 +18,7 @@ function SelfLearningModule(config, store: StoreType) {
     Global(config, store);
   }
 
-  store.listen(lastAction => {
+  store.listen((lastAction) => {
     const state = store.getState();
 
     switch (lastAction.type) {
@@ -45,7 +46,7 @@ function SelfLearningModule(config, store: StoreType) {
             return "columns[" + x + "]";
           }
 
-          extraColumns.forEach(column => {
+          extraColumns.forEach((column) => {
             try {
               const formula = column.formula
                 .toUpperCase()
@@ -58,7 +59,7 @@ function SelfLearningModule(config, store: StoreType) {
             } catch (err) {
               store.dispatch({
                 type: "ERROR_OCCURRED",
-                payload: err
+                payload: err,
               });
             }
           });
@@ -68,15 +69,15 @@ function SelfLearningModule(config, store: StoreType) {
             payload: {
               entry: newEntry,
               key,
-              extra: columns.slice(2)
-            }
+              extra: columns.slice(2),
+            },
           });
         } else {
           store.dispatch({
             type: "SL_ENTRY",
             payload: {
-              entry: newEntry
-            }
+              entry: newEntry,
+            },
           });
         }
       }

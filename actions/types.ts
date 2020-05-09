@@ -1,7 +1,7 @@
 import { IEntry, ILoggerState } from "../reducers/loggerReducer";
 import {
   GeneralEntry,
-  IndividualEntry
+  IndividualEntry,
 } from "../reducers/selfLearning/individualReducer";
 
 type ActionType =
@@ -170,7 +170,7 @@ export interface LogActivityOverwriteAction extends IAction {
   type: "LOG_ACTIVITY_OVERWRITE";
   payload: {
     index: number;
-    newValue: string;
+    newValue: "" | number;
   };
 }
 
@@ -193,6 +193,10 @@ export interface LogMakeEntryAction extends IAction {
 
 export interface LogMakePartialAction extends IAction {
   type: "LOG_MAKE_PARTIAL";
+  payload: {
+    index: number;
+    entry: string;
+  };
 }
 
 export interface LogOverwriteAction extends IAction {
@@ -207,6 +211,7 @@ export interface LogRecoverAction extends IAction {
 
 export interface LogResetAction extends IAction {
   type: "LOG_RESET";
+  payload: string;
 }
 
 export interface LogSaveAction extends IAction {
@@ -220,6 +225,7 @@ export interface LogUniqueOverwriteAction extends IAction {
 
 export interface LogUploadAction extends IAction {
   type: "LOG_UPLOAD";
+  payload: { fileName: string; ftpIndex: number; callback };
 }
 
 export interface OutputEmitAction extends IAction {

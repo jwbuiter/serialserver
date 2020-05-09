@@ -2,9 +2,10 @@ import { Gpio } from "onoff";
 import { exec } from "child_process";
 
 import constants from "../../constants";
-import { StoreType } from "../../store";
+import { IStore } from "../../store";
+import { IInputConfig } from "../../config";
 
-function Input(index, config, store: StoreType) {
+function Input(index: number, config: IInputConfig, store: IStore) {
   const {
     formula,
     timeout,

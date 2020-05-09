@@ -8,7 +8,7 @@ import dateFormat from "dateformat";
 
 import constants from "../../constants";
 import fullConfig from "../../config";
-import { StoreType } from "../../store";
+import { IStore } from "../../store";
 import Realtime from "./Realtime";
 
 const app = express();
@@ -18,7 +18,7 @@ const logoPath = "../../../logo";
 const logPath = constants.saveLogLocation;
 const titleString = "<title>" + constants.name + "</title>";
 
-function SiteModule(config, store: StoreType) {
+function SiteModule(config, store: IStore) {
   function importExcel(req, res) {
     console.log(req.files);
     if (!req.files.excelFile) {

@@ -6,10 +6,12 @@ import path from "path";
 
 import constants from "../../constants";
 import { IEntry } from "../../reducers/loggerReducer";
+import { ILoggerConfig } from "../../config";
+import { IStore } from "../../store";
 
 const backupPath = path.join(constants.saveLogLocation, "backup.json");
 
-function LoggerModule(config, store) {
+function LoggerModule(config: ILoggerConfig, store: IStore) {
   const {
     resetTime,
     resetInterval,
@@ -21,7 +23,7 @@ function LoggerModule(config, store) {
   const { activityCounter, enabled } = store.getState().config.selfLearning;
   const activityIndex = 1 - Number(enabled[3]);
 
-  let fileName;
+  let fileName: string;
 
   function resetLog(onBoot: boolean) {
     if (fileName)
@@ -178,7 +180,6 @@ function LoggerModule(config, store) {
 
         store.dispatch({
           type: "LOG_SAVE",
-          payload: fileName,
         });
 
         store.dispatch({
@@ -190,7 +191,7 @@ function LoggerModule(config, store) {
         const { index, entry } = lastAction.payload;
         const state = store.getState();
 
-        const newRow = {
+        const newRow: IEntry = {
           name: constants.name,
           id: logID,
           date: dateFormat(new Date(), "yyyy-mm-dd HH:MM:ss"),
@@ -222,17 +223,16 @@ function LoggerModule(config, store) {
       }
       case "LOG_SAVE": {
         if (!writeToFile) break;
-        const fileName = lastAction.payload;
         const state = store.getState();
         const saveArray = [state.logger.legend].concat(
           state.logger.entries.map((entry) => [
             entry.name,
             entry.id,
             entry.date,
-            ...entry.coms,
-            ...entry.cells,
-            entry.TU,
-            entry.TA,
+            ...entry.coms.map((val) => String(val)),
+            ...entry.cells.map((val) => String(val)),
+            String(entry.TU),
+            String(entry.TA),
           ])
         );
 

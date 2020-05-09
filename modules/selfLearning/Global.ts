@@ -1,4 +1,7 @@
-function selfLearningGlobal(config, store) {
+import { IStore } from "../../store";
+import { ISelfLearningConfig } from "../../config";
+
+function selfLearningGlobal(config: ISelfLearningConfig, store: IStore) {
   const { enabled, totalNumber, numberPercentage } = config;
   const tolerance = config.tolerance / 100;
   const number = Math.round((totalNumber * numberPercentage) / 100);
@@ -6,11 +9,11 @@ function selfLearningGlobal(config, store) {
   const comIndex = Number(enabled[3]);
   console.log("Global SL enabled on com" + comIndex);
 
-  store.listen(lastAction => {
+  store.listen((lastAction) => {
     switch (lastAction.type) {
       case "LOG_RESET": {
         store.dispatch({
-          type: "SL_RESET_GLOBAL"
+          type: "SL_RESET_GLOBAL",
         });
         break;
       }
@@ -20,7 +23,7 @@ function selfLearningGlobal(config, store) {
         const entries = store.getState().selfLearning.global.entries;
         if (entries.length < number) break;
 
-        const matches = entries.map(entry => ({
+        const matches = entries.map((entry) => ({
           value: entry,
           matches: entries.reduce((total, compEntry) => {
             if (
@@ -29,14 +32,14 @@ function selfLearningGlobal(config, store) {
             )
               return total + 1;
             return total;
-          }, 0)
+          }, 0),
         }));
 
         const successfullMatches = matches.filter(
-          elem => elem.matches >= number
+          (elem) => elem.matches >= number
         );
         if (successfullMatches.length) {
-          const matchedEntries = entries.filter(entry =>
+          const matchedEntries = entries.filter((entry) =>
             successfullMatches.reduce((acc, cur) => {
               if (
                 entry > cur.value * (1 - tolerance) &&
@@ -65,19 +68,19 @@ function selfLearningGlobal(config, store) {
               matchedTolerance,
               comIndex,
               tolerance,
-              filterLog: true
-            }
+              filterLog: true,
+            },
           });
           store.dispatch({
-            type: "LOG_SAVE"
+            type: "LOG_SAVE",
           });
           config.success = success;
           config.startCalibration = calibration;
           store.dispatch({
             type: "CONFIG_UPDATE",
             payload: {
-              selfLearning: config
-            }
+              selfLearning: config,
+            },
           });
         }
         break;
@@ -85,7 +88,7 @@ function selfLearningGlobal(config, store) {
     }
   });
   store.dispatch({
-    type: "SL_RESET_GLOBAL"
+    type: "SL_RESET_GLOBAL",
   });
 }
 

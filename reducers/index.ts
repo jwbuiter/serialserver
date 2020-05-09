@@ -7,11 +7,11 @@ import inputReducer, { IInputState } from "./inputReducer";
 import tableReducer, { ITableState } from "./tableReducer";
 import loggerReducer, { ILoggerState } from "./loggerReducer";
 import selfLearningReducer, {
-  ISelfLearningState
+  ISelfLearningState,
 } from "./selfLearning/selfLearningReducer";
 import configProvider from "./configProvider";
 
-type ReducerState = {
+export type ReducerState = {
   lastAction: Action | null;
   serial: ISerialState;
   output: IOutputState;
@@ -30,5 +30,5 @@ export default combineReducers<ReducerState, Action>({
   table: tableReducer,
   logger: loggerReducer,
   selfLearning: selfLearningReducer,
-  config: configProvider
+  config: configProvider,
 });

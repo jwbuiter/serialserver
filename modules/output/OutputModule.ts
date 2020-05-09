@@ -1,11 +1,12 @@
 import Output from "./Output";
 
-import { StoreType } from "../../store";
+import { IStore } from "../../store";
+import { IOutputsConfig } from "../../config";
 
-function OutputModule(config, store: StoreType) {
+function OutputModule(config: IOutputsConfig, store: IStore) {
   const { ports } = config;
   return {
-    ports: ports.map((output, index) => Output(index, output, store))
+    ports: ports.map((output, index) => Output(index, output, store)),
   };
 }
 

@@ -1,6 +1,6 @@
-import { StoreType } from "../../store";
+import { IStore } from "../../store";
 
-function AuthenticationModule(config, store: StoreType) {
+function AuthenticationModule(config, store: IStore) {
   return {};
 }
 

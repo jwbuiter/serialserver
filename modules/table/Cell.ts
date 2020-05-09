@@ -1,9 +1,9 @@
 import http from "http";
 
-import { StoreType } from "../../store";
+import { IStore } from "../../store";
 import Parser from "../parser/Parser";
 
-export default function Cell(index: number, config: any, store: StoreType) {
+export default function Cell(index: number, config: any, store: IStore) {
   const {
     formula,
     digits,
@@ -13,7 +13,7 @@ export default function Cell(index: number, config: any, store: StoreType) {
     type,
     menuOptions,
     colorConditions,
-    readerPort
+    readerPort,
   } = config;
   const manual = type === "manual" || type === "menu" || readerPort;
   const myParser = Parser(store);
@@ -33,10 +33,10 @@ export default function Cell(index: number, config: any, store: StoreType) {
 
       res.end();
     });
-    server.on("error", err => {
+    server.on("error", (err) => {
       store.dispatch({
         type: "ERROR_OCCURRED",
-        payload: err
+        payload: err,
       });
     });
 
@@ -51,14 +51,14 @@ export default function Cell(index: number, config: any, store: StoreType) {
         type: "TABLE_ENTRY",
         payload: {
           index,
-          entry: content
-        }
+          entry: content,
+        },
       });
     } else {
       content = "";
       store.dispatch({
         type: "TABLE_RESET_CELL",
-        payload: index
+        payload: index,
       });
     }
     store.dispatch({
@@ -66,8 +66,8 @@ export default function Cell(index: number, config: any, store: StoreType) {
       payload: {
         index,
         entry: content,
-        manual
-      }
+        manual,
+      },
     });
   }
 
@@ -84,8 +84,8 @@ export default function Cell(index: number, config: any, store: StoreType) {
       type: "TABLE_ENTRY",
       payload: {
         index,
-        entry
-      }
+        entry,
+      },
     });
 
     if (
@@ -98,11 +98,11 @@ export default function Cell(index: number, config: any, store: StoreType) {
         payload: {
           index,
           entry,
-          manual
-        }
+          manual,
+        },
       });
       store.dispatch({
-        type: "STATE_CHANGED"
+        type: "STATE_CHANGED",
       });
     }
   }
@@ -122,13 +122,13 @@ export default function Cell(index: number, config: any, store: StoreType) {
         type: "TABLE_COLOR",
         payload: {
           index,
-          color
-        }
+          color,
+        },
       });
     }
   }
 
-  store.listen(lastAction => {
+  store.listen((lastAction) => {
     const state = store.getState();
     switch (lastAction.type) {
       case "STATE_CHANGED":

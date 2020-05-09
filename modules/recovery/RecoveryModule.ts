@@ -4,7 +4,7 @@ import path from "path";
 import { exec } from "child_process";
 
 import constants from "../../constants";
-import { StoreType } from "../../store";
+import { IStore } from "../../store";
 
 const { resetPin, onlinePin } = constants;
 const configPath = path.join(__dirname, "../../..", "configs");
@@ -41,9 +41,9 @@ function RecoveryModule() {
     exec("shutdown -r now");
   }
 
-  let store: StoreType;
+  let store: IStore;
 
-  function bindStore(newStore: StoreType) {
+  function bindStore(newStore: IStore) {
     store = newStore;
 
     store.listen((lastAction) => {

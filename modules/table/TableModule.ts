@@ -4,7 +4,7 @@ import XLSX from "xlsx";
 
 import { getExcelDate } from "../../utils/dateUtils";
 import Cell from "./Cell";
-import { StoreType } from "../../store";
+import { IStore } from "../../store";
 
 const excelPath = path.join(__dirname, "../../..", "data", "data.xls");
 
@@ -18,7 +18,7 @@ function sheetToArray(sheet: XLSX.WorkSheet) {
         sheet[
           XLSX.utils.encode_cell({
             r: rowNum,
-            c: colNum
+            c: colNum,
           })
         ];
       if (typeof nextCell === "undefined") {
@@ -37,7 +37,7 @@ function saveExcel(array: any[][]) {
   XLSX.writeFile(wb, excelPath);
 }
 
-function TableModule(config, store: StoreType) {
+function TableModule(config, store: IStore) {
   const {
     trigger,
     useFile,
@@ -46,7 +46,7 @@ function TableModule(config, store: StoreType) {
     individualColumn,
     dateColumn,
     exitColumn,
-    cells
+    cells,
   } = config;
 
   let excelSheet;
@@ -57,7 +57,7 @@ function TableModule(config, store: StoreType) {
     excelSheet = sheetToArray(excelFile.Sheets[sheetName]);
   }
 
-  store.listen(lastAction => {
+  store.listen((lastAction) => {
     const state = store.getState();
 
     switch (lastAction.type) {
@@ -66,7 +66,7 @@ function TableModule(config, store: StoreType) {
           const searchEntry = state.serial.coms[trigger].entry;
           if (!searchEntry) break;
 
-          const foundRow = excelSheet.find(row => {
+          const foundRow = excelSheet.find((row) => {
             return row[searchColumn] === searchEntry;
           });
 
@@ -76,8 +76,8 @@ function TableModule(config, store: StoreType) {
               type: "EXCEL_FOUND_ROW",
               payload: {
                 found: true,
-                foundRow
-              }
+                foundRow,
+              },
             });
           } else {
             console.log("not found");
@@ -85,8 +85,8 @@ function TableModule(config, store: StoreType) {
               type: "EXCEL_FOUND_ROW",
               payload: {
                 found: false,
-                foundRow
-              }
+                foundRow,
+              },
             });
           }
         }
@@ -96,7 +96,7 @@ function TableModule(config, store: StoreType) {
         if (useFile && excelSheet) {
           const { key, calibration } = lastAction.payload;
 
-          const foundRow = excelSheet.find(row => {
+          const foundRow = excelSheet.find((row) => {
             return row[searchColumn] === key;
           });
 
@@ -127,17 +127,17 @@ function TableModule(config, store: StoreType) {
           if (exitCode) {
             store.dispatch({
               type: "SL_INDIVIDUAL_DECREMENT_TOTAL",
-              payload: callback
+              payload: callback,
             });
           }
 
-          const foundRow = excelSheet.find(row => {
+          const foundRow = excelSheet.find((row) => {
             return row[searchColumn] === key;
           });
 
           if (!foundRow) return;
 
-          const foundIndex = excelSheet.findIndex(row => {
+          const foundIndex = excelSheet.findIndex((row) => {
             return row[searchColumn] === key;
           });
 
@@ -156,17 +156,17 @@ function TableModule(config, store: StoreType) {
         index,
         {
           ...cell,
-          waitForOther
+          waitForOther,
         },
         store
       )
   );
   store.dispatch({
-    type: "HANDLE_TABLE"
+    type: "HANDLE_TABLE",
   });
 
   return {
-    cells: tempCells
+    cells: tempCells,
   };
 }
 

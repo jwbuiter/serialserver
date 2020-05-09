@@ -2,11 +2,11 @@ import fs from "fs";
 import path from "path";
 
 import fullConfig from "../../config";
-import { StoreType } from "../../store";
+import { IStore } from "../../store";
 
 const configPath = path.join(__dirname, "../../..", "configs");
 
-function ConfigModule(store: StoreType) {
+function ConfigModule(store: IStore) {
   let config = fullConfig;
   function saveConfig(config, name) {
     console.log("Saving config: " + name);

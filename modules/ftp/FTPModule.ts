@@ -4,11 +4,13 @@ import fs from "fs";
 import dateFormat from "dateformat";
 
 import constants from "../../constants";
+import { IFTPConfig } from "../../config";
+import { IStore } from "../../store";
 
 const xlsxDir = path.join(__dirname, "../../../data/data.xls");
 const ftpBacklogDir = path.join(__dirname, "../../../data/ftpBacklog.json");
 
-function FTPModule(config, store) {
+function FTPModule(config: IFTPConfig, store: IStore) {
   const { targets, automatic, uploadExcel } = config;
   const { logID } = store.getState().config.logger;
 

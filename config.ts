@@ -1,11 +1,11 @@
 type ComConfig = {
-  mode: string;
+  mode: "serial" | "reader" | "test";
   port: string;
   baudRate: number;
   readerPort: number;
   stopBits: number;
   bits: number;
-  parity: string;
+  parity: "none" | "even" | "odd" | "mark" | "space";
   RTSCTS: boolean;
   XONXOFF: boolean;
   name: string;
@@ -27,13 +27,19 @@ type ComConfig = {
   autoCommandText: string;
 };
 
+export interface ISerialConfig {
+  testMode: boolean;
+  resetTrigger: "off" | "on" | "com0" | "com1";
+  coms: ComConfig[];
+}
+
 type CellConfig = {
   name: string;
   formula: string;
   numeric: boolean;
   digits: number;
   resetOnExe: boolean;
-  type: string;
+  type: "normal" | "date" | "manual" | "menu" | "reader";
   menuOptions: { key: number; value: string }[];
   colorConditions: { key: string; value: string }[];
   readerPort: number;
@@ -41,7 +47,18 @@ type CellConfig = {
   showInLog: boolean;
 };
 
-type OutputConfig = {
+export interface ITableConfig {
+  trigger: number;
+  useFile: boolean;
+  waitForOther: boolean;
+  searchColumn: number;
+  individualColumn: number;
+  dateColumn: number;
+  exitColumn: number;
+  cells: CellConfig[];
+}
+
+export interface IOutputConfig {
   name: string;
   formula: string;
   execute: boolean;
@@ -51,9 +68,13 @@ type OutputConfig = {
   warning: boolean;
   warningPeriod: number;
   hardwareOutput: number;
-};
+}
 
-type InputConfig = {
+export interface IOutputsConfig {
+  ports: IOutputConfig[];
+}
+
+export interface IInputConfig {
   name: string;
   formula: string;
   follow: number;
@@ -65,61 +86,66 @@ type InputConfig = {
   commandValue: string;
   visible: boolean;
   hardwareInput: number;
-};
+}
 
-type FTPTargetConfig = {
+export interface IInputsConfig {
+  ports: IInputConfig[];
+}
+
+export interface ILoggerConfig {
+  writeToFile: boolean;
+  csvSeparator: "," | ";";
+  resetMode: "off" | "time" | "interval";
+  resetTime: string;
+  resetInterval: number;
+  logID: string;
+  unique: "off" | "com0" | "com1";
+}
+
+interface IFTPTargetConfig {
   address: string;
   folder: string;
   username: string;
   password: string;
-};
+}
 
-interface IConfig {
-  serial: { testMode: boolean; resetTrigger: string; coms: ComConfig[] };
-  table: {
-    trigger: number;
-    useFile: boolean;
-    waitForOther: boolean;
-    searchColumn: number;
-    individualColumn: number;
-    dateColumn: number;
-    exitColumn: number;
-    cells: CellConfig[];
-  };
-  output: { ports: OutputConfig[] };
-  input: { ports: InputConfig[] };
-  logger: {
-    writeToFile: boolean;
-    csvSeparator: string;
-    resetMode: string;
-    resetTime: string;
-    resetInterval: number;
-    logID: string;
-    unique: string;
-  };
-  FTP: { automatic: boolean; uploadExcel: boolean; targets: FTPTargetConfig[] };
-  selfLearning: {
-    enabled: string;
-    startCalibration: number;
-    totalNumber: number;
-    numberPercentage: number;
-    tolerance: number;
-    startTolerance: number;
-    individualTolerance: number;
-    individualToleranceAbs: number;
-    individualToleranceShift: number;
-    individualCorrectionIncrement: number;
-    individualCorrectionLimit: number;
-    individualAverageNumber: number;
-    activityCounter: boolean;
-    firstTopFormula: string;
-    firstTopDigits: number;
-    secondTopFormula: string;
-    secondTopDigits: number;
-    exitOptions: { key: string; value: any }[];
-    extraColumns: { topFormula: string; formula: string }[];
-    success: number;
-  };
+export interface IFTPConfig {
+  automatic: boolean;
+  uploadExcel: boolean;
+  targets: IFTPTargetConfig[];
+}
+
+export interface ISelfLearningConfig {
+  enabled: "off" | "com0" | "com1" | "com0ind" | "com1ind";
+  startCalibration: number;
+  totalNumber: number;
+  numberPercentage: number;
+  tolerance: number;
+  startTolerance: number;
+  individualTolerance: number;
+  individualToleranceAbs: number;
+  individualToleranceShift: number;
+  individualCorrectionIncrement: number;
+  individualCorrectionLimit: number;
+  individualAverageNumber: number;
+  activityCounter: boolean;
+  firstTopFormula: string;
+  firstTopDigits: number;
+  secondTopFormula: string;
+  secondTopDigits: number;
+  exitOptions: { key: string; value: any }[];
+  extraColumns: { topFormula: string; formula: string }[];
+  success: number;
+}
+
+export interface IConfig {
+  serial: ISerialConfig;
+  table: ITableConfig;
+  output: IOutputsConfig;
+  input: IInputsConfig;
+  logger: ILoggerConfig;
+  FTP: IFTPConfig;
+  selfLearning: ISelfLearningConfig;
   version: string;
 }
 
