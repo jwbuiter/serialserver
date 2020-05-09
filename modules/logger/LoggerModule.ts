@@ -41,7 +41,7 @@ function LoggerModule(config: ILoggerConfig, store: IStore) {
         store.dispatch({
           type: "HARD_REBOOT",
         });
-      }, 1000);
+      }, 5000);
   }
 
   resetLog(true);
