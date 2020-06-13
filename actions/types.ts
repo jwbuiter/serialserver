@@ -55,6 +55,7 @@ type ActionType =
   | "SL_INDIVIDUAL_INCREMENT"
   | "SL_INDIVIDUAL_LOAD"
   | "SL_INDIVIDUAL_UPGRADE"
+  | "SL_INDIVIDUAL_EXTRA"
   | "SL_RESET_GLOBAL"
   | "SL_RESET_INDIVIDUAL"
   | "SL_SET_TOLERANCE"
@@ -306,7 +307,14 @@ export interface SLEntryAction extends IAction {
   payload: {
     entry: number;
     key?: string;
-    extra?: any;
+  };
+}
+
+export interface SLIndividualExtraAction extends IAction {
+  type: "SL_INDIVIDUAL_EXTRA";
+  payload: {
+    key: string;
+    extra: (number | string)[];
   };
 }
 
@@ -487,6 +495,7 @@ export type Action =
   | SLIndividualIncrementAction
   | SLIndividualLoadAction
   | SLIndividualUpgradeAction
+  | SLIndividualExtraAction
   | SLResetGlobalAction
   | SLResetIndividualAction
   | SLSetToleranceAction

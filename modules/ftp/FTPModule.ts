@@ -36,7 +36,8 @@ function FTPModule(config: IFTPConfig, store: IStore) {
       };
 
       for (let i = 0; i < targets.length; i++) {
-        upload(i, fileName, callback);
+        if (fileName == "excel") uploadDataFile(i, callback);
+        else upload(i, fileName, callback);
       }
     }
     saveFtpBacklog();
@@ -88,10 +89,13 @@ function FTPModule(config: IFTPConfig, store: IStore) {
     });
   }
 
-  function uploadDataFile(index) {
+  function uploadDataFile(index, callback) {
     const { address, folder, username, password } = targets[index];
 
-    if (!fs.existsSync(xlsxDir)) return;
+    if (!address || !fs.existsSync(xlsxDir)) {
+      callback("Success: nothing to do");
+      return;
+    }
 
     const fileStats = fs.statSync(xlsxDir);
     const modifyDate = new Date(fileStats.mtimeMs);
@@ -105,12 +109,13 @@ function FTPModule(config: IFTPConfig, store: IStore) {
       c.mkdir(folder, true, () => {
         c.put(xlsxDir, path.join(folder, fileName), (err) => {
           c.end();
+          callback("Successfully uploaded " + fileName);
         });
       });
     });
 
     c.on("error", (err) => {
-      console.log("FTP Error:" + err.message);
+      callback(err.message);
     });
 
     c.connect({
@@ -125,15 +130,13 @@ function FTPModule(config: IFTPConfig, store: IStore) {
       case "LOG_UPLOAD": {
         const { fileName, ftpIndex, callback } = lastAction.payload;
         upload(ftpIndex, fileName, callback);
-        if (uploadExcel) uploadDataFile(ftpIndex);
+        if (uploadExcel) uploadDataFile(ftpIndex, callback);
         break;
       }
       case "LOG_RESET": {
         const fileName = lastAction.payload;
         if (automatic) addToBackLog(fileName);
-        for (let i = 0; i < targets.length; i++) {
-          if (uploadExcel) uploadDataFile(i);
-        }
+        if (uploadExcel) addToBackLog("excel");
         break;
       }
     }

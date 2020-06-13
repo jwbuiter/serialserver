@@ -4,7 +4,6 @@ const { selfLearning } = config;
 
 export type GeneralEntry = {
   entries: number[];
-  extra: string[];
   activity: number;
   activityHistory: number[];
 };
@@ -19,7 +18,7 @@ export type IndividualEntry = {
   increments: number;
   calibration: number;
   measurements: Measurement[];
-  extra: any;
+  extra: (number | string)[];
   numUpdates: number;
   numUpdatesHistory: number[];
   activity: number;
@@ -71,7 +70,7 @@ export default function individualReducer(
 ): IIndividualSelfLearningState {
   switch (action.type) {
     case "SL_ENTRY": {
-      const { entry, key, extra } = action.payload;
+      const { entry, key } = action.payload;
 
       const newGeneralEntries = Object.assign({}, state.generalEntries);
       const newIndividualEntries = Object.assign({}, state.individualEntries);
@@ -89,7 +88,6 @@ export default function individualReducer(
         newIndividualEntries[key] = {
           ...newIndividualEntries[key],
           measurements,
-          extra,
           numUpdates: newIndividualEntries[key].numUpdates + 1,
           ...calculateEntry(measurements),
         };
@@ -99,12 +97,10 @@ export default function individualReducer(
           entries: [entry]
             .concat(Array.from(newGeneralEntries[key].entries))
             .slice(0, 5),
-          extra,
         };
       } else {
         newGeneralEntries[key] = {
           entries: [entry],
-          extra,
           activity: 1,
           activityHistory: [],
         };
@@ -122,12 +118,6 @@ export default function individualReducer(
       const newGeneralEntries = Object.assign({}, state.generalEntries);
       const newIndividualEntries = Object.assign({}, state.individualEntries);
 
-      let extra = [];
-      if (key in state.generalEntries) {
-        extra = state.generalEntries[key].extra;
-        delete newGeneralEntries[key];
-      }
-
       const newMeasurement = {
         value: calibration,
         age: 0,
@@ -140,7 +130,7 @@ export default function individualReducer(
       newIndividualEntries[key] = {
         ...calculateEntry(measurements),
         measurements,
-        extra,
+        extra: [],
         numUpdates: 1,
         numUpdatesHistory: [],
         activity: 1,
@@ -268,7 +258,6 @@ export default function individualReducer(
       } else {
         newGeneralEntries[key] = {
           entries: [],
-          extra: [],
           activity: 1,
           activityHistory: [],
         };
@@ -284,6 +273,19 @@ export default function individualReducer(
       return {
         ...state,
         individualColumnHeaders: action.payload,
+      };
+    }
+    case "SL_INDIVIDUAL_EXTRA": {
+      const { key, extra } = action.payload;
+      const newIndividualEntries = Object.assign({}, state.individualEntries);
+
+      if (key in newIndividualEntries) {
+        newIndividualEntries[key].extra = extra;
+      }
+
+      return {
+        ...state,
+        individualEntries: newIndividualEntries,
       };
     }
     default:

@@ -3,6 +3,7 @@ import fs from "fs";
 import Parser from "../parser/Parser";
 import { IStore } from "../../store";
 import { ISelfLearningConfig } from "../../config";
+import { getExcelDate, getExcelDateTime } from "../../utils/dateUtils";
 
 function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
   const {
@@ -158,6 +159,50 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
               });
             }
           }
+        }
+
+        const updatedSelfLearning = store.getState().selfLearning.individual;
+
+        if (key in updatedSelfLearning.individualEntries) {
+          const calibration =
+            updatedSelfLearning.individualEntries[key].calibration;
+          const columns = [calibration, key];
+
+          function parseExcel(x) {
+            x = x.charCodeAt(1) - 65;
+            return "store.getState().table.foundRow[" + x + "]";
+          }
+
+          function parseColumn(x) {
+            x = parseInt(x.slice(1)) - 1;
+            return "columns[" + x + "]";
+          }
+
+          extraColumns.forEach((column) => {
+            try {
+              const formula = column.formula
+                .toUpperCase()
+                .replace(/#[0-9]+/g, parseColumn)
+                .replace(/\$[A-Z]/g, parseExcel)
+                .replace(/DATETIME/g, () => String(getExcelDateTime()))
+                .replace(/DATE/g, () => String(getExcelDate()));
+
+              columns.push(eval(formula));
+            } catch (err) {
+              store.dispatch({
+                type: "ERROR_OCCURRED",
+                payload: err,
+              });
+            }
+          });
+
+          store.dispatch({
+            type: "SL_INDIVIDUAL_EXTRA",
+            payload: {
+              key,
+              extra: columns.slice(2),
+            },
+          });
         }
 
         checkSuccess();

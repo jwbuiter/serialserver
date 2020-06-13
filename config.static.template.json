@@ -1,5 +1,5 @@
 {
-  "name": "MBDCcom01",
+  "name": "AutoScale01",
   "QS": "000 000 000",
   "port": 80,
   "saveLogLocation": "/home/pi/Documents",
@@ -49,5 +49,5 @@
   "manualResetHard": false,
   "inputResetHard": false,
   "newCycleResetHard": false,
-  "version": "4.1"
+  "version": "4.2"
 }

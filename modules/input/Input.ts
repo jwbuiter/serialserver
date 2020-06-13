@@ -26,6 +26,9 @@ function Input(index: number, config: IInputConfig, store: IStore) {
   let state = false;
 
   if (myGPIO) {
+    setTimeout(() => {
+      dispatchPhysical(myGPIO.readSync() ? true : false);
+    }, 10);
     myGPIO.watch((err, val) => {
       setTimeout(() => {
         dispatchPhysical(myGPIO.readSync() ? true : false);

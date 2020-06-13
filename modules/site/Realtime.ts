@@ -7,6 +7,8 @@ import ip from "ip";
 import constants from "../../constants";
 import oldConfig, { template } from "../../config";
 import { IStore } from "../../store";
+import { IInputPort } from "../../reducers/inputReducer";
+import { IOutputPort } from "../../reducers/outputReducer";
 
 const configPath = path.join(__dirname, "../../..", "configs");
 const logPath = constants.saveLogLocation;
@@ -15,7 +17,7 @@ const version = constants.version;
 function Realtime(server, config, store: IStore) {
   const io = socketio.listen(server);
 
-  function emitInput(port, index) {
+  function emitInput(port: IInputPort, index) {
     let state;
     if (port.isForced) {
       state = port.forcedState ? "forcedOn" : "forcedOff";
@@ -31,8 +33,7 @@ function Realtime(server, config, store: IStore) {
       ...port,
     });
   }
-
-  function emitOutput(port, index) {
+  function emitOutput(port: IOutputPort, index: number) {
     let state;
     if (port.isForced) {
       state = port.forcedState ? "forcedOn" : "forcedOff";
@@ -396,20 +397,22 @@ function Realtime(server, config, store: IStore) {
     });
   }
 
-  function deleteSLData(_, callback) {
+  function deleteSLData({ logID, startCalibration, totalNumber }, callback) {
     store.dispatch({
       type: "SL_RESET_INDIVIDUAL",
     });
 
-    const startCalibration = template.selfLearning.startCalibration;
-    const selfLearning = oldConfig.selfLearning;
-
     store.dispatch({
       type: "CONFIG_UPDATE",
       payload: {
+        logger: {
+          ...oldConfig.logger,
+          logID,
+        },
         selfLearning: {
-          ...selfLearning,
+          ...oldConfig.selfLearning,
           startCalibration,
+          totalNumber,
         },
       },
     });

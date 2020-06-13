@@ -2,7 +2,7 @@ import { Action } from "../actions/types";
 import config from "../config";
 const { output } = config;
 
-interface IPort {
+export interface IOutputPort {
   state: boolean;
   result: boolean;
   isForced: boolean;
@@ -12,7 +12,7 @@ interface IPort {
 }
 
 export interface IOutputState {
-  ports: IPort[];
+  ports: IOutputPort[];
 }
 
 const initialState: IOutputState = {
@@ -26,7 +26,7 @@ const initialState: IOutputState = {
   })),
 };
 
-function calculateState(port: IPort, index: number) {
+function calculateState(port: IOutputPort, index: number) {
   if (port.isForced) return port.forcedState;
 
   if (output.ports[index].execute) return port.executing;

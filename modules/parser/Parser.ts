@@ -233,13 +233,13 @@ export default function Parser(store: IStore) {
       ).length,
     SIT: (index, state) =>
       Object.values(state.individual.individualEntries).reduce(
-        (acc, cur) => acc + cur.extra[index - 3],
+        (acc, cur) => acc + Number(cur.extra[index - 3]),
         0
       ),
     SIA: (index, state) =>
       average(
-        Object.values(state.individual.individualEntries).map(
-          (entry) => entry.extra[index - 3]
+        Object.values(state.individual.individualEntries).map((entry) =>
+          Number(entry.extra[index - 3])
         )
       ),
   };

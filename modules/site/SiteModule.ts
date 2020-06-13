@@ -226,15 +226,23 @@ function SiteModule(config, store: IStore) {
         titleString +
           '<meta http-equiv="refresh" content="5; url=/" />Restarting now.'
       );
-      if (constants.manualResetHard) {
-        store.dispatch({
-          type: "HARD_REBOOT",
-        });
-      } else {
-        store.dispatch({
-          type: "RESTART",
-        });
-      }
+      store.dispatch({
+        type: "RESTART",
+      });
+    },
+    "/hard_reboot": (req, res) => {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header(
+        "Access-Control-Allow-Headers",
+        "Origin, X-Requested-With, Content-Type, Accept"
+      );
+      res.send(
+        titleString +
+          '<meta http-equiv="refresh" content="5; url=/" />Hard rebooting now.'
+      );
+      store.dispatch({
+        type: "HARD_REBOOT",
+      });
     },
     "/logo": (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
