@@ -15,13 +15,13 @@ export default function Cell(index: number, config: any, store: IStore) {
     colorConditions,
     readerPort,
   } = config;
-  const manual = type === "manual" || type === "menu" || readerPort;
+  const manual = type === "manual" || type === "menu" || type === "reader";
   const myParser = Parser(store);
 
   let content: string | number = "";
   let color: string = "";
 
-  if (readerPort) {
+  if (type === "reader" && readerPort) {
     const server = http.createServer((req, res) => {
       if (req.url === "/favicon.ico") {
         res.end();

@@ -27,6 +27,4 @@ store.subscribe(() => {
   });
 });
 
-type bla = typeof store;
-
 export default store;
