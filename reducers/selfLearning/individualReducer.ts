@@ -4,6 +4,7 @@ const { selfLearning } = config;
 
 export type GeneralEntry = {
   entries: number[];
+  extra: (number | string)[];
   activity: number;
   activityHistory: number[];
 };
@@ -101,6 +102,7 @@ export default function individualReducer(
       } else {
         newGeneralEntries[key] = {
           entries: [entry],
+          extra: [],
           activity: 1,
           activityHistory: [],
         };
@@ -118,6 +120,12 @@ export default function individualReducer(
       const newGeneralEntries = Object.assign({}, state.generalEntries);
       const newIndividualEntries = Object.assign({}, state.individualEntries);
 
+      let extra = [];
+      if (key in state.generalEntries) {
+        extra = state.generalEntries[key].extra;
+        delete newGeneralEntries[key];
+      }
+
       const newMeasurement = {
         value: calibration,
         age: 0,
@@ -130,7 +138,7 @@ export default function individualReducer(
       newIndividualEntries[key] = {
         ...calculateEntry(measurements),
         measurements,
-        extra: [],
+        extra,
         numUpdates: 1,
         numUpdatesHistory: [],
         activity: 1,
@@ -258,6 +266,7 @@ export default function individualReducer(
       } else {
         newGeneralEntries[key] = {
           entries: [],
+          extra: [],
           activity: 1,
           activityHistory: [],
         };
@@ -278,14 +287,19 @@ export default function individualReducer(
     case "SL_INDIVIDUAL_EXTRA": {
       const { key, extra } = action.payload;
       const newIndividualEntries = Object.assign({}, state.individualEntries);
+      const newGeneralEntries = Object.assign({}, state.generalEntries);
 
       if (key in newIndividualEntries) {
         newIndividualEntries[key].extra = extra;
+      }
+      else if (key in newGeneralEntries) {
+        newGeneralEntries[key].extra = extra;
       }
 
       return {
         ...state,
         individualEntries: newIndividualEntries,
+        generalEntries: newGeneralEntries
       };
     }
     default:
