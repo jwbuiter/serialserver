@@ -151,7 +151,7 @@ function FTPModule(config: IFTPConfig, store: IStore) {
   }
 
   setInterval(tryBacklog, 3600000);
-  tryBacklog();
+  setTimeout(tryBacklog, 60000);
 
   return {};
 }

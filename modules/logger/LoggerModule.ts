@@ -223,6 +223,7 @@ function LoggerModule(config: ILoggerConfig, store: IStore) {
         });
         break;
       }
+      case "LOG_LIST_OVERWRITE":
       case "LOG_SAVE": {
         if (!writeToFile) break;
         const state = store.getState();
