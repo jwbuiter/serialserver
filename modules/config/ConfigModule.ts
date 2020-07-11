@@ -9,8 +9,10 @@ import { Action } from "../../actions/types";
 const configPath = path.join(__dirname, "../../..", "configs");
 
 function ConfigModule(store: IStore) {
-  if (fullConfig.version != constants.version)
-    store.dispatch({ type: "ERROR_OCCURRED", payload: Error("Config has wrong version") });
+  const mayorVersion = constants.version.split(".")[0];
+  const configMayorVersion = fullConfig.version.split(".")[0];
+  if (mayorVersion != configMayorVersion)
+    store.dispatch({ type: "ERROR_OCCURRED", payload: Error("Config has wrong mayor version") });
 
   let config = fullConfig;
 
