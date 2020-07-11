@@ -166,9 +166,17 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
         let calibration;
         if (key in updatedSelfLearning.individualEntries) {
           calibration = updatedSelfLearning.individualEntries[key].calibration;
+          store.dispatch({
+            type: "LOG_LIST_OVERWRITE",
+            payload: "UN"
+          });
         }
         else if (key in updatedSelfLearning.generalEntries) {
           calibration = updatedSelfLearning.generalEntries[key].entries[0];
+          store.dispatch({
+            type: "LOG_LIST_OVERWRITE",
+            payload: "SL"
+          });
         }
 
         const columns = [calibration, key];

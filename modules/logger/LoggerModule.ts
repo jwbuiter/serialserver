@@ -136,6 +136,7 @@ function LoggerModule(config: ILoggerConfig, store: IStore) {
           ),
           TU: "",
           TA: "",
+          list: "",
           full: true,
         };
 
@@ -201,6 +202,7 @@ function LoggerModule(config: ILoggerConfig, store: IStore) {
           cells: state.table.cells.map((cell) => ""),
           TU: "",
           TA: "",
+          list: "",
           full: false,
         };
 
@@ -233,6 +235,7 @@ function LoggerModule(config: ILoggerConfig, store: IStore) {
             ...entry.cells.map((val) => String(val)),
             String(entry.TU),
             String(entry.TA),
+            String(entry.list)
           ])
         );
 

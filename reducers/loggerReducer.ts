@@ -1,6 +1,6 @@
 import { Action } from "../actions/types";
 import config from "../config";
-const { table, serial, logger } = config;
+const { table, serial, logger, selfLearning } = config;
 
 export interface IEntry {
   name: string;
@@ -10,6 +10,7 @@ export interface IEntry {
   cells: (string | number)[];
   TU: number | "";
   TA: number | "";
+  list: "UN" | "SL" | "";
   full: boolean;
 }
 
@@ -41,6 +42,7 @@ const initialState = {
     ...table.cells.map((element: CellConfig) => element.name),
     "TU",
     "TA",
+    "List"
   ],
   accessors: [
     "name",
@@ -50,6 +52,7 @@ const initialState = {
     ...table.cells.map((_: CellConfig, i: number) => `cells[${i}]`),
     "TU",
     "TA",
+    "list"
   ],
   digits: [
     -1,
@@ -57,6 +60,7 @@ const initialState = {
     -1,
     ...serial.coms.map((element: ComConfig) => element.digits),
     ...table.cells.map((element: CellConfig) => element.digits),
+    0,
     0,
     0,
   ],
@@ -68,6 +72,7 @@ const initialState = {
     ...table.cells.map((element: CellConfig) => element.showInLog),
     true,
     true,
+    selfLearning.enabled.endsWith("ind"),
   ],
   entries: [],
 };
@@ -105,13 +110,25 @@ export default function (
     case "LOG_UNIQUE_OVERWRITE": {
       const index = action.payload;
 
-      const newEntries: IEntry[] = Array.from(state.entries);
+      const newEntries = Array.from(state.entries);
       newEntries[index].TU = "";
 
       return {
         ...state,
         entries: newEntries,
       };
+    }
+    case "LOG_LIST_OVERWRITE": {
+      const list = action.payload;
+
+      const newEntries = Array.from(state.entries);
+      if (newEntries.length) newEntries[newEntries.length - 1].list = list;
+
+      return {
+        ...state,
+        entries: newEntries
+      }
+
     }
     case "LOG_ACTIVITY_OVERWRITE": {
       const { index, newValue } = action.payload;

@@ -32,6 +32,7 @@ type ActionType =
   | "LOG_RESET"
   | "LOG_SAVE"
   | "LOG_UNIQUE_OVERWRITE"
+  | "LOG_LIST_OVERWRITE"
   | "LOG_UPLOAD"
   | "OUTPUT_EMIT"
   | "OUTPUT_EXECUTING_CHANGED"
@@ -222,6 +223,11 @@ export interface LogSaveAction extends IAction {
 export interface LogUniqueOverwriteAction extends IAction {
   type: "LOG_UNIQUE_OVERWRITE";
   payload: number;
+}
+
+export interface LogListOverwriteAction extends IAction {
+  type: "LOG_LIST_OVERWRITE";
+  payload: "UN" | "SL";
 }
 
 export interface LogUploadAction extends IAction {
@@ -472,6 +478,7 @@ export type Action =
   | LogResetAction
   | LogSaveAction
   | LogUniqueOverwriteAction
+  | LogListOverwriteAction
   | LogUploadAction
   | OutputEmitAction
   | OutputExecutingChangedAction
