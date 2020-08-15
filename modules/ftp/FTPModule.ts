@@ -93,11 +93,10 @@ function FTPModule(config: IFTPConfig, store: IStore) {
     if (address.endsWith(":22"))
       uploadSftp(address.slice(0, -3), folder, username, password, sourceFile, fileName, callback);
     else
-      uploadFtp(address, folder, username, password, xlsxDir, sourceFile, callback);
+      uploadFtp(address, folder, username, password, sourceFile, fileName, callback);
   }
 
   function uploadFtp(address, folder, username, password, sourceFile, fileName, callback) {
-    console.log("ftp", { sourceFile, fileName })
     const c = new Client();
     c.on("ready", () => {
       c.mkdir(folder, true, () => {
@@ -120,7 +119,6 @@ function FTPModule(config: IFTPConfig, store: IStore) {
   }
 
   function uploadSftp(address, folder, username, password, sourceFile, fileName, callback) {
-    console.log("sftp", { sourceFile, fileName })
     const c = new ssh2.Client();
     c.on('ready', function () {
       c.sftp(function (err, sftp) {
