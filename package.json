@@ -21,6 +21,7 @@
   "homepage": "https://github.com/jwbuiter/serialserver#readme",
   "dependencies": {
     "@types/node": "^13.1.8",
+    "@types/ssh2": "^0.5.44",
     "@types/xlsx": "0.0.36",
     "dateformat": "^3.0.3",
     "express": "^4.16.2",
@@ -33,6 +34,7 @@
     "redux": "^4.0.0",
     "serialport": "^6.0.5",
     "socket.io": "^2.0.4",
+    "ssh2": "^0.8.9",
     "ts-node-dev": "^1.0.0-pre.44",
     "typescript": "^3.7.3",
     "xlsx": "^0.12.10"

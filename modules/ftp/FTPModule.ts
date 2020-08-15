@@ -2,6 +2,7 @@ import Client from "ftp";
 import path from "path";
 import fs from "fs";
 import dateFormat from "dateformat";
+import ssh2 from "ssh2";
 
 import constants from "../../constants";
 import { IFTPConfig } from "../../config";
@@ -37,7 +38,7 @@ function FTPModule(config: IFTPConfig, store: IStore) {
 
       for (let i = 0; i < targets.length; i++) {
         if (fileName == "excel") uploadDataFile(i, callback);
-        else upload(i, fileName, callback);
+        else uploadFile(i, fileName, callback);
       }
     }
     saveFtpBacklog();
@@ -51,7 +52,7 @@ function FTPModule(config: IFTPConfig, store: IStore) {
     });
   }
 
-  function upload(index, fileName, callback) {
+  function uploadFile(index, fileName, callback) {
     const { address, folder, username, password } = targets[index];
 
     if (!address) {
@@ -61,32 +62,12 @@ function FTPModule(config: IFTPConfig, store: IStore) {
 
     const localPath = constants.saveLogLocation;
 
-    let c = new Client();
-    c.on("ready", () => {
-      c.mkdir(folder, true, () => {
-        c.put(
-          path.join(localPath, fileName),
-          path.join(folder, fileName),
-          (err) => {
-            c.end();
-            callback("Successfully uploaded " + fileName);
-          }
-        );
-      });
-    });
-    c.on("error", (err) => {
-      callback(err.message);
-    });
-
     if (!(username && password)) {
       callback("No username and password set");
       return;
     }
-    c.connect({
-      host: address,
-      user: username,
-      password,
-    });
+
+    upload(address, folder, username, password, path.join(localPath, fileName), fileName, callback);
   }
 
   function uploadDataFile(index, callback) {
@@ -104,10 +85,23 @@ function FTPModule(config: IFTPConfig, store: IStore) {
       "yyyy-mm-dd_HH-MM-ss"
     )}.xls`;
 
+
+    upload(address, folder, username, password, xlsxDir, fileName, callback);
+  }
+
+  function upload(address, folder, username, password, sourceFile, fileName, callback) {
+    if (address.endsWith(":22"))
+      uploadSftp(address.slice(0, -3), folder, username, password, sourceFile, fileName, callback);
+    else
+      uploadFtp(address, folder, username, password, xlsxDir, sourceFile, callback);
+  }
+
+  function uploadFtp(address, folder, username, password, sourceFile, fileName, callback) {
+    console.log("ftp", { sourceFile, fileName })
     const c = new Client();
     c.on("ready", () => {
       c.mkdir(folder, true, () => {
-        c.put(xlsxDir, path.join(folder, fileName), (err) => {
+        c.put(sourceFile, path.join(folder, fileName), (err) => {
           c.end();
           callback("Successfully uploaded " + fileName);
         });
@@ -125,11 +119,35 @@ function FTPModule(config: IFTPConfig, store: IStore) {
     });
   }
 
+  function uploadSftp(address, folder, username, password, sourceFile, fileName, callback) {
+    console.log("sftp", { sourceFile, fileName })
+    const c = new ssh2.Client();
+    c.on('ready', function () {
+      c.sftp(function (err, sftp) {
+        sftp.fastPut(sourceFile, path.join(folder, fileName), () => {
+          callback("Successfully uploaded " + fileName);
+        });
+      });
+    })
+
+    c.on("error", (err) => {
+      callback(err.message);
+    });
+
+    c.connect({
+      host: address,
+      port: 22,
+      username,
+      password,
+    });
+
+  }
+
   store.listen((lastAction) => {
     switch (lastAction.type) {
       case "LOG_UPLOAD": {
         const { fileName, ftpIndex, callback } = lastAction.payload;
-        upload(ftpIndex, fileName, callback);
+        uploadFile(ftpIndex, fileName, callback);
         if (uploadExcel) uploadDataFile(ftpIndex, callback);
         break;
       }
