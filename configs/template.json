@@ -394,7 +394,8 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": -1
+        "hardwareInput": -1,
+        "normalState": "open"
       },
       {
         "name": "",
@@ -407,7 +408,8 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": -1
+        "hardwareInput": -1,
+        "normalState": "open"
       },
       {
         "name": "",
@@ -420,7 +422,8 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": -1
+        "hardwareInput": -1,
+        "normalState": "open"
       },
       {
         "name": "",
@@ -433,7 +436,8 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": -1
+        "hardwareInput": -1,
+        "normalState": "open"
       },
       {
         "name": "",
@@ -446,7 +450,8 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": -1
+        "hardwareInput": -1,
+        "normalState": "open"
       },
       {
         "name": "",
@@ -459,7 +464,8 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": -1
+        "hardwareInput": -1,
+        "normalState": "open"
       },
       {
         "name": "",
@@ -472,7 +478,8 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": -1
+        "hardwareInput": -1,
+        "normalState": "open"
       },
       {
         "name": "",
@@ -485,7 +492,8 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": -1
+        "hardwareInput": -1,
+        "normalState": "open"
       },
       {
         "name": "",
@@ -498,7 +506,8 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": -1
+        "hardwareInput": -1,
+        "normalState": "open"
       },
       {
         "name": "",
@@ -511,7 +520,8 @@
         "commandCom": "",
         "commandValue": "",
         "visible": false,
-        "hardwareInput": -1
+        "hardwareInput": -1,
+        "normalState": "open"
       }
     ]
   },
@@ -564,5 +574,5 @@
     "extraColumns": [],
     "success": 0
   },
-  "version": "4.3"
+  "version": "4.4"
 }

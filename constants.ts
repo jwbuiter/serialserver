@@ -36,6 +36,6 @@ let constants: IConstants = require("../config.static.template");
 
 try {
   constants = require("../config.static");
-} catch {}
+} catch { }
 
 export default constants;

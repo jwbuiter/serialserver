@@ -86,6 +86,7 @@ export interface IInputConfig {
   commandValue: string;
   visible: boolean;
   hardwareInput: number;
+  normalState: "open" | "closed";
 }
 
 export interface IInputsConfig {

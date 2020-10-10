@@ -15,6 +15,7 @@ function Input(index: number, config: IInputConfig, store: IStore) {
     commandCom,
     commandValue,
     hardwareInput,
+    normalState
   } = config;
 
   const myGPIO = ~hardwareInput
@@ -151,6 +152,8 @@ function Input(index: number, config: IInputConfig, store: IStore) {
   }
 
   function dispatchPhysical(state) {
+    if (normalState == "closed") state = !state;
+
     store.dispatch({
       type: "INPUT_PHYSICAL_CHANGED",
       payload: {
