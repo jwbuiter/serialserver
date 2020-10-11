@@ -22,7 +22,7 @@ export default function Parser(store: IStore) {
     const column = parseInt(x[2]);
     assert(
       row * tableColumns + column - 1 >= 0 &&
-        row * tableColumns + column - 1 < store.getState().table.cells.length,
+      row * tableColumns + column - 1 < store.getState().table.cells.length,
       "Out of bounds of table contents"
     );
 
@@ -166,7 +166,7 @@ export default function Parser(store: IStore) {
       Math.round(
         (config.selfLearning.totalNumber *
           config.selfLearning.numberPercentage) /
-          100
+        100
       ),
     SC: (state, tolerance, calibration) => calibration,
     SCMIN: (state, tolerance, calibration) => calibration * (1 - tolerance),
@@ -318,8 +318,8 @@ export default function Parser(store: IStore) {
       try {
         formula = formula
           .toUpperCase()
-          .replace(" AND ", " && ")
-          .replace(" OR ", " || ")
+          .replace(/ AND /g, " && ")
+          .replace(/ OR /g, " || ")
           .replace(/#[A-G][0-9]/g, parseTable)
           .replace(/#I[0-9]+/g, parseInput)
           .replace(/#O[0-9]+/g, parseOutput)
