@@ -1,3 +1,5 @@
+import { mergeConfig } from "./utils/objectUtils";
+
 interface IConstants {
   name: string;
   QS: string;
@@ -35,7 +37,7 @@ interface IConstants {
 let constants: IConstants = require("../config.static.template");
 
 try {
-  constants = require("../config.static");
+  constants = mergeConfig(constants, require("../config.static"));
 } catch { }
 
 export default constants;

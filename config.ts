@@ -1,3 +1,5 @@
+import { mergeConfig } from "./utils/objectUtils";
+
 type ComConfig = {
   mode: "serial" | "reader" | "test";
   port: string;
@@ -151,12 +153,12 @@ export interface IConfig {
 }
 
 export let template: IConfig = require("../configs/template");
-let config: IConfig;
+let config = template;
 
 try {
-  config = require("../configs/current");
-} catch {
-  config = template;
-}
+  config = mergeConfig(config, require("../configs/current"));
+  console.log(config)
+} catch { }
+
 
 export default config;
