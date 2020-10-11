@@ -64,6 +64,7 @@ export interface IOutputConfig {
   name: string;
   formula: string;
   execute: boolean;
+  holdOnExecute: boolean;
   seconds: number;
   manualConfirmation: boolean;
   visible: boolean;

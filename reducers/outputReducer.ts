@@ -29,7 +29,13 @@ const initialState: IOutputState = {
 function calculateState(port: IOutputPort, index: number) {
   if (port.isForced) return port.forcedState;
 
-  if (output.ports[index].execute) return port.executing;
+  if (output.ports[index].execute) {
+    if (output.ports[index].holdOnExecute)
+      return port.executing;
+    else
+      return port.executing && port.result;
+
+  }
 
   return port.result;
 }
