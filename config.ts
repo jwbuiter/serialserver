@@ -158,7 +158,6 @@ let config = template;
 
 try {
   config = mergeConfig(config, require("../configs/current"));
-  console.log(config)
 } catch { }
 
 
