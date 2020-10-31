@@ -75,18 +75,29 @@ export default function Parser(store: IStore) {
   function parseStatistic(x: string) {
     const state = store.getState();
 
-    if (x === "&TAT") {
-      return String(
-        state.logger.entries
-          .map((entry) => Number(entry.TA))
-          .reduce((acc, cur) => acc + cur)
-      );
+    switch (x) {
+      case "&TAT":
+        return String(
+          state.logger.entries
+            .map((entry) => Number(entry.TA))
+            .reduce((acc, cur) => acc + cur)
+        );
+      case "&TU": {
+        if (state.logger.entries.length === 0) return "0";
+
+        return Number(state.logger.entries[state.logger.entries.length - 1].TU).toString();
+      }
+      case "&TA": {
+        if (state.logger.entries.length === 0) return "0";
+
+        return Number(state.logger.entries[state.logger.entries.length - 1].TA).toString();
+      }
     }
 
-    const unique = x.includes("U");
+    const unique = x[3] === "U";
     const operator = x.slice(1, 3);
 
-    x = x.slice(-2);
+    x = x.slice(3 + Number(unique));
 
     let i: number;
 
@@ -128,16 +139,6 @@ export default function Parser(store: IStore) {
             return acc;
           }
         }, []).length,
-      TU: () => {
-        if (data.length === 0) return 0;
-
-        return Number(state.logger.entries[state.logger.entries.length - 1].TU);
-      },
-      TA: () => {
-        if (data.length === 0) return 0;
-
-        return Number(state.logger.entries[state.logger.entries.length - 1].TA);
-      },
     };
 
     return statisticFunctions[operator]().toString();
