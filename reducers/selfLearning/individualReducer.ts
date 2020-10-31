@@ -1,5 +1,6 @@
 import { Action } from "../../actions/types";
 import config from "../../config";
+import constants from "../../constants";
 const { selfLearning } = config;
 
 export type GeneralEntry = {
@@ -97,7 +98,7 @@ export default function individualReducer(
           ...newGeneralEntries[key],
           entries: [entry]
             .concat(Array.from(newGeneralEntries[key].entries))
-            .slice(0, 5),
+            .slice(0, constants.individualSLMaxEntries),
         };
       } else {
         newGeneralEntries[key] = {

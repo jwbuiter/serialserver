@@ -49,5 +49,7 @@
   "manualResetHard": false,
   "inputResetHard": false,
   "newCycleResetHard": false,
-  "version": "4.4"
+  "individualSLMaxEntries": 5,
+  "individualSLMatchEntries": 3,
+  "version": "4.5"
 }

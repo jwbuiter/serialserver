@@ -4,6 +4,7 @@ import Parser from "../parser/Parser";
 import { IStore } from "../../store";
 import { ISelfLearningConfig } from "../../config";
 import { getExcelDate, getExcelDateTime } from "../../utils/dateUtils";
+import constants from "../../constants";
 
 function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
   const {
@@ -115,7 +116,7 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
         } else if (key in individualSL.generalEntries) {
           const { entries } = individualSL.generalEntries[key];
 
-          if (entries.length >= 3) {
+          if (entries.length >= constants.individualSLMatchEntries) {
             const matches = entries.map((entry) => ({
               value: entry,
               matches: entries.reduce((total, compEntry) => {
@@ -132,7 +133,7 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
             }));
 
             const successfullMatches = matches.filter(
-              (elem) => elem.matches >= 3
+              (elem) => elem.matches >= constants.individualSLMatchEntries
             );
             if (successfullMatches.length) {
               const matchedEntries = entries.filter((entry) =>

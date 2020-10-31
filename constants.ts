@@ -31,6 +31,8 @@ interface IConstants {
   manualResetHard: boolean;
   inputResetHard: boolean;
   newCycleResetHard: boolean;
+  individualSLMaxEntries: number;
+  individualSLMatchEntries: number;
   version: string;
 }
 
