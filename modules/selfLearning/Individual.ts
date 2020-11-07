@@ -261,8 +261,23 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
         });
         break;
       }
+      case "SL_INDIVIDUAL_INCREMENT": {
+        for (const key in individualSL.individualEntries) {
+          let entry = individualSL.individualEntries[key];
+
+          if (entry.measurements.length == 0) {
+            store.dispatch({
+              type: "SL_INDIVIDUAL_DOWNGRADE",
+              payload: {
+                key
+              },
+            });
+          }
+        }
+        saveIndividualSelfLearning();
+        break;
+      }
       case "SL_INDIVIDUAL_DELETE_GENERAL":
-      case "SL_INDIVIDUAL_INCREMENT":
       case "SL_RESET_INDIVIDUAL": {
         saveIndividualSelfLearning();
         break;

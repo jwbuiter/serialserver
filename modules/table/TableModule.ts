@@ -5,6 +5,8 @@ import XLSX from "xlsx";
 import { getExcelDate } from "../../utils/dateUtils";
 import Cell from "./Cell";
 import { IStore } from "../../store";
+import constants from "../../constants";
+import config from "../../config";
 
 const excelPath = path.join(__dirname, "../../..", "data", "data.xls");
 
@@ -16,10 +18,10 @@ function sheetToArray(sheet: XLSX.WorkSheet) {
     for (let colNum = range.s.c; colNum <= range.e.c; colNum++) {
       var nextCell =
         sheet[
-          XLSX.utils.encode_cell({
-            r: rowNum,
-            c: colNum,
-          })
+        XLSX.utils.encode_cell({
+          r: rowNum,
+          c: colNum,
+        })
         ];
       if (typeof nextCell === "undefined") {
         row.push(void 0);
@@ -35,6 +37,9 @@ function saveExcel(array: any[][]) {
   const ws = XLSX.utils.aoa_to_sheet(array);
   XLSX.utils.book_append_sheet(wb, ws, "data");
   XLSX.writeFile(wb, excelPath);
+
+  const fileName = `${constants.name}_${config.logger.logID}.xls`;
+  XLSX.writeFile(wb, path.join(constants.saveLogLocation, fileName));
 }
 
 function TableModule(config, store: IStore) {
@@ -135,13 +140,63 @@ function TableModule(config, store: IStore) {
             return row[searchColumn] === key;
           });
 
-          if (!foundRow) return;
+          if (!foundRow) break;
 
           const foundIndex = excelSheet.findIndex((row) => {
             return row[searchColumn] === key;
           });
 
-          excelSheet[foundIndex][exitColumn] = exitCode;
+          if (constants.individualSLRemoveExcel && exitCode)
+            excelSheet = excelSheet.filter((_, index) => index != foundIndex);
+          else
+            excelSheet[foundIndex][exitColumn] = exitCode;
+
+          saveExcel(excelSheet);
+        }
+        break;
+      }
+      case "SL_ENTRY": {
+        if (useFile && excelSheet && constants.individualSLOverwriteExcel) {
+          const { key } = lastAction.payload;
+          const entries = store.getState().selfLearning.individual.individualEntries;
+
+          if (!key || !(key in entries)) break;
+
+          const foundRow = excelSheet.find((row) => {
+            return row[searchColumn] === key;
+          });
+
+          if (!foundRow) break;
+
+          const foundIndex = excelSheet.findIndex((row) => {
+            return row[searchColumn] === key;
+          });
+
+          const currentDate = getExcelDate();
+          if (excelSheet[foundIndex][dateColumn] == currentDate) break;
+
+          excelSheet[foundIndex][individualColumn] = entries[key].calibration;
+          excelSheet[foundIndex][dateColumn] = currentDate;
+
+          saveExcel(excelSheet);
+        }
+        break;
+      }
+      case "SL_INDIVIDUAL_DOWNGRADE": {
+        if (useFile && excelSheet && constants.individualSLRemoveExcel) {
+          const { key } = lastAction.payload;
+
+          const foundRow = excelSheet.find((row) => {
+            return row[searchColumn] === key;
+          });
+
+          if (!foundRow) break;
+
+          const foundIndex = excelSheet.findIndex((row) => {
+            return row[searchColumn] === key;
+          });
+
+          excelSheet = excelSheet.filter((_, index) => index != foundIndex);
 
           saveExcel(excelSheet);
         }

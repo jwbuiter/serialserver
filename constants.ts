@@ -33,6 +33,8 @@ interface IConstants {
   newCycleResetHard: boolean;
   individualSLMaxEntries: number;
   individualSLMatchEntries: number;
+  individualSLOverwriteExcel: boolean;
+  individualSLRemoveExcel: boolean;
   version: string;
 }
 

@@ -97,11 +97,7 @@ export default function Parser(store: IStore) {
     const unique = x[3] === "U";
     const operator = x.slice(1, 3);
 
-    console.log({ x, unique, operator })
-
     x = x.slice(3 + Number(unique));
-
-    console.log({ newx: x });
 
     let i: number;
 

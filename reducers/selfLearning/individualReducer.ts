@@ -19,6 +19,7 @@ export type IndividualEntry = {
   tolerance: number;
   increments: number;
   calibration: number;
+  oldCalibration: number;
   measurements: Measurement[];
   extra: (number | string)[];
   numUpdates: number;
@@ -40,7 +41,7 @@ export const initialStateIndividual: IIndividualSelfLearningState = {
 };
 
 function average(arr: number[]) {
-  return arr.reduce((acc, cur) => acc + cur) / arr.length;
+  return arr.reduce((acc, cur) => acc + cur) / (arr.length || 1);
 }
 
 function calculateEntry(measurements: Measurement[]) {
@@ -89,6 +90,7 @@ export default function individualReducer(
 
         newIndividualEntries[key] = {
           ...newIndividualEntries[key],
+          oldCalibration: newIndividualEntries[key].calibration,
           measurements,
           numUpdates: newIndividualEntries[key].numUpdates + 1,
           ...calculateEntry(measurements),
@@ -136,8 +138,13 @@ export default function individualReducer(
         newMeasurement
       );
 
+      let { tolerance, increments } = calculateEntry(measurements);
+
       newIndividualEntries[key] = {
-        ...calculateEntry(measurements),
+        tolerance,
+        increments,
+        calibration,
+        oldCalibration: calibration,
         measurements,
         extra,
         numUpdates: 1,
@@ -182,10 +189,9 @@ export default function individualReducer(
           .map((elem) => ({ ...elem, age: elem.age + 1 }))
           .filter((elem) => elem.age <= individualCorrectionLimit + 1);
 
-        if (measurements.length == 0) continue;
-
         newIndividualEntries[key] = {
           ...oldEntry,
+          oldCalibration: oldEntry.calibration,
           measurements,
           ...calculateEntry(measurements),
           numUpdatesHistory: [

@@ -51,5 +51,7 @@
   "newCycleResetHard": false,
   "individualSLMaxEntries": 5,
   "individualSLMatchEntries": 3,
-  "version": "4.5"
+  "individualSLOverwriteExcel": false,
+  "individualSLRemoveExcel": false,
+  "version": "4.6"
 }
