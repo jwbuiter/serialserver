@@ -97,7 +97,11 @@ export default function Parser(store: IStore) {
     const unique = x[3] === "U";
     const operator = x.slice(1, 3);
 
+    console.log({ x, unique, operator })
+
     x = x.slice(3 + Number(unique));
+
+    console.log({ newx: x });
 
     let i: number;
 
@@ -107,7 +111,7 @@ export default function Parser(store: IStore) {
       i = (x.charCodeAt(0) - 65) * tableColumns + Number(x[1]) - 1;
     } else {
       table = false;
-      i = Number(x[1]);
+      i = Number(x);
     }
 
     const data = state.logger.entries
