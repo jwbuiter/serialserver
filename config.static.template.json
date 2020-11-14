@@ -54,6 +54,6 @@
   "individualSLOverwriteExcel": false,
   "individualSLRemoveExcel": false,
   "individualSLDecrementTotal": true,
-  "saveExcelTimeStamp": true,
+  "saveExcelDateStamp": true,
   "version": "4.7"
 }

@@ -41,12 +41,12 @@ function saveExcel(array: any[][]) {
 
   let fileName;
 
-  if (constants.saveExcelTimeStamp) {
+  if (constants.saveExcelDateStamp) {
     const fileStats = fs.statSync(excelPath);
     const modifyDate = new Date(fileStats.mtimeMs);
     fileName = `${constants.name}_${config.logger.logID}_${dateFormat(
       modifyDate,
-      "yyyy-mm-dd_HH-MM-ss"
+      "yyyy-mm-dd"
     )}.xls`;
   }
   else {
