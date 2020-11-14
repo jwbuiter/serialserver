@@ -53,5 +53,7 @@
   "individualSLMatchEntries": 3,
   "individualSLOverwriteExcel": false,
   "individualSLRemoveExcel": false,
-  "version": "4.6"
+  "individualSLDecrementTotal": true,
+  "saveExcelTimeStamp": true,
+  "version": "4.7"
 }

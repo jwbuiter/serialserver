@@ -131,6 +131,7 @@ export interface ISelfLearningConfig {
   individualToleranceShift: number;
   individualCorrectionIncrement: number;
   individualCorrectionLimit: number;
+  individualCycleLimit: number;
   individualAverageNumber: number;
   activityCounter: boolean;
   firstTopFormula: string;

@@ -12,7 +12,6 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
     numberPercentage,
     startCalibration,
     individualToleranceAbs,
-    individualCorrectionLimit,
     activityCounter,
     firstTopFormula,
     secondTopFormula,
@@ -217,7 +216,6 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
             extra: columns.slice(2),
           },
         });
-
 
         checkSuccess();
         saveIndividualSelfLearning();

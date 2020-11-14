@@ -574,6 +574,7 @@
     "individualToleranceShift": 0,
     "individualCorrectionIncrement": 50,
     "individualCorrectionLimit": 2,
+    "individualCycleLimit": 0,
     "individualAverageNumber": 3,
     "activityCounter": false,
     "firstTopFormula": "",
@@ -584,5 +585,5 @@
     "extraColumns": [],
     "success": 0
   },
-  "version": "4.6"
+  "version": "4.7"
 }

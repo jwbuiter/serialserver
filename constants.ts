@@ -35,6 +35,8 @@ interface IConstants {
   individualSLMatchEntries: number;
   individualSLOverwriteExcel: boolean;
   individualSLRemoveExcel: boolean;
+  individualSLDecrementTotal: boolean;
+  saveExcelTimeStamp: boolean;
   version: string;
 }
 

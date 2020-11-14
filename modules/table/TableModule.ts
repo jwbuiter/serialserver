@@ -1,12 +1,13 @@
 import fs from "fs";
 import path from "path";
 import XLSX from "xlsx";
+import dateFormat from "dateformat";
 
 import { getExcelDate } from "../../utils/dateUtils";
 import Cell from "./Cell";
 import { IStore } from "../../store";
 import constants from "../../constants";
-import config from "../../config";
+import config, { ITableConfig } from "../../config";
 
 const excelPath = path.join(__dirname, "../../..", "data", "data.xls");
 
@@ -38,23 +39,26 @@ function saveExcel(array: any[][]) {
   XLSX.utils.book_append_sheet(wb, ws, "data");
   XLSX.writeFile(wb, excelPath);
 
-  const fileName = `${constants.name}_${config.logger.logID}.xls`;
+  let fileName;
+
+  if (constants.saveExcelTimeStamp) {
+    const fileStats = fs.statSync(excelPath);
+    const modifyDate = new Date(fileStats.mtimeMs);
+    fileName = `${constants.name}_${config.logger.logID}_${dateFormat(
+      modifyDate,
+      "yyyy-mm-dd_HH-MM-ss"
+    )}.xls`;
+  }
+  else {
+    fileName = `${constants.name}_${config.logger.logID}.xls`;
+  }
+
   XLSX.writeFile(wb, path.join(constants.saveLogLocation, fileName));
 }
 
-function TableModule(config, store: IStore) {
-  const {
-    trigger,
-    useFile,
-    waitForOther,
-    searchColumn,
-    individualColumn,
-    dateColumn,
-    exitColumn,
-    cells,
-  } = config;
+function TableModule({ trigger, useFile, waitForOther, searchColumn, individualColumn, dateColumn, exitColumn, cells, }: ITableConfig, store: IStore) {
 
-  let excelSheet;
+  let excelSheet: any[][];
   if (fs.existsSync(excelPath)) {
     let excelFile = XLSX.readFile(excelPath);
     // @ts-ignore
@@ -129,7 +133,7 @@ function TableModule(config, store: IStore) {
 
           const exitCode = Number(message);
 
-          if (exitCode) {
+          if (exitCode && constants.individualSLDecrementTotal) {
             store.dispatch({
               type: "SL_INDIVIDUAL_DECREMENT_TOTAL",
               payload: callback,
@@ -199,6 +203,24 @@ function TableModule(config, store: IStore) {
           excelSheet = excelSheet.filter((_, index) => index != foundIndex);
 
           saveExcel(excelSheet);
+        }
+        break;
+      }
+      case "SL_INDIVIDUAL_INCREMENT": {
+        if (useFile && excelSheet && config.selfLearning.individualCycleLimit > 0) {
+          for (const row of excelSheet) {
+            let rowDate = Number(row[dateColumn]);
+            if (rowDate == 0 || Number.isNaN(rowDate))
+              continue;
+
+            if ((getExcelDate() - rowDate) > config.selfLearning.individualCycleLimit)
+              store.dispatch({
+                type: "SL_INDIVIDUAL_DOWNGRADE",
+                payload: {
+                  key: row[searchColumn]
+                },
+              });
+          }
         }
         break;
       }

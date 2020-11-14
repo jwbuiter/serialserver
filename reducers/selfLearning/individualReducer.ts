@@ -187,7 +187,7 @@ export default function individualReducer(
         const oldEntry = state.individualEntries[key];
         const measurements = oldEntry.measurements
           .map((elem) => ({ ...elem, age: elem.age + 1 }))
-          .filter((elem) => elem.age <= individualCorrectionLimit + 1);
+          .filter((elem) => individualCorrectionLimit == 0 || elem.age <= individualCorrectionLimit + 1);
 
         newIndividualEntries[key] = {
           ...oldEntry,
