@@ -190,17 +190,7 @@ function TableModule({ trigger, useFile, waitForOther, searchColumn, individualC
         if (useFile && excelSheet && constants.individualSLRemoveExcel) {
           const { key } = lastAction.payload;
 
-          const foundRow = excelSheet.find((row) => {
-            return row[searchColumn] === key;
-          });
-
-          if (!foundRow) break;
-
-          const foundIndex = excelSheet.findIndex((row) => {
-            return row[searchColumn] === key;
-          });
-
-          excelSheet = excelSheet.filter((_, index) => index != foundIndex);
+          excelSheet = excelSheet.filter(row => row[searchColumn] !== key);
 
           saveExcel(excelSheet);
         }
