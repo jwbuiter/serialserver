@@ -1,13 +1,13 @@
 #!/bin/bash
 git reset --hard
-git pull
-npm install
+git pull --depth 1
+npm install --unsafe-perm
 npm run build
 [ -e /etc/systemd/system/serialserver.service ] && rm /etc/systemd/system/serialserver.service
 cp serialserver.service /etc/systemd/system/
 systemctl daemon-reload
 rm -r client2
-git clone https://github.com/jwbuiter/serialserverclient2.git
+git clone https://github.com/jwbuiter/serialserverclient2.git --depth 1
 mv serialserverclient2 client2
 
 if [ -f "config.static.json" ]

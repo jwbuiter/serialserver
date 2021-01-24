@@ -36,7 +36,7 @@ function Com(index, config, store) {
 
   const myGPIO = new Gpio(constants.comPin[index], "out");
 
-  let remainingEntries = new Buffer("0");
+  let remainingEntries = Buffer.from("0");
   let averageList = [];
 
   let myTimeout = setTimeout(() => 0, 1);
@@ -265,7 +265,7 @@ function Com(index, config, store) {
 
           let newEntry = remainingEntries
             .slice(
-              nextEntry + new Buffer(prefix).length,
+              nextEntry + Buffer.from(prefix).length,
               nextEntryEnd === 0
                 ? remainingEntries.length
                 : nextEntryEnd + nextEntry
