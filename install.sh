@@ -3,7 +3,7 @@ git clone https://github.com/jwbuiter/serialserverclient2.git
 mv serialserverclient2 client2
 mkdir tmp
 cd tmp
-curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 apt-get install -y nodejs
 cd ..
 rm -rf tmp
