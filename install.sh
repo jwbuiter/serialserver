@@ -1,5 +1,5 @@
 #!/bin/bash
-git clone https://github.com/jwbuiter/serialserverclient2.git
+git clone https://github.com/jwbuiter/serialserverclient2.git --depth 1
 mv serialserverclient2 client2
 mkdir tmp
 cd tmp

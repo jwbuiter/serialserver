@@ -7,7 +7,7 @@ npm run build
 cp serialserver.service /etc/systemd/system/
 systemctl daemon-reload
 rm -r client2
-git clone https://github.com/jwbuiter/serialserverclient2.git
+git clone https://github.com/jwbuiter/serialserverclient2.git --depth 1
 mv serialserverclient2 client2
 
 if [ -f "config.static.json" ]
