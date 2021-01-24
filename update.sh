@@ -1,7 +1,7 @@
 #!/bin/bash
 git reset --hard
 git pull
-npm install
+npm install --unsafe-perm
 npm run build
 [ -e /etc/systemd/system/serialserver.service ] && rm /etc/systemd/system/serialserver.service
 cp serialserver.service /etc/systemd/system/

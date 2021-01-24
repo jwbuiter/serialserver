@@ -7,7 +7,7 @@ curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
 apt-get install -y nodejs
 cd ..
 rm -rf tmp
-npm install
+npm install --unsafe-perm
 npm run build
 adduser --disabled-password --gecos "" serialserver
 chown -R serialserver:serialserver /srv/serialserver
