@@ -10,6 +10,7 @@ import selfLearningReducer, {
   ISelfLearningState,
 } from "./selfLearning/selfLearningReducer";
 import configProvider from "./configProvider";
+import { IConfig } from "../config";
 
 export type ReducerState = {
   lastAction: Action | null;
@@ -19,7 +20,7 @@ export type ReducerState = {
   table: ITableState;
   logger: ILoggerState;
   selfLearning: ISelfLearningState;
-  config: any;
+  config: IConfig;
 };
 
 export default combineReducers<ReducerState, Action>({

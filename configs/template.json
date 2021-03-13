@@ -64,6 +64,7 @@
   "table": {
     "trigger": 0,
     "useFile": false,
+    "fileExtension": "xls",
     "waitForOther": false,
     "searchColumn": 0,
     "individualColumn": 1,

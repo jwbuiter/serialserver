@@ -15,6 +15,7 @@ const logPath = constants.saveLogLocation;
 const version = constants.version;
 
 function Realtime(server, config, store: IStore) {
+  const { fileExtension } = store.getState().config.table;
   const io = socketio.listen(server);
 
   function emitInput(port: IInputPort, index) {
@@ -190,14 +191,14 @@ function Realtime(server, config, store: IStore) {
     try {
       fs.accessSync(path.join(configPath, name));
       fs.unlinkSync(path.join(configPath, name));
-    } catch (err) {}
+    } catch (err) { }
   }
 
   function deleteLog(name) {
     try {
       fs.accessSync(path.join(logPath, name));
       fs.unlinkSync(path.join(logPath, name));
-    } catch (err) {}
+    } catch (err) { }
   }
 
   function uploadLog({ name, index }, callback) {
@@ -417,8 +418,8 @@ function Realtime(server, config, store: IStore) {
       },
     });
 
-    const dataFile = path.join(__dirname, "../../../data/data.xls");
-    const templateFile = path.join(__dirname, "../../../data/template.xls");
+    const dataFile = path.join(__dirname, "../../../data/data." + fileExtension);
+    const templateFile = path.join(__dirname, "../../../data/template." + fileExtension);
 
     if (fs.existsSync(dataFile)) {
       fs.unlinkSync(dataFile);

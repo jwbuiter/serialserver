@@ -148,6 +148,16 @@ function Input(index: number, config: IInputConfig, store: IStore) {
         }
         break;
       }
+      case "resetSerial": {
+        if (state) {
+          const index = Number(commandCom.slice(3));
+          store.dispatch({
+            type: "SERIAL_RESET",
+            payload: index
+          });
+        }
+        break;
+      }
     }
   }
 

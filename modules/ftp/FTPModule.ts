@@ -8,12 +8,13 @@ import constants from "../../constants";
 import { IFTPConfig } from "../../config";
 import { IStore } from "../../store";
 
-const xlsxDir = path.join(__dirname, "../../../data/data.xls");
 const ftpBacklogDir = path.join(__dirname, "../../../data/ftpBacklog.json");
 
 function FTPModule(config: IFTPConfig, store: IStore) {
   const { targets, automatic, uploadExcel } = config;
   const { logID } = store.getState().config.logger;
+  const { fileExtension } = store.getState().config.table;
+  const xlsxDir = path.join(__dirname, "../../../data/data." + fileExtension);
 
   let ftpBacklog = [];
 
@@ -83,7 +84,7 @@ function FTPModule(config: IFTPConfig, store: IStore) {
     const fileName = `${constants.name}_${logID}_${dateFormat(
       modifyDate,
       "yyyy-mm-dd_HH-MM-ss"
-    )}.xls`;
+    )}.${fileExtension}`;
 
 
     upload(address, folder, username, password, xlsxDir, fileName, callback);
