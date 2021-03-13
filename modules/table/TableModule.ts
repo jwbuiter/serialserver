@@ -9,54 +9,54 @@ import { IStore } from "../../store";
 import constants from "../../constants";
 import config, { ITableConfig } from "../../config";
 
-const excelPath = path.join(__dirname, "../../..", "data", "data.xls");
 
-function sheetToArray(sheet: XLSX.WorkSheet) {
-  const result: any[][] = [];
-  const range = XLSX.utils.decode_range(sheet["!ref"]);
-  for (let rowNum = range.s.r; rowNum <= range.e.r; rowNum++) {
-    const row = [];
-    for (let colNum = range.s.c; colNum <= range.e.c; colNum++) {
-      var nextCell =
-        sheet[
-        XLSX.utils.encode_cell({
-          r: rowNum,
-          c: colNum,
-        })
-        ];
-      if (typeof nextCell === "undefined") {
-        row.push(void 0);
-      } else row.push(nextCell.v);
+function TableModule({ trigger, useFile, fileExtension, waitForOther, searchColumn, individualColumn, dateColumn, exitColumn, cells, }: ITableConfig, store: IStore) {
+  const excelPath = path.join(__dirname, "../../..", "data", "data." + fileExtension);
+
+  function sheetToArray(sheet: XLSX.WorkSheet) {
+    const result: any[][] = [];
+    const range = XLSX.utils.decode_range(sheet["!ref"]);
+    for (let rowNum = range.s.r; rowNum <= range.e.r; rowNum++) {
+      const row = [];
+      for (let colNum = range.s.c; colNum <= range.e.c; colNum++) {
+        var nextCell =
+          sheet[
+          XLSX.utils.encode_cell({
+            r: rowNum,
+            c: colNum,
+          })
+          ];
+        if (typeof nextCell === "undefined") {
+          row.push(void 0);
+        } else row.push(nextCell.v);
+      }
+      result.push(row);
     }
-    result.push(row);
-  }
-  return result;
-}
-
-function saveExcel(array: any[][]) {
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(array);
-  XLSX.utils.book_append_sheet(wb, ws, "data");
-  XLSX.writeFile(wb, excelPath);
-
-  let fileName;
-
-  if (constants.saveExcelDateStamp) {
-    const fileStats = fs.statSync(excelPath);
-    const modifyDate = new Date(fileStats.mtimeMs);
-    fileName = `${constants.name}_${config.logger.logID}_${dateFormat(
-      modifyDate,
-      "yyyy-mm-dd"
-    )}.xls`;
-  }
-  else {
-    fileName = `${constants.name}_${config.logger.logID}.xls`;
+    return result;
   }
 
-  XLSX.writeFile(wb, path.join(constants.saveLogLocation, fileName));
-}
+  function saveExcel(array: any[][]) {
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(array);
+    XLSX.utils.book_append_sheet(wb, ws, "data");
+    XLSX.writeFile(wb, excelPath);
 
-function TableModule({ trigger, useFile, waitForOther, searchColumn, individualColumn, dateColumn, exitColumn, cells, }: ITableConfig, store: IStore) {
+    let fileName;
+
+    if (constants.saveExcelDateStamp) {
+      const fileStats = fs.statSync(excelPath);
+      const modifyDate = new Date(fileStats.mtimeMs);
+      fileName = `${constants.name}_${config.logger.logID}_${dateFormat(
+        modifyDate,
+        "yyyy-mm-dd"
+      )}.xls`;
+    }
+    else {
+      fileName = `${constants.name}_${config.logger.logID}.${fileExtension}`;
+    }
+
+    XLSX.writeFile(wb, path.join(constants.saveLogLocation, fileName));
+  }
 
   let excelSheet: any[][];
   if (fs.existsSync(excelPath)) {

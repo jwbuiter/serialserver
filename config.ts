@@ -52,6 +52,7 @@ type CellConfig = {
 export interface ITableConfig {
   trigger: number;
   useFile: boolean;
+  fileExtension: "xls" | "xlsx",
   waitForOther: boolean;
   searchColumn: number;
   individualColumn: number;
@@ -79,7 +80,7 @@ export interface IOutputsConfig {
 
 export interface IInputConfig {
   name: string;
-  formula: string;
+  formula: "exe" | "exebl" | "reset" | "teach" | "restart" | "shutdown" | "command" | "resetSerial";
   follow: number;
   timeout: number;
   invert: boolean;

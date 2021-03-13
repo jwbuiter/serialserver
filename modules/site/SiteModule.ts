@@ -19,26 +19,28 @@ const logPath = constants.saveLogLocation;
 const titleString = "<title>" + constants.name + "</title>";
 
 function SiteModule(config, store: IStore) {
+  const { fileExtension } = store.getState().config.table;
+
   function importExcel(req, res) {
     console.log(req.files);
     if (!req.files.excelFile) {
       return res.send(
         titleString +
-          '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.'
+        '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.'
       );
     }
 
     let uploadedFile = req.files.excelFile;
 
     uploadedFile.mv(
-      path.join(__dirname, "../../..", "data", "data.xls"),
+      path.join(__dirname, "../../..", "data", "data." + fileExtension),
       (err) => {
         if (err) {
           return res.status(500).send(err);
         }
         res.send(
           titleString +
-            '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.'
+          '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.'
         );
         store.dispatch({
           type: "LOG_BACKUP",
@@ -52,21 +54,21 @@ function SiteModule(config, store: IStore) {
     if (!req.files.templateFile) {
       return res.send(
         titleString +
-          '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.'
+        '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.'
       );
     }
 
     let uploadedFile = req.files.templateFile;
 
     uploadedFile.mv(
-      path.join(__dirname, "../../..", "data", "template.xls"),
+      path.join(__dirname, "../../..", "data", "template." + fileExtension),
       (err) => {
         if (err) {
           return res.status(500).send(err);
         }
         res.send(
           titleString +
-            '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.'
+          '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.'
         );
       }
     );
@@ -78,7 +80,7 @@ function SiteModule(config, store: IStore) {
     if (!req.files.configFile) {
       return res.send(
         titleString +
-          '<meta http-equiv="refresh" content="1; url=/" /> No files were uploaded.'
+        '<meta http-equiv="refresh" content="1; url=/" /> No files were uploaded.'
       );
     }
 
@@ -93,7 +95,7 @@ function SiteModule(config, store: IStore) {
 
         res.send(
           titleString +
-            '<meta http-equiv="refresh" content="1; url=/" /> Config uploaded.'
+          '<meta http-equiv="refresh" content="1; url=/" /> Config uploaded.'
         );
       }
     );
@@ -183,8 +185,8 @@ function SiteModule(config, store: IStore) {
     },
     "/downloadExcel": (req, res) => {
       const logID = store.getState().config.logger.logID;
-      const fileName = `${constants.name}_${logID}.xls`;
-      res.download(path.join(__dirname, "../../../data/data.xls"), fileName);
+      const fileName = `${constants.name}_${logID}.${fileExtension}`;
+      res.download(path.join(__dirname, "../../../data/data." + fileExtension), fileName);
     },
     "/downloadConfig": (req, res) =>
       res.download(path.join(__dirname, "../../..", "configs", req.query.file)),
@@ -224,7 +226,7 @@ function SiteModule(config, store: IStore) {
       );
       res.send(
         titleString +
-          '<meta http-equiv="refresh" content="5; url=/" />Restarting now.'
+        '<meta http-equiv="refresh" content="5; url=/" />Restarting now.'
       );
       store.dispatch({
         type: "RESTART",
@@ -238,7 +240,7 @@ function SiteModule(config, store: IStore) {
       );
       res.send(
         titleString +
-          '<meta http-equiv="refresh" content="5; url=/" />Hard rebooting now.'
+        '<meta http-equiv="refresh" content="5; url=/" />Hard rebooting now.'
       );
       store.dispatch({
         type: "HARD_REBOOT",
