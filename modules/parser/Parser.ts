@@ -80,7 +80,7 @@ export default function Parser(store: IStore) {
         return String(
           state.logger.entries
             .map((entry) => Number(entry.TA))
-            .reduce((acc, cur) => acc + cur)
+            .reduce((acc, cur) => acc + cur, 0)
         );
       case "&TU": {
         if (state.logger.entries.length === 0) return "0";

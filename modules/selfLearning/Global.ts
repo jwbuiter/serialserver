@@ -49,12 +49,8 @@ function selfLearningGlobal(config: ISelfLearningConfig, store: IStore) {
               return acc;
             }, false)
           );
-          const maxMatched = matchedEntries.reduce((acc, cur) =>
-            Math.max(acc, cur)
-          );
-          const minMatched = matchedEntries.reduce((acc, cur) =>
-            Math.min(acc, cur)
-          );
+          const maxMatched = Math.max(...matchedEntries);
+          const minMatched = Math.min(...matchedEntries);
 
           const calibration = (minMatched + maxMatched) / 2;
           const matchedTolerance = (maxMatched - calibration) / calibration;

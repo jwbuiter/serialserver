@@ -41,7 +41,7 @@ export const initialStateIndividual: IIndividualSelfLearningState = {
 };
 
 function average(arr: number[]) {
-  return arr.reduce((acc, cur) => acc + cur) / (arr.length || 1);
+  return arr.reduce((acc, cur) => acc + cur, 0) / (arr.length || 1);
 }
 
 function calculateEntry(measurements: Measurement[]) {

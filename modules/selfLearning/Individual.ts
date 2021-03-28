@@ -147,7 +147,7 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
               );
 
               const calibration =
-                matchedEntries.reduce((acc, cur) => acc + cur) /
+                matchedEntries.reduce((acc, cur) => acc + cur, 0) /
                 matchedEntries.length;
 
               store.dispatch({
