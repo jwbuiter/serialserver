@@ -155,11 +155,11 @@ export interface IConfig {
   version: string;
 }
 
-export let template: IConfig = require("../configs/template");
+export let template: IConfig = require("./configs/template");
 let config = template;
 
 try {
-  config = mergeConfig(config, require("../configs/current"));
+  config = mergeConfig(config, require("./configs/current"));
 } catch { }
 
 

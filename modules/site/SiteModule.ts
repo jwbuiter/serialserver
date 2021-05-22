@@ -13,8 +13,6 @@ import Realtime from "./Realtime";
 
 const app = express();
 app.use(zip());
-const clientPath = "../../../client2";
-const logoPath = "../../../logo";
 const logPath = constants.saveLogLocation;
 const titleString = "<title>" + constants.name + "</title>";
 
@@ -33,7 +31,7 @@ function SiteModule(config, store: IStore) {
     let uploadedFile = req.files.excelFile;
 
     uploadedFile.mv(
-      path.join(__dirname, "../../..", "data", "data." + fileExtension),
+      path.join(constants.baseDirectory, "data", "data." + fileExtension),
       (err) => {
         if (err) {
           return res.status(500).send(err);
@@ -61,7 +59,7 @@ function SiteModule(config, store: IStore) {
     let uploadedFile = req.files.templateFile;
 
     uploadedFile.mv(
-      path.join(__dirname, "../../..", "data", "template." + fileExtension),
+      path.join(constants.baseDirectory, "data", "template." + fileExtension),
       (err) => {
         if (err) {
           return res.status(500).send(err);
@@ -87,7 +85,7 @@ function SiteModule(config, store: IStore) {
     let uploadedFile = req.files.configFile;
 
     uploadedFile.mv(
-      path.join(__dirname, "../../..", "configs", uploadedFile.name),
+      path.join(constants.baseDirectory, "configs", uploadedFile.name),
       (err) => {
         if (err) {
           return res.status(500).send(err);
@@ -186,10 +184,10 @@ function SiteModule(config, store: IStore) {
     "/downloadExcel": (req, res) => {
       const logID = store.getState().config.logger.logID;
       const fileName = `${constants.name}_${logID}.${fileExtension}`;
-      res.download(path.join(__dirname, "../../../data/data." + fileExtension), fileName);
+      res.download(path.join(constants.baseDirectory, "data", "data." + fileExtension), fileName);
     },
     "/downloadConfig": (req, res) =>
-      res.download(path.join(__dirname, "../../..", "configs", req.query.file)),
+      res.download(path.join(constants.baseDirectory, "configs", req.query.file)),
     "/downloadLog": (req, res) => {
       if (req.query.multiFile) {
         const files = req.query.multiFile.split(",").map((element) => ({
@@ -253,7 +251,7 @@ function SiteModule(config, store: IStore) {
         "Origin, X-Requested-With, Content-Type, Accept"
       );
 
-      const logo = path.join(__dirname, logoPath, "logo.jpg");
+      const logo = path.join(constants.baseDirectory, "logo", "logo.jpg");
       if (fs.existsSync(logo)) res.sendFile(logo);
       else {
         res.status(404);
@@ -281,7 +279,7 @@ function SiteModule(config, store: IStore) {
     "/uploadConfig": uploadConfig,
   };
 
-  app.use("/", express.static(path.join(__dirname, clientPath, "build")));
+  app.use("/", express.static(path.join(constants.baseDirectory, "client2", "build")));
 
   for (let route in functionRoutes) {
     app.get(route, functionRoutes[route]);

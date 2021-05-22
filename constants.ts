@@ -4,6 +4,7 @@ interface IConstants {
   name: string;
   QS: string;
   port: number;
+  baseDirectory: string;
   saveLogLocation: string;
   configPassword: string;
   exposeUpload: boolean;
@@ -40,10 +41,10 @@ interface IConstants {
   version: string;
 }
 
-let constants: IConstants = require("../config.static.template");
+let constants: IConstants = require("./config.static.template");
 
 try {
-  constants = mergeConfig(constants, require("../config.static"));
+  constants = mergeConfig(constants, require("./config.static"));
 } catch { }
 
 export default constants;

@@ -10,7 +10,7 @@ import { IStore } from "../../store";
 import { IInputPort } from "../../reducers/inputReducer";
 import { IOutputPort } from "../../reducers/outputReducer";
 
-const configPath = path.join(__dirname, "../../..", "configs");
+const configPath = path.join(constants.baseDirectory, "configs");
 const logPath = constants.saveLogLocation;
 const version = constants.version;
 
@@ -418,8 +418,8 @@ function Realtime(server, config, store: IStore) {
       },
     });
 
-    const dataFile = path.join(__dirname, "../../../data/data." + fileExtension);
-    const templateFile = path.join(__dirname, "../../../data/template." + fileExtension);
+    const dataFile = path.join(constants.baseDirectory, "data", "data." + fileExtension);
+    const templateFile = path.join(constants.baseDirectory, "data", "template." + fileExtension);
 
     if (fs.existsSync(dataFile)) {
       fs.unlinkSync(dataFile);

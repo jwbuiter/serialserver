@@ -11,7 +11,7 @@ import config, { ITableConfig } from "../../config";
 
 
 function TableModule({ trigger, useFile, fileExtension, waitForOther, searchColumn, individualColumn, dateColumn, exitColumn, cells, }: ITableConfig, store: IStore) {
-  const excelPath = path.join(__dirname, "../../..", "data", "data." + fileExtension);
+  const excelPath = path.join(constants.baseDirectory, "data", "data." + fileExtension);
 
   function sheetToArray(sheet: XLSX.WorkSheet) {
     const result: any[][] = [];

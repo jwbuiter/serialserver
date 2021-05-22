@@ -6,7 +6,7 @@ import constants from "../../constants";
 import { IStore } from "../../store";
 import { Action } from "../../actions/types";
 
-const configPath = path.join(__dirname, "../../..", "configs");
+const configPath = path.join(constants.baseDirectory, "configs");
 
 function ConfigModule(store: IStore) {
   const mayorVersion = constants.version.split(".")[0];

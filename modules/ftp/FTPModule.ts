@@ -8,13 +8,13 @@ import constants from "../../constants";
 import { IFTPConfig } from "../../config";
 import { IStore } from "../../store";
 
-const ftpBacklogDir = path.join(__dirname, "../../../data/ftpBacklog.json");
+const ftpBacklogDir = path.join(constants.baseDirectory, "data", "ftpBacklog.json");
 
 function FTPModule(config: IFTPConfig, store: IStore) {
   const { targets, automatic, uploadExcel } = config;
   const { logID } = store.getState().config.logger;
   const { fileExtension } = store.getState().config.table;
-  const xlsxDir = path.join(__dirname, "../../../data/data." + fileExtension);
+  const xlsxDir = path.join(constants.baseDirectory, "data", "data." + fileExtension);
 
   let ftpBacklog = [];
 

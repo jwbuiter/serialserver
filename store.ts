@@ -1,5 +1,5 @@
 import { createStore, Store } from "redux";
-import rootReducer, { ReducerState } from "./reducers/index.js";
+import rootReducer, { ReducerState } from "./reducers/index";
 import { Action } from "./actions/types";
 
 export type StoreCallback = (lastAction: Action) => void;

@@ -2,6 +2,7 @@
   "name": "AutoScale01",
   "QS": "000 000 000",
   "port": 80,
+  "baseDirectory": "/srv/serialserver",
   "saveLogLocation": "/home/pi/Documents",
   "configPassword": "MBDCagro22",
   "exposeUpload": false,

@@ -45,7 +45,7 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
     };
 
     fs.writeFile(
-      __dirname + "/../../../selfLearning/individualData.json",
+      constants.baseDirectory + "/selfLearning/individualData.json",
       JSON.stringify(individualData),
       "utf8",
       (err) => {
@@ -307,7 +307,7 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
     }
   });
 
-  if (fs.existsSync(__dirname + "/../../../selfLearning/individualData.json")) {
+  if (fs.existsSync(constants.baseDirectory + "/selfLearning/individualData.json")) {
     try {
       const individualData = require("../../../selfLearning/individualData");
       store.dispatch({

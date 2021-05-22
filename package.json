@@ -2,12 +2,13 @@
   "name": "serialserver",
   "version": "1.0.0",
   "description": " Webserver that hosts all incoming serial data",
-  "main": "build/server.js",
+  "bin": "build.js",
   "scripts": {
-    "start": "node ./build/server.js",
-    "build": "tsc",
-    "dev": "ts-node-dev --respawn --transpileOnly ./server.ts",
-    "prod": "tsc && node ./build/server.js"
+    "start": "node build.js",
+    "build": "tsc --out build.js --module amd --moduleResolution node && sed -i '1s;^;var define = require(\"amdefine\")(module)\\;;' build.js && echo 'define.require(\"server\");' >> build.js && npm run minify",
+    "dev": "ts-node-dev --respawn --transpile-only ./server.ts",
+    "prod": "npm run build && npm run start",
+    "minify": "uglifyjs --compress --mangle --output build.min.js -- build.js"
   },
   "repository": {
     "type": "git",
@@ -23,6 +24,7 @@
     "@types/node": "^13.1.8",
     "@types/ssh2": "^0.5.44",
     "@types/xlsx": "0.0.36",
+    "amdefine": "^1.0.1",
     "dateformat": "^3.0.3",
     "express": "^4.16.2",
     "express-easy-zip": "^1.1.5",
@@ -33,10 +35,13 @@
     "onoff": "^6.0.0",
     "redux": "^4.0.0",
     "serialport": "^9.0.6",
-    "socket.io": "^2.0.4",
+    "socket.io": "^2.4.1",
     "ssh2": "^0.8.9",
-    "ts-node-dev": "^1.0.0-pre.44",
-    "typescript": "^3.7.3",
+    "ts-node-dev": "^1.1.6",
+    "typescript": "^4.0.0",
     "xlsx": "^0.12.10"
+  },
+  "devDependencies": {
+    "uglify-js": "^3.13.7"
   }
 }

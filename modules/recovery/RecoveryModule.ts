@@ -7,7 +7,7 @@ import constants from "../../constants";
 import { IStore } from "../../store";
 
 const { resetPin, onlinePin } = constants;
-const configPath = path.join(__dirname, "../../..", "configs");
+const configPath = path.join(constants.baseDirectory, "configs");
 
 function RecoveryModule() {
   const onlineGPIO = new Gpio(onlinePin, "out");
