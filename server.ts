@@ -1,6 +1,5 @@
 import RecoveryModule from "./modules/recovery/RecoveryModule";
 import ConfigModule from "./modules/config/ConfigModule";
-import authentication from "./modules/authentication/AuthenticationModule";
 import FTP from "./modules/ftp/FTPModule";
 import input from "./modules/input/InputModule";
 import logger from "./modules/logger/LoggerModule";
@@ -11,18 +10,25 @@ import site from "./modules/site/SiteModule";
 import table from "./modules/table/TableModule";
 import store from "./store";
 import constants from "./constants";
+import AuthenticationModule from "./modules/authentication/AuthenticationModule";
 
 const usedModules = {
   recovery: RecoveryModule(),
+  authentication: AuthenticationModule(),
 };
 
-if (typeof usedModules.recovery != "boolean") {
+function canStart(usedModules: { recovery: any; authentication: boolean }) {
+  if (!usedModules.recovery) return false;
+  if (!usedModules.authentication) return false;
+  return true;
+}
+
+if (canStart(usedModules)) {
   usedModules.recovery.bindStore(store);
 
   const config = ConfigModule(store);
 
   const modules = {
-    authentication,
     FTP,
     input,
     logger,

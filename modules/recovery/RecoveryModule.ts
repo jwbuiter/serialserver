@@ -87,7 +87,7 @@ function RecoveryModule() {
       if (resetGPIO.readSync()) restart();
     }, 1000);
 
-    return false;
+    return null;
   }
 
   try {
