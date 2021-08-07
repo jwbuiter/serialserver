@@ -6,14 +6,8 @@ import { IStore } from "../../store";
 import { IOutputConfig } from "../../config";
 
 function Output(index: number, config: IOutputConfig, store: IStore) {
-  const {
-    execute,
-    seconds,
-    formula,
-    hardwareOutput,
-    warning,
-    warningPeriod,
-  } = config;
+  const { execute, seconds, formula, hardwareOutput, warning, warningPeriod } =
+    config;
 
   const myGPIO = ~hardwareOutput
     ? new Gpio(constants.outputPin[hardwareOutput], "out")
@@ -22,6 +16,7 @@ function Output(index: number, config: IOutputConfig, store: IStore) {
 
   let stateJSON = "";
   let state = false;
+  let result = false;
   let warningInterval: NodeJS.Timeout = null;
 
   function setState(newState: boolean) {
@@ -55,8 +50,30 @@ function Output(index: number, config: IOutputConfig, store: IStore) {
 
   store.listen((lastAction) => {
     switch (lastAction.type) {
+      case "OUTPUT_RESULT_CHANGED": {
+        const newState = store.getState().output.ports[index];
+
+        if (newState.result && !result && seconds && !execute) {
+          store.dispatch({
+            type: "OUTPUT_EXECUTING_CHANGED",
+            payload: {
+              index,
+              executing: true,
+            },
+          });
+          setTimeout(() => {
+            store.dispatch({
+              type: "OUTPUT_EXECUTING_CHANGED",
+              payload: {
+                index,
+                executing: false,
+              },
+            });
+          }, seconds * 1000);
+        }
+        result = newState.result;
+      }
       case "OUTPUT_EXECUTING_CHANGED":
-      case "OUTPUT_RESULT_CHANGED":
       case "OUTPUT_FORCED_CHANGED": {
         if (index === lastAction.payload.index) {
           const newState = store.getState().output.ports[index];
