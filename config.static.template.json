@@ -47,9 +47,9 @@
     "table": true
   },
   "autoResetHard": false,
-  "manualResetHard": false,
+  "manualResetHard": true,
   "inputResetHard": false,
-  "newCycleResetHard": false,
+  "newCycleResetHard": true,
   "individualSLMaxEntries": 5,
   "individualSLMatchEntries": 3,
   "individualSLOverwriteExcel": false,
