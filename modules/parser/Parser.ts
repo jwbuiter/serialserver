@@ -22,7 +22,7 @@ export default function Parser(store: IStore) {
     const column = parseInt(x[2]);
     assert(
       row * tableColumns + column - 1 >= 0 &&
-      row * tableColumns + column - 1 < store.getState().table.cells.length,
+        row * tableColumns + column - 1 < store.getState().table.cells.length,
       "Out of bounds of table contents"
     );
 
@@ -85,12 +85,16 @@ export default function Parser(store: IStore) {
       case "&TU": {
         if (state.logger.entries.length === 0) return "0";
 
-        return Number(state.logger.entries[state.logger.entries.length - 1].TU).toString();
+        return Number(
+          state.logger.entries[state.logger.entries.length - 1].TU
+        ).toString();
       }
       case "&TA": {
         if (state.logger.entries.length === 0) return "0";
 
-        return Number(state.logger.entries[state.logger.entries.length - 1].TA).toString();
+        return Number(
+          state.logger.entries[state.logger.entries.length - 1].TA
+        ).toString();
       }
     }
 
@@ -167,7 +171,7 @@ export default function Parser(store: IStore) {
       Math.round(
         (config.selfLearning.totalNumber *
           config.selfLearning.numberPercentage) /
-        100
+          100
       ),
     SC: (state, tolerance, calibration) => calibration,
     SCMIN: (state, tolerance, calibration) => calibration * (1 - tolerance),
@@ -249,7 +253,7 @@ export default function Parser(store: IStore) {
     const property = x.slice(1);
     const state = store.getState().selfLearning;
 
-    const isNumbered = property.match(/[0-9]$/);
+    const isNumbered = property.match(/[0-9]+$/);
 
     if (isNumbered) {
       const index = Number(isNumbered[0]);
@@ -327,7 +331,7 @@ export default function Parser(store: IStore) {
           .replace(/\$[A-Z]/g, parseExcel)
           .replace(/COM[0-9]/g, parseCom)
           .replace(/\&[A-Z0-9]+/g, parseStatistic)
-          .replace(/#\w+[0-9]?/g, parseSelfLearning)
+          .replace(/#\w+[0-9]*/g, parseSelfLearning)
           .replace(/DATETIME/g, () => String(getExcelDateTime()))
           .replace(/DATE/g, () => String(getExcelDate()));
         result = eval(formula);
