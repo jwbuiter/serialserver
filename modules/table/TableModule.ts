@@ -9,9 +9,25 @@ import { IStore } from "../../store";
 import constants from "../../constants";
 import config, { ITableConfig } from "../../config";
 
-
-function TableModule({ trigger, useFile, fileExtension, waitForOther, searchColumn, individualColumn, dateColumn, exitColumn, cells, }: ITableConfig, store: IStore) {
-  const excelPath = path.join(constants.baseDirectory, "data", "data." + fileExtension);
+function TableModule(
+  {
+    trigger,
+    useFile,
+    fileExtension,
+    waitForOther,
+    searchColumn,
+    individualColumn,
+    dateColumn,
+    exitColumn,
+    cells,
+  }: ITableConfig,
+  store: IStore
+) {
+  const excelPath = path.join(
+    constants.baseDirectory,
+    "data",
+    "data." + fileExtension
+  );
 
   function sheetToArray(sheet: XLSX.WorkSheet) {
     const result: any[][] = [];
@@ -21,10 +37,10 @@ function TableModule({ trigger, useFile, fileExtension, waitForOther, searchColu
       for (let colNum = range.s.c; colNum <= range.e.c; colNum++) {
         var nextCell =
           sheet[
-          XLSX.utils.encode_cell({
-            r: rowNum,
-            c: colNum,
-          })
+            XLSX.utils.encode_cell({
+              r: rowNum,
+              c: colNum,
+            })
           ];
         if (typeof nextCell === "undefined") {
           row.push(void 0);
@@ -50,8 +66,7 @@ function TableModule({ trigger, useFile, fileExtension, waitForOther, searchColu
         modifyDate,
         "yyyy-mm-dd"
       )}.xls`;
-    }
-    else {
+    } else {
       fileName = `${constants.name}_${config.logger.logID}.${fileExtension}`;
     }
 
@@ -152,8 +167,7 @@ function TableModule({ trigger, useFile, fileExtension, waitForOther, searchColu
 
           if (constants.individualSLRemoveExcel && exitCode)
             excelSheet = excelSheet.filter((_, index) => index != foundIndex);
-          else
-            excelSheet[foundIndex][exitColumn] = exitCode;
+          else excelSheet[foundIndex][exitColumn] = exitCode;
 
           saveExcel(excelSheet);
         }
@@ -162,7 +176,8 @@ function TableModule({ trigger, useFile, fileExtension, waitForOther, searchColu
       case "SL_ENTRY": {
         if (useFile && excelSheet && constants.individualSLOverwriteExcel) {
           const { key } = lastAction.payload;
-          const entries = store.getState().selfLearning.individual.individualEntries;
+          const entries =
+            store.getState().selfLearning.individual.individualEntries;
 
           if (!key || !(key in entries)) break;
 
@@ -190,24 +205,35 @@ function TableModule({ trigger, useFile, fileExtension, waitForOther, searchColu
         if (useFile && excelSheet && constants.individualSLRemoveExcel) {
           const { key } = lastAction.payload;
 
-          excelSheet = excelSheet.filter(row => row[searchColumn] !== key);
+          excelSheet = excelSheet.filter((row) => row[searchColumn] !== key);
 
           saveExcel(excelSheet);
         }
         break;
       }
       case "SL_INDIVIDUAL_INCREMENT": {
-        if (useFile && excelSheet && config.selfLearning.individualCycleLimit > 0) {
+        if (
+          useFile &&
+          excelSheet &&
+          config.selfLearning.individualCycleLimit > 0
+        ) {
           for (const row of excelSheet) {
-            let rowDate = Number(row[dateColumn]);
+            let rowDate = Number(
+              row[config.selfLearning.individualCycleLimitDateColunn]
+            );
             if (rowDate == 0 || Number.isNaN(rowDate))
-              continue;
+              rowDate = Number(row[dateColumn]);
 
-            if ((getExcelDate() - rowDate) > config.selfLearning.individualCycleLimit)
+            if (rowDate == 0 || Number.isNaN(rowDate)) continue;
+
+            if (
+              getExcelDate() - rowDate >
+              config.selfLearning.individualCycleLimit
+            )
               store.dispatch({
                 type: "SL_INDIVIDUAL_DOWNGRADE",
                 payload: {
-                  key: row[searchColumn]
+                  key: row[searchColumn],
                 },
               });
           }

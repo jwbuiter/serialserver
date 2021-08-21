@@ -52,7 +52,7 @@ type CellConfig = {
 export interface ITableConfig {
   trigger: number;
   useFile: boolean;
-  fileExtension: "xls" | "xlsx",
+  fileExtension: "xls" | "xlsx";
   waitForOther: boolean;
   searchColumn: number;
   individualColumn: number;
@@ -80,7 +80,15 @@ export interface IOutputsConfig {
 
 export interface IInputConfig {
   name: string;
-  formula: "exe" | "exebl" | "reset" | "teach" | "restart" | "shutdown" | "command" | "resetSerial";
+  formula:
+    | "exe"
+    | "exebl"
+    | "reset"
+    | "teach"
+    | "restart"
+    | "shutdown"
+    | "command"
+    | "resetSerial";
   follow: number;
   timeout: number;
   invert: boolean;
@@ -133,6 +141,7 @@ export interface ISelfLearningConfig {
   individualCorrectionIncrement: number;
   individualCorrectionLimit: number;
   individualCycleLimit: number;
+  individualCycleLimitDateColunn: number;
   individualAverageNumber: number;
   activityCounter: boolean;
   firstTopFormula: string;
@@ -160,7 +169,6 @@ let config = template;
 
 try {
   config = mergeConfig(config, require("./configs/current"));
-} catch { }
-
+} catch {}
 
 export default config;

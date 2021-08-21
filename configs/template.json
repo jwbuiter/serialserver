@@ -576,6 +576,7 @@
     "individualCorrectionIncrement": 50,
     "individualCorrectionLimit": 2,
     "individualCycleLimit": 0,
+    "individualCycleLimitDateColumn": 2,
     "individualAverageNumber": 3,
     "activityCounter": false,
     "firstTopFormula": "",
