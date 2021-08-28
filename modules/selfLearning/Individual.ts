@@ -309,7 +309,7 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
 
   if (fs.existsSync(constants.baseDirectory + "/selfLearning/individualData.json")) {
     try {
-      const individualData = require("../../../selfLearning/individualData");
+      const individualData = require(constants.baseDirectory + "/selfLearning/individualData");
       store.dispatch({
         type: "SL_INDIVIDUAL_LOAD",
         payload: individualData,
