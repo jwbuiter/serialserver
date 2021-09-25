@@ -257,7 +257,7 @@ export default function Parser(store: IStore) {
 
     if (isNumbered) {
       const index = Number(isNumbered[0]);
-      const numberedProperty = property.slice(0, -1);
+      const numberedProperty = property.slice(0, -isNumbered[0].length);
 
       return selfLearningNumberedFunctions[numberedProperty](
         index,
