@@ -19,27 +19,42 @@ const titleString = "<title>" + constants.name + "</title>";
 function SiteModule(config, store: IStore) {
   const { fileExtension } = store.getState().config.table;
 
-  function importExcel(req, res) {
+  function saveFile(
+    req,
+    res,
+    filename: string,
+    targetFilename: string,
+    action: () => void = () => {}
+  ) {
     console.log(req.files);
     if (!req.files.excelFile) {
       return res.send(
         titleString +
-        '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.'
+          '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.'
       );
     }
 
-    let uploadedFile = req.files.excelFile;
+    let uploadedFile = req.files[filename];
 
-    uploadedFile.mv(
-      path.join(constants.baseDirectory, "data", "data." + fileExtension),
-      (err) => {
-        if (err) {
-          return res.status(500).send(err);
-        }
-        res.send(
-          titleString +
+    uploadedFile.mv(targetFilename, (err) => {
+      if (err) {
+        return res.status(500).send(err);
+      }
+      res.send(
+        titleString +
           '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.'
-        );
+      );
+      action();
+    });
+  }
+
+  function importExcel(req, res) {
+    saveFile(
+      req,
+      res,
+      "excelFile",
+      path.join(constants.baseDirectory, "data", "data." + fileExtension),
+      () => {
         store.dispatch({
           type: "LOG_BACKUP",
         });
@@ -47,55 +62,36 @@ function SiteModule(config, store: IStore) {
     );
   }
 
-  function importExcelTemplate(req, res) {
-    console.log(req.files);
-    if (!req.files.templateFile) {
-      return res.send(
-        titleString +
-        '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.'
-      );
-    }
-
-    let uploadedFile = req.files.templateFile;
-
-    uploadedFile.mv(
-      path.join(constants.baseDirectory, "data", "template." + fileExtension),
-      (err) => {
-        if (err) {
-          return res.status(500).send(err);
-        }
-        res.send(
-          titleString +
-          '<meta http-equiv="refresh" content="5; url=/" /> File uploaded.'
-        );
+  function updateExcel(req, res) {
+    saveFile(
+      req,
+      res,
+      "excelFile",
+      path.join(constants.baseDirectory, "data", "temp." + fileExtension),
+      () => {
+        console.log("start update");
+        store.dispatch({
+          type: "EXCEL_UPDATE",
+        });
       }
     );
   }
 
+  function importExcelTemplate(req, res) {
+    saveFile(
+      req,
+      res,
+      "templateFile",
+      path.join(constants.baseDirectory, "data", "template." + fileExtension)
+    );
+  }
+
   function uploadConfig(req, res) {
-    console.log(req.files);
-
-    if (!req.files.configFile) {
-      return res.send(
-        titleString +
-        '<meta http-equiv="refresh" content="1; url=/" /> No files were uploaded.'
-      );
-    }
-
-    let uploadedFile = req.files.configFile;
-
-    uploadedFile.mv(
-      path.join(constants.baseDirectory, "configs", uploadedFile.name),
-      (err) => {
-        if (err) {
-          return res.status(500).send(err);
-        }
-
-        res.send(
-          titleString +
-          '<meta http-equiv="refresh" content="1; url=/" /> Config uploaded.'
-        );
-      }
+    saveFile(
+      req,
+      res,
+      "configFile",
+      path.join(constants.baseDirectory, "configs", req.files.configFile.name)
     );
   }
 
@@ -184,10 +180,15 @@ function SiteModule(config, store: IStore) {
     "/downloadExcel": (req, res) => {
       const logID = store.getState().config.logger.logID;
       const fileName = `${constants.name}_${logID}.${fileExtension}`;
-      res.download(path.join(constants.baseDirectory, "data", "data." + fileExtension), fileName);
+      res.download(
+        path.join(constants.baseDirectory, "data", "data." + fileExtension),
+        fileName
+      );
     },
     "/downloadConfig": (req, res) =>
-      res.download(path.join(constants.baseDirectory, "configs", req.query.file)),
+      res.download(
+        path.join(constants.baseDirectory, "configs", req.query.file)
+      ),
     "/downloadLog": (req, res) => {
       if (req.query.multiFile) {
         const files = req.query.multiFile.split(",").map((element) => ({
@@ -224,7 +225,7 @@ function SiteModule(config, store: IStore) {
       );
       res.send(
         titleString +
-        '<meta http-equiv="refresh" content="5; url=/" />Restarting now.'
+          '<meta http-equiv="refresh" content="5; url=/" />Restarting now.'
       );
       store.dispatch({
         type: "RESTART",
@@ -238,7 +239,7 @@ function SiteModule(config, store: IStore) {
       );
       res.send(
         titleString +
-        '<meta http-equiv="refresh" content="5; url=/" />Hard rebooting now.'
+          '<meta http-equiv="refresh" content="5; url=/" />Hard rebooting now.'
       );
       store.dispatch({
         type: "HARD_REBOOT",
@@ -275,11 +276,15 @@ function SiteModule(config, store: IStore) {
   const uploadRoutes = {
     "/importFile": importExcel,
     "/importExcel": importExcel,
+    "/updateExcel": updateExcel,
     "/importTemplate": importExcelTemplate,
     "/uploadConfig": uploadConfig,
   };
 
-  app.use("/", express.static(path.join(constants.baseDirectory, "client2", "build")));
+  app.use(
+    "/",
+    express.static(path.join(constants.baseDirectory, "client2", "build"))
+  );
 
   for (let route in functionRoutes) {
     app.get(route, functionRoutes[route]);

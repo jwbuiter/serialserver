@@ -28,6 +28,11 @@ function TableModule(
     "data",
     "data." + fileExtension
   );
+  const tempPath = path.join(
+    constants.baseDirectory,
+    "data",
+    "temp." + fileExtension
+  );
 
   function sheetToArray(sheet: XLSX.WorkSheet) {
     const result: any[][] = [];
@@ -81,163 +86,190 @@ function TableModule(
     excelSheet = sheetToArray(excelFile.Sheets[sheetName]);
   }
 
+  function findRow(key: any): any[] | undefined {
+    return excelSheet.find((row) => {
+      return row[searchColumn] === key;
+    });
+  }
+
   store.listen((lastAction) => {
     const state = store.getState();
 
     switch (lastAction.type) {
       case "HANDLE_TABLE": {
-        if (useFile && excelSheet) {
-          const searchEntry = state.serial.coms[trigger].entry;
-          if (!searchEntry) break;
+        if (!useFile || !excelSheet) break;
+        const searchEntry = state.serial.coms[trigger].entry;
+        if (!searchEntry) break;
 
-          const foundRow = excelSheet.find((row) => {
-            return row[searchColumn] === searchEntry;
+        const foundRow = findRow(searchEntry);
+
+        if (foundRow) {
+          console.log("found");
+          store.dispatch({
+            type: "EXCEL_FOUND_ROW",
+            payload: {
+              found: true,
+              foundRow,
+            },
           });
+        } else {
+          console.log("not found");
+          store.dispatch({
+            type: "EXCEL_FOUND_ROW",
+            payload: {
+              found: false,
+              foundRow,
+            },
+          });
+        }
 
-          if (foundRow) {
-            console.log("found");
-            store.dispatch({
-              type: "EXCEL_FOUND_ROW",
-              payload: {
-                found: true,
-                foundRow,
-              },
-            });
-          } else {
-            console.log("not found");
-            store.dispatch({
-              type: "EXCEL_FOUND_ROW",
-              payload: {
-                found: false,
-                foundRow,
-              },
-            });
+        break;
+      }
+      case "EXCEL_UPDATE": {
+        if (!excelSheet) break;
+
+        let updateSheet: any[][];
+
+        if (!fs.existsSync(tempPath)) break;
+        let excelFile = XLSX.readFile(tempPath);
+        // @ts-ignore
+        let sheetName = excelFile.Workbook.Sheets[0].name;
+        updateSheet = sheetToArray(excelFile.Sheets[sheetName]);
+        fs.unlinkSync(tempPath);
+
+        for (let updateRow of updateSheet.slice(1)) {
+          let existingRow = findRow(updateRow[searchColumn]);
+
+          if (!existingRow) {
+            excelSheet.push(updateRow);
+            continue;
+          }
+
+          for (let i = 0; i < updateRow.length; i++) {
+            if (updateRow[i]) {
+              existingRow[i] = updateRow[i];
+            }
           }
         }
+
+        saveExcel(excelSheet);
         break;
       }
       case "SL_INDIVIDUAL_UPGRADE": {
-        if (useFile && excelSheet) {
-          const { key, calibration } = lastAction.payload;
+        if (!useFile || !excelSheet) break;
 
-          const foundRow = excelSheet.find((row) => {
-            return row[searchColumn] === key;
-          });
+        const { key, calibration } = lastAction.payload;
 
-          if (foundRow) {
-            if (!foundRow[individualColumn])
-              foundRow[individualColumn] = calibration;
-            if (!foundRow[dateColumn]) foundRow[dateColumn] = getExcelDate();
-          } else {
-            const newRow = [];
+        const foundRow = findRow(key);
+        if (foundRow) {
+          if (!foundRow[individualColumn])
+            foundRow[individualColumn] = calibration;
+          if (!foundRow[dateColumn]) foundRow[dateColumn] = getExcelDate();
+        } else {
+          const newRow = [];
 
-            newRow[searchColumn] = key;
-            newRow[individualColumn] = calibration;
-            newRow[dateColumn] = getExcelDate();
+          newRow[searchColumn] = key;
+          newRow[individualColumn] = calibration;
+          newRow[dateColumn] = getExcelDate();
 
-            excelSheet.push(newRow);
-          }
-
-          saveExcel(excelSheet);
+          excelSheet.push(newRow);
         }
+        saveExcel(excelSheet);
+
         break;
       }
       case "SL_INDIVIDUAL_DELETE_INDIVIDUAL": {
-        if (useFile && excelSheet) {
-          const { key, message, callback } = lastAction.payload;
+        if (!useFile || !excelSheet) break;
 
-          const exitCode = Number(message);
+        const { key, message, callback } = lastAction.payload;
 
-          if (exitCode && constants.individualSLDecrementTotal) {
-            store.dispatch({
-              type: "SL_INDIVIDUAL_DECREMENT_TOTAL",
-              payload: callback,
-            });
-          }
-
-          const foundRow = excelSheet.find((row) => {
-            return row[searchColumn] === key;
+        const exitCode = Number(message);
+        if (exitCode && constants.individualSLDecrementTotal) {
+          store.dispatch({
+            type: "SL_INDIVIDUAL_DECREMENT_TOTAL",
+            payload: callback,
           });
-
-          if (!foundRow) break;
-
-          const foundIndex = excelSheet.findIndex((row) => {
-            return row[searchColumn] === key;
-          });
-
-          if (constants.individualSLRemoveExcel && exitCode)
-            excelSheet = excelSheet.filter((_, index) => index != foundIndex);
-          else excelSheet[foundIndex][exitColumn] = exitCode;
-
-          saveExcel(excelSheet);
         }
+
+        const foundIndex = excelSheet.findIndex((row) => {
+          return row[searchColumn] === key;
+        });
+        if (foundIndex == -1) break;
+
+        if (constants.individualSLRemoveExcel && exitCode)
+          excelSheet = excelSheet.filter((_, index) => index != foundIndex);
+        else excelSheet[foundIndex][exitColumn] = exitCode;
+
+        saveExcel(excelSheet);
+
         break;
       }
       case "SL_ENTRY": {
-        if (useFile && excelSheet && constants.individualSLOverwriteExcel) {
-          const { key } = lastAction.payload;
-          const entries =
-            store.getState().selfLearning.individual.individualEntries;
+        if (!useFile || !excelSheet || !constants.individualSLOverwriteExcel)
+          break;
 
-          if (!key || !(key in entries)) break;
+        const { key } = lastAction.payload;
+        const entries =
+          store.getState().selfLearning.individual.individualEntries;
 
-          const foundRow = excelSheet.find((row) => {
-            return row[searchColumn] === key;
-          });
+        if (!key || !(key in entries)) break;
 
-          if (!foundRow) break;
+        const foundIndex = excelSheet.findIndex((row) => {
+          return row[searchColumn] === key;
+        });
+        if (foundIndex == -1) break;
 
-          const foundIndex = excelSheet.findIndex((row) => {
-            return row[searchColumn] === key;
-          });
+        const currentDate = getExcelDate();
+        if (excelSheet[foundIndex][dateColumn] == currentDate) break;
 
-          const currentDate = getExcelDate();
-          if (excelSheet[foundIndex][dateColumn] == currentDate) break;
+        excelSheet[foundIndex][individualColumn] = entries[key].calibration;
+        excelSheet[foundIndex][dateColumn] = currentDate;
 
-          excelSheet[foundIndex][individualColumn] = entries[key].calibration;
-          excelSheet[foundIndex][dateColumn] = currentDate;
+        saveExcel(excelSheet);
 
-          saveExcel(excelSheet);
-        }
         break;
       }
       case "SL_INDIVIDUAL_DOWNGRADE": {
-        if (useFile && excelSheet && constants.individualSLRemoveExcel) {
-          const { key } = lastAction.payload;
+        if (!useFile || !excelSheet || !constants.individualSLRemoveExcel)
+          break;
 
-          excelSheet = excelSheet.filter((row) => row[searchColumn] !== key);
+        const { key } = lastAction.payload;
 
-          saveExcel(excelSheet);
-        }
+        excelSheet = excelSheet.filter((row) => row[searchColumn] !== key);
+
+        saveExcel(excelSheet);
+
         break;
       }
       case "SL_INDIVIDUAL_INCREMENT": {
         if (
-          useFile &&
-          excelSheet &&
-          config.selfLearning.individualCycleLimit > 0
-        ) {
-          for (const row of excelSheet) {
-            let rowDate = Number(
-              row[config.selfLearning.individualCycleLimitDateColunn]
-            );
-            if (rowDate == 0 || Number.isNaN(rowDate))
-              rowDate = Number(row[dateColumn]);
+          !useFile ||
+          !excelSheet ||
+          config.selfLearning.individualCycleLimit <= 0
+        )
+          break;
 
-            if (rowDate == 0 || Number.isNaN(rowDate)) continue;
+        for (const row of excelSheet) {
+          let rowDate = Number(
+            row[config.selfLearning.individualCycleLimitDateColunn]
+          );
+          if (rowDate == 0 || Number.isNaN(rowDate))
+            rowDate = Number(row[dateColumn]);
 
-            if (
-              getExcelDate() - rowDate >
-              config.selfLearning.individualCycleLimit
-            )
-              store.dispatch({
-                type: "SL_INDIVIDUAL_DOWNGRADE",
-                payload: {
-                  key: row[searchColumn],
-                },
-              });
-          }
+          if (rowDate == 0 || Number.isNaN(rowDate)) continue;
+
+          if (
+            getExcelDate() - rowDate >
+            config.selfLearning.individualCycleLimit
+          )
+            store.dispatch({
+              type: "SL_INDIVIDUAL_DOWNGRADE",
+              payload: {
+                key: row[searchColumn],
+              },
+            });
         }
+
         break;
       }
     }

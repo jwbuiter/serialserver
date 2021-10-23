@@ -9,6 +9,7 @@ type ActionType =
   | "CONFIG_UPDATE"
   | "ERROR_OCCURRED"
   | "EXCEL_FOUND_ROW"
+  | "EXCEL_UPDATE"
   | "EXECUTE_START"
   | "EXECUTE_STOP"
   | "HANDLE_ALL"
@@ -96,6 +97,10 @@ export interface ExcelFoundRowAction extends IAction {
     found: boolean;
     foundRow: string[];
   };
+}
+
+export interface ExcelUpdateAction extends IAction {
+  type: "EXCEL_UPDATE";
 }
 
 export interface ExecuteStartAction extends IAction {
@@ -455,6 +460,7 @@ export type Action =
   | ConfigUpdateAction
   | ErrorOccurredAction
   | ExcelFoundRowAction
+  | ExcelUpdateAction
   | ExecuteStartAction
   | ExecuteStopAction
   | HandleAllAction
