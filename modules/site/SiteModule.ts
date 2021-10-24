@@ -26,12 +26,14 @@ function SiteModule(config, store: IStore) {
     targetFilename: string,
     action: () => void = () => {}
   ) {
-    console.log(req.files);
-    if (!req.files.excelFile) {
-      return res.send(
-        titleString +
-          '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.'
-      );
+    console.log(req.files, filename, targetFilename);
+    if (!req.files[filename]) {
+      return res
+        .status(400)
+        .send(
+          titleString +
+            '<meta http-equiv="refresh" content="1; url=/" />No files were uploaded.'
+        );
     }
 
     let uploadedFile = req.files[filename];
