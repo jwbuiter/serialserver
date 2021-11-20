@@ -18,6 +18,7 @@ function Output(index: number, config: IOutputConfig, store: IStore) {
   let state = false;
   let result = false;
   let warningInterval: NodeJS.Timeout = null;
+  let debounceTimeout: NodeJS.Timeout = null;
 
   function setState(newState: boolean) {
     state = newState;
@@ -53,15 +54,31 @@ function Output(index: number, config: IOutputConfig, store: IStore) {
       case "OUTPUT_RESULT_CHANGED": {
         const newState = store.getState().output.ports[index];
 
-        if (newState.result && !result && seconds && !execute) {
-          store.dispatch({
-            type: "OUTPUT_EXECUTING_CHANGED",
-            payload: {
-              index,
-              executing: true,
-            },
-          });
-          setTimeout(() => {
+        if (execute) break;
+
+        if (seconds > 0) {
+          if (newState.result && !result) {
+            store.dispatch({
+              type: "OUTPUT_EXECUTING_CHANGED",
+              payload: {
+                index,
+                executing: true,
+              },
+            });
+            setTimeout(() => {
+              store.dispatch({
+                type: "OUTPUT_EXECUTING_CHANGED",
+                payload: {
+                  index,
+                  executing: false,
+                },
+              });
+            }, seconds * 1000);
+          }
+        } else if (seconds < 0) {
+          if (!newState.result) {
+            clearTimeout(debounceTimeout);
+            debounceTimeout = null;
             store.dispatch({
               type: "OUTPUT_EXECUTING_CHANGED",
               payload: {
@@ -69,8 +86,19 @@ function Output(index: number, config: IOutputConfig, store: IStore) {
                 executing: false,
               },
             });
-          }, seconds * 1000);
+          } else if (!debounceTimeout) {
+            debounceTimeout = setTimeout(() => {
+              store.dispatch({
+                type: "OUTPUT_EXECUTING_CHANGED",
+                payload: {
+                  index,
+                  executing: true,
+                },
+              });
+            }, -seconds * 1000);
+          }
         }
+
         result = newState.result;
       }
       case "OUTPUT_EXECUTING_CHANGED":
@@ -118,7 +146,7 @@ function Output(index: number, config: IOutputConfig, store: IStore) {
               executing: true,
             },
           });
-          if (seconds) {
+          if (seconds > 0) {
             setTimeout(() => {
               store.dispatch({
                 type: "OUTPUT_EXECUTING_CHANGED",
@@ -133,7 +161,7 @@ function Output(index: number, config: IOutputConfig, store: IStore) {
         break;
       }
       case "EXECUTE_STOP": {
-        if (execute && !seconds) {
+        if (execute && seconds <= 0) {
           store.dispatch({
             type: "OUTPUT_EXECUTING_CHANGED",
             payload: {
