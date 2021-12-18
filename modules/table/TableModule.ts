@@ -261,13 +261,17 @@ function TableModule(
           if (
             getExcelDate() - rowDate >
             config.selfLearning.individualCycleLimit
-          )
+          ) {
+            const key = row[searchColumn];
             store.dispatch({
               type: "SL_INDIVIDUAL_DOWNGRADE",
               payload: {
-                key: row[searchColumn],
+                key,
               },
             });
+            excelSheet = excelSheet.filter((row) => row[searchColumn] !== key);
+            saveExcel(excelSheet);
+          }
         }
 
         break;
