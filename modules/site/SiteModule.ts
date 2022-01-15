@@ -118,7 +118,7 @@ function SiteModule(config, store: IStore) {
       res.send(fullConfig);
     },
     "/com": (req, res) =>
-      res.send(titleString + (store.getState().input.executing ? "1" : "0")),
+      res.send(store.getState().input.executing ? "1" : "0"),
     "/coml": (req, res) => {
       const loggerState = store.getState().logger;
       const entries = loggerState.entries.slice(-1);
@@ -265,7 +265,7 @@ function SiteModule(config, store: IStore) {
 
   function addTableRoute(i, j) {
     functionRoutes[`/${String.fromCharCode(65 + i)}${j + 1}`] = (req, res) => {
-      res.send(titleString + store.getState().table.cells[i * 5 + j].entry);
+      res.send(store.getState().table.cells[i * 5 + j].entry);
     };
   }
 
@@ -277,10 +277,10 @@ function SiteModule(config, store: IStore) {
 
   function addIORoutes(i) {
     functionRoutes[`/I${i + 1}`] = (req, res) => {
-      res.send(titleString + Number(store.getState().input.ports[i].state));
+      res.send(Number(store.getState().input.ports[i].state));
     };
     functionRoutes[`/O${i + 1}`] = (req, res) => {
-      res.send(titleString + Number(store.getState().output.ports[i].state));
+      res.send(Number(store.getState().output.ports[i].state));
     };
   }
 
@@ -308,7 +308,7 @@ function SiteModule(config, store: IStore) {
   for (let i = 0; i < store.getState().serial.coms.length; i++) {
     app.get("/com" + i, (req, res) => {
       const com = store.getState().serial.coms[i];
-      let sendString = titleString;
+      let sendString = "";
       console.log(store.getState().serial);
 
       if (com.average === "") {
