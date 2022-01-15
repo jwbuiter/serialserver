@@ -275,6 +275,19 @@ function SiteModule(config, store: IStore) {
     }
   }
 
+  function addIORoutes(i) {
+    functionRoutes[`/I${i + 1}`] = (req, res) => {
+      res.send(titleString + store.getState().input.ports[i].state);
+    };
+    functionRoutes[`/O${i + 1}`] = (req, res) => {
+      res.send(titleString + store.getState().output.ports[i].state);
+    };
+  }
+
+  for (let i = 0; i < 10; i++) {
+    addIORoutes(i);
+  }
+
   const uploadRoutes = {
     "/importFile": importExcel,
     "/importExcel": importExcel,
