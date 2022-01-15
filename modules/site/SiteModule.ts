@@ -277,10 +277,10 @@ function SiteModule(config, store: IStore) {
 
   function addIORoutes(i) {
     functionRoutes[`/I${i + 1}`] = (req, res) => {
-      res.send(Number(store.getState().input.ports[i].state));
+      res.send(String(Number(store.getState().input.ports[i].state)));
     };
     functionRoutes[`/O${i + 1}`] = (req, res) => {
-      res.send(Number(store.getState().output.ports[i].state));
+      res.send(String(Number(store.getState().output.ports[i].state)));
     };
   }
 
