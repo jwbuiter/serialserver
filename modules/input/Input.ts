@@ -15,7 +15,7 @@ function Input(index: number, config: IInputConfig, store: IStore) {
     commandCom,
     commandValue,
     hardwareInput,
-    normalState
+    normalState,
   } = config;
 
   const myGPIO = ~hardwareInput
@@ -45,10 +45,8 @@ function Input(index: number, config: IInputConfig, store: IStore) {
           (acc, cur) => acc || cur.blocking,
           false
         );
-        const stillExecuting = reduxState.output.ports.reduce(
-          (acc, cur) => acc || cur.executing,
-          false
-        );
+        const stillExecuting = reduxState.input.executing;
+
         if (state && !blocked && !stillExecuting) {
           store.dispatch({
             type: "LOG_MAKE_ENTRY",
@@ -153,7 +151,7 @@ function Input(index: number, config: IInputConfig, store: IStore) {
           const index = Number(commandCom.slice(3));
           store.dispatch({
             type: "SERIAL_RESET",
-            payload: index
+            payload: index,
           });
         }
         break;
