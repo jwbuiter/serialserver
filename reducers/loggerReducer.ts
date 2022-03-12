@@ -20,7 +20,7 @@ export interface ILoggerState {
   digits: number[];
   visible: boolean[];
   entries: IEntry[];
-  logFilePath: string;
+  logFileName: string;
 }
 
 type ComConfig = {
@@ -76,7 +76,7 @@ const initialState = {
     selfLearning.enabled.endsWith("ind"),
   ],
   entries: [],
-  logFilePath: "",
+  logFileName: "",
 };
 
 export default function (
@@ -94,7 +94,10 @@ export default function (
       };
     }
     case "LOG_RESET": {
-      return { ...initialState, logFilePath: action.payload };
+      return initialState;
+    }
+    case "LOG_SET_FILE": {
+      return { ...state, logFileName: action.payload };
     }
     case "LOG_OVERWRITE": {
       const entry = action.payload;

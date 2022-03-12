@@ -8,13 +8,21 @@ import constants from "../../constants";
 import { IFTPConfig } from "../../config";
 import { IStore } from "../../store";
 
-const ftpBacklogDir = path.join(constants.baseDirectory, "data", "ftpBacklog.json");
+const ftpBacklogDir = path.join(
+  constants.baseDirectory,
+  "data",
+  "ftpBacklog.json"
+);
 
 function FTPModule(config: IFTPConfig, store: IStore) {
   const { targets, automatic, uploadExcel } = config;
   const { logID } = store.getState().config.logger;
   const { fileExtension } = store.getState().config.table;
-  const xlsxDir = path.join(constants.baseDirectory, "data", "data." + fileExtension);
+  const xlsxDir = path.join(
+    constants.baseDirectory,
+    "data",
+    "data." + fileExtension
+  );
 
   let ftpBacklog = [];
 
@@ -68,7 +76,15 @@ function FTPModule(config: IFTPConfig, store: IStore) {
       return;
     }
 
-    upload(address, folder, username, password, path.join(localPath, fileName), fileName, callback);
+    upload(
+      address,
+      folder,
+      username,
+      password,
+      path.join(localPath, fileName),
+      fileName,
+      callback
+    );
   }
 
   function uploadDataFile(index, callback) {
@@ -86,18 +102,49 @@ function FTPModule(config: IFTPConfig, store: IStore) {
       "yyyy-mm-dd_HH-MM-ss"
     )}.${fileExtension}`;
 
-
     upload(address, folder, username, password, xlsxDir, fileName, callback);
   }
 
-  function upload(address, folder, username, password, sourceFile, fileName, callback) {
+  function upload(
+    address,
+    folder,
+    username,
+    password,
+    sourceFile,
+    fileName,
+    callback
+  ) {
     if (address.endsWith(":22"))
-      uploadSftp(address.slice(0, -3), folder, username, password, sourceFile, fileName, callback);
+      uploadSftp(
+        address.slice(0, -3),
+        folder,
+        username,
+        password,
+        sourceFile,
+        fileName,
+        callback
+      );
     else
-      uploadFtp(address, folder, username, password, sourceFile, fileName, callback);
+      uploadFtp(
+        address,
+        folder,
+        username,
+        password,
+        sourceFile,
+        fileName,
+        callback
+      );
   }
 
-  function uploadFtp(address, folder, username, password, sourceFile, fileName, callback) {
+  function uploadFtp(
+    address,
+    folder,
+    username,
+    password,
+    sourceFile,
+    fileName,
+    callback
+  ) {
     const c = new Client();
     c.on("ready", () => {
       c.mkdir(folder, true, () => {
@@ -119,15 +166,23 @@ function FTPModule(config: IFTPConfig, store: IStore) {
     });
   }
 
-  function uploadSftp(address, folder, username, password, sourceFile, fileName, callback) {
+  function uploadSftp(
+    address,
+    folder,
+    username,
+    password,
+    sourceFile,
+    fileName,
+    callback
+  ) {
     const c = new ssh2.Client();
-    c.on('ready', function () {
+    c.on("ready", function () {
       c.sftp(function (err, sftp) {
         sftp.fastPut(sourceFile, path.join(folder, fileName), () => {
           callback("Successfully uploaded " + fileName);
         });
       });
-    })
+    });
 
     c.on("error", (err) => {
       callback(err.message);
@@ -139,7 +194,6 @@ function FTPModule(config: IFTPConfig, store: IStore) {
       username,
       password,
     });
-
   }
 
   store.listen((lastAction) => {

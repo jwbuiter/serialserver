@@ -31,6 +31,7 @@ type ActionType =
   | "LOG_OVERWRITE"
   | "LOG_RECOVER"
   | "LOG_RESET"
+  | "LOG_SET_FILE"
   | "LOG_SAVE"
   | "LOG_UNIQUE_OVERWRITE"
   | "LOG_LIST_OVERWRITE"
@@ -218,6 +219,11 @@ export interface LogRecoverAction extends IAction {
 
 export interface LogResetAction extends IAction {
   type: "LOG_RESET";
+  payload: string;
+}
+
+export interface LogSetFIleAction extends IAction {
+  type: "LOG_SET_FILE";
   payload: string;
 }
 
@@ -482,6 +488,7 @@ export type Action =
   | LogOverwriteAction
   | LogRecoverAction
   | LogResetAction
+  | LogSetFIleAction
   | LogSaveAction
   | LogUniqueOverwriteAction
   | LogListOverwriteAction

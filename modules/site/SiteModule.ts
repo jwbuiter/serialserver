@@ -204,7 +204,7 @@ function SiteModule(config, store: IStore) {
       } else if (req.query.file) {
         res.download(path.join(logPath, req.query.file));
       } else {
-        res.download(store.getState().logger.logFilePath);
+        res.download(path.join(logPath, store.getState().logger.logFileName));
       }
     },
     "/shutdown": (req, res) => {

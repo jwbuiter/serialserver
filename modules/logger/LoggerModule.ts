@@ -12,14 +12,8 @@ import { IStore } from "../../store";
 const backupPath = path.join(constants.saveLogLocation, "backup.json");
 
 function LoggerModule(config: ILoggerConfig, store: IStore) {
-  const {
-    resetTime,
-    resetInterval,
-    resetMode,
-    writeToFile,
-    logID,
-    unique,
-  } = config;
+  const { resetTime, resetInterval, resetMode, writeToFile, logID, unique } =
+    config;
   const { activityCounter, enabled } = store.getState().config.selfLearning;
   const activityIndex = 1 - Number(enabled[3]);
 
@@ -35,6 +29,11 @@ function LoggerModule(config: ILoggerConfig, store: IStore) {
       new Date(),
       "yyyy-mm-dd_HH-MM-ss"
     )}.csv`;
+
+    store.dispatch({
+      type: "LOG_SET_FILE",
+      payload: fileName,
+    });
 
     if (!onBoot && constants.autoResetHard)
       setTimeout(() => {
@@ -236,7 +235,7 @@ function LoggerModule(config: ILoggerConfig, store: IStore) {
             ...entry.cells.map((val) => String(val)),
             String(entry.TU),
             String(entry.TA),
-            String(entry.list)
+            String(entry.list),
           ])
         );
 
