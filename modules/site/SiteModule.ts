@@ -203,6 +203,8 @@ function SiteModule(config, store: IStore) {
         res.zip({ files, filename: `${constants.name}_${logID}_${date}.zip` });
       } else if (req.query.file) {
         res.download(path.join(logPath, req.query.file));
+      } else {
+        res.download(path.join(logPath, store.getState().logger.logFilePath));
       }
     },
     "/shutdown": (req, res) => {

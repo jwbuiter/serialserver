@@ -20,6 +20,7 @@ export interface ILoggerState {
   digits: number[];
   visible: boolean[];
   entries: IEntry[];
+  logFilePath: string;
 }
 
 type ComConfig = {
@@ -42,7 +43,7 @@ const initialState = {
     ...table.cells.map((element: CellConfig) => element.name),
     "TU",
     "TA",
-    "List"
+    "List",
   ],
   accessors: [
     "name",
@@ -52,7 +53,7 @@ const initialState = {
     ...table.cells.map((_: CellConfig, i: number) => `cells[${i}]`),
     "TU",
     "TA",
-    "list"
+    "list",
   ],
   digits: [
     -1,
@@ -75,6 +76,7 @@ const initialState = {
     selfLearning.enabled.endsWith("ind"),
   ],
   entries: [],
+  logFilePath: "",
 };
 
 export default function (
@@ -92,7 +94,7 @@ export default function (
       };
     }
     case "LOG_RESET": {
-      return initialState;
+      return { ...initialState, logFilePath: action.payload };
     }
     case "LOG_OVERWRITE": {
       const entry = action.payload;
@@ -126,9 +128,8 @@ export default function (
 
       return {
         ...state,
-        entries: newEntries
-      }
-
+        entries: newEntries,
+      };
     }
     case "LOG_ACTIVITY_OVERWRITE": {
       const { index, newValue } = action.payload;
