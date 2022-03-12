@@ -34,7 +34,6 @@ interface IConstants {
   newCycleResetHard: boolean;
   individualSLMaxEntries: number;
   individualSLMatchEntries: number;
-  individualSLOverwriteExcel: boolean;
   individualSLRemoveExcel: boolean;
   individualSLDecrementTotal: boolean;
   saveExcelDateStamp: boolean;
@@ -45,6 +44,6 @@ let constants: IConstants = require("./config.static.template");
 
 try {
   constants = mergeConfig(constants, require("./config.static"));
-} catch { }
+} catch {}
 
 export default constants;

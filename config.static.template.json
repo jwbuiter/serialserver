@@ -52,7 +52,6 @@
   "newCycleResetHard": true,
   "individualSLMaxEntries": 5,
   "individualSLMatchEntries": 3,
-  "individualSLOverwriteExcel": false,
   "individualSLRemoveExcel": false,
   "individualSLDecrementTotal": true,
   "saveExcelDateStamp": true,

@@ -67,9 +67,10 @@
     "fileExtension": "xls",
     "waitForOther": false,
     "searchColumn": 0,
-    "individualColumn": 1,
-    "dateColumn": 2,
-    "exitColumn": 3,
+    "currentCalibrationColumn": 22,
+    "startingCalibrationColumn": 23,
+    "dateColumn": 24,
+    "exitColumn": 25,
     "cells": [
       {
         "name": "",

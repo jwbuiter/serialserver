@@ -55,7 +55,8 @@ export interface ITableConfig {
   fileExtension: "xls" | "xlsx";
   waitForOther: boolean;
   searchColumn: number;
-  individualColumn: number;
+  currentCalibrationColumn: number;
+  startingCalibrationColumn: number;
   dateColumn: number;
   exitColumn: number;
   cells: CellConfig[];

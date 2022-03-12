@@ -16,7 +16,8 @@ function TableModule(
     fileExtension,
     waitForOther,
     searchColumn,
-    individualColumn,
+    currentCalibrationColumn,
+    startingCalibrationColumn,
     dateColumn,
     exitColumn,
     cells,
@@ -84,6 +85,20 @@ function TableModule(
     // @ts-ignore
     let sheetName = excelFile.Workbook.Sheets[0].name;
     excelSheet = sheetToArray(excelFile.Sheets[sheetName]);
+
+    for (let row of excelSheet.slice(1)) {
+      const key = row[searchColumn];
+      const calibration = row[currentCalibrationColumn];
+      if (!key || !calibration) continue;
+
+      store.dispatch({
+        type: "SL_INDIVIDUAL_UPGRADE",
+        payload: {
+          key,
+          calibration,
+        },
+      });
+    }
   }
 
   function findRow(key: any): any[] | undefined {
@@ -160,20 +175,21 @@ function TableModule(
 
         const { key, calibration } = lastAction.payload;
 
-        const foundRow = findRow(key);
-        if (foundRow) {
-          if (!foundRow[individualColumn])
-            foundRow[individualColumn] = calibration;
-          if (!foundRow[dateColumn]) foundRow[dateColumn] = getExcelDate();
+        let keyRow = findRow(key);
+        if (keyRow) {
+          if (!keyRow[startingCalibrationColumn])
+            keyRow[startingCalibrationColumn] = calibration;
+          if (!keyRow[dateColumn]) keyRow[dateColumn] = getExcelDate();
         } else {
-          const newRow = [];
+          keyRow = [];
 
-          newRow[searchColumn] = key;
-          newRow[individualColumn] = calibration;
-          newRow[dateColumn] = getExcelDate();
+          keyRow[searchColumn] = key;
+          keyRow[startingCalibrationColumn] = calibration;
+          keyRow[dateColumn] = getExcelDate();
 
-          excelSheet.push(newRow);
+          excelSheet.push(keyRow);
         }
+        keyRow[currentCalibrationColumn] = calibration;
         saveExcel(excelSheet);
 
         break;
@@ -205,8 +221,7 @@ function TableModule(
         break;
       }
       case "SL_ENTRY": {
-        if (!useFile || !excelSheet || !constants.individualSLOverwriteExcel)
-          break;
+        if (!useFile || !excelSheet) break;
 
         const { key } = lastAction.payload;
         const entries =
@@ -219,11 +234,8 @@ function TableModule(
         });
         if (foundIndex == -1) break;
 
-        const currentDate = getExcelDate();
-        if (excelSheet[foundIndex][dateColumn] == currentDate) break;
-
-        excelSheet[foundIndex][individualColumn] = entries[key].calibration;
-        excelSheet[foundIndex][dateColumn] = currentDate;
+        excelSheet[foundIndex][currentCalibrationColumn] =
+          entries[key].calibration;
 
         saveExcel(excelSheet);
 
