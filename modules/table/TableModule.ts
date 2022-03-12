@@ -79,13 +79,7 @@ function TableModule(
     XLSX.writeFile(wb, path.join(constants.saveLogLocation, fileName));
   }
 
-  let excelSheet: any[][];
-  if (fs.existsSync(excelPath)) {
-    let excelFile = XLSX.readFile(excelPath);
-    // @ts-ignore
-    let sheetName = excelFile.Workbook.Sheets[0].name;
-    excelSheet = sheetToArray(excelFile.Sheets[sheetName]);
-
+  function loadSelfLearningFromExcel() {
     for (let row of excelSheet.slice(1)) {
       const key = row[searchColumn];
       const calibration = row[currentCalibrationColumn];
@@ -99,6 +93,16 @@ function TableModule(
         },
       });
     }
+  }
+
+  let excelSheet: any[][];
+  if (fs.existsSync(excelPath)) {
+    let excelFile = XLSX.readFile(excelPath);
+    // @ts-ignore
+    let sheetName = excelFile.Workbook.Sheets[0].name;
+    excelSheet = sheetToArray(excelFile.Sheets[sheetName]);
+
+    loadSelfLearningFromExcel();
   }
 
   function findRow(key: any): any[] | undefined {
@@ -166,8 +170,8 @@ function TableModule(
             }
           }
         }
-
         saveExcel(excelSheet);
+        loadSelfLearningFromExcel();
         break;
       }
       case "SL_INDIVIDUAL_UPGRADE": {
