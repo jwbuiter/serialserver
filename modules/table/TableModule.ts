@@ -219,6 +219,7 @@ function TableModule(
         if (constants.individualSLRemoveExcel && exitCode)
           excelSheet = excelSheet.filter((_, index) => index != foundIndex);
         else excelSheet[foundIndex][exitColumn] = exitCode;
+        excelSheet[foundIndex][currentCalibrationColumn] = "";
 
         saveExcel(excelSheet);
 
@@ -246,12 +247,19 @@ function TableModule(
         break;
       }
       case "SL_INDIVIDUAL_DOWNGRADE": {
-        if (!useFile || !excelSheet || !constants.individualSLRemoveExcel)
-          break;
+        if (!useFile || !excelSheet) break;
 
         const { key } = lastAction.payload;
 
-        excelSheet = excelSheet.filter((row) => row[searchColumn] !== key);
+        if (constants.individualSLRemoveExcel)
+          excelSheet = excelSheet.filter((row) => row[searchColumn] !== key);
+        else {
+          const foundIndex = excelSheet.findIndex((row) => {
+            return row[searchColumn] === key;
+          });
+          if (foundIndex == -1) break;
+          excelSheet[foundIndex][currentCalibrationColumn] = "";
+        }
 
         saveExcel(excelSheet);
 
