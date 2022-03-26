@@ -80,19 +80,39 @@ function TableModule(
   }
 
   function loadSelfLearningFromExcel() {
+    const currentTeaching = store.getState().selfLearning.teaching;
+    if (!currentTeaching)
+      store.dispatch({
+        type: "SL_TEACH",
+        payload: true,
+      });
+
+    const currentEntries =
+      store.getState().selfLearning.individual.individualEntries;
     for (let row of excelSheet.slice(1)) {
       const key = row[searchColumn];
       const calibration = row[currentCalibrationColumn];
       if (!key || !calibration) continue;
+      if (
+        key in currentEntries &&
+        currentEntries[key].calibration == calibration
+      )
+        continue;
 
       store.dispatch({
-        type: "SL_INDIVIDUAL_UPGRADE",
+        type: "SL_ENTRY",
         payload: {
           key,
-          calibration,
+          entry: calibration,
         },
       });
     }
+
+    if (!currentTeaching)
+      store.dispatch({
+        type: "SL_TEACH",
+        payload: false,
+      });
   }
 
   let excelSheet: any[][];
@@ -165,6 +185,7 @@ function TableModule(
           }
 
           for (let i = 0; i < updateRow.length; i++) {
+            if (i == currentCalibrationColumn && existingRow[i]) continue; //preserve calibration unless there is none
             if (updateRow[i]) {
               existingRow[i] = updateRow[i];
             }
