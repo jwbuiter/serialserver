@@ -296,7 +296,7 @@ function TableModule(
 
         for (const row of excelSheet) {
           let rowDate = Number(
-            row[config.selfLearning.individualCycleLimitDateColunn]
+            row[config.selfLearning.individualCycleLimitDateColumn]
           );
           if (rowDate == 0 || Number.isNaN(rowDate))
             rowDate = Number(row[dateColumn]);

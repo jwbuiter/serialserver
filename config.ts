@@ -142,7 +142,7 @@ export interface ISelfLearningConfig {
   individualCorrectionIncrement: number;
   individualCorrectionLimit: number;
   individualCycleLimit: number;
-  individualCycleLimitDateColunn: number;
+  individualCycleLimitDateColumn: number;
   individualAverageNumber: number;
   activityCounter: boolean;
   firstTopFormula: string;
