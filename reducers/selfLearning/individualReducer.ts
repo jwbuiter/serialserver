@@ -187,7 +187,11 @@ export default function individualReducer(
         const oldEntry = state.individualEntries[key];
         const measurements = oldEntry.measurements
           .map((elem) => ({ ...elem, age: elem.age + 1 }))
-          .filter((elem) => individualCorrectionLimit == 0 || elem.age <= individualCorrectionLimit + 1);
+          .filter(
+            (elem) =>
+              individualCorrectionLimit == 0 ||
+              elem.age <= individualCorrectionLimit + 1
+          );
 
         newIndividualEntries[key] = {
           ...oldEntry,
@@ -245,7 +249,7 @@ export default function individualReducer(
     }
     case "SL_INDIVIDUAL_DELETE_INDIVIDUAL": {
       const { key } = action.payload;
-      if (key) {
+      if (key != undefined) {
         const newIndividualEntries = Object.assign({}, state.individualEntries);
         delete newIndividualEntries[key];
 
@@ -298,15 +302,14 @@ export default function individualReducer(
 
       if (key in newIndividualEntries) {
         newIndividualEntries[key].extra = extra;
-      }
-      else if (key in newGeneralEntries) {
+      } else if (key in newGeneralEntries) {
         newGeneralEntries[key].extra = extra;
       }
 
       return {
         ...state,
         individualEntries: newIndividualEntries,
-        generalEntries: newGeneralEntries
+        generalEntries: newGeneralEntries,
       };
     }
     default:

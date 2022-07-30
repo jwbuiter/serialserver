@@ -57,12 +57,8 @@ function Realtime(server, config, store: IStore) {
 
     switch (state.selfLearning.type) {
       case "individual": {
-        const {
-          calibration,
-          tolerance,
-          success,
-          comIndex,
-        } = state.selfLearning;
+        const { calibration, tolerance, success, comIndex } =
+          state.selfLearning;
         io.emit("selfLearning", {
           individual: true,
           calibration,
@@ -74,12 +70,8 @@ function Realtime(server, config, store: IStore) {
         break;
       }
       case "global": {
-        const {
-          calibration,
-          tolerance,
-          success,
-          comIndex,
-        } = state.selfLearning;
+        const { calibration, tolerance, success, comIndex } =
+          state.selfLearning;
         const { matchedTolerance } = state.selfLearning.global;
         io.emit("selfLearning", {
           individual: false,
@@ -191,14 +183,14 @@ function Realtime(server, config, store: IStore) {
     try {
       fs.accessSync(path.join(configPath, name));
       fs.unlinkSync(path.join(configPath, name));
-    } catch (err) { }
+    } catch (err) {}
   }
 
   function deleteLog(name) {
     try {
       fs.accessSync(path.join(logPath, name));
       fs.unlinkSync(path.join(logPath, name));
-    } catch (err) { }
+    } catch (err) {}
   }
 
   function uploadLog({ name, index }, callback) {
@@ -418,14 +410,29 @@ function Realtime(server, config, store: IStore) {
       },
     });
 
-    const dataFile = path.join(constants.baseDirectory, "data", "data." + fileExtension);
-    const templateFile = path.join(constants.baseDirectory, "data", "template." + fileExtension);
+    const dataFormat = path.join(constants.baseDirectory, "data", "data.");
+    const templateFormat = path.join(
+      constants.baseDirectory,
+      "data",
+      "template."
+    );
 
-    if (fs.existsSync(dataFile)) {
+    const dataFile = [
+      dataFormat + fileExtension,
+      dataFormat + "xls",
+      dataFormat + "xlsx",
+    ].find((p) => fs.existsSync(p));
+    const templateFile = [
+      templateFormat + fileExtension,
+      templateFormat + "xls",
+      templateFormat + "xlsx",
+    ].find((p) => fs.existsSync(p));
+
+    if (dataFile) {
       fs.unlinkSync(dataFile);
     }
 
-    if (fs.existsSync(templateFile)) {
+    if (templateFile) {
       fs.copyFileSync(templateFile, dataFile);
     }
 

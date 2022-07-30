@@ -24,11 +24,8 @@ function TableModule(
   }: ITableConfig,
   store: IStore
 ) {
-  const excelPath = path.join(
-    constants.baseDirectory,
-    "data",
-    "data." + fileExtension
-  );
+  const excelFormat = path.join(constants.baseDirectory, "data", "data.");
+  const excelPath = excelFormat + fileExtension;
   const tempPath = path.join(
     constants.baseDirectory,
     "data",
@@ -71,11 +68,10 @@ function TableModule(
       fileName = `${constants.name}_${config.logger.logID}_${dateFormat(
         modifyDate,
         "yyyy-mm-dd"
-      )}.xls`;
+      )}.${fileExtension}`;
     } else {
       fileName = `${constants.name}_${config.logger.logID}.${fileExtension}`;
     }
-
     XLSX.writeFile(wb, path.join(constants.saveLogLocation, fileName));
   }
 
@@ -116,13 +112,24 @@ function TableModule(
   }
 
   let excelSheet: any[][];
-  if (fs.existsSync(excelPath)) {
-    let excelFile = XLSX.readFile(excelPath);
+
+  const existingPath = [
+    excelPath,
+    excelFormat + "xls",
+    excelFormat + "xlsx",
+  ].find((p) => fs.existsSync(p));
+  if (existingPath != undefined) {
+    let excelFile = XLSX.readFile(existingPath);
     // @ts-ignore
     let sheetName = excelFile.Workbook.Sheets[0].name;
     excelSheet = sheetToArray(excelFile.Sheets[sheetName]);
 
     loadSelfLearningFromExcel();
+    saveExcel(excelSheet);
+
+    if (existingPath != excelPath) {
+      fs.unlinkSync(existingPath);
+    }
   }
 
   function findRow(key: any): any[] | undefined {
