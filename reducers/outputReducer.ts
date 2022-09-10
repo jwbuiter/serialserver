@@ -38,7 +38,10 @@ function calculateState(port: IOutputPort, index: number) {
   return port.result;
 }
 
-export default function (state: IOutputState = initialState, action: Action) {
+export default function (
+  state: IOutputState = initialState,
+  action: Action
+): IOutputState {
   switch (action.type) {
     case "OUTPUT_RESULT_CHANGED": {
       const { index, result } = action.payload;

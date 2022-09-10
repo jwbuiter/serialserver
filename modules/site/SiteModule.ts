@@ -267,7 +267,7 @@ function SiteModule(config, store: IStore) {
 
   function addTableRoute(i, j) {
     functionRoutes[`/${String.fromCharCode(65 + i)}${j + 1}`] = (req, res) => {
-      res.send(store.getState().table.cells[i * 5 + j].entry);
+      res.send(String(store.getState().table.cells[i * 5 + j].entry));
     };
   }
 

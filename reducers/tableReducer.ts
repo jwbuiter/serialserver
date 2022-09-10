@@ -2,7 +2,12 @@ import { Action } from "../actions/types";
 import config from "../config";
 const { table } = config;
 
-type Cell = { entry: string; color: string; manual: boolean; numeric: boolean };
+type Cell = {
+  entry: string | number;
+  color: string;
+  manual: boolean;
+  numeric: boolean;
+};
 
 export interface ITableState {
   cells: Cell[];
@@ -19,11 +24,14 @@ const initialState = {
   foundRow: Array<string>(26).fill(""),
 };
 
-export default function (state: ITableState = initialState, action: Action) {
+export default function (
+  state: ITableState = initialState,
+  action: Action
+): ITableState {
   switch (action.type) {
     case "TABLE_ENTRY": {
       const { index, entry } = action.payload;
-      const newCells = JSON.parse(JSON.stringify(state.cells));
+      const newCells: Cell[] = JSON.parse(JSON.stringify(state.cells));
       newCells[index].entry = entry;
       return {
         ...state,

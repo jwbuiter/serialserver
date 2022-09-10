@@ -25,7 +25,10 @@ const initialState: ISerialState = {
   })),
 };
 
-export default function (state: ISerialState = initialState, action: Action) {
+export default function (
+  state: ISerialState = initialState,
+  action: Action
+): ISerialState {
   switch (action.type) {
     case "SERIAL_ENTRY": {
       const { index, entry } = action.payload;

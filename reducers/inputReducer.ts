@@ -38,11 +38,14 @@ function calculateState(port: IInputPort) {
   return port.physical;
 }
 
-export default function (state: IInputState = initialState, action: Action) {
+export default function (
+  state: IInputState = initialState,
+  action: Action
+): IInputState {
   switch (action.type) {
     case "INPUT_PHYSICAL_CHANGED": {
       const { index, physical } = action.payload;
-      const newPorts = Array.from(state.ports);
+      const newPorts: IInputPort[] = Array.from(state.ports);
       newPorts[index].physical = physical;
       return {
         ...state,
