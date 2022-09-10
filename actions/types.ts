@@ -352,7 +352,7 @@ export interface SLIndividualDeleteGeneralAction extends IAction {
 
 export interface SLIndividualDeleteIndividualAction extends IAction {
   type: "SL_INDIVIDUAL_DELETE_INDIVIDUAL";
-  payload: { key: string; message: string; callback };
+  payload: { key?: string; message?: string; callback };
 }
 
 export interface SLIndividualDowngradeAction extends IAction {

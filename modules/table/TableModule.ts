@@ -226,28 +226,38 @@ function TableModule(
 
         break;
       }
+      case "SL_RESET_INDIVIDUAL":
       case "SL_INDIVIDUAL_DELETE_INDIVIDUAL": {
         if (!useFile || !excelSheet) break;
 
-        const { key, message, callback } = lastAction.payload;
+        let deletedKey = undefined;
+        if (lastAction.type == "SL_INDIVIDUAL_DELETE_INDIVIDUAL") {
+          const { key, message, callback } = lastAction.payload;
+          deletedKey = key;
 
-        const exitCode = Number(message);
-        if (exitCode && constants.individualSLDecrementTotal) {
-          store.dispatch({
-            type: "SL_INDIVIDUAL_DECREMENT_TOTAL",
-            payload: callback,
+          const exitCode = Number(message);
+          if (exitCode && constants.individualSLDecrementTotal) {
+            store.dispatch({
+              type: "SL_INDIVIDUAL_DECREMENT_TOTAL",
+              payload: callback,
+            });
+          }
+
+          const foundIndex = excelSheet.findIndex((row) => {
+            return row[searchColumn] === key;
           });
+          if (foundIndex !== -1) {
+            if (constants.individualSLRemoveExcel && exitCode)
+              excelSheet = excelSheet.filter((_, index) => index != foundIndex);
+            else excelSheet[foundIndex][exitColumn] = exitCode;
+          }
         }
 
-        const foundIndex = excelSheet.findIndex((row) => {
-          return row[searchColumn] === key;
-        });
-        if (foundIndex == -1) break;
+        for (let row of excelSheet) {
+          if (deletedKey && row[searchColumn] !== deletedKey) continue;
 
-        if (constants.individualSLRemoveExcel && exitCode)
-          excelSheet = excelSheet.filter((_, index) => index != foundIndex);
-        else excelSheet[foundIndex][exitColumn] = exitCode;
-        excelSheet[foundIndex][currentCalibrationColumn] = "";
+          row[currentCalibrationColumn] = "";
+        }
 
         saveExcel(excelSheet);
 

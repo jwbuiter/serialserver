@@ -417,7 +417,7 @@ function Realtime(server, config, store: IStore) {
       "template."
     );
 
-    const dataFile = [
+    let dataFile = [
       dataFormat + fileExtension,
       dataFormat + "xls",
       dataFormat + "xlsx",
@@ -430,6 +430,8 @@ function Realtime(server, config, store: IStore) {
 
     if (dataFile) {
       fs.unlinkSync(dataFile);
+    } else {
+      dataFile = dataFormat + fileExtension;
     }
 
     if (templateFile) {
