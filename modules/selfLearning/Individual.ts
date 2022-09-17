@@ -13,6 +13,8 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
     startCalibration,
     individualToleranceAbs,
     activityCounter,
+    individualActivityUpdatesWindow,
+    individualActivityUpdatesMinimum,
     firstTopFormula,
     secondTopFormula,
     extraColumns,
@@ -168,14 +170,13 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
           calibration = updatedSelfLearning.individualEntries[key].calibration;
           store.dispatch({
             type: "LOG_LIST_OVERWRITE",
-            payload: "UN"
+            payload: "UN",
           });
-        }
-        else if (key in updatedSelfLearning.generalEntries) {
+        } else if (key in updatedSelfLearning.generalEntries) {
           calibration = updatedSelfLearning.generalEntries[key].entries[0];
           store.dispatch({
             type: "LOG_LIST_OVERWRITE",
-            payload: "SL"
+            payload: "SL",
           });
         }
 
@@ -267,7 +268,7 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
             store.dispatch({
               type: "SL_INDIVIDUAL_DOWNGRADE",
               payload: {
-                key
+                key,
               },
             });
           }
@@ -285,14 +286,34 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
         if (lastAction.payload.index === comIndex) break;
         if (!lastAction.payload.entry) break;
 
+        const key = lastAction.payload.entry;
+
         store.dispatch({
           type: "LOG_MAKE_PARTIAL",
           payload: lastAction.payload,
         });
         store.dispatch({
           type: "SL_INDIVIDUAL_ACTIVITY",
-          payload: { key: lastAction.payload.entry },
+          payload: { key },
         });
+
+        const entry =
+          store.getState().selfLearning.individual.individualEntries[key];
+        if (entry) {
+          const { numUpdates, activity } = entry;
+          if (
+            activity >= individualActivityUpdatesWindow &&
+            numUpdates < individualActivityUpdatesMinimum
+          ) {
+            store.dispatch({
+              type: "SL_INDIVIDUAL_DOWNGRADE",
+              payload: {
+                key,
+              },
+            });
+          }
+        }
+
         saveIndividualSelfLearning();
         break;
       }
@@ -307,9 +328,12 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
     }
   });
 
-  if (fs.existsSync(constants.baseDirectory + "/selfLearning/individualData.json")) {
+  if (
+    fs.existsSync(constants.baseDirectory + "/selfLearning/individualData.json")
+  ) {
     try {
-      const individualData = require(constants.baseDirectory + "/selfLearning/individualData");
+      const individualData = require(constants.baseDirectory +
+        "/selfLearning/individualData");
       store.dispatch({
         type: "SL_INDIVIDUAL_LOAD",
         payload: individualData,

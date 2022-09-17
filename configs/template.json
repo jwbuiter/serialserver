@@ -580,6 +580,8 @@
     "individualCycleLimitDateColumn": 2,
     "individualAverageNumber": 3,
     "activityCounter": false,
+    "individualActivityUpdatesWindow": 20,
+    "individualActivityUpdatesMinimum": 0,
     "firstTopFormula": "",
     "firstTopDigits": 0,
     "secondTopFormula": "",
