@@ -21,7 +21,7 @@ const initialState: ISerialState = {
     time: null,
     entry: "",
     average: "",
-    numeric: serial.coms[i].factor !== 0,
+    numeric: serial.coms[i].numeric,
   })),
 };
 

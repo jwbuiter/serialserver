@@ -15,6 +15,7 @@ function LoggerModule(config: ILoggerConfig, store: IStore) {
   const { resetTime, resetInterval, resetMode, writeToFile, logID, unique } =
     config;
   const { activityCounter, enabled } = store.getState().config.selfLearning;
+  const uniqueIndex = Number(unique.slice(-1));
   const activityIndex = 1 - Number(enabled[3]);
 
   let fileName: string;
@@ -74,10 +75,10 @@ function LoggerModule(config: ILoggerConfig, store: IStore) {
     }
   }
 
-  function updateActivity(activityEntry, full) {
+  function updateActivity(activityEntry, full, index) {
     const logEntries = store.getState().logger.entries;
     const oldEntry = logEntries.find(
-      (entry) => entry.coms[activityIndex] === activityEntry && entry.TA
+      (entry) => entry.coms[index] === activityEntry && entry.TA
     );
 
     if (!oldEntry) {
@@ -92,10 +93,10 @@ function LoggerModule(config: ILoggerConfig, store: IStore) {
     }
 
     const TA = logEntries.filter(
-      (entry) => entry.coms[activityIndex] === activityEntry
+      (entry) => entry.coms[index] === activityEntry
     ).length;
     const oldIndex = logEntries.findIndex(
-      (entry) => entry.coms[activityIndex] === activityEntry && entry.TA
+      (entry) => entry.coms[index] === activityEntry && entry.TA
     );
     const newIndex = full || !oldEntry.full ? logEntries.length - 1 : oldIndex;
 
@@ -139,8 +140,7 @@ function LoggerModule(config: ILoggerConfig, store: IStore) {
           full: true,
         };
 
-        if (unique !== "off") {
-          const uniqueIndex = Number(unique.slice(-1));
+        if (!Number.isNaN(uniqueIndex)) {
           const comValue = state.serial.coms[uniqueIndex].entry;
           let uniqueTimes = 1;
 
@@ -165,12 +165,26 @@ function LoggerModule(config: ILoggerConfig, store: IStore) {
           newRow.TU = uniqueTimes;
         }
 
-        if (activityCounter) {
+        if (!Number.isNaN(activityIndex) && activityCounter) {
           store.dispatch({
             type: "LOG_OVERWRITE",
             payload: newRow,
           });
-          updateActivity(state.serial.coms[activityIndex].entry, true);
+          updateActivity(
+            state.serial.coms[activityIndex].entry,
+            true,
+            activityIndex
+          );
+        } else if (!Number.isNaN(uniqueIndex) && activityCounter) {
+          store.dispatch({
+            type: "LOG_ENTRY",
+            payload: newRow,
+          });
+          updateActivity(
+            state.serial.coms[uniqueIndex].entry,
+            true,
+            uniqueIndex
+          );
         } else {
           store.dispatch({
             type: "LOG_ENTRY",
@@ -210,7 +224,7 @@ function LoggerModule(config: ILoggerConfig, store: IStore) {
           payload: newRow,
         });
 
-        updateActivity(entry, false);
+        updateActivity(entry, false, activityIndex);
 
         store.dispatch({
           type: "LOG_SAVE",
