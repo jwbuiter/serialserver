@@ -13,6 +13,7 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
     startCalibration,
     individualToleranceAbs,
     activityCounter,
+    individualActivityUpdatesDays,
     individualActivityUpdatesWindow,
     individualActivityUpdatesMinimum,
     firstTopFormula,
@@ -272,6 +273,23 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
               },
             });
           }
+
+          if (!activityCounter || individualActivityUpdatesDays <= 0 || entry.activityHistory.length < individualActivityUpdatesDays)
+            continue;
+
+          const activityCount = entry.activityHistory.slice(0, individualActivityUpdatesDays).reduce((a, b) => a + b, 0);
+          if (activityCount / individualActivityUpdatesDays < individualActivityUpdatesWindow)
+            continue;
+          const updatesCount = entry.numUpdatesHistory.slice(0, individualActivityUpdatesDays).reduce((a, b) => a + b, 0);
+
+          if ((updatesCount / activityCount) < (individualActivityUpdatesMinimum / individualActivityUpdatesWindow)) {
+            store.dispatch({
+              type: "SL_INDIVIDUAL_DOWNGRADE",
+              payload: {
+                key,
+              },
+            });
+          }
         }
         saveIndividualSelfLearning();
         break;
@@ -296,23 +314,6 @@ function selfLearningIndividual(config: ISelfLearningConfig, store: IStore) {
           type: "SL_INDIVIDUAL_ACTIVITY",
           payload: { key },
         });
-
-        const entry =
-          store.getState().selfLearning.individual.individualEntries[key];
-        if (entry) {
-          const { numUpdates, activity } = entry;
-          if (
-            activity >= individualActivityUpdatesWindow &&
-            numUpdates < individualActivityUpdatesMinimum
-          ) {
-            store.dispatch({
-              type: "SL_INDIVIDUAL_DOWNGRADE",
-              payload: {
-                key,
-              },
-            });
-          }
-        }
 
         saveIndividualSelfLearning();
         break;

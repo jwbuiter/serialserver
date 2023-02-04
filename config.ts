@@ -145,6 +145,7 @@ export interface ISelfLearningConfig {
   individualCycleLimitDateColumn: number;
   individualAverageNumber: number;
   activityCounter: boolean;
+  individualActivityUpdatesDays: number;
   individualActivityUpdatesWindow: number;
   individualActivityUpdatesMinimum: number;
   firstTopFormula: string;
