@@ -136,11 +136,12 @@ function Input(index: number, config: IInputConfig, store: IStore) {
       case "command": {
         if (state) {
           const index = Number(commandCom.slice(3));
+          const escapedCommand = commandValue.replace("\\r","\r").replace("\\n","\n");
           store.dispatch({
             type: "SERIAL_COMMAND",
             payload: {
               index,
-              command: commandValue,
+              command: escapedCommand,
             },
           });
         }
