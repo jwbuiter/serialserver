@@ -1,6 +1,5 @@
 import RecoveryModule from "./modules/recovery/RecoveryModule";
 import ConfigModule from "./modules/config/ConfigModule";
-import authentication from "./modules/authentication/AuthenticationModule";
 import FTP from "./modules/ftp/FTPModule";
 import input from "./modules/input/InputModule";
 import logger from "./modules/logger/LoggerModule";
@@ -9,6 +8,7 @@ import selfLearning from "./modules/selfLearning/SelfLearningModule";
 import serial from "./modules/serial/SerialModule";
 import site from "./modules/site/SiteModule";
 import table from "./modules/table/TableModule";
+import bluetooth from "./modules/bluetooth/BluetoothModule";
 import store from "./store";
 import constants from "./constants";
 
@@ -22,7 +22,6 @@ if (typeof usedModules.recovery != "boolean") {
   const config = ConfigModule(store);
 
   const modules = {
-    authentication,
     FTP,
     input,
     logger,
@@ -31,6 +30,7 @@ if (typeof usedModules.recovery != "boolean") {
     serial,
     site,
     table,
+    bluetooth,
   };
 
   const { enabledModules } = constants;

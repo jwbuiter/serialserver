@@ -591,5 +591,10 @@
     "extraColumns": [],
     "success": 0
   },
+  "bluetooth":{
+    "trigger": "off",
+    "source": "log",
+    "frequency": 10
+  },
   "version": "4.8"
 }

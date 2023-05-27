@@ -1,4 +1,4 @@
-import serialPort from "serialport";
+import { SerialPort } from "serialport";
 import http from "http";
 import { Gpio } from "onoff";
 
@@ -207,7 +207,8 @@ function Com(index, config, store) {
       break;
     }
     default: {
-      const myPort = new serialPort(port, {
+      const myPort = new SerialPort({
+        path: port,
         baudRate: baudRate,
         dataBits: bits,
         stopBits: stopBits,

@@ -1,0 +1,10 @@
+[Service]
+WorkingDirectory=/srv/serialserver
+ExecStart=rfcomm watch hci0
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=notell
+ 
+[Install]
+WantedBy=bluetooth.target

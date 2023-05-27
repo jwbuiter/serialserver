@@ -4,7 +4,9 @@ git pull
 npm install --unsafe-perm
 npm run build
 [ -e /etc/systemd/system/serialserver.service ] && rm /etc/systemd/system/serialserver.service
-cp serialserver.service /etc/systemd/system/
+[ -e /etc/systemd/system/bt-agent.service ] && rm /etc/systemd/system/bt-agent.service
+[ -e /etc/systemd/system/dbus-org.bluez.service ] && rm /etc/systemd/system/dbus-org.bluez.service
+cp services/* /etc/systemd/system/
 systemctl daemon-reload
 rm -r client2
 git clone https://github.com/jwbuiter/serialserverclient2.git --depth 1

@@ -36,7 +36,6 @@
   ],
   "onlinePin": 5,
   "enabledModules": {
-    "authentication": true,
     "FTP": true,
     "input": true,
     "logger": true,
@@ -44,7 +43,8 @@
     "site": true,
     "selfLearning": false,
     "serial": true,
-    "table": true
+    "table": true,
+    "bluetooth": false
   },
   "autoResetHard": false,
   "manualResetHard": true,
@@ -54,6 +54,6 @@
   "individualSLMatchEntries": 3,
   "individualSLRemoveExcel": false,
   "individualSLDecrementTotal": true,
-  "saveExcelDateStamp": true,
+  "saveExcelDateStamp": false,
   "version": "4.8"
 }

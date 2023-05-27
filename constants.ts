@@ -18,7 +18,6 @@ interface IConstants {
   comPin: number[];
   onlinePin: number;
   enabledModules: {
-    authentication: boolean;
     FTP: boolean;
     input: boolean;
     logger: boolean;
@@ -27,6 +26,7 @@ interface IConstants {
     selfLearning: boolean;
     serial: boolean;
     table: boolean;
+    bluetooth: boolean;
   };
   autoResetHard: boolean;
   manualResetHard: boolean;

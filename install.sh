@@ -4,7 +4,7 @@ mv serialserverclient2 client2
 mkdir tmp
 cd tmp
 curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-apt-get install -y nodejs
+apt-get install -y nodejs bluez-tools
 cd ..
 rm -rf tmp
 npm install --unsafe-perm
@@ -12,11 +12,16 @@ npm run build
 adduser --disabled-password --gecos "" serialserver
 chown -R serialserver:serialserver /srv/serialserver
 chmod 777 /srv/serialserver
-[ -e /etc/systemd/system/serialserver.service ] && rm /etc/systemd/system/serialserver.service
-cp serialserver.service /etc/systemd/system/
+/bin/cp services/* /etc/systemd/system/
+systemctl daemon-reload
+systemctl enable bt-agent
 systemctl enable serialserver
+systemctl enable rfcomm
 systemctl enable ssh
 systemctl start ssh
+systemctl restart bluetooth
+systemctl start bt-agent
+systemctl start rfcomm
 
 if [ -f "config.static.json" ]
 then

@@ -157,6 +157,12 @@ export interface ISelfLearningConfig {
   success: number;
 }
 
+export interface IBluetoothConfig {
+  trigger: "off" | "com0" | "com1" | "continuous" | "execute";
+  source: "com0" | "com1" | "log";
+  frequency: number;
+}
+
 export interface IConfig {
   serial: ISerialConfig;
   table: ITableConfig;
@@ -165,6 +171,7 @@ export interface IConfig {
   logger: ILoggerConfig;
   FTP: IFTPConfig;
   selfLearning: ISelfLearningConfig;
+  bluetooth: IBluetoothConfig;
   version: string;
 }
 

@@ -10,6 +10,7 @@ import constants from "../../constants";
 import fullConfig from "../../config";
 import { IStore } from "../../store";
 import Realtime from "./Realtime";
+import { createLogLine } from "../../utils/logUtils";
 
 const app = express();
 app.use(zip());
@@ -120,22 +121,7 @@ function SiteModule(config, store: IStore) {
     "/com": (req, res) =>
       res.send(store.getState().input.executing ? "1" : "0"),
     "/coml": (req, res) => {
-      const loggerState = store.getState().logger;
-      const entries = loggerState.entries.slice(-1);
-      const legend = loggerState.legend;
-      const accessors = loggerState.accessors;
-
-      res.send(
-        JSON.stringify(
-          {
-            entries,
-            legend,
-            accessors,
-          },
-          null,
-          2
-        )
-      );
+      res.send(createLogLine(store.getState().logger));
     },
     "/comlog": (req, res) => {
       res.header("Access-Control-Allow-Origin", "*");
@@ -311,8 +297,6 @@ function SiteModule(config, store: IStore) {
     app.get("/com" + i, (req, res) => {
       const com = store.getState().serial.coms[i];
       let sendString = "";
-      console.log(store.getState().serial);
-
       if (com.average === "") {
         sendString += com.entry;
       } else {
