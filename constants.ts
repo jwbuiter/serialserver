@@ -38,6 +38,7 @@ interface IConstants {
   individualSLDecrementTotal: boolean;
   saveExcelDateStamp: boolean;
   version: string;
+  buildDate: string;
 }
 
 let constants: IConstants = require("./config.static.template");
@@ -45,5 +46,10 @@ let constants: IConstants = require("./config.static.template");
 try {
   constants = mergeConfig(constants, require("./config.static"));
 } catch {}
+
+constants.buildDate = require("child_process")
+  .execSync('git log -1 --format="%at" | xargs -I{} date -d @{} +%Y/%m/%d')
+  .toString()
+  .trim();
 
 export default constants;
