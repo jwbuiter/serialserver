@@ -8,16 +8,19 @@ const bluetoothSerialFile = "/dev/rfcomm0";
 
 function BluetoothModule(config: IBluetoothConfig, store: IStore) {
   const { trigger, source, frequency } = config;
+  console.log("bluetooth", config);
   if (trigger === "off") return {};
 
-  const index = +source[3];
+  const sourceIndex = +source[3];
+  const triggerIndex = +trigger[3];
 
   function sendData() {
+    console.log("send");
     let data: string;
     if (source == "log") {
       data = createLogLine(store.getState().logger);
     } else {
-      const com = store.getState().serial.coms[index];
+      const com = store.getState().serial.coms[sourceIndex];
       if (com.average === "") data = com.entry;
       else data = com.average;
     }
@@ -45,7 +48,7 @@ function BluetoothModule(config: IBluetoothConfig, store: IStore) {
     store.listen((lastAction) => {
       if (
         lastAction.type === "SERIAL_ENTRY" &&
-        lastAction.payload.index == index
+        lastAction.payload.index == triggerIndex
       )
         sendData();
     });
