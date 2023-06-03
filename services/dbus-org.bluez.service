@@ -6,7 +6,7 @@ ConditionPathIsDirectory=/sys/class/bluetooth
 [Service]
 Type=dbus
 BusName=org.bluez
-ExecStart=/usr/libexec/bluetooth/bluetoothd --compat
+ExecStart=/usr/sbin/bluetoothd --compat
 ExecStartPost=/usr/bin/sdptool add SP
 NotifyAccess=main
 #WatchdogSec=10
