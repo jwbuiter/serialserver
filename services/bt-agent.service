@@ -5,7 +5,7 @@ PartOf=bluetooth.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/bt-agent -c NoInputNoOutput
+ExecStart=/srv/serialserver/bt-agent.sh
 
 [Install]
 WantedBy=bluetooth.target
