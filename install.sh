@@ -14,12 +14,14 @@ chown -R serialserver:serialserver /srv/serialserver
 chmod 777 /srv/serialserver
 /bin/cp services/* /etc/systemd/system/
 systemctl daemon-reload
+bluetoothctl discoverable on || true
+bluetoothctl pairable on || true
+systemctl restart bluetooth
 systemctl enable bt-agent
 systemctl enable serialserver
 systemctl enable rfcomm
 systemctl enable ssh
 systemctl start ssh
-systemctl restart bluetooth
 systemctl start bt-agent
 systemctl start rfcomm
 
