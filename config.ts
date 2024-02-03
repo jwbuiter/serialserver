@@ -59,6 +59,7 @@ export interface ITableConfig {
   startingCalibrationColumn: number;
   dateColumn: number;
   exitColumn: number;
+  transferTargets: { key: string; value: string }[];
   cells: CellConfig[];
 }
 

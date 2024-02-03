@@ -52,6 +52,7 @@ function SiteModule(config, store: IStore) {
   }
 
   function importExcel(req, res) {
+    res.header("Access-Control-Allow-Origin", "*");
     saveFile(
       req,
       res,
@@ -66,6 +67,7 @@ function SiteModule(config, store: IStore) {
   }
 
   function updateExcel(req, res) {
+    res.header("Access-Control-Allow-Origin", "*");
     saveFile(
       req,
       res,
@@ -166,6 +168,7 @@ function SiteModule(config, store: IStore) {
       );
     },
     "/downloadExcel": (req, res) => {
+      res.header(`Access-Control-Allow-Origin`, `*`);
       const logID = store.getState().config.logger.logID;
       const fileName = `${constants.name}_${logID}.${fileExtension}`;
       res.download(

@@ -71,6 +71,7 @@
     "startingCalibrationColumn": 23,
     "dateColumn": 24,
     "exitColumn": 25,
+    "transferTargets": [],
     "cells": [
       {
         "name": "",
