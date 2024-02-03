@@ -47,7 +47,11 @@ function TableModule(
           ];
         if (typeof nextCell === "undefined") {
           row.push(void 0);
-        } else row.push(nextCell.v);
+        } else {
+          let value = nextCell.v;
+          if (colNum == searchColumn) value = String(value);
+          row.push(value);
+        }
       }
       result.push(row);
     }
@@ -119,16 +123,22 @@ function TableModule(
     excelFormat + "xlsx",
   ].find((p) => fs.existsSync(p));
   if (existingPath != undefined) {
-    let excelFile = XLSX.readFile(existingPath);
-    // @ts-ignore
-    let sheetName = excelFile.Workbook.Sheets[0].name;
-    excelSheet = sheetToArray(excelFile.Sheets[sheetName]);
+    try {
+      let excelFile = XLSX.readFile(existingPath);
+      // @ts-ignore
+      let sheetName = excelFile.Workbook.Sheets[0].name;
+      excelSheet = sheetToArray(excelFile.Sheets[sheetName]);
 
-    loadSelfLearningFromExcel();
-    saveExcel(excelSheet);
+      loadSelfLearningFromExcel();
+      saveExcel(excelSheet);
 
-    if (existingPath != excelPath) {
+      if (existingPath != excelPath) {
+        fs.unlinkSync(existingPath);
+      }
+    } catch (e) {
+      console.log("Invalid Excel file, deleting...");
       fs.unlinkSync(existingPath);
+      excelSheet = [];
     }
   }
 
