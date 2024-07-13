@@ -5,7 +5,7 @@
   "bin": "build.js",
   "scripts": {
     "start": "node build.js",
-    "build": "tsc --out build.js --module amd --moduleResolution node && sed -i '1s;^;var define = require(\"amdefine\")(module)\\;;' build.js && echo 'define.require(\"server\");' >> build.js && npm run minify",
+    "build": "git log -1 --format=\"%at\" | xargs -I{} date -d @{} +%Y/%m/%d > BUILDDATE && tsc --out build.js --module amd --moduleResolution node && sed -i '1s;^;var define = require(\"amdefine\")(module)\\;;' build.js && echo 'define.require(\"server\");' >> build.js && npm run minify",
     "dev": "ts-node-dev --respawn --transpile-only --ignore-watch [data,configs] ./server.ts",
     "prod": "npm run build && npm run start",
     "minify": "uglifyjs --compress --mangle --output build.min.js -- build.js"

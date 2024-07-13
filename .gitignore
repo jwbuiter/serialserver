@@ -1,4 +1,5 @@
 config.static.json
+BUILDDATE
 seriallog*.txt
 data/*
 configs/*

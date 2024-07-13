@@ -1,3 +1,5 @@
+import fs from "fs";
+
 import { mergeConfig } from "./utils/objectUtils";
 
 interface IConstants {
@@ -47,9 +49,8 @@ try {
   constants = mergeConfig(constants, require("./config.static"));
 } catch {}
 
-constants.buildDate = require("child_process")
-  .execSync('git log -1 --format="%at" | xargs -I{} date -d @{} +%Y/%m/%d')
-  .toString()
-  .trim();
+constants.buildDate = fs.readFileSync("BUILDDATE").toString().trim();
+
+console.log("build date: " + constants.buildDate);
 
 export default constants;
