@@ -143,6 +143,11 @@ export default function Parser(store: IStore) {
             return acc;
           }
         }, []).length,
+      EX: () =>
+        Number(
+          data.findIndex((num) => num == Number(state.serial.coms[i].entry)) !=
+            -1
+        ),
     };
 
     return statisticFunctions[operator]().toString();

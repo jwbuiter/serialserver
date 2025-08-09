@@ -40,7 +40,7 @@ function Input(index: number, config: IInputConfig, store: IStore) {
   function handleInput(state) {
     switch (formula) {
       case "exe": {
-        const reduxState = store.getState();
+        let reduxState = store.getState();
         const blocked = reduxState.input.ports.reduce(
           (acc, cur) => acc || cur.blocking,
           false
@@ -54,7 +54,13 @@ function Input(index: number, config: IInputConfig, store: IStore) {
           store.dispatch({
             type: "EXECUTE_START",
           });
-        } else if (!state && reduxState.input.executing) {
+          reduxState = store.getState(); // update state since start of execution may have changed it
+        }
+
+        if (
+          !reduxState.input.ports[index].state &&
+          reduxState.input.executing
+        ) {
           store.dispatch({
             type: "EXECUTE_STOP",
           });
@@ -136,7 +142,9 @@ function Input(index: number, config: IInputConfig, store: IStore) {
       case "command": {
         if (state) {
           const index = Number(commandCom.slice(3));
-          const escapedCommand = commandValue.replace("\\r","\r").replace("\\n","\n");
+          const escapedCommand = commandValue
+            .replace("\\r", "\r")
+            .replace("\\n", "\n");
           store.dispatch({
             type: "SERIAL_COMMAND",
             payload: {
