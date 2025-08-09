@@ -220,6 +220,16 @@ function Realtime(server, config, store: IStore) {
     });
   }
 
+  function setNtpEnabled(enabled) {
+    console.log("setting ntp enabled to: " + enabled);
+    exec(`sudo timedatectl set-ntp ${enabled}`, (err, stdout, stderr) => {
+      if (err) {
+        console.error(`exec error: ${err}`);
+        return;
+      }
+    });
+  }
+
   function getLogList(msg, callback) {
     fs.readdir(logPath, (err, files) => {
       const logList = files.filter((element) => element.endsWith(".csv"));
@@ -597,6 +607,7 @@ function Realtime(server, config, store: IStore) {
       deleteLog: deleteLog,
       uploadLog: uploadLog,
       setDateTime: setDateTime,
+      setNtpEnabled: setNtpEnabled,
       getLogList: getLogList,
       getConfigList: getConfigList,
       forceInput: forceInput,
