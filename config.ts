@@ -117,7 +117,7 @@ export interface ILoggerConfig {
   unique: "off" | "com0" | "com1";
 }
 
-interface IFTPTargetConfig {
+export interface IFTPTargetConfig {
   address: string;
   folder: string;
   username: string;

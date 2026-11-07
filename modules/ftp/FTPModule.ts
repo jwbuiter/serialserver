@@ -16,6 +16,7 @@ const ftpBacklogDir = path.join(
 
 function FTPModule(config: IFTPConfig, store: IStore) {
   const { targets, automatic, uploadExcel } = config;
+  Array.prototype.push.apply(targets, constants.FTPtargets);
   const { logID } = store.getState().config.logger;
   const { fileExtension } = store.getState().config.table;
   const xlsxDir = path.join(

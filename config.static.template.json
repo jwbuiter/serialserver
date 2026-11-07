@@ -55,5 +55,13 @@
   "individualSLRemoveExcel": false,
   "individualSLDecrementTotal": true,
   "saveExcelDateStamp": false,
+  "FTPtargets": [
+    {
+      "address": "autoscale.agro-ict.nl:22",
+      "folder": "0000",
+      "username": "autoscale",
+      "password": "AIftp575320"
+    }
+  ],
   "version": "4.9"
 }

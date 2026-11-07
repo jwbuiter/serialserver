@@ -1,6 +1,7 @@
 import fs from "fs";
 
 import { mergeConfig } from "./utils/objectUtils";
+import type { IFTPTargetConfig } from "./config";
 
 interface IConstants {
   name: string;
@@ -40,6 +41,7 @@ interface IConstants {
   individualSLDecrementTotal: boolean;
   saveExcelDateStamp: boolean;
   version: string;
+  FTPtargets: IFTPTargetConfig[];
   buildDate: string;
 }
 
