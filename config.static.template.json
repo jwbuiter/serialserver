@@ -8,6 +8,11 @@
   "exposeUpload": false,
   "exposeShutdown": true,
   "exposeSettings": true,
+  "wifi": {
+    "hotspotSSID": "",
+    "hotspotPassword": "serialserver",
+    "fallbackDelay": 60
+  },
   "showTolerance": false,
   "tableColumns": 5,
   "resetPin": 7,
@@ -44,7 +49,8 @@
     "selfLearning": false,
     "serial": true,
     "table": true,
-    "bluetooth": false
+    "bluetooth": false,
+    "wifi": true
   },
   "autoResetHard": false,
   "manualResetHard": true,

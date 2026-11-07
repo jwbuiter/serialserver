@@ -11,6 +11,7 @@ import fullConfig from "../../config";
 import { IStore } from "../../store";
 import Realtime from "./Realtime";
 import { createLogLine } from "../../utils/logUtils";
+import { isHotspotActive, HOTSPOT_IP } from "../wifi/WifiModule";
 
 const app = express();
 app.use(zip());
@@ -286,6 +287,22 @@ function SiteModule(config, store: IStore) {
     "/importTemplate": importExcelTemplate,
     "/uploadConfig": uploadConfig,
   };
+
+  // Captive portal: while the hotspot is up, every DNS name resolves to the Pi
+  // (see install.sh). Requests for other hosts (phones checking for internet,
+  // e.g. /generate_204 or /hotspot-detect.html) are redirected to the Wi-Fi
+  // dialog so the device shows its "sign in to network" page.
+  app.use((req, res, next) => {
+    if (!isHotspotActive()) return next();
+    const host = String(req.headers.host || "").split(":")[0];
+    const isLocal =
+      host === "" ||
+      host === "localhost" ||
+      host.endsWith(".local") ||
+      /^[0-9.]+$/.test(host);
+    if (isLocal) return next();
+    res.redirect(302, `http://${HOTSPOT_IP}/?wifi`);
+  });
 
   app.use(
     "/",

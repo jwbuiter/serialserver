@@ -13,6 +13,11 @@ interface IConstants {
   exposeUpload: boolean;
   exposeShutdown: boolean;
   exposeSettings: boolean;
+  wifi: {
+    hotspotSSID: string;
+    hotspotPassword: string;
+    fallbackDelay: number;
+  };
   showTolerance: boolean;
   tableColumns: number;
   resetPin: number;
@@ -30,6 +35,7 @@ interface IConstants {
     serial: boolean;
     table: boolean;
     bluetooth: boolean;
+    wifi: boolean;
   };
   autoResetHard: boolean;
   manualResetHard: boolean;

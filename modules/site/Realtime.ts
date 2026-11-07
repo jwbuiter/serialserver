@@ -9,6 +9,7 @@ import oldConfig, { template } from "../../config";
 import { IStore } from "../../store";
 import { IInputPort } from "../../reducers/inputReducer";
 import { IOutputPort } from "../../reducers/outputReducer";
+import * as wifi from "../wifi/WifiModule";
 
 const configPath = path.join(constants.baseDirectory, "configs");
 const logPath = constants.saveLogLocation;
@@ -493,6 +494,36 @@ function Realtime(server, config, store: IStore) {
     });
   }
 
+  // Wraps a wifi operation so the client always gets {ok, ...result} or {ok: false, error}.
+  function wifiCommand(fn: (msg) => Promise<any>) {
+    return (msg, callback) => {
+      const reply = typeof callback === "function" ? callback : () => {};
+      fn(msg)
+        .then((result) => reply({ ok: true, ...result }))
+        .catch((err) => reply({ ok: false, error: err.message }));
+    };
+  }
+
+  const wifiCommands = {
+    wifiStatus: wifiCommand(async () => ({
+      status: await wifi.getStatus(),
+      saved: await wifi.getSavedNetworks(),
+    })),
+    wifiScan: wifiCommand(async (msg) => wifi.scan(!(msg && msg.rescan === false))),
+    wifiConnect: wifiCommand(async ({ ssid, password, hidden }) => ({
+      status: await wifi.connect(String(ssid || ""), String(password || ""), !!hidden),
+    })),
+    wifiForget: wifiCommand(async (name) => {
+      await wifi.forget(String(name));
+      return {};
+    }),
+    wifiHotspot: wifiCommand(async (enable) => {
+      if (enable) await wifi.startHotspot();
+      else await wifi.stopHotspot();
+      return {};
+    }),
+  };
+
   setInterval(() => {
     io.emit("time", new Date().getTime());
   }, 1000);
@@ -624,6 +655,12 @@ function Realtime(server, config, store: IStore) {
 
     for (let command in commands) {
       socket.on(command, (msg, callback) => commands[command](msg, callback));
+    }
+
+    if (constants.enabledModules.wifi) {
+      for (let command in wifiCommands) {
+        socket.on(command, (msg, callback) => wifiCommands[command](msg, callback));
+      }
     }
   });
 }

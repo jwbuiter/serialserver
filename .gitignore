@@ -12,3 +12,4 @@ node_modules/*
 !configs/template.json
 !logo/.gitkeep
 !selfLearning/.gitkeep
+.vscode

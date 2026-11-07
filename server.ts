@@ -9,6 +9,7 @@ import serial from "./modules/serial/SerialModule";
 import site from "./modules/site/SiteModule";
 import table from "./modules/table/TableModule";
 import bluetooth from "./modules/bluetooth/BluetoothModule";
+import wifi from "./modules/wifi/WifiModule";
 import store from "./store";
 import constants from "./constants";
 
@@ -31,6 +32,7 @@ if (typeof usedModules.recovery != "boolean") {
     site,
     table,
     bluetooth,
+    wifi,
   };
 
   const { enabledModules } = constants;

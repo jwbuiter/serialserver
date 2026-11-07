@@ -18,6 +18,10 @@ systemctl enable serialserver
 systemctl enable ssh
 systemctl start ssh
 
+# Wi-Fi dialog and setup hotspot: installs NetworkManager and, on Bullseye,
+# migrates the network settings and switches to it (applies after reboot).
+bash setup_wifi.sh || echo "Wi-Fi setup failed, see output above."
+
 if [ -f "config.static.json" ]
 then
 	echo "static config already exists."
