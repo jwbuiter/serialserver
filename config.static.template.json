@@ -9,9 +9,18 @@
   "exposeShutdown": true,
   "exposeSettings": true,
   "wifi": {
-    "hotspotSSID": "",
     "hotspotPassword": "serialserver",
-    "fallbackDelay": 60
+    "fallbackDelay": 20,
+    "defaultNetworks": [
+      {
+        "ssid": "AI-IoT",
+        "password": "AIconnect5753"
+      },
+      {
+        "ssid": "MBDC",
+        "password": ""
+      }
+    ]
   },
   "showTolerance": false,
   "tableColumns": 5,

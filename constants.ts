@@ -14,9 +14,10 @@ interface IConstants {
   exposeShutdown: boolean;
   exposeSettings: boolean;
   wifi: {
-    hotspotSSID: string;
     hotspotPassword: string;
     fallbackDelay: number;
+    // Networks set up by a network reset (reset button held while running).
+    defaultNetworks: { ssid: string; password: string }[];
   };
   showTolerance: boolean;
   tableColumns: number;

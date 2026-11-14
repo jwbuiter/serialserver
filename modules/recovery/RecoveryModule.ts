@@ -8,6 +8,9 @@ import { IStore } from "../../store";
 
 const { resetPin, onlinePin } = constants;
 const configPath = path.join(constants.baseDirectory, "configs");
+const RESET_BUTTON_POLL = 100;
+// How long the reset button has to be held while running to reset the network.
+const NETWORK_RESET_HOLD = 5000;
 
 function RecoveryModule() {
   const onlineGPIO = new Gpio(onlinePin, "out");
@@ -43,8 +46,43 @@ function RecoveryModule() {
 
   let store: IStore;
 
+  // Holding the reset button while the application runs resets the network
+  // settings (handled by the wifi module). Holding it during startup still
+  // resets the configuration, see below.
+  function watchResetButton() {
+    let heldFor = 0;
+    let triggered = false;
+
+    setInterval(() => {
+      const pressed = !resetGPIO.readSync();
+      if (!pressed) {
+        heldFor = 0;
+        triggered = false;
+        return;
+      }
+
+      heldFor += RESET_BUTTON_POLL;
+      if (heldFor >= NETWORK_RESET_HOLD && !triggered) {
+        triggered = true;
+        console.log("Reset button held, resetting network settings.");
+        store.dispatch({ type: "NETWORK_RESET" });
+
+        // Blink the online LED quickly to confirm.
+        let blinks = 0;
+        const blink = setInterval(() => {
+          onlineGPIO.writeSync(blinks % 2 === 0 ? 0 : 1);
+          if (++blinks >= 30) {
+            clearInterval(blink);
+            onlineGPIO.writeSync(1);
+          }
+        }, 100);
+      }
+    }, RESET_BUTTON_POLL);
+  }
+
   function bindStore(newStore: IStore) {
     store = newStore;
+    watchResetButton();
 
     store.listen((lastAction) => {
       switch (lastAction.type) {

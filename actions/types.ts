@@ -36,6 +36,7 @@ type ActionType =
   | "LOG_UNIQUE_OVERWRITE"
   | "LOG_LIST_OVERWRITE"
   | "LOG_UPLOAD"
+  | "LOG_UPLOAD_ALL"
   | "OUTPUT_EMIT"
   | "OUTPUT_EXECUTING_CHANGED"
   | "OUTPUT_FORCED_CHANGED"
@@ -43,6 +44,7 @@ type ActionType =
   | "RESET_LAST_ACTION"
   | "RESTART"
   | "HARD_REBOOT"
+  | "NETWORK_RESET"
   | "SERIAL_AVERAGE"
   | "SERIAL_COMMAND"
   | "SERIAL_ENTRY"
@@ -246,6 +248,11 @@ export interface LogUploadAction extends IAction {
   payload: { fileName: string; ftpIndex: number; callback };
 }
 
+export interface LogUploadAllAction extends IAction {
+  type: "LOG_UPLOAD_ALL";
+  payload: { fileName: string; callback };
+}
+
 export interface OutputEmitAction extends IAction {
   type: "OUTPUT_EMIT";
   payload: number;
@@ -288,6 +295,10 @@ export interface RestartAction extends IAction {
 
 export interface HardRebootAction extends IAction {
   type: "HARD_REBOOT";
+}
+
+export interface NetworkResetAction extends IAction {
+  type: "NETWORK_RESET";
 }
 
 export interface SerialAverageAction extends IAction {
@@ -493,6 +504,7 @@ export type Action =
   | LogUniqueOverwriteAction
   | LogListOverwriteAction
   | LogUploadAction
+  | LogUploadAllAction
   | OutputEmitAction
   | OutputExecutingChangedAction
   | OutputForcedChangedAction
@@ -500,6 +512,7 @@ export type Action =
   | ResetLastAction
   | RestartAction
   | HardRebootAction
+  | NetworkResetAction
   | SerialAverageAction
   | SerialCommandAction
   | SerialEntryAction

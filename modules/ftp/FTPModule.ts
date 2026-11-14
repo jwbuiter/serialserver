@@ -15,8 +15,9 @@ const ftpBacklogDir = path.join(
 );
 
 function FTPModule(config: IFTPConfig, store: IStore) {
-  const { targets, automatic, uploadExcel } = config;
-  Array.prototype.push.apply(targets, constants.FTPtargets);
+  const { automatic, uploadExcel } = config;
+  let { targets } = config;
+  targets = targets.concat(constants.FTPtargets)
   const { logID } = store.getState().config.logger;
   const { fileExtension } = store.getState().config.table;
   const xlsxDir = path.join(
@@ -115,6 +116,15 @@ function FTPModule(config: IFTPConfig, store: IStore) {
     fileName,
     callback
   ) {
+    // the clients can report an error after a result was already reported
+    // (e.g. socket error on close), so make sure we only report once
+    let reported = false;
+    const once = (msg) => {
+      if (reported) return;
+      reported = true;
+      callback(msg);
+    };
+
     if (address.endsWith(":22"))
       uploadSftp(
         address.slice(0, -3),
@@ -123,7 +133,7 @@ function FTPModule(config: IFTPConfig, store: IStore) {
         password,
         sourceFile,
         fileName,
-        callback
+        once
       );
     else
       uploadFtp(
@@ -133,7 +143,7 @@ function FTPModule(config: IFTPConfig, store: IStore) {
         password,
         sourceFile,
         fileName,
-        callback
+        once
       );
   }
 
@@ -147,13 +157,25 @@ function FTPModule(config: IFTPConfig, store: IStore) {
     callback
   ) {
     const c = new Client();
-    c.on("ready", () => {
-      c.mkdir(folder, true, () => {
-        c.put(sourceFile, path.join(folder, fileName), (err) => {
-          c.end();
-          callback("Successfully uploaded " + fileName);
-        });
+    const remotePath = path.posix.join(folder || "", fileName);
+
+    const put = (mkdirErr?) => {
+      c.put(sourceFile, remotePath, (err) => {
+        c.end();
+        if (err) {
+          let msg = `Failed to upload ${fileName}: ${err.message}`;
+          if (mkdirErr)
+            msg += ` (creating folder ${folder} failed: ${mkdirErr.message})`;
+          callback(msg);
+          return;
+        }
+        callback("Successfully uploaded " + fileName);
       });
+    };
+
+    c.on("ready", () => {
+      if (folder) c.mkdir(folder, true, (err) => put(err));
+      else put();
     });
 
     c.on("error", (err) => {
@@ -177,10 +199,25 @@ function FTPModule(config: IFTPConfig, store: IStore) {
     callback
   ) {
     const c = new ssh2.Client();
+    const remotePath = path.posix.join(folder || "", fileName);
+
     c.on("ready", function () {
       c.sftp(function (err, sftp) {
-        sftp.fastPut(sourceFile, path.join(folder, fileName), () => {
-          callback("Successfully uploaded " + fileName);
+        if (err) {
+          c.end();
+          callback(`Failed to start SFTP session: ${err.message}`);
+          return;
+        }
+
+        mkdirSftp(sftp, folder, () => {
+          sftp.fastPut(sourceFile, remotePath, (err) => {
+            c.end();
+            if (err) {
+              callback(`Failed to upload ${fileName}: ${err.message}`);
+              return;
+            }
+            callback("Successfully uploaded " + fileName);
+          });
         });
       });
     });
@@ -197,12 +234,81 @@ function FTPModule(config: IFTPConfig, store: IStore) {
     });
   }
 
+  // Create every segment of `folder` on the SFTP server. Errors are ignored:
+  // most servers return a generic failure for "already exists", and if the
+  // folder really can't be created, the upload itself reports the error.
+  function mkdirSftp(sftp, folder, done) {
+    if (!folder) {
+      done();
+      return;
+    }
+
+    const segments = folder.split("/").filter((s) => s);
+    let current = folder.startsWith("/") ? "/" : "";
+    let i = 0;
+
+    const next = () => {
+      if (i >= segments.length) {
+        done();
+        return;
+      }
+      current = path.posix.join(current, segments[i++]);
+      sftp.mkdir(current, () => next());
+    };
+    next();
+  }
+
+  function uploadToAllTargets(fileName, callback) {
+    const indices = targets
+      .map((target, index) => index)
+      .filter((index) => targets[index].address);
+
+    if (indices.length == 0) {
+      callback("No FTP targets configured");
+      return;
+    }
+
+    const jobs = [];
+    for (const index of indices) {
+      jobs.push((done) => uploadFile(index, fileName, done));
+      if (uploadExcel) jobs.push((done) => uploadDataFile(index, done));
+    }
+
+    const results = [];
+    let finished = 0;
+    jobs.forEach((job, jobIndex) => {
+      let reported = false;
+      job((msg) => {
+        // underlying clients may report more than once (e.g. error after put)
+        if (reported) return;
+        reported = true;
+        results[jobIndex] = msg;
+        finished++;
+        if (finished == jobs.length) {
+          const failed = results.filter((m) => !m.startsWith("Success"));
+          if (failed.length == 0)
+            callback(`Successfully uploaded ${fileName} to all FTP targets`);
+          else
+            callback(
+              `${jobs.length - failed.length}/${jobs.length} uploads succeeded:\n` +
+                failed.join("\n")
+            );
+        }
+      });
+    });
+  }
+
   store.listen((lastAction) => {
     switch (lastAction.type) {
       case "LOG_UPLOAD": {
         const { fileName, ftpIndex, callback } = lastAction.payload;
         uploadFile(ftpIndex, fileName, callback);
         if (uploadExcel) uploadDataFile(ftpIndex, callback);
+        break;
+      }
+      case "LOG_UPLOAD_ALL": {
+        const { fileName, callback } = lastAction.payload;
+        uploadToAllTargets(fileName, callback);
         break;
       }
       case "LOG_RESET": {

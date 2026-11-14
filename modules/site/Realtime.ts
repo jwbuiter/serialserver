@@ -205,6 +205,16 @@ function Realtime(server, config, store: IStore) {
     });
   }
 
+  function uploadLogAll(name, callback) {
+    store.dispatch({
+      type: "LOG_UPLOAD_ALL",
+      payload: {
+        fileName: name,
+        callback,
+      },
+    });
+  }
+
   function setDateTime(dateTimeString) {
     console.log("setting date and time to: " + dateTimeString);
     exec(`hwclock --set --date="${dateTimeString}"`, (err, stdout, stderr) => {
@@ -506,17 +516,25 @@ function Realtime(server, config, store: IStore) {
 
   const wifiCommands = {
     wifiStatus: wifiCommand(async () => ({
-      status: await wifi.getStatus(),
+      status: await wifi.getStatus(true),
       saved: await wifi.getSavedNetworks(),
     })),
     wifiScan: wifiCommand(async (msg) => wifi.scan(!(msg && msg.rescan === false))),
-    wifiConnect: wifiCommand(async ({ ssid, password, hidden }) => ({
-      status: await wifi.connect(String(ssid || ""), String(password || ""), !!hidden),
+    wifiConnect: wifiCommand(async ({ ssid, password, hidden, security, ipConfig }) => ({
+      status: await wifi.connect(
+        String(ssid || ""),
+        String(password || ""),
+        !!hidden,
+        String(security || ""),
+        ipConfig || null
+      ),
     })),
+    wifiSetIp: wifiCommand(async ({ target, ipConfig }) => wifi.setIpConfig(String(target), ipConfig)),
     wifiForget: wifiCommand(async (name) => {
       await wifi.forget(String(name));
       return {};
     }),
+    wifiOrder: wifiCommand(async (names) => wifi.setNetworkOrder((Array.isArray(names) ? names : []).map(String))),
     wifiHotspot: wifiCommand(async (enable) => {
       if (enable) await wifi.startHotspot();
       else await wifi.stopHotspot();
@@ -637,6 +655,7 @@ function Realtime(server, config, store: IStore) {
       deleteConfig: deleteConfig,
       deleteLog: deleteLog,
       uploadLog: uploadLog,
+      uploadLogAll: uploadLogAll,
       setDateTime: setDateTime,
       setNtpEnabled: setNtpEnabled,
       getLogList: getLogList,
